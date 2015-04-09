@@ -8,6 +8,6 @@ See the LICENSE file.
 
 ## Future Plans
 * Adds spline or rational interpolation
-* Adds virtual constructors to create a copy of BSDF, BRDF, or BTDF
+* Adds virtual constructors to create a copy of lb::Bsdf, lb::Brdf, or lb::Btdf
 
 [1]: http://eigen.tuxfamily.org/index.php?title=Main_Page "Eigen"
