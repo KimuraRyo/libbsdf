@@ -73,6 +73,27 @@ void SampleSet::checkEqualIntervalAngles()
     std::cout << "[SampleSet::checkEqualIntervalAngles] Angle3: " << equalIntervalAngles3_ << std::endl;
 }
 
+void SampleSet::convertFromXyzToSrgb()
+{
+    if (colorModel_ != XYZ_MODEL) {
+        std::cerr
+            << "[SampleSet::xyzToSrgb] Not CIE-XYZ model: " << colorModel_
+            << std::endl;
+        return;
+    }
+
+    for (int i0 = 0; i0 < numAngles0_; ++i0) {
+    for (int i1 = 0; i1 < numAngles1_; ++i1) {
+    for (int i2 = 0; i2 < numAngles2_; ++i2) {
+    for (int i3 = 0; i3 < numAngles3_; ++i3) {
+        const Spectrum& xyz = getSpectrum(i0, i1, i2, i3);
+        Spectrum rgb = SpectrumUtility::xyzToSrgb(xyz);
+        setSpectrum(i0, i1, i2, i3, rgb);
+    }}}}
+
+    colorModel_ = RGB_MODEL;
+}
+
 void SampleSet::resizeAngles(int numAngles0,
                              int numAngles1,
                              int numAngles2,

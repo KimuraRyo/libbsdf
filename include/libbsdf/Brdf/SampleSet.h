@@ -110,6 +110,9 @@ public:
     /*! Checks the attributes whether angles are set at equal intervals */
     void checkEqualIntervalAngles();
 
+    /*! Converts the color model from CIE-XYZ to sRGB. */
+    void convertFromXyzToSrgb();
+
     /*! Resizes the number of angles. Angles and spectra must be initialized. */
     void resizeAngles(int numAngles0, int numAngles1, int numAngles2, int numAngles3);
 
