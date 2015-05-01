@@ -9,7 +9,8 @@
 #ifndef LIBBSDF_SPHERICAL_COORDINATE_SYSTEM_H
 #define LIBBSDF_SPHERICAL_COORDINATE_SYSTEM_H
 
-#include <libbsdf/Common/Utility.h>
+#include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 

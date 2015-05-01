@@ -22,12 +22,10 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
 
     std::ios_base::sync_with_stdio(false);
 
-    SpecularCoordinatesBrdf* brdf = 0;
-
     ddr_sdr_utility::SymmetryType symmetryType  = ddr_sdr_utility::PLANE_SYMMETRICAL;
-    ddr_sdr_utility::DataType     dataType      = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
+    ddr_sdr_utility::UnitType     unitType      = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
 
-    ColorModel::Type colorModel = ColorModel::RGB;
+    ColorModel colorModel = RGB_MODEL;
 
     int numWavelengths = 1;
 
@@ -36,21 +34,21 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
     std::vector<float> spThetaDegrees;
     std::vector<float> spPhiDegrees;
 
-    int wlIndex = 0;
-
     ddr_sdr_utility::ignoreCommentLines(fin);
+    std::ifstream::pos_type pos = fin.tellg();
 
-    std::string token;
-    while (fin >> token) {
+    // Read a header.
+    std::string headStr;
+    while (fin >> headStr) {
         ddr_sdr_utility::ignoreCommentLines(fin);
 
-        if (token.empty()) {
+        if (headStr.empty()) {
             continue;
         }
-        else if (token == "Source") {
+        else if (headStr == "Source") {
             reader_utility::ignoreLine(fin);
         }
-        else if (token == "TypeSym") {
+        else if (headStr == "TypeSym") {
             std::string typeStr;
             fin >> typeStr;
 
@@ -71,41 +69,46 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             }
             else {
                 reader_utility::logNotImplementedKeyword(typeStr);
+                return 0;
             }
         }
-        else if (token == "TypeColorModel") {
+        else if (headStr == "TypeColorModel") {
             std::string typeStr;
             fin >> typeStr;
             typeStr = reader_utility::toLower(typeStr);
 
             if (typeStr == "rgb") {
-                colorModel = ColorModel::RGB;
+                colorModel = RGB_MODEL;
                 numWavelengths = 3;
             }
             else if (typeStr == "spectral") {
-                colorModel = ColorModel::SPECTRAL;
+                colorModel = SPECTRAL_MODEL;
                 fin >> numWavelengths;
             }
             else if (typeStr == "bw") {
-                colorModel = ColorModel::MONOCHROME;
+                colorModel = MONOCHROMATIC_MODEL;
                 numWavelengths = 1;
             }
+            else {
+                reader_utility::logNotImplementedKeyword(typeStr);
+                return 0;
+            }
         }
-        else if (token == "TypeData") {
+        else if (headStr == "TypeData") {
             std::string typeStr;
             fin >> typeStr;
 
             if (typeStr == "Luminance Absolute") {
-                dataType = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
+                unitType = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
             }
             else if (typeStr == "Luminance Relative") {
-                dataType = ddr_sdr_utility::LUMINANCE_RELATIVE;
+                unitType = ddr_sdr_utility::LUMINANCE_RELATIVE;
             }
             else {
                 reader_utility::ignoreLine(fin);
             }
         }
-        else if (token == "psi") {
+        else if (headStr == "psi") {
             int numInPhi;
             fin >> numInPhi;
             for (int i = 0; i < numInPhi; ++i) {
@@ -114,7 +117,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 inPhiDegrees.push_back(angle);
             }
         }
-        else if (token == "sigma") {
+        else if (headStr == "sigma") {
             int numInTheta;
             fin >> numInTheta;
             for (int i = 0; i < numInTheta; ++i) {
@@ -123,11 +126,11 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 inThetaDegrees.push_back(angle);
             }
         }
-        else if (token == "sigmaT") {
-            reader_utility::logNotImplementedKeyword(token);
+        else if (headStr == "sigmaT") {
+            reader_utility::logNotImplementedKeyword(headStr);
             reader_utility::ignoreLine(fin);
         }
-        else if (token == "phi") {
+        else if (headStr == "phi") {
             int numSpecPhi;
             fin >> numSpecPhi;
             for (int i = 0; i < numSpecPhi; ++i) {
@@ -136,7 +139,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 spPhiDegrees.push_back(angle);
             }
         }
-        else if (token == "theta") {
+        else if (headStr == "theta") {
             int numSpecTheta;
             fin >> numSpecTheta;
             for (int i = 0; i < numSpecTheta; ++i) {
@@ -145,75 +148,82 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 spThetaDegrees.push_back(angle);
             }
         }
-        else if (reader_utility::toLower(token) == "wl" ||
-                 reader_utility::toLower(token) == "bw" ||
-                 reader_utility::toLower(token) == "red" ||
-                 reader_utility::toLower(token) == "gre" ||
-                 reader_utility::toLower(token) == "blu") {
-            if (!brdf) {
-                if (inThetaDegrees.empty()) {
-                    inThetaDegrees.push_back(0.0);
-                }
+        else if (reader_utility::toLower(headStr) == "wl" ||
+                 reader_utility::toLower(headStr) == "bw" ||
+                 reader_utility::toLower(headStr) == "red" ||
+                 reader_utility::toLower(headStr) == "gre" ||
+                 reader_utility::toLower(headStr) == "blu") {
+            fin.seekg(pos, std::ios_base::beg);
+            break;
+        }
 
-                if (inPhiDegrees.empty()) {
-                    inPhiDegrees.push_back(0.0);
-                }
+        pos = fin.tellg();
+    }
 
-                if (spThetaDegrees.empty()) {
-                    spThetaDegrees.push_back(0.0);
-                }
+    if (inThetaDegrees.empty() ||
+        spThetaDegrees.empty() ||
+        spPhiDegrees.empty()) {
+        std::cerr << "[DdrReader::read] Invalid format." << std::endl;
+        return 0;
+    }
 
-                if (spPhiDegrees.empty()) {
-                    spPhiDegrees.push_back(0.0);
-                }
+    if (inPhiDegrees.empty()) {
+        inPhiDegrees.push_back(0.0f);
+    }
 
-                int numSpecPhi = spPhiDegrees.size();
-                if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
-                    numSpecPhi = spPhiDegrees.size() + (spPhiDegrees.size() - 1);
-                }
+    int numSpecPhi = spPhiDegrees.size();
+    if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
+        numSpecPhi = spPhiDegrees.size() + (spPhiDegrees.size() - 1);
+    }
 
-                if (spThetaDegrees.size() <= 1 || numSpecPhi <= 1) return 0;
+    // Initialize BRDF.
+    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(inThetaDegrees.size(), inPhiDegrees.size(),
+                                                                spThetaDegrees.size(), numSpecPhi,
+                                                                colorModel,
+                                                                numWavelengths);
 
-                brdf = new SpecularCoordinatesBrdf(inThetaDegrees.size(), inPhiDegrees.size(),
-                                                   spThetaDegrees.size(), numSpecPhi,
-                                                   colorModel,
-                                                   numWavelengths);
+    SampleSet* ss = brdf->getSampleSet();
 
-                SampleSet* ss = brdf->getSampleSet();
+    copy(inThetaDegrees, ss->getAngles0());
+    copy(inPhiDegrees,   ss->getAngles1());
+    copy(spThetaDegrees, ss->getAngles2());
 
-                copy(inThetaDegrees, ss->getAngles0());
-                copy(inPhiDegrees,   ss->getAngles1());
-                copy(spThetaDegrees, ss->getAngles2());
+    ss->getAngles0() = toRadians(ss->getAngles0());
+    ss->getAngles1() = toRadians(ss->getAngles1());
+    ss->getAngles2() = toRadians(ss->getAngles2());
 
-                ss->getAngles0() = toRadians(ss->getAngles0());
-                ss->getAngles1() = toRadians(ss->getAngles1());
-                ss->getAngles2() = toRadians(ss->getAngles2());
+    for (int i = 0; i < static_cast<int>(spPhiDegrees.size()); ++i) {
+        brdf->setSpecPhi(i, toRadian(spPhiDegrees.at(i)));
+    }
 
-                for (int i = 0; i < static_cast<int>(spPhiDegrees.size()); ++i) {
-                    brdf->setSpecPhi(i, toRadian(spPhiDegrees.at(i)));
-                }
-                
-                // Copy symmetry samples.
-                if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
-                    int numSpecPhiDegrees = static_cast<int>(spPhiDegrees.size());
-                    for (int i = numSpecPhiDegrees, reverseIndex = numSpecPhiDegrees - 2;
-                         i < brdf->getNumSpecPhi();
-                         ++i, --reverseIndex) {
-                        brdf->setSpecPhi(i, PI_F + (PI_F - brdf->getSpecPhi(reverseIndex)));
-                    }
-                }
-            }
+    // Copy symmetrical angles.
+    if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
+        int numSpecPhiDegrees = static_cast<int>(spPhiDegrees.size());
+        for (int i = numSpecPhiDegrees, reverseIndex = numSpecPhiDegrees - 2;
+             i < brdf->getNumSpecPhi();
+             ++i, --reverseIndex) {
+            brdf->setSpecPhi(i, PI_F + (PI_F - brdf->getSpecPhi(reverseIndex)));
+        }
+    }
 
-            if (colorModel == ColorModel::SPECTRAL) {
+    // Read data.
+    int wlIndex = 0;
+    std::string dataStr;
+    while (fin >> dataStr) {
+        ddr_sdr_utility::ignoreCommentLines(fin);
+
+        if (dataStr.empty()) {
+            continue;
+        }
+        else if (reader_utility::toLower(dataStr) == "wl" ||
+                 reader_utility::toLower(dataStr) == "bw" ||
+                 reader_utility::toLower(dataStr) == "red" ||
+                 reader_utility::toLower(dataStr) == "gre" ||
+                 reader_utility::toLower(dataStr) == "blu") {
+            if (colorModel == SPECTRAL_MODEL) {
                 float wavelength;
                 fin >> wavelength;
                 brdf->getSampleSet()->setWavelength(wlIndex, wavelength);
-            }
-            else if (colorModel == ColorModel::RGB) {
-                brdf->getSampleSet()->setWavelength(wlIndex, 0.0f);
-            }
-            else {
-                brdf->getSampleSet()->setWavelength(0, 0.0f);
             }
 
             ddr_sdr_utility::ignoreCommentLines(fin);
@@ -241,8 +251,8 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 float brdfValue;
                 fin >> brdfValue;
 
-                if (dataType == ddr_sdr_utility::LUMINANCE_ABSOLUTE ||
-                    dataType == ddr_sdr_utility::LUMINANCE_RELATIVE) {
+                if (unitType == ddr_sdr_utility::LUMINANCE_ABSOLUTE ||
+                    unitType == ddr_sdr_utility::LUMINANCE_RELATIVE) {
                     brdfValue /= PI_F;
                 }
 
@@ -268,12 +278,9 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
 
             ++wlIndex;
         }
-        else {
-            //logNotImplementedKeyword(token);
-        }
 
         if (fin.fail()) {
-            std::cerr << "[DdrReader::read] Invalid format. Head of line: " << token << std::endl;
+            std::cerr << "[DdrReader::read] Invalid format. Head of line: " << dataStr << std::endl;
             delete brdf;
             return 0;
         }

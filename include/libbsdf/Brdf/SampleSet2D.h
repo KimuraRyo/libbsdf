@@ -11,7 +11,7 @@
 
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Brdf/Sampler.h>
-#include <libbsdf/Common/Spectrum.h>
+#include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Vector.h>
 
 namespace lb {
@@ -30,10 +30,10 @@ private:
 
 public:
     /*! Constructs a 2D sample array. */
-    SampleSet2D(int                 numTheta,
-                int                 numPhi,
-                ColorModel::Type    colorModel = ColorModel::RGB,
-                int                 numWavelengths = 3);
+    SampleSet2D(int         numTheta,
+                int         numPhi,
+                ColorModel  colorModel = RGB_MODEL,
+                int         numWavelengths = 3);
 
     /*! Gets the spectrum at a direction. */
     Spectrum getSpectrum(const Vec3& inDir) const;
@@ -84,7 +84,7 @@ public:
     bool isEqualIntervalPhi() const;
 
     /*! Gets the color model. */
-    ColorModel::Type getColorModel() const;
+    ColorModel getColorModel() const;
 
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
@@ -109,7 +109,7 @@ protected:
     bool equalIntervalTheta_; /*!< This attribute holds whether polar angles are set at equal intervals. */
     bool equalIntervalPhi_;   /*!< This attribute holds whether azimuthal angles are set at equal intervals. */
 
-    ColorModel::Type colorModel_; /*!< The color model of spectra. */
+    ColorModel colorModel_; /*!< The color model of spectra. */
 };
 
 inline Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
@@ -184,7 +184,7 @@ inline int SampleSet2D::getNumPhi()   const { return numPhi_; }
 inline bool SampleSet2D::isEqualIntervalTheta() const { return equalIntervalTheta_; }
 inline bool SampleSet2D::isEqualIntervalPhi()   const { return equalIntervalPhi_; }
 
-inline ColorModel::Type SampleSet2D::getColorModel() const { return colorModel_; }
+inline ColorModel SampleSet2D::getColorModel() const { return colorModel_; }
 
 inline bool SampleSet2D::isIsotropic() const { return (numPhi_ == 1); }
 

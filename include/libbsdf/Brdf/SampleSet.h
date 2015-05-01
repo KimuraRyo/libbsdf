@@ -11,7 +11,7 @@
 
 #include <cassert>
 
-#include <libbsdf/Common/Spectrum.h>
+#include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Vector.h>
 
 namespace lb {
@@ -33,12 +33,12 @@ class SampleSet
 {
 public:
     /*! Constructs the sample points of a BRDF. */
-    SampleSet(int               numAngles0,
-              int               numAngles1,
-              int               numAngles2,
-              int               numAngles3,
-              ColorModel::Type  colorModel = ColorModel::RGB,
-              int               numWavelengths = 3);
+    SampleSet(int           numAngles0,
+              int           numAngles1,
+              int           numAngles2,
+              int           numAngles3,
+              ColorModel    colorModel = RGB_MODEL,
+              int           numWavelengths = 3);
 
     /*! Sets spectra and angles to zero. */
     void zeroOutSamples();
@@ -105,17 +105,17 @@ public:
     bool isEqualIntervalAngles3() const; /*!< Returns true if angles3 are set at equal intervals. */
 
     /*! Gets the color model. */
-    ColorModel::Type getColorModel() const;
+    ColorModel getColorModel() const;
 
     /*! Checks the attributes whether angles are set at equal intervals */
     void checkEqualIntervalAngles();
 
-    /*! Resizes spectra and angles. */
-    void resizeSamples(int numAngles0, int numAngles1, int numAngles2, int numAngles3);
+    /*! Resizes the number of angles. Angles and spectra must be initialized. */
+    void resizeAngles(int numAngles0, int numAngles1, int numAngles2, int numAngles3);
 
 private:
-    /*! Resizes each spectrum in spectra_. */
-    void initializeSpectralSamples(int numWavelengths);
+    /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
+    void resizeWavelengths(int numWavelengths);
 
     /*! Gets the index of spectra from a set of angle indices. */
     int getIndex(int index0, int index1, int index2, int index3) const;
@@ -139,7 +139,7 @@ private:
     bool equalIntervalAngles2_; /*!< This attribute holds whether angles2 are set at equal intervals. */
     bool equalIntervalAngles3_; /*!< This attribute holds whether angles3 are set at equal intervals. */
 
-    ColorModel::Type colorModel_; /*!< The color model of spectra. */
+    ColorModel colorModel_; /*!< The color model of spectra. */
 };
 
 inline Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3)
@@ -209,7 +209,7 @@ inline bool SampleSet::isEqualIntervalAngles1() const { return equalIntervalAngl
 inline bool SampleSet::isEqualIntervalAngles2() const { return equalIntervalAngles2_; }
 inline bool SampleSet::isEqualIntervalAngles3() const { return equalIntervalAngles3_; }
 
-inline ColorModel::Type SampleSet::getColorModel() const
+inline ColorModel SampleSet::getColorModel() const
 {
     return colorModel_;
 }

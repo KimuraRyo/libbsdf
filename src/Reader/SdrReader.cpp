@@ -24,16 +24,15 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
         return 0;
     }
 
-    SampleSet2D* ss2 = 0;
-
-    ColorModel::Type colorModel = ColorModel::RGB;
+    ColorModel colorModel = RGB_MODEL;
 
     int numWavelengths = 1;
     std::vector<float> inThetaDegrees;
-    int wlIndex = 0;
 
     ddr_sdr_utility::ignoreCommentLines(fin);
+    std::ifstream::pos_type pos = fin.tellg();
 
+    // Read a header.
     std::string headStr;
     while (fin >> headStr) {
         ddr_sdr_utility::ignoreCommentLines(fin);
@@ -50,14 +49,18 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
             typeStr = reader_utility::toLower(typeStr);
 
             if (typeStr == "rgb") {
-                colorModel = ColorModel::RGB;
+                colorModel = RGB_MODEL;
             }
             else if (typeStr == "spectral") {
-                colorModel = ColorModel::SPECTRAL;
+                colorModel = SPECTRAL_MODEL;
                 fin >> numWavelengths;
             }
             else if (typeStr == "bw") {
-                colorModel = ColorModel::MONOCHROME;
+                colorModel = MONOCHROMATIC_MODEL;
+            }
+            else {
+                reader_utility::logNotImplementedKeyword(typeStr);
+                return 0;
             }
         }
         else if (headStr == "sigma") {
@@ -69,23 +72,50 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
                 inThetaDegrees.push_back(angle);
             }
         }
-        else if (reader_utility::toLower(headStr) == "wl") {
-            if (!ss2) {
-                if (inThetaDegrees.empty()) {
-                    inThetaDegrees.push_back(0.0);
-                }
+        else if (reader_utility::toLower(headStr) == "wl" ||
+                 reader_utility::toLower(headStr) == "bw" ||
+                 reader_utility::toLower(headStr) == "red" ||
+                 reader_utility::toLower(headStr) == "gre" ||
+                 reader_utility::toLower(headStr) == "blu") {
+            fin.seekg(pos, std::ios_base::beg);
+            break;
+        }
 
-                ss2 = new SampleSet2D(inThetaDegrees.size(), 1, colorModel, numWavelengths);
+        pos = fin.tellg();
+    }
 
-                copy(inThetaDegrees, ss2->getThetaArray());
-                ss2->getThetaArray() = toRadians(ss2->getThetaArray());
+    if (inThetaDegrees.empty()) {
+        std::cerr << "[SdrReader::read] Invalid format." << std::endl;
+        return 0;
+    }
 
-                ss2->setPhi(0, 0.0);
+    // Initialize the arrya of reflectance.
+    SampleSet2D* ss2 = new SampleSet2D(inThetaDegrees.size(), 1, colorModel, numWavelengths);
+
+    copy(inThetaDegrees, ss2->getThetaArray());
+    ss2->getThetaArray() = toRadians(ss2->getThetaArray());
+
+    ss2->setPhi(0, 0.0);
+
+    // Read data.
+    int wlIndex = 0;
+    std::string dataStr;
+    while (fin >> dataStr) {
+        ddr_sdr_utility::ignoreCommentLines(fin);
+
+        if (dataStr.empty()) {
+            continue;
+        }
+        else if (reader_utility::toLower(dataStr) == "wl" ||
+                 reader_utility::toLower(dataStr) == "bw" ||
+                 reader_utility::toLower(dataStr) == "red" ||
+                 reader_utility::toLower(dataStr) == "gre" ||
+                 reader_utility::toLower(dataStr) == "blu") {
+            if (colorModel == SPECTRAL_MODEL) {
+                float wavelength;
+                fin >> wavelength;
+                ss2->setWavelength(wlIndex, wavelength);
             }
-
-            float wavelength;
-            fin >> wavelength;
-            ss2->setWavelength(wlIndex, wavelength);
 
             ddr_sdr_utility::ignoreCommentLines(fin);
             // Skip "def"
@@ -95,7 +125,6 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
             for (int inThIndex = 0; inThIndex < static_cast<int>(inThetaDegrees.size()); ++inThIndex) {
                 float srValue;
                 fin >> srValue;
-
                 ss2->getSpectrum(inThIndex)[wlIndex] = srValue;
 
                 if (fin.fail()) {
@@ -107,18 +136,15 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
 
             ++wlIndex;
         }
-        else {
-            //logNotImplementedKeyword(headStr);
-        }
 
         if (fin.fail()) {
-            std::cerr << "[SdrReader::read] Invalid format. Head of line: " << headStr << std::endl;
+            std::cerr << "[SdrReader::read] Invalid format. Head of line: " << dataStr << std::endl;
             delete ss2;
             return 0;
         }
     }
 
     ss2->clampAngles();
-    
+
     return ss2;
 }

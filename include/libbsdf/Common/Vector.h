@@ -8,7 +8,7 @@
 
 /*!
  * \file    Vector.h
- * \brief   Vector types for libbsdf.
+ * \brief   The Vector.h header file includes the vector declarations and functions.
  */
 
 #ifndef LIBBSDF_VECTOR_H

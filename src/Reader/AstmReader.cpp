@@ -25,7 +25,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
     std::ios_base::sync_with_stdio(false);
 
-    ColorModel::Type colorModel = ColorModel::SPECTRAL;
+    ColorModel colorModel = SPECTRAL_MODEL;
     std::vector<float> wavelengths;
 
     // Read a header.
@@ -67,7 +67,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 wavelengths.push_back(0.0f);
                 wavelengths.push_back(0.0f);
                 wavelengths.push_back(0.0f);
-                colorModel = ColorModel::RGB;
+                colorModel = RGB_MODEL;
             }
             else if (varNames.size() == 7 &&
                      varNames.at(4) == "X" &&
@@ -76,7 +76,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 wavelengths.push_back(0.0f);
                 wavelengths.push_back(0.0f);
                 wavelengths.push_back(0.0f);
-                colorModel = ColorModel::XYZ;
+                colorModel = XYZ_MODEL;
             }
             else {
                 for (int i = 4; i < static_cast<int>(varNames.size()); ++i) {
@@ -104,12 +104,12 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         }
     }
 
-    if (colorModel == ColorModel::SPECTRAL) {
+    if (colorModel == SPECTRAL_MODEL) {
         if (wavelengths.size() == 1 && wavelengths.at(0) == 0.0f) {
-            colorModel = ColorModel::MONOCHROME;
+            colorModel = MONOCHROMATIC_MODEL;
         }
         else if (wavelengths.size() == 3 && wavelengths.at(0) == 0.0f) {
-            colorModel = ColorModel::RGB;
+            colorModel = RGB_MODEL;
         }
     }
 
@@ -121,14 +121,14 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     SampleMap samples;
 
     // Read data.
-    std::string valStr;
-    while (std::getline(fin, valStr)) {
-        if (valStr.empty() || valStr.at(0) == '\r') continue;
+    std::string dataStr;
+    while (std::getline(fin, dataStr)) {
+        if (dataStr.empty() || dataStr.at(0) == '\r') continue;
 
         AngleList angles;
         Spectrum values(wavelengths.size());
 
-        std::stringstream stream(valStr);
+        std::stringstream stream(dataStr);
         std::string token;
         int count = 0;
         while (std::getline(stream, token, ',')) {
@@ -152,7 +152,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 values[count - 4] = std::max(val, 0.0f);
             }
 
-            count++;
+            ++count;
         }
 
         inThetaAngles.insert(angles.at(0));

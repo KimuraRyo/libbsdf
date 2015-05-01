@@ -9,7 +9,7 @@
 #ifndef LIBBSDF_LINEAR_INTERPOLATOR_H
 #define LIBBSDF_LINEAR_INTERPOLATOR_H
 
-#include <libbsdf/Common/Spectrum.h>
+#include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {

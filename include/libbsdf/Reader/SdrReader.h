@@ -17,11 +17,11 @@ namespace lb {
 
 /*!
  * \class SdrReader
- * \brief The SdrReader class provides the reader of a SDR and SDT file.
+ * \brief The SdrReader class provides the reader for a SDR and SDT file.
  *
  * A SDR (Specular Distribution Reflection) file includes specular reflectances,
  * and a SDT (Specular Distribution Transparent) file includes specular transmittances.
- * It loads the list of reflectance and creates a lb::SampleSet2D.
+ * lb::SampleSet2D is created from loaded data.
  */
 class SdrReader
 {

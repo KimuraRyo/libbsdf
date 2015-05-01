@@ -8,7 +8,7 @@
 
 /*!
  * \file    ReaderUtility.h
- * \brief   Utility functions for file readers.
+ * \brief   The ReaderUtility.h header file includes the utility functions for file readers.
  */
 
 #ifndef LIBBSDF_READER_UTILITY_H
@@ -19,6 +19,8 @@
 #include <iostream>
 #include <limits>
 #include <algorithm>
+
+#include <libbsdf/Common/Global.h>
 
 namespace lb {
 namespace reader_utility {
@@ -34,6 +36,12 @@ void ignoreCommentLines(std::ifstream& fin, const std::string& lineHead);
 
 /*! Converts a string to lower-case. */
 std::string toLower(const std::string& str);
+
+/*! Returns true if the string ends with \a suffix. */
+bool hasSuffix(const std::string &str, const std::string &suffix);
+
+/*! Classifies the type of a file. */
+FileType classifyFile(const std::string& fileName);
 
 } // namespace reader_utility
 

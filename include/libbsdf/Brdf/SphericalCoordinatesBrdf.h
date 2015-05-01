@@ -29,9 +29,9 @@ private:
 public:
     /*! Constructs a BRDF. */
     SphericalCoordinatesBrdf(int numInTheta, int numInPhi, int numOutTheta, int numOutPhi,
-                             ColorModel::Type   colorModel = ColorModel::RGB,
-                             int                numWavelengths = 3,
-                             bool               equalIntervalAngles = false);
+                             ColorModel colorModel = RGB_MODEL,
+                             int        numWavelengths = 3,
+                             bool       equalIntervalAngles = false);
 
     /*! Constructs a BRDF from lb::Brdf and angle lists. */
     SphericalCoordinatesBrdf(const Brdf&    brdf,

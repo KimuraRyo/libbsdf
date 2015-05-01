@@ -48,7 +48,7 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
 
     HalfDifferenceCoordinatesBrdf* brdf = new HalfDifferenceCoordinatesBrdf(numHalfTheta + 1, 1,
                                                                             numDiffTheta + 1, numDiffPhi + 1,
-                                                                            ColorModel::RGB, 3, true);
+                                                                            RGB_MODEL, 3, true);
 
     // Set the angles of a non-linear mapping.
     for (int i = 0; i < brdf->getNumHalfTheta(); ++i) {

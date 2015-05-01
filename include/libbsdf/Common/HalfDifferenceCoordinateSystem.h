@@ -12,6 +12,7 @@
 #include <Eigen/Geometry>
 
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
+#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 

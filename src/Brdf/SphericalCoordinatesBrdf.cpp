@@ -10,13 +10,13 @@
 
 using namespace lb;
 
-SphericalCoordinatesBrdf::SphericalCoordinatesBrdf(int              numInTheta,
-                                                   int              numInPhi,
-                                                   int              numOutTheta,
-                                                   int              numOutPhi,
-                                                   ColorModel::Type colorModel,
-                                                   int              numWavelengths,
-                                                   bool             equalIntervalAngles)
+SphericalCoordinatesBrdf::SphericalCoordinatesBrdf(int          numInTheta,
+                                                   int          numInPhi,
+                                                   int          numOutTheta,
+                                                   int          numOutPhi,
+                                                   ColorModel   colorModel,
+                                                   int          numWavelengths,
+                                                   bool         equalIntervalAngles)
                                                    : BaseBrdf(numInTheta,
                                                               numInPhi,
                                                               numOutTheta,

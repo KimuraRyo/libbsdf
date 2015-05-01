@@ -14,14 +14,16 @@
 #include <vector>
 
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-#include <libbsdf/Common/Spectrum.h>
+#include <libbsdf/Common/Global.h>
 
 namespace lb {
 
 /*!
  * \class AstmReader
- * \brief The AstmReader class provides the reader of an ASTM E1392-96(2002) file.
+ * \brief The AstmReader class provides the reader for an ASTM E1392-96(2002) file.
  *
+ * lb::SphericalCoordinatesBrdf is created from loaded data.
+ * 
  * File format:
  * http://www.astm.org/Standards/E1392.htm
  */

@@ -27,7 +27,7 @@ enum SymmetryType {
     ASYMMETRICAL_4D
 };
 
-enum DataType {
+enum UnitType {
     LUMINANCE_ABSOLUTE,
     INTENSITY_ABSOLUTE,
     LUMINANCE_RELATIVE,

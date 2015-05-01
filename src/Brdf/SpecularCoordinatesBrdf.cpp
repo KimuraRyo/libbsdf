@@ -14,13 +14,13 @@
 
 using namespace lb;
 
-SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int                numInTheta,
-                                                 int                numInPhi,
-                                                 int                numSpecTheta,
-                                                 int                numSpecPhi,
-                                                 ColorModel::Type   colorModel,
-                                                 int                numWavelengths,
-                                                 bool               equalIntervalAngles)
+SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
+                                                 int        numInPhi,
+                                                 int        numSpecTheta,
+                                                 int        numSpecPhi,
+                                                 ColorModel colorModel,
+                                                 int        numWavelengths,
+                                                 bool       equalIntervalAngles)
                                                  : BaseBrdf(numInTheta,
                                                             numInPhi,
                                                             numSpecTheta,

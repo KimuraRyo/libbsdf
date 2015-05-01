@@ -15,9 +15,8 @@ Vec3 SpectrumUtility::computeNormalizingConstant_sRGB()
     Vec3 prevXyz(CieData::XYZ[0], CieData::XYZ[1], CieData::XYZ[2]);
     prevXyz *= CieData::D65[0];
 
-    const float interval = (CieData::maxWavelength - CieData::minWavelength) / (CieData::numWavelengths - 1);
-
     Vec3d sumXyz = Vec3d::Zero();
+    const float interval = (CieData::maxWavelength - CieData::minWavelength) / (CieData::numWavelengths - 1);
 
     // Trapezoidal rule
     for (int i = 1; i < CieData::numWavelengths; ++i) {
@@ -25,7 +24,6 @@ Vec3 SpectrumUtility::computeNormalizingConstant_sRGB()
         xyz *= CieData::D65[i];
 
         Vec3 area = interval * (prevXyz + xyz);
-
         sumXyz[0] += area[0];
         sumXyz[1] += area[1];
         sumXyz[2] += area[2];

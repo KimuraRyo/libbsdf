@@ -8,7 +8,7 @@
 
 /*!
  * \file    Version.h
- * \brief   The version number of libbsdf.
+ * \brief   The Version.h header file includes the version number of libbsdf.
  */
 
 #ifndef LIBBSDF_VERSION_H

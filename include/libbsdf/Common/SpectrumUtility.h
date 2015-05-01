@@ -22,18 +22,18 @@ namespace lb {
 class SpectrumUtility
 {
 public:
-    /*! Converts from a spectrum to a sRGB. Negative sRGB values are clamped. */
+    /*! Converts from a spectrum to sRGB. Negative sRGB values are clamped. */
     template <typename T>
     static Vec3 spectrumToSrgb(const T& spectrum, const T& wavelengths, int numSamples);
 
-    /*! Converts from a spectrum to a CIE-XYZ. */
+    /*! Converts from a spectrum to CIE-XYZ. */
     template <typename T>
     static Vec3 spectrumToXyz(const T& spectrum, const T& wavelengths, int numSamples);
 
-    /*! Converts from a sRGB to a CIE-XYZ. */
+    /*! Converts from CIE-XYZ to sRGB. */
     static Vec3f xyzToSrgb(const Vec3f& xyz);
 
-    /*! Converts from a wavelength to a sRGB. Negative or more than 1.0 sRGB values are clamped. */
+    /*! Converts from a wavelength to sRGB. Negative or more than 1.0 sRGB values are clamped. */
     static Vec3 wavelengthToSrgb(float wavelength);
 
 private:
@@ -43,7 +43,8 @@ private:
     /*! Computes constants to normalize sRGB. */
     static Vec3 computeNormalizingConstant_sRGB();
 
-    static const Vec3 NORMALIZING_CONSTANT_SRGB; /*!< Precomputed constants to normalize sRGB values. */
+    /*! Precomputed constants to normalize sRGB values. */
+    static const Vec3 NORMALIZING_CONSTANT_SRGB;
 };
 
 template <typename T>

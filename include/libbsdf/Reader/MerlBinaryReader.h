@@ -17,8 +17,10 @@ namespace lb {
 
 /*!
  * \class MerlBinaryReader
- * \brief The MerlBinaryReader class provides the reader of an isotropic BRDF measured by MERL.
+ * \brief The MerlBinaryReader class provides the reader for an isotropic BRDF measured by MERL.
  *
+ * lb::HalfDifferenceCoordinatesBrdf is created from loaded data.
+ * 
  * File format:
  * http://people.csail.mit.edu/wojciech/BRDFDatabase/code/
  * 

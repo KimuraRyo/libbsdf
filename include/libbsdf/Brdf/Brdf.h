@@ -18,7 +18,8 @@ namespace lb {
  * \brief   The Brdf class provides the BRDF data and sampling functions.
  *
  * The BRDF data consists of angles, wavelengths, spectra, and coordinate system.
- * The data structure is defined in lb::SampleSet.
+ * The data structure is defined in lb::SampleSet. The functions depending on coordinate
+ * system are implemented in lb::Brdf and derived classes.
  */
 class Brdf
 {
@@ -60,12 +61,12 @@ public:
 
 protected:
     /*! Constructs a BRDF. */
-    Brdf(int                numAngles0,
-         int                numAngles1,
-         int                numAngles2,
-         int                numAngles3,
-         ColorModel::Type   colorModel = ColorModel::RGB,
-         int                numWavelengths = 3);
+    Brdf(int        numAngles0,
+         int        numAngles1,
+         int        numAngles2,
+         int        numAngles3,
+         ColorModel colorModel = RGB_MODEL,
+         int        numWavelengths = 3);
 
     /*! Constructs an empty BRDF. Brdf::samples_ must be initialized in a derived class. */
     Brdf();

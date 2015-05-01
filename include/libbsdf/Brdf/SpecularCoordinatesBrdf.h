@@ -29,13 +29,13 @@ private:
 
 public:
     /*! Constructs a spectral BRDF. */
-    SpecularCoordinatesBrdf(int                 numInTheta,
-                            int                 numInPhi,
-                            int                 numSpecTheta,
-                            int                 numSpecPhi,
-                            ColorModel::Type    colorModel = ColorModel::RGB,
-                            int                 numWavelengths = 3,
-                            bool                equalIntervalAngles = false);
+    SpecularCoordinatesBrdf(int         numInTheta,
+                            int         numInPhi,
+                            int         numSpecTheta,
+                            int         numSpecPhi,
+                            ColorModel  colorModel = RGB_MODEL,
+                            int         numWavelengths = 3,
+                            bool        equalIntervalAngles = false);
 
     /*! Constructs a BRDF from lb::Brdf and angle lists. */
     SpecularCoordinatesBrdf(const Brdf&     brdf,

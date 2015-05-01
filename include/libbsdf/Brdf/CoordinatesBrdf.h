@@ -31,13 +31,13 @@ public:
      * \param equalIntervalAngles If this parameter is true, angles of sample points
      * are equally-spaced intervals.
      */
-    CoordinatesBrdf(int                 numAngles0,
-                    int                 numAngles1,
-                    int                 numAngles2,
-                    int                 numAngles3,
-                    ColorModel::Type    colorModel = ColorModel::RGB,
-                    int                 numWavelengths = 3,
-                    bool                equalIntervalAngles = false);
+    CoordinatesBrdf(int         numAngles0,
+                    int         numAngles1,
+                    int         numAngles2,
+                    int         numAngles3,
+                    ColorModel  colorModel = RGB_MODEL,
+                    int         numWavelengths = 3,
+                    bool        equalIntervalAngles = false);
 
     /*! Constructs a BRDF from lb::Brdf and angle lists. */
     CoordinatesBrdf(const Brdf&     brdf,
@@ -104,13 +104,13 @@ private:
 };
 
 template <typename CoordSysT>
-CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(int                 numAngles0,
-                                            int                 numAngles1,
-                                            int                 numAngles2,
-                                            int                 numAngles3,
-                                            ColorModel::Type    colorModel,
-                                            int                 numWavelengths,
-                                            bool                equalIntervalAngles)
+CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(int         numAngles0,
+                                            int         numAngles1,
+                                            int         numAngles2,
+                                            int         numAngles3,
+                                            ColorModel  colorModel,
+                                            int         numWavelengths,
+                                            bool        equalIntervalAngles)
                                             : Brdf(numAngles0,
                                                    numAngles1,
                                                    numAngles2,
@@ -255,7 +255,7 @@ bool CoordinatesBrdf<CoordSysT>::expand()
 
         CoordinatesBrdf<CoordSysT> origBrdf(*this);
 
-        samples_->resizeSamples(angles0.size(), angles1.size(), angles2.size(), angles3.size());
+        samples_->resizeAngles(angles0.size(), angles1.size(), angles2.size(), angles3.size());
         samples_->getAngles0() = angles0;
         samples_->getAngles1() = angles1;
         samples_->getAngles2() = angles2;

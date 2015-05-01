@@ -11,7 +11,7 @@
 
 #include <cassert>
 
-#include <libbsdf/Common/Spectrum.h>
+#include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 namespace lb {

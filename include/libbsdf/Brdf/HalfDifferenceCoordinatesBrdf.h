@@ -29,13 +29,13 @@ private:
 
 public:
     /*! Constructs a BRDF. */
-    HalfDifferenceCoordinatesBrdf(int               numHalfTheta,
-                                  int               numHalfPhi,
-                                  int               numDiffTheta,
-                                  int               numDiffPhi,
-                                  ColorModel::Type  colorModel = ColorModel::RGB,
-                                  int               numWavelengths = 3,
-                                  bool              equalIntervalAngles = false);
+    HalfDifferenceCoordinatesBrdf(int           numHalfTheta,
+                                  int           numHalfPhi,
+                                  int           numDiffTheta,
+                                  int           numDiffPhi,
+                                  ColorModel    colorModel = RGB_MODEL,
+                                  int           numWavelengths = 3,
+                                  bool          equalIntervalAngles = false);
 
     /*! Constructs a BRDF from lb::Brdf and angle lists. */
     HalfDifferenceCoordinatesBrdf(const Brdf&   brdf,

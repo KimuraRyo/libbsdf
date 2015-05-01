@@ -10,13 +10,13 @@
 
 using namespace lb;
 
-HalfDifferenceCoordinatesBrdf::HalfDifferenceCoordinatesBrdf(int                numHalfTheta,
-                                                             int                numHalfPhi,
-                                                             int                numDiffTheta,
-                                                             int                numDiffPhi,
-                                                             ColorModel::Type   colorModel,
-                                                             int                numWavelengths,
-                                                             bool               equalIntervalAngles)
+HalfDifferenceCoordinatesBrdf::HalfDifferenceCoordinatesBrdf(int        numHalfTheta,
+                                                             int        numHalfPhi,
+                                                             int        numDiffTheta,
+                                                             int        numDiffPhi,
+                                                             ColorModel colorModel,
+                                                             int        numWavelengths,
+                                                             bool       equalIntervalAngles)
                                                              : BaseBrdf(numHalfTheta,
                                                                         numHalfPhi,
                                                                         numDiffTheta,

@@ -19,9 +19,10 @@ namespace lb {
 
 /*!
  * \class LightToolsBsdfReader
- * \brief The LightToolsBsdfReader class provides the reader of a LightTools BSDF file.
+ * \brief The LightToolsBsdfReader class provides the reader for a LightTools BSDF file.
  *
- * A LightTools BSDF file can contain BRDF and BTDF of front and back.
+ * A LightTools BSDF file can contain BRDFs and BTDFs of front and back.
+ * lb::TwoSidedMaterial is created from loaded data.
  */
 class LightToolsBsdfReader
 {
@@ -31,17 +32,13 @@ public:
 
 private:
     enum SymmetryType {
+        UNKNOWN_SYMMETRY = 0,
         ASYMMETRICAL
     };
 
     enum SideType {
-        FRONT,
-        BACK
-    };
-
-    enum ScatterType {
-        BRDF,
-        BTDF
+        FRONT_SIDE,
+        BACK_SIDE
     };
 
     enum TristimulusValueType {
@@ -61,7 +58,7 @@ private:
         float tis;          /*!< Total Integrated Scatter. */
 
         SideType                sideType;
-        ScatterType             scatterType;
+        DataType                dataType;
         TristimulusValueType    tristimulusValueType;
         
         Arrayf samples;
@@ -72,11 +69,11 @@ private:
     /*! Skips comment lines. */
     static void ignoreCommentLines(std::ifstream& fin);
 
-    /*! Creates a BRDF from a LightTools BRDF data. */
+    /*! Creates a BRDF from LightTools BRDF data. */
     static SphericalCoordinatesBrdf* createBrdf(std::vector<Data*>&         brdfData,
                                                 const std::vector<float>&   outThetaDegrees,
                                                 const std::vector<float>&   outPhiDegrees,
-                                                ColorModel::Type            colorModel);
+                                                ColorModel                  colorModel);
 
     /*! Rotates a BRDF using an outgoing azimuthal angle. */
     static SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf& brdf, float rotationAngle);

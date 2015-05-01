@@ -9,10 +9,10 @@
 #include <libbsdf/Writer/DdrWriter.h>
 
 #include <fstream>
+#include <iostream>
 
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Version.h>
-#include <libbsdf/Reader/DdrSdrUtility.h>
 
 using namespace lb;
 
@@ -28,23 +28,23 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
 
     const SampleSet* ss = brdf.getSampleSet();
 
-    ColorModel::Type colorModel;
+    ColorModel colorModel;
 
     fout << "Source Measured" << std::endl;
     fout << "TypeSym ASymmetrical" << std::endl;
 
     fout << "TypeColorModel ";
     if (ss->getNumWavelengths() == 1) {
-        colorModel = ColorModel::MONOCHROME;
+        colorModel = MONOCHROMATIC_MODEL;
         fout << "BW" << std::endl;
     }
-    else if (ss->getColorModel() == ColorModel::RGB ||
-             ss->getColorModel() == ColorModel::XYZ) {
-        colorModel = ColorModel::RGB;
+    else if (ss->getColorModel() == RGB_MODEL ||
+             ss->getColorModel() == XYZ_MODEL) {
+        colorModel = RGB_MODEL;
         fout << "RGB" << std::endl;
     }
     else {
-        colorModel = ColorModel::SPECTRAL;
+        colorModel = SPECTRAL_MODEL;
         fout << "spectral " << ss->getNumWavelengths() << std::endl;
     }
 
@@ -69,10 +69,10 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
     fout << std::endl;
 
     for (int wlIndex = 0; wlIndex < ss->getNumWavelengths(); ++wlIndex) {
-        if (colorModel == ColorModel::MONOCHROME) {
+        if (colorModel == MONOCHROMATIC_MODEL) {
             fout << "bw" << std::endl;
         }
-        else if (colorModel == ColorModel::RGB) {
+        else if (colorModel == RGB_MODEL) {
             if (wlIndex == 0) {
                 fout << "red" << std::endl;
             }
@@ -106,7 +106,7 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
                     for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
                         const Spectrum& sp = brdf.getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
 
-                        if (ss->getColorModel() == ColorModel::XYZ) {
+                        if (ss->getColorModel() == XYZ_MODEL) {
                             Spectrum rgb = SpectrumUtility::xyzToSrgb(sp);
                             fout << " " << rgb[wlIndex] * PI_F;
                         }

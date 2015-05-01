@@ -12,12 +12,12 @@ using namespace lb;
 
 Brdf::~Brdf() { delete samples_; }
 
-Brdf::Brdf(int              numAngles0,
-           int              numAngles1,
-           int              numAngles2,
-           int              numAngles3,
-           ColorModel::Type colorModel,
-           int              numWavelengths)
+Brdf::Brdf(int          numAngles0,
+           int          numAngles1,
+           int          numAngles2,
+           int          numAngles3,
+           ColorModel   colorModel,
+           int          numWavelengths)
            : samples_(new SampleSet(numAngles0,
                                     numAngles1,
                                     numAngles2,

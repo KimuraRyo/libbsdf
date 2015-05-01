@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Reader/LightToolsBsdfReader.h>
 
 #include <fstream>
@@ -25,9 +24,8 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
 
     std::ios_base::sync_with_stdio(false);
 
-    SymmetryType symmetryType = ASYMMETRICAL;
-
-    ColorModel::Type colorModel = ColorModel::MONOCHROME;
+    SymmetryType symmetryType = UNKNOWN_SYMMETRY;
+    ColorModel colorModel = UNKNOWN_MODEL;
 
     std::vector<float> outThetaDegrees;
     std::vector<float> outPhiDegrees;
@@ -51,18 +49,26 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             if (typeStr == "Asymmetric") {
                 symmetryType = ASYMMETRICAL;
             }
+            else {
+                reader_utility::logNotImplementedKeyword(typeStr);
+                return 0;
+            }
         }
         else if (headStr == "SpectralContent") {
             std::string typeStr;
             fin >> typeStr;
 
             if (typeStr == "Monochrome") {
-                colorModel = ColorModel::MONOCHROME;
+                colorModel = MONOCHROMATIC_MODEL;
                 numChannels = 1;
             }
             else if (typeStr == "XYZ") {
-                colorModel = ColorModel::XYZ;
+                colorModel = XYZ_MODEL;
                 numChannels = 3;
+            }
+            else {
+                reader_utility::logNotImplementedKeyword(typeStr);
+                return 0;
             }
         }
         else if (headStr == "ScatterAzimuth") {
@@ -93,6 +99,12 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
     std::vector<Data*> backBrdfData;
     std::vector<Data*> backBtdfData;
 
+    if (outThetaDegrees.empty() ||
+        outPhiDegrees.empty()) {
+        std::cerr << "[LightToolsBsdfReader::read] Invalid format." << std::endl;
+        return 0;
+    }
+
     int numOutDirSamples = outThetaDegrees.size() * outPhiDegrees.size();
 
     ignoreCommentLines(fin);
@@ -119,35 +131,39 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             data->aoi = aoi;
         }
         else if (dataStr == "POI") {
-            float poi;
-            fin >> poi;
-            data->poi = poi;
+            fin >> data->poi;
         }
         else if (dataStr == "Side") {
             std::string sideStr;
             fin >> sideStr;
             
             if (sideStr == "Front") {
-                data->sideType = FRONT;
+                data->sideType = FRONT_SIDE;
             }
             else if (sideStr == "Back") {
-                data->sideType = BACK;
+                data->sideType = BACK_SIDE;
+            }
+            else {
+                reader_utility::logNotImplementedKeyword(sideStr);
+                return 0;
             }
         }
         else if (dataStr == "Wavelength") {
-            float wl;
-            fin >> wl;
-            data->wavelength = wl;
+            fin >> data->wavelength;
         }
         else if (dataStr == "ScatterType") {
             std::string scatterStr;
             fin >> scatterStr;
             
             if (scatterStr == "BRDF") {
-                data->scatterType = BRDF;
+                data->dataType = BRDF_DATA;
             }
             else if (scatterStr == "BTDF") {
-                data->scatterType = BTDF;
+                data->dataType = BTDF_DATA;
+            }
+            else {
+                reader_utility::logNotImplementedKeyword(scatterStr);
+                return 0;
             }
         }
         else if (dataStr == "TristimulusValue") {
@@ -163,23 +179,23 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             else if (trisStr == "TrisZ") {
                 data->tristimulusValueType = TRIS_Z;
             }
+            else {
+                reader_utility::logNotImplementedKeyword(trisStr);
+                return 0;
+            }
         }
         else if (dataStr == "TIS") {
-            float tis;
-            fin >> tis;
-            data->tis = tis;
+            fin >> data->tis;
 
             ignoreCommentLines(fin);
 
             data->samples.resize(numOutDirSamples);
             for (int i = 0; i < numOutDirSamples; ++i) {
-                float val;
-                fin >> val;
-                data->samples[i] = val;            
+                fin >> data->samples[i];
             }
 
-            if (data->sideType == FRONT) {
-                if (data->scatterType == BRDF) {
+            if (data->sideType == FRONT_SIDE) {
+                if (data->dataType == BRDF_DATA) {
                     frontBrdfData.push_back(data);
                 }
                 else {
@@ -187,7 +203,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
                 }
             }
             else {
-                if (data->scatterType == BRDF) {
+                if (data->dataType == BRDF_DATA) {
                     backBrdfData.push_back(data);
                 }
                 else {
@@ -229,8 +245,8 @@ LightToolsBsdfReader::Data::Data() : aoi(0.0f),
                                      poi(0.0f),
                                      wavelength(0.0f),
                                      tis(0.0f),
-                                     sideType(FRONT),
-                                     scatterType(BRDF) {}
+                                     sideType(FRONT_SIDE),
+                                     dataType(BRDF_DATA) {}
 
 bool LightToolsBsdfReader::Data::cmp(Data* lhs, Data* rhs)
 {
@@ -245,15 +261,15 @@ bool LightToolsBsdfReader::Data::cmp(Data* lhs, Data* rhs)
 SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<Data*>&          brdfData,
                                                            const std::vector<float>&    outThetaDegrees,
                                                            const std::vector<float>&    outPhiDegrees,
-                                                           ColorModel::Type             colorModel)
+                                                           ColorModel                   colorModel)
 {
     if (brdfData.empty()) return 0;
 
     int numChannels;
-    if (colorModel == ColorModel::MONOCHROME) {
+    if (colorModel == MONOCHROMATIC_MODEL) {
         numChannels = 1;
     }
-    else if (colorModel == ColorModel::XYZ) {
+    else if (colorModel == XYZ_MODEL) {
         numChannels = 3;
     }
     else {
@@ -292,10 +308,10 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<Data*>&  
         Data* data = brdfData.at(i);
 
         int channelIndex;
-        if (colorModel == ColorModel::MONOCHROME) {
+        if (colorModel == MONOCHROMATIC_MODEL) {
             channelIndex = 0;
         }
-        else if (colorModel == ColorModel::XYZ) {
+        else if (colorModel == XYZ_MODEL) {
             channelIndex = data->tristimulusValueType;
         }
         else {

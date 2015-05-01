@@ -12,15 +12,16 @@
 #include <iostream>
 
 #include <libbsdf/Common/Utility.h>
+#include <libbsdf/Common/SpectrumUtility.h>
 
 using namespace lb;
 
-SampleSet::SampleSet(int                numAngles0,
-                     int                numAngles1,
-                     int                numAngles2,
-                     int                numAngles3,
-                     ColorModel::Type   colorModel,
-                     int                numWavelengths)
+SampleSet::SampleSet(int        numAngles0,
+                     int        numAngles1,
+                     int        numAngles2,
+                     int        numAngles3,
+                     ColorModel colorModel,
+                     int        numWavelengths)
                      : equalIntervalAngles0_(false),
                        equalIntervalAngles1_(false),
                        equalIntervalAngles2_(false),
@@ -28,19 +29,19 @@ SampleSet::SampleSet(int                numAngles0,
 {
     assert(numAngles0 > 0 && numAngles1 > 0 && numAngles2 > 0 && numAngles3 > 0);
 
-    resizeSamples(numAngles0, numAngles1, numAngles2, numAngles3);
+    resizeAngles(numAngles0, numAngles1, numAngles2, numAngles3);
 
     colorModel_ = colorModel;
 
-    if (colorModel == ColorModel::SPECTRAL) {
-        initializeSpectralSamples(numWavelengths);
+    if (colorModel == SPECTRAL_MODEL) {
+        resizeWavelengths(numWavelengths);
     }
-    else if (colorModel == ColorModel::MONOCHROME) {
-        initializeSpectralSamples(1);
+    else if (colorModel == MONOCHROMATIC_MODEL) {
+        resizeWavelengths(1);
         wavelengths_ = Arrayf::Zero(1);
     }
     else {
-        initializeSpectralSamples(3);
+        resizeWavelengths(3);
         wavelengths_ = Arrayf::Zero(3);
     }
 }
@@ -72,10 +73,10 @@ void SampleSet::checkEqualIntervalAngles()
     std::cout << "[SampleSet::checkEqualIntervalAngles] Angle3: " << equalIntervalAngles3_ << std::endl;
 }
 
-void SampleSet::resizeSamples(int numAngles0,
-                              int numAngles1,
-                              int numAngles2,
-                              int numAngles3)
+void SampleSet::resizeAngles(int numAngles0,
+                             int numAngles1,
+                             int numAngles2,
+                             int numAngles3)
 {
     assert(numAngles0 > 0 && numAngles1 > 0 && numAngles2 > 0 && numAngles3 > 0);
 
@@ -93,7 +94,7 @@ void SampleSet::resizeSamples(int numAngles0,
     angles3_.resize(numAngles3);
 }
 
-void SampleSet::initializeSpectralSamples(int numWavelengths)
+void SampleSet::resizeWavelengths(int numWavelengths)
 {
     assert(numWavelengths > 0);
 

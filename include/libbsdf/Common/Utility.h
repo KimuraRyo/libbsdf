@@ -8,7 +8,7 @@
 
 /*!
  * \file    Utility.h
- * \brief   Utility functions for libbsdf.
+ * \brief   The Utility.h header file includes the utility functions for libbsdf.
  */
 
 #ifndef LIBBSDF_UTILITY_H
@@ -16,15 +16,7 @@
 
 #include <libbsdf/Common/Vector.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 namespace lb {
-
-const float PI_F = 3.14159265358979323846f;
-const float PI_2_F = 1.57079632679489661923f;
-const float EPSILON_F = std::numeric_limits<float>::epsilon();
 
 /*! \brief Clamps a value between a minimum and maximum value. */
 template <typename T>

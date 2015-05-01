@@ -12,10 +12,10 @@
 
 using namespace lb;
 
-SampleSet2D::SampleSet2D(int                numTheta,
-                         int                numPhi,
-                         ColorModel::Type   colorModel,
-                         int                numWavelengths)
+SampleSet2D::SampleSet2D(int        numTheta,
+                         int        numPhi,
+                         ColorModel colorModel,
+                         int        numWavelengths)
                          : equalIntervalTheta_(false),
                            equalIntervalPhi_(false)
 {
@@ -32,10 +32,10 @@ SampleSet2D::SampleSet2D(int                numTheta,
     thetaAngles_.resize(numTheta);
     phiAngles_.resize(numPhi);
 
-    if (colorModel == ColorModel::MONOCHROME) {
+    if (colorModel == MONOCHROMATIC_MODEL) {
         numWavelengths = 1;
     }
-    else if (colorModel != ColorModel::SPECTRAL) {
+    else if (colorModel != SPECTRAL_MODEL) {
         numWavelengths = 3;
     }
 
@@ -49,8 +49,8 @@ SampleSet2D::SampleSet2D(int                numTheta,
 
     wavelengths_.resize(numWavelengths);
 
-    if (colorModel == ColorModel::MONOCHROME ||
-        colorModel != ColorModel::SPECTRAL) {
+    if (colorModel == MONOCHROMATIC_MODEL ||
+        colorModel != SPECTRAL_MODEL) {
         wavelengths_ = Arrayf::Zero(numWavelengths);
     }
 }
