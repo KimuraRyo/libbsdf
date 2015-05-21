@@ -44,7 +44,9 @@ Vec3 toVec3(const Vec3T& vec3);
 template <typename ArrayT, typename ScalarT>
 void append(ArrayT& arrayf, ScalarT value);
 
-/* Implementation */
+/*
+ * Implementation
+ */
 
 template <typename Vec3T>
 inline Vec3 toVec3(const Vec3T& vec3)

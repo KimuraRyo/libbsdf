@@ -23,12 +23,12 @@ namespace lb {
  * See Rusinkiewicz, S. 1998. A New Change of Variables for Efficient BRDF Representation.
  *
  * The coordinate system has four angle parameters.
- *   - halfTheta: the polar angle of a halfway vector
- *   - halfPhi: the azimuthal angle of a halfway vector
- *   - diffTheta: the polar angle of a difference vector
- *   - diffPhi: the azimuthal angle of a difference vector
+ *   - \a halfTheta: the polar angle of a halfway vector
+ *   - \a halfPhi: the azimuthal angle of a halfway vector
+ *   - \a diffTheta: the polar angle of a difference vector
+ *   - \a diffPhi: the azimuthal angle of a difference vector
  *
- * Diff is an abbreviation for difference.
+ * \a diff is an abbreviation for difference. \a halfPhi isn't used for isotropic BRDFs.
  */
 class HalfDifferenceCoordinateSystem
 {
@@ -47,6 +47,14 @@ public:
      */
     static void fromXyz(const Vec3& inDir, const Vec3& outDir,
                         float* halfTheta, float* halfPhi,
+                        float* diffTheta, float* diffPhi);
+
+    /*!
+     * Converts from incoming and outgoing directions to three angles for isotropic data and
+     * assigns them to \a halfTheta, \a diffTheta, and \a diffPhi.
+     */
+    static void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                        float* halfTheta,
                         float* diffTheta, float* diffPhi);
 
     static const std::string ANGLE0_NAME; /*!< This attribute holds the name of halfTheta. */
@@ -82,6 +90,21 @@ inline void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir, const Vec
     SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, halfPhi);
 
     Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfPhi) * Vec2f(inDir[0], inDir[1]);
+    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfTheta) * Vec2f(rotPhVec[0], inDir[2]);
+    Vec3 diffDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
+    diffDir.normalize();
+    SphericalCoordinateSystem::fromXyz(diffDir, diffTheta, diffPhi);
+}
+
+inline void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                                    float* halfTheta,
+                                                    float* diffTheta, float* diffPhi)
+{
+    Vec3 halfDir = (inDir + outDir).normalized();
+    float halfPhi; // halfPhi is 0 for isotorpic data.
+    SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, &halfPhi);
+
+    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-halfPhi) * Vec2f(inDir[0], inDir[1]);
     Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfTheta) * Vec2f(rotPhVec[0], inDir[2]);
     Vec3 diffDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
     diffDir.normalize();

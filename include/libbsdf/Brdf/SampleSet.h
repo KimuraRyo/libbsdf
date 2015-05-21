@@ -24,10 +24,12 @@ namespace lb {
  * The arrays of angles and wavelengths must be sorted in ascending order.
  *
  * A sample point is defined with four angles.
- *   - angle0 (e.g. incoming polar angle of a spherical coordinate system)
- *   - angle1 (e.g. incoming azimuthal angle of a spherical coordinate system)
- *   - angle2 (e.g. outgoing polar angle of a spherical coordinate system)
- *   - angle3 (e.g. outgoing azimuthal angle of a spherical coordinate system)
+ *   - \a angle0 (e.g. incoming polar angle of a spherical coordinate system)
+ *   - \a angle1 (e.g. incoming azimuthal angle of a spherical coordinate system)
+ *   - \a angle2 (e.g. outgoing polar angle of a spherical coordinate system)
+ *   - \a angle3 (e.g. outgoing azimuthal angle of a spherical coordinate system)
+ *
+ * \a angle1 isn't used for isotropic BRDFs.
  */
 class SampleSet
 {
@@ -47,7 +49,13 @@ public:
     Spectrum& getSpectrum(int index0, int index1, int index2, int index3);
 
     /*! Gets the spectrum at a set of angle indices. */
+    Spectrum& getSpectrum(int index0, int index2, int index3);
+
+    /*! Gets the spectrum at a set of angle indices. */
     const Spectrum& getSpectrum(int index0, int index1, int index2, int index3) const;
+
+    /*! Gets the spectrum at a set of angle indices. */
+    const Spectrum& getSpectrum(int index0, int index2, int index3) const;
 
     /*! Gets the spectrum at an index. */
     Spectrum& getSpectrum(int index);
@@ -107,6 +115,9 @@ public:
     /*! Gets the color model. */
     ColorModel getColorModel() const;
 
+    /*! Returns true if the data is isotropic. */
+    bool isIsotropic() const;
+
     /*! Checks the attributes whether angles are set at equal intervals */
     void checkEqualIntervalAngles();
 
@@ -120,8 +131,11 @@ private:
     /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
     void resizeWavelengths(int numWavelengths);
 
-    /*! Gets the index of spectra from a set of angle indices. */
+    /*! Gets the index of the spectrum from a set of angle indices. */
     int getIndex(int index0, int index1, int index2, int index3) const;
+
+    /*! Gets the index of the spectrum from a set of angle indices of isotropic data. */
+    int getIndex(int index0, int index2, int index3) const;
 
     SpectrumList spectra_; /*!< The list of spectrum for each pair of incoming and outgoing directions. */
 
@@ -150,9 +164,19 @@ inline Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int 
     return spectra_.at(getIndex(index0, index1, index2, index3));
 }
 
+inline Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3)
+{
+    return spectra_.at(getIndex(index0, index2, index3));
+}
+
 inline const Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3) const
 {
     return spectra_.at(getIndex(index0, index1, index2, index3));
+}
+
+inline const Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3) const
+{
+    return spectra_.at(getIndex(index0, index2, index3));
 }
 
 inline       Spectrum& SampleSet::getSpectrum(int index)       { return spectra_.at(index); }
@@ -217,6 +241,8 @@ inline ColorModel SampleSet::getColorModel() const
     return colorModel_;
 }
 
+inline bool SampleSet::isIsotropic() const { return (numAngles1_ == 1); }
+
 inline int SampleSet::getIndex(int index0, int index1, int index2, int index3) const
 {
     assert(index0 >= 0 && index1 >= 0 && index2 >= 0 && index3 >= 0);
@@ -226,6 +252,17 @@ inline int SampleSet::getIndex(int index0, int index1, int index2, int index3) c
               + numAngles0_ * index1
               + numAngles0_ * numAngles1_ * index2
               + numAngles0_ * numAngles1_ * numAngles2_ * index3;
+    return index;
+}
+
+inline int SampleSet::getIndex(int index0, int index2, int index3) const
+{
+    assert(index0 >= 0 && index2 >= 0 && index3 >= 0);
+    assert(index0 < numAngles0_ && index2 < numAngles2_ && index3 < numAngles3_);
+
+    int index = index0
+              + numAngles0_ * index2
+              + numAngles0_ * numAngles2_ * index3;
     return index;
 }
 

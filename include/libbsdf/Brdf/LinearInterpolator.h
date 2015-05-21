@@ -20,6 +20,8 @@ class SampleSet2D;
 /*!
  * \class   LinearInterpolator
  * \brief   The LinearInterpolator class provides the functions for linear interpolation.
+ *
+ * \a angle1 isn't used for isotropic BRDFs.
  */
 class LinearInterpolator
 {
@@ -32,10 +34,24 @@ public:
                             float               angle3,
                             Spectrum*           spectrum);
 
+    /*! Gets the interpolated spectrum of sample points at a set of angles. */
+    static void getSpectrum(const SampleSet&    samples,
+                            float               angle0,
+                            float               angle2,
+                            float               angle3,
+                            Spectrum*           spectrum);
+
     /*! Gets the interpolated value of sample points at a set of angles and the index of wavelength. */
     static float getValue(const SampleSet&  samples,
                           float             angle0,
                           float             angle1,
+                          float             angle2,
+                          float             angle3,
+                          int               spectrumIndex);
+
+    /*! Gets the interpolated value of sample points at a set of angles and the index of wavelength. */
+    static float getValue(const SampleSet&  samples,
+                          float             angle0,
                           float             angle2,
                           float             angle3,
                           int               spectrumIndex);

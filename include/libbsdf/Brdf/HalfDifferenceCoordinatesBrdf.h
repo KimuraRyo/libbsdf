@@ -98,16 +98,9 @@ public:
     int getNumDiffTheta() const; /*!< Gets the number of polar angles of a difference vector. */
     int getNumDiffPhi()   const; /*!< Gets the number of azimuthal angles of a difference vector. */
 
-    /*! Returns true if a BRDF is isotropic. */
-    bool isIsotropic() const;
-
 private:
     /*! Copy operator is disabled. */
     HalfDifferenceCoordinatesBrdf& operator=(const HalfDifferenceCoordinatesBrdf&);
-
-    /*! Gets the index of spectra from angle indices of an isotropic BRDF. */
-    int getIndex(int halfThetaIndex,
-                 int diffThetaIndex, int diffPhiIndex) const;
 };
 
 inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta, float halfPhi,
@@ -133,13 +126,13 @@ inline const Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaI
 inline Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,
                                                             int diffThetaIndex, int diffPhiIndex)
 {
-    return samples_->getSpectrum(getIndex(halfThetaIndex, diffThetaIndex, diffPhiIndex));
+    return samples_->getSpectrum(halfThetaIndex, diffThetaIndex, diffPhiIndex);
 }
 
 inline const Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,
                                                                   int diffThetaIndex, int diffPhiIndex) const
 {
-    return samples_->getSpectrum(getIndex(halfThetaIndex, diffThetaIndex, diffPhiIndex));
+    return samples_->getSpectrum(halfThetaIndex, diffThetaIndex, diffPhiIndex);
 }
 
 inline void HalfDifferenceCoordinatesBrdf::setSpectrum(int halfThetaIndex, int halfPhiIndex,
@@ -163,20 +156,6 @@ inline int HalfDifferenceCoordinatesBrdf::getNumHalfTheta() const { return sampl
 inline int HalfDifferenceCoordinatesBrdf::getNumHalfPhi()   const { return samples_->getNumAngles1(); }
 inline int HalfDifferenceCoordinatesBrdf::getNumDiffTheta() const { return samples_->getNumAngles2(); }
 inline int HalfDifferenceCoordinatesBrdf::getNumDiffPhi()   const { return samples_->getNumAngles3(); }
-
-inline bool HalfDifferenceCoordinatesBrdf::isIsotropic() const
-{
-    return (getNumHalfPhi() == 1);
-}
-
-inline int HalfDifferenceCoordinatesBrdf::getIndex(int halfThetaIndex,
-                                                   int diffThetaIndex, int diffPhiIndex) const
-{
-    int index = halfThetaIndex
-              + samples_->getNumAngles0() * diffThetaIndex
-              + samples_->getNumAngles0() * samples_->getNumAngles2() * diffPhiIndex;
-    return index;
-}
 
 } // namespace lb
 

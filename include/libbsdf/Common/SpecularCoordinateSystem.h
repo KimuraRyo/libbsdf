@@ -12,6 +12,7 @@
 #include <Eigen/Geometry>
 
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
+#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
@@ -20,12 +21,12 @@ namespace lb {
  * \brief   The SpecularCoordinateSystem class provides the functions of a specular coordinate system.
  *
  * The coordinate system has four angle parameters.
- *   - inTheta: the polar angle of an incoming direction
- *   - inPhi: the azimuthal angle of an incoming direction
- *   - specTheta: the polar angle of a specular direction
- *   - specPhi: the azimuthal angle of a specular direction
+ *   - \a inTheta: the polar angle of an incoming direction
+ *   - \a inPhi: the azimuthal angle of an incoming direction
+ *   - \a specTheta: the polar angle of a specular direction
+ *   - \a specPhi: the azimuthal angle of a specular direction
  *
- * Spec is an abbreviation for specular.
+ * \a spec is an abbreviation for specular. \a inPhi isn't used for isotropic BRDFs.
  */
 class SpecularCoordinateSystem
 {
@@ -46,6 +47,14 @@ public:
                         float* inTheta, float* inPhi,
                         float* specTheta, float* specPhi);
 
+    /*!
+     * Converts from incoming and outgoing directions to three angles for isotropic data and
+     * assigns them to \a inTheta, \a specTheta, and \a specPhi.
+     */
+    static void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                        float* inTheta,
+                        float* specTheta, float* specPhi);
+
     static const std::string ANGLE0_NAME; /*!< This attribute holds the name of inTheta. */
     static const std::string ANGLE1_NAME; /*!< This attribute holds the name of inPhi. */
     static const std::string ANGLE2_NAME; /*!< This attribute holds the name of specTheta. */
@@ -58,10 +67,11 @@ public:
 
 private:
     /*! Converts an outgoing direction from a specular coordinate system to a Cartesian. */
-    static Vec3 toOutDirXyz(float inTheta, float specTheta, float specPhi);
+    static Vec3 toOutDirXyz(float inTheta, float inPhi,
+                            float specTheta, float specPhi);
 
     /*! Converts an outgoing direction from a Cartesian coordinate system to a specular. */
-    static void fromOutDirXyz(const Vec3& dir, float inTheta,
+    static void fromOutDirXyz(const Vec3& outDir, float inTheta, float inPhi,
                               float* specTheta, float* specPhi);
 };
 
@@ -70,7 +80,7 @@ inline void SpecularCoordinateSystem::toXyz(float inTheta, float inPhi,
                                             Vec3* inDir, Vec3* outDir)
 {
     *inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
-    *outDir = toOutDirXyz(inTheta, specTheta, specPhi);
+    *outDir = toOutDirXyz(inTheta, inPhi, specTheta, specPhi);
 }
 
 inline void SpecularCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& outDir,
@@ -78,27 +88,36 @@ inline void SpecularCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& out
                                               float* specTheta, float* specPhi)
 {
     SphericalCoordinateSystem::fromXyz(inDir, inTheta, inPhi);
-    fromOutDirXyz(outDir, *inTheta, specTheta, specPhi);
+    fromOutDirXyz(outDir, *inTheta, *inPhi, specTheta, specPhi);
 }
 
-inline Vec3 SpecularCoordinateSystem::toOutDirXyz(float inTheta, float specTheta, float specPhi)
+inline void SpecularCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                              float* inTheta,
+                                              float* specTheta, float* specPhi)
 {
-    Vec3 xyzVec = SphericalCoordinateSystem::toXyz(specTheta, specPhi);
-    Vec2f rotVec = Eigen::Rotation2D<Vec2f::Scalar>(inTheta) * Vec2f(xyzVec(0), xyzVec(2));
-
-    return Vec3(rotVec(0), xyzVec(1), rotVec(1));
+    float inPhi; // inPhi is 0 for isotorpic data.
+    SphericalCoordinateSystem::fromXyz(inDir, inTheta, &inPhi);
+    fromOutDirXyz(outDir, *inTheta, inPhi, specTheta, specPhi);
 }
 
-inline void SpecularCoordinateSystem::fromOutDirXyz(const Vec3& dir, float inTheta,
+inline Vec3 SpecularCoordinateSystem::toOutDirXyz(float inTheta, float inPhi,
+                                                  float specTheta, float specPhi)
+{
+    Vec3 outDir = SphericalCoordinateSystem::toXyz(specTheta, specPhi);
+    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(inTheta) * Vec2f(outDir[0], outDir[2]);
+    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(inPhi) * Vec2f(rotThVec[0], outDir[1]);
+
+    return Vec3(rotPhVec[0], rotPhVec[1], rotThVec[1]);
+}
+
+inline void SpecularCoordinateSystem::fromOutDirXyz(const Vec3& outDir, float inTheta, float inPhi,
                                                     float* specTheta, float* specPhi)
 {
-    Vec2f rotVec = Eigen::Rotation2D<Vec2f::Scalar>(-inTheta) * Vec2f(dir(0), dir(2));
-    rotVec(1) = std::min(rotVec(1), 1.0f);
-    *specTheta = std::acos(rotVec(1));
-    *specPhi = std::atan2(dir(1), rotVec(0));
-    if (*specPhi < 0.0f) {
-        *specPhi += 2.0f * PI_F;
-    }
+    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-inPhi) * Vec2f(outDir[0], outDir[1]);
+    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(-inTheta) * Vec2f(rotPhVec[0], outDir[2]);
+    rotThVec[1] = clamp(rotThVec[1], -1.0f, 1.0f);
+    Vec3 rotDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
+    SphericalCoordinateSystem::fromXyz(rotDir, specTheta, specPhi);
 }
 
 } // namespace lb

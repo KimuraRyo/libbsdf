@@ -91,16 +91,9 @@ public:
     int getNumOutTheta() const; /*!< Gets the number of polar angles of an outgoing direction. */
     int getNumOutPhi()   const; /*!< Gets the number of azimuthal angles of an outgoing direction. */
 
-    /*! Returns true if a BRDF is isotropic. */
-    bool isIsotropic() const;
-
 private:
     /*! Copy operator is disabled. */
     SphericalCoordinatesBrdf& operator=(const SphericalCoordinatesBrdf&);
-
-    /*! Gets the index of spectra from angle indices of an isotropic BRDF. */
-    int getIndex(int inThetaIndex,
-                 int outThetaIndex, int outPhiIndex) const;
 };
 
 inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
@@ -126,13 +119,13 @@ inline const Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex, i
 inline Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,
                                                        int outThetaIndex, int outPhiIndex)
 {
-    return samples_->getSpectrum(getIndex(inThetaIndex, outThetaIndex, outPhiIndex));
+    return samples_->getSpectrum(inThetaIndex, outThetaIndex, outPhiIndex);
 }
 
 inline const Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,
                                                              int outThetaIndex, int outPhiIndex) const
 {
-    return samples_->getSpectrum(getIndex(inThetaIndex, outThetaIndex, outPhiIndex));
+    return samples_->getSpectrum(inThetaIndex, outThetaIndex, outPhiIndex);
 }
 
 inline void SphericalCoordinatesBrdf::setSpectrum(int inThetaIndex, int inPhiIndex,
@@ -156,17 +149,6 @@ inline int SphericalCoordinatesBrdf::getNumInTheta()  const { return samples_->g
 inline int SphericalCoordinatesBrdf::getNumInPhi()    const { return samples_->getNumAngles1(); }
 inline int SphericalCoordinatesBrdf::getNumOutTheta() const { return samples_->getNumAngles2(); }
 inline int SphericalCoordinatesBrdf::getNumOutPhi()   const { return samples_->getNumAngles3(); }
-
-inline bool SphericalCoordinatesBrdf::isIsotropic() const { return (getNumInPhi() == 1); }
-
-inline int SphericalCoordinatesBrdf::getIndex(int inThetaIndex,
-                                              int outThetaIndex, int outPhiIndex) const
-{
-    int index = inThetaIndex
-              + samples_->getNumAngles0() * outThetaIndex
-              + samples_->getNumAngles0() * samples_->getNumAngles2() * outPhiIndex;
-    return index;
-}
 
 } // namespace lb
 

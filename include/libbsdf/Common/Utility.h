@@ -62,7 +62,9 @@ bool isEqualInterval(const T& array);
 template <typename Vec3T>
 void fixDownwardDir(Vec3T& dir);
 
-/* Implementation */
+/*
+ * Implementation
+ */
 
 template <typename T>
 inline T clamp(T value, T minValue, T maxValue)
@@ -112,7 +114,7 @@ inline Vec3T reflect(const Vec3T& inDir, const Vec3T& normalDir)
 template <typename T>
 inline T toDegree(T radian)
 {
-    return radian / static_cast<T>(PI_F)* static_cast<T>(180.0);
+    return radian / static_cast<T>(PI_F) * static_cast<T>(180.0);
 }
 
 template <typename T>

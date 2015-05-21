@@ -98,19 +98,12 @@ public:
     int getNumSpecTheta() const; /*!< Gets the number of polar angles of a specular direction. */
     int getNumSpecPhi()   const; /*!< Gets the number of azimuthal angles of a specular direction. */
 
-    /*! Returns true if a BRDF is isotropic. */
-    bool isIsotropic() const;
-
     /*! Fixes the energy conservation of a BRDF with each incoming direction. */
     void fixEnergyConservation();
 
 private:
     /*! Copy operator is disabled. */
     SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&);
-
-    /*! Gets the index of spectra from angle indices of an isotropic BRDF. */
-    int getIndex(int inThetaIndex,
-                 int specThetaIndex, int specPhiIndex) const;
 };
 
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
@@ -136,13 +129,13 @@ inline const Spectrum& SpecularCoordinatesBrdf::getSpectrum(int inThetaIndex, in
 inline Spectrum& SpecularCoordinatesBrdf::getSpectrum(int inThetaIndex,
                                                       int specThetaIndex, int specPhiIndex)
 {
-    return samples_->getSpectrum(getIndex(inThetaIndex, specThetaIndex, specPhiIndex));
+    return samples_->getSpectrum(inThetaIndex, specThetaIndex, specPhiIndex);
 }
 
 inline const Spectrum&  SpecularCoordinatesBrdf::getSpectrum(int inThetaIndex,
                                                              int specThetaIndex, int specPhiIndex) const
 {
-    return samples_->getSpectrum(getIndex(inThetaIndex, specThetaIndex, specPhiIndex));
+    return samples_->getSpectrum(inThetaIndex, specThetaIndex, specPhiIndex);
 }
 
 inline void SpecularCoordinatesBrdf::setSpectrum(int inThetaIndex, int inPhiIndex,
@@ -166,17 +159,6 @@ inline int SpecularCoordinatesBrdf::getNumInTheta()   const { return samples_->g
 inline int SpecularCoordinatesBrdf::getNumInPhi()     const { return samples_->getNumAngles1(); }
 inline int SpecularCoordinatesBrdf::getNumSpecTheta() const { return samples_->getNumAngles2(); }
 inline int SpecularCoordinatesBrdf::getNumSpecPhi()   const { return samples_->getNumAngles3(); }
-
-inline bool SpecularCoordinatesBrdf::isIsotropic() const { return (getNumInPhi() == 1); }
-
-inline int SpecularCoordinatesBrdf::getIndex(int inThetaIndex,
-                                             int specThetaIndex, int specPhiIndex) const
-{
-    int index = inThetaIndex
-              + samples_->getNumAngles0() * specThetaIndex
-              + samples_->getNumAngles0() * samples_->getNumAngles2() * specPhiIndex;
-    return index;
-}
 
 } // namespace lb
 

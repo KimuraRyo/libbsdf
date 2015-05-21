@@ -31,7 +31,13 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
     ColorModel colorModel;
 
     fout << "Source Measured" << std::endl;
-    fout << "TypeSym ASymmetrical" << std::endl;
+
+    if (ss->isIsotropic()) {
+        fout << "TypeSym ASymmetrical" << std::endl;
+    }
+    else {
+        fout << "TypeSym ASymmetrical 4D" << std::endl;
+    }
 
     fout << "TypeColorModel ";
     if (ss->getNumWavelengths() == 1) {
@@ -49,6 +55,13 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
     }
 
     fout << "TypeData Luminance Absolute" << std::endl;
+
+    if (!ss->isIsotropic()) {
+        fout << "psi " << brdf.getNumInPhi() << std::endl;
+        for (int i = 0; i < brdf.getNumInPhi(); ++i) {
+            fout << " " << toDegree(brdf.getInPhi(i));
+        }
+    }
 
     fout << "sigma " << brdf.getNumInTheta() << std::endl;
     for (int i = 0; i < brdf.getNumInTheta(); ++i) {

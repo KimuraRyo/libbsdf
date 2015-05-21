@@ -62,10 +62,16 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 symmetryType = ddr_sdr_utility::PLANE_SYMMETRICAL;
             }
             else if (typeStr == "ASymmetrical") {
-                symmetryType = ddr_sdr_utility::ASYMMETRICAL;
-            }
-            else if (typeStr == "ASymmetrical 4D") {
-                symmetryType = ddr_sdr_utility::ASYMMETRICAL_4D;
+                std::ifstream::pos_type asymmetricalPos = fin.tellg();
+                fin >> typeStr;
+
+                if (typeStr == "4D") {                
+                    symmetryType = ddr_sdr_utility::ASYMMETRICAL_4D;
+                }
+                else {
+                    symmetryType = ddr_sdr_utility::ASYMMETRICAL;
+                    fin.seekg(asymmetricalPos, std::ios_base::beg);
+                }
             }
             else {
                 reader_utility::logNotImplementedKeyword(typeStr);
@@ -98,11 +104,18 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             std::string typeStr;
             fin >> typeStr;
 
-            if (typeStr == "Luminance Absolute") {
-                unitType = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
-            }
-            else if (typeStr == "Luminance Relative") {
-                unitType = ddr_sdr_utility::LUMINANCE_RELATIVE;
+            if (typeStr == "Luminance") {
+                fin >> typeStr;
+
+                if (typeStr == "Absolute") {
+                    unitType = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
+                }
+                else if (typeStr == "Relative") {
+                    unitType = ddr_sdr_utility::LUMINANCE_RELATIVE;
+                }
+                else {
+                    reader_utility::ignoreLine(fin);
+                }
             }
             else {
                 reader_utility::ignoreLine(fin);

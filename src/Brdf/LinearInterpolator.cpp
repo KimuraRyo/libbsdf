@@ -27,16 +27,6 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
     const Arrayf& angles2 = samples.getAngles2();
     const Arrayf& angles3 = samples.getAngles3();
 
-    //assert(angle0 >= angles0[0]);
-    //assert(angle1 >= angles1[0]);
-    //assert(angle2 >= angles2[0]);
-    //assert(angle3 >= angles3[0]);
-
-    //assert(angle0 <= angles0(angles0.size() - 1) || angles0.size() == 1);
-    //assert(angle1 <= angles1(angles1.size() - 1) || angles1.size() == 1);
-    //assert(angle2 <= angles2(angles2.size() - 1) || angles2.size() == 1);
-    //assert(angle3 <= angles3(angles3.size() - 1) || angles3.size() == 1);
-
     int lIdx0, lIdx1, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx1, uIdx2, uIdx3; // index of the upper bound sample point
     Vec4 lowerAngles, upperAngles;
@@ -50,67 +40,89 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
     Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
     Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
-    if (samples.getNumAngles1() == 1) {
-        const Spectrum& sp0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3);
-        const Spectrum& sp0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3);
-        const Spectrum& sp0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3);
-        const Spectrum& sp0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3);
+    const Spectrum& sp0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3);
+    const Spectrum& sp0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3);
+    const Spectrum& sp0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3);
+    const Spectrum& sp0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3);
 
-        const Spectrum& sp1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3);
-        const Spectrum& sp1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3);
-        const Spectrum& sp1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3);
-        const Spectrum& sp1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3);
+    const Spectrum& sp0100 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, lIdx3);
+    const Spectrum& sp0101 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, uIdx3);
+    const Spectrum& sp0110 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, lIdx3);
+    const Spectrum& sp0111 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, uIdx3);
 
-        Spectrum sp000 = lerp(sp0000, sp0001, weights[3]);
-        Spectrum sp001 = lerp(sp0010, sp0011, weights[3]);
-        Spectrum sp100 = lerp(sp1000, sp1001, weights[3]);
-        Spectrum sp101 = lerp(sp1010, sp1011, weights[3]);
+    const Spectrum& sp1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3);
+    const Spectrum& sp1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3);
+    const Spectrum& sp1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3);
+    const Spectrum& sp1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3);
 
-        Spectrum sp00 = lerp(sp000, sp001, weights[2]);
-        Spectrum sp10 = lerp(sp100, sp101, weights[2]);
+    const Spectrum& sp1100 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, lIdx3);
+    const Spectrum& sp1101 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, uIdx3);
+    const Spectrum& sp1110 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, lIdx3);
+    const Spectrum& sp1111 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, uIdx3);
 
-        *spectrum = lerp(sp00, sp10, weights[0]);
-    }
-    else {
-        const Spectrum& sp0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3);
-        const Spectrum& sp0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3);
-        const Spectrum& sp0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3);
-        const Spectrum& sp0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3);
+    Spectrum sp000 = lerp(sp0000, sp0001, weights[3]);
+    Spectrum sp001 = lerp(sp0010, sp0011, weights[3]);
+    Spectrum sp010 = lerp(sp0100, sp0101, weights[3]);
+    Spectrum sp011 = lerp(sp0110, sp0111, weights[3]);
+    Spectrum sp100 = lerp(sp1000, sp1001, weights[3]);
+    Spectrum sp101 = lerp(sp1010, sp1011, weights[3]);
+    Spectrum sp110 = lerp(sp1100, sp1101, weights[3]);
+    Spectrum sp111 = lerp(sp1110, sp1111, weights[3]);
 
-        const Spectrum& sp0100 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, lIdx3);
-        const Spectrum& sp0101 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, uIdx3);
-        const Spectrum& sp0110 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, lIdx3);
-        const Spectrum& sp0111 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, uIdx3);
+    Spectrum sp00 = lerp(sp000, sp001, weights[2]);
+    Spectrum sp01 = lerp(sp010, sp011, weights[2]);
+    Spectrum sp10 = lerp(sp100, sp101, weights[2]);
+    Spectrum sp11 = lerp(sp110, sp111, weights[2]);
 
-        const Spectrum& sp1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3);
-        const Spectrum& sp1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3);
-        const Spectrum& sp1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3);
-        const Spectrum& sp1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3);
+    Spectrum sp0 = lerp(sp00, sp01, weights[1]);
+    Spectrum sp1 = lerp(sp10, sp11, weights[1]);
 
-        const Spectrum& sp1100 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, lIdx3);
-        const Spectrum& sp1101 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, uIdx3);
-        const Spectrum& sp1110 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, lIdx3);
-        const Spectrum& sp1111 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, uIdx3);
+    *spectrum = lerp(sp0, sp1, weights[0]);
 
-        Spectrum sp000 = lerp(sp0000, sp0001, weights[3]);
-        Spectrum sp001 = lerp(sp0010, sp0011, weights[3]);
-        Spectrum sp010 = lerp(sp0100, sp0101, weights[3]);
-        Spectrum sp011 = lerp(sp0110, sp0111, weights[3]);
-        Spectrum sp100 = lerp(sp1000, sp1001, weights[3]);
-        Spectrum sp101 = lerp(sp1010, sp1011, weights[3]);
-        Spectrum sp110 = lerp(sp1100, sp1101, weights[3]);
-        Spectrum sp111 = lerp(sp1110, sp1111, weights[3]);
+    assert(!spectrum->hasNaN());
+}
 
-        Spectrum sp00 = lerp(sp000, sp001, weights[2]);
-        Spectrum sp01 = lerp(sp010, sp011, weights[2]);
-        Spectrum sp10 = lerp(sp100, sp101, weights[2]);
-        Spectrum sp11 = lerp(sp110, sp111, weights[2]);
+void LinearInterpolator::getSpectrum(const SampleSet&   samples,
+                                     float              angle0,
+                                     float              angle2,
+                                     float              angle3,
+                                     Spectrum*          spectrum)
+{
+    const Arrayf& angles0 = samples.getAngles0();
+    const Arrayf& angles2 = samples.getAngles2();
+    const Arrayf& angles3 = samples.getAngles3();
 
-        Spectrum sp0 = lerp(sp00, sp01, weights[1]);
-        Spectrum sp1 = lerp(sp10, sp11, weights[1]);
+    int lIdx0, lIdx2, lIdx3; // index of the lower bound sample point
+    int uIdx0, uIdx2, uIdx3; // index of the upper bound sample point
+    Vec4 lowerAngles, upperAngles;
 
-        *spectrum = lerp(sp0, sp1, weights[0]);
-    }
+    findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
+    findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
+    findBounds(angles3, angle3, samples.isEqualIntervalAngles3(), &lIdx3, &uIdx3, &lowerAngles[3], &upperAngles[3]);
+
+    Vec4 angles(angle0, 0.0, angle2, angle3);
+    Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
+    Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
+
+    const Spectrum& sp0000 = samples.getSpectrum(lIdx0, lIdx2, lIdx3);
+    const Spectrum& sp0001 = samples.getSpectrum(lIdx0, lIdx2, uIdx3);
+    const Spectrum& sp0010 = samples.getSpectrum(lIdx0, uIdx2, lIdx3);
+    const Spectrum& sp0011 = samples.getSpectrum(lIdx0, uIdx2, uIdx3);
+
+    const Spectrum& sp1000 = samples.getSpectrum(uIdx0, lIdx2, lIdx3);
+    const Spectrum& sp1001 = samples.getSpectrum(uIdx0, lIdx2, uIdx3);
+    const Spectrum& sp1010 = samples.getSpectrum(uIdx0, uIdx2, lIdx3);
+    const Spectrum& sp1011 = samples.getSpectrum(uIdx0, uIdx2, uIdx3);
+
+    Spectrum sp000 = lerp(sp0000, sp0001, weights[3]);
+    Spectrum sp001 = lerp(sp0010, sp0011, weights[3]);
+    Spectrum sp100 = lerp(sp1000, sp1001, weights[3]);
+    Spectrum sp101 = lerp(sp1010, sp1011, weights[3]);
+
+    Spectrum sp00 = lerp(sp000, sp001, weights[2]);
+    Spectrum sp10 = lerp(sp100, sp101, weights[2]);
+
+    *spectrum = lerp(sp00, sp10, weights[0]);
 
     assert(!spectrum->hasNaN());
 }
@@ -127,16 +139,6 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     const Arrayf& angles2 = samples.getAngles2();
     const Arrayf& angles3 = samples.getAngles3();
 
-    //assert(angle0 >= angles0[0]);
-    //assert(angle1 >= angles1[0]);
-    //assert(angle2 >= angles2[0]);
-    //assert(angle3 >= angles3[0]);
-
-    //assert(angle0 <= angles0(angles0.size() - 1) || angles0.size() == 1);
-    //assert(angle1 <= angles1(angles1.size() - 1) || angles1.size() == 1);
-    //assert(angle2 <= angles2(angles2.size() - 1) || angles2.size() == 1);
-    //assert(angle3 <= angles3(angles3.size() - 1) || angles3.size() == 1);
-
     int lIdx0, lIdx1, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx1, uIdx2, uIdx3; // index of the upper bound sample point
     Vec4 lowerAngles, upperAngles;
@@ -150,73 +152,93 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
     Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
-    if (samples.getNumAngles1() == 1) {
-        float val0000 = samples.getSpectrum(lIdx0, 0, lIdx2, lIdx3)[spectrumIndex];
-        float val0001 = samples.getSpectrum(lIdx0, 0, lIdx2, uIdx3)[spectrumIndex];
-        float val0010 = samples.getSpectrum(lIdx0, 0, uIdx2, lIdx3)[spectrumIndex];
-        float val0011 = samples.getSpectrum(lIdx0, 0, uIdx2, uIdx3)[spectrumIndex];
+    float val0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3)[spectrumIndex];
+    float val0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3)[spectrumIndex];
+    float val0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3)[spectrumIndex];
+    float val0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3)[spectrumIndex];
 
-        float val1000 = samples.getSpectrum(uIdx0, 0, lIdx2, lIdx3)[spectrumIndex];
-        float val1001 = samples.getSpectrum(uIdx0, 0, lIdx2, uIdx3)[spectrumIndex];
-        float val1010 = samples.getSpectrum(uIdx0, 0, uIdx2, lIdx3)[spectrumIndex];
-        float val1011 = samples.getSpectrum(uIdx0, 0, uIdx2, uIdx3)[spectrumIndex];
+    float val0100 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, lIdx3)[spectrumIndex];
+    float val0101 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, uIdx3)[spectrumIndex];
+    float val0110 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, lIdx3)[spectrumIndex];
+    float val0111 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, uIdx3)[spectrumIndex];
 
-        float val000 = lerp(val0000, val0001, weights[3]);
-        float val001 = lerp(val0010, val0011, weights[3]);
-        float val100 = lerp(val1000, val1001, weights[3]);
-        float val101 = lerp(val1010, val1011, weights[3]);
+    float val1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3)[spectrumIndex];
+    float val1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3)[spectrumIndex];
+    float val1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3)[spectrumIndex];
+    float val1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3)[spectrumIndex];
 
-        float val00 = lerp(val000, val001, weights[2]);
-        float val10 = lerp(val100, val101, weights[2]);
+    float val1100 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, lIdx3)[spectrumIndex];
+    float val1101 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, uIdx3)[spectrumIndex];
+    float val1110 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, lIdx3)[spectrumIndex];
+    float val1111 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, uIdx3)[spectrumIndex];
 
-        float val = lerp(val00, val10, weights[0]);
+    float val000 = lerp(val0000, val0001, weights[3]);
+    float val001 = lerp(val0010, val0011, weights[3]);
+    float val010 = lerp(val0100, val0101, weights[3]);
+    float val011 = lerp(val0110, val0111, weights[3]);
+    float val100 = lerp(val1000, val1001, weights[3]);
+    float val101 = lerp(val1010, val1011, weights[3]);
+    float val110 = lerp(val1100, val1101, weights[3]);
+    float val111 = lerp(val1110, val1111, weights[3]);
 
-        assert(!std::isnan(val));
-        return val;
-    }
-    else {
-        float val0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3)[spectrumIndex];
-        float val0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3)[spectrumIndex];
-        float val0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3)[spectrumIndex];
-        float val0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val00 = lerp(val000, val001, weights[2]);
+    float val01 = lerp(val010, val011, weights[2]);
+    float val10 = lerp(val100, val101, weights[2]);
+    float val11 = lerp(val110, val111, weights[2]);
 
-        float val0100 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, lIdx3)[spectrumIndex];
-        float val0101 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, uIdx3)[spectrumIndex];
-        float val0110 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, lIdx3)[spectrumIndex];
-        float val0111 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val0 = lerp(val00, val01, weights[1]);
+    float val1 = lerp(val10, val11, weights[1]);
 
-        float val1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3)[spectrumIndex];
-        float val1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3)[spectrumIndex];
-        float val1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3)[spectrumIndex];
-        float val1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val = lerp(val0, val1, weights[0]);
 
-        float val1100 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, lIdx3)[spectrumIndex];
-        float val1101 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, uIdx3)[spectrumIndex];
-        float val1110 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, lIdx3)[spectrumIndex];
-        float val1111 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, uIdx3)[spectrumIndex];
+    assert(!std::isnan(val));
+    return val;
+}
 
-        float val000 = lerp(val0000, val0001, weights[3]);
-        float val001 = lerp(val0010, val0011, weights[3]);
-        float val010 = lerp(val0100, val0101, weights[3]);
-        float val011 = lerp(val0110, val0111, weights[3]);
-        float val100 = lerp(val1000, val1001, weights[3]);
-        float val101 = lerp(val1010, val1011, weights[3]);
-        float val110 = lerp(val1100, val1101, weights[3]);
-        float val111 = lerp(val1110, val1111, weights[3]);
+float LinearInterpolator::getValue(const SampleSet& samples,
+                                   float            angle0,
+                                   float            angle2,
+                                   float            angle3,
+                                   int              spectrumIndex)
+{
+    const Arrayf& angles0 = samples.getAngles0();
+    const Arrayf& angles2 = samples.getAngles2();
+    const Arrayf& angles3 = samples.getAngles3();
 
-        float val00 = lerp(val000, val001, weights[2]);
-        float val01 = lerp(val010, val011, weights[2]);
-        float val10 = lerp(val100, val101, weights[2]);
-        float val11 = lerp(val110, val111, weights[2]);
+    int lIdx0, lIdx2, lIdx3; // index of the lower bound sample point
+    int uIdx0, uIdx2, uIdx3; // index of the upper bound sample point
+    Vec4 lowerAngles, upperAngles;
 
-        float val0 = lerp(val00, val01, weights[1]);
-        float val1 = lerp(val10, val11, weights[1]);
+    findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
+    findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
+    findBounds(angles3, angle3, samples.isEqualIntervalAngles3(), &lIdx3, &uIdx3, &lowerAngles[3], &upperAngles[3]);
 
-        float val = lerp(val0, val1, weights[0]);
+    Vec4 angles(angle0, 0.0, angle2, angle3);
+    Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
+    Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
-        assert(!std::isnan(val));
-        return val;
-    }
+    float val0000 = samples.getSpectrum(lIdx0, lIdx2, lIdx3)[spectrumIndex];
+    float val0001 = samples.getSpectrum(lIdx0, lIdx2, uIdx3)[spectrumIndex];
+    float val0010 = samples.getSpectrum(lIdx0, uIdx2, lIdx3)[spectrumIndex];
+    float val0011 = samples.getSpectrum(lIdx0, uIdx2, uIdx3)[spectrumIndex];
+
+    float val1000 = samples.getSpectrum(uIdx0, lIdx2, lIdx3)[spectrumIndex];
+    float val1001 = samples.getSpectrum(uIdx0, lIdx2, uIdx3)[spectrumIndex];
+    float val1010 = samples.getSpectrum(uIdx0, uIdx2, lIdx3)[spectrumIndex];
+    float val1011 = samples.getSpectrum(uIdx0, uIdx2, uIdx3)[spectrumIndex];
+
+    float val000 = lerp(val0000, val0001, weights[3]);
+    float val001 = lerp(val0010, val0011, weights[3]);
+    float val100 = lerp(val1000, val1001, weights[3]);
+    float val101 = lerp(val1010, val1011, weights[3]);
+
+    float val00 = lerp(val000, val001, weights[2]);
+    float val10 = lerp(val100, val101, weights[2]);
+
+    float val = lerp(val00, val10, weights[0]);
+
+    assert(!std::isnan(val));
+    return val;
 }
 
 void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
@@ -226,9 +248,6 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
 {
     const Arrayf& thetaArray = ss2.getThetaArray();
     const Arrayf& phiArray = ss2.getPhiArray();
-
-    //assert(inTheta >= thetaArray[0] && inPhi >= phiArray[0]);
-    //assert(inTheta <= thetaArray[thetaArray.size() - 1] && inPhi <= phiArray[phiArray.size() - 1]);
 
     int lIdx0, lIdx1; // index of the lower bound sample point
     int uIdx0, uIdx1; // index of the upper bound sample point
@@ -275,16 +294,17 @@ void LinearInterpolator::findBounds(const Arrayf&   angles,
         return;
     }
 
+    int backIndex = static_cast<int>(angles.size() - 1);
     if (equalIntervalAngles) {
         // Calculate lower and upper indices.
-        *lowerIndex = static_cast<int>((angles.size() - 1) * angle / (angles[angles.size() - 1]));
-        *lowerIndex = std::min(*lowerIndex, static_cast<int>(angles.size()) - 2);
+        *lowerIndex = static_cast<int>(backIndex * angle / (angles[backIndex]));
+        *lowerIndex = std::min(*lowerIndex, backIndex - 1);
         *upperIndex = *lowerIndex + 1;
     }
     else {
         // Find lower and upper indices.
         const float* anglePtr = std::lower_bound(&angles[0], &angles[0] + angles.size(), angle);
-        *upperIndex = clamp(static_cast<int>(anglePtr - &angles[0]), 1, static_cast<int>(angles.size()) - 1);
+        *upperIndex = clamp(static_cast<int>(anglePtr - &angles[0]), 1, backIndex);
         *lowerIndex = *upperIndex - 1;
     }
 

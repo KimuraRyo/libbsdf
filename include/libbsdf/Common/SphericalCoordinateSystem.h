@@ -19,17 +19,19 @@ namespace lb {
  * \brief   The SphericalCoordinateSystem class provides the functions of a spherical coordinate system.
  *
  * The coordinate system has four angle parameters.
- *   - inTheta: the polar angle of an incoming direction
- *   - inPhi: the azimuthal angle of an incoming direction
- *   - outTheta: the polar angle of an outgoing direction
- *   - outPhi: the azimuthal angle of an outgoing direction
+ *   - \a inTheta: the polar angle of an incoming direction
+ *   - \a inPhi: the azimuthal angle of an incoming direction
+ *   - \a outTheta: the polar angle of an outgoing direction
+ *   - \a outPhi: the azimuthal angle of an outgoing direction
+ * 
+ * \a inPhi isn't used for isotropic BRDFs.
  */
 class SphericalCoordinateSystem
 {
 public:
     /*!
      * Converts from four angles to incoming and outgoing directions and
-     * assigns them to *inDir and *outDir.
+     * assigns them to \a inDir and \a outDir.
      */
     static void toXyz(float inTheta, float inPhi,
                       float outTheta, float outPhi,
@@ -37,10 +39,18 @@ public:
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
-     * assigns them to *inTheta, *inPhi, *outTheta, and *outPhi.
+     * assigns them to \a inTheta, \a inPhi, \a outTheta, and \a outPhi.
      */
     static void fromXyz(const Vec3& inDir, const Vec3& outDir,
                         float* inTheta, float* inPhi,
+                        float* outTheta, float* outPhi);
+
+    /*!
+     * Converts from incoming and outgoing directions to three angles for isotropic data and
+     * assigns them to \a inTheta, \a outTheta, and \a outPhi.
+     */
+    static void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                        float* inTheta,
                         float* outTheta, float* outPhi);
 
     static const std::string ANGLE0_NAME; /*!< This attribute holds the name of inTheta. */
@@ -82,6 +92,20 @@ inline void SphericalCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& ou
 {
     fromXyz(inDir, inTheta, inPhi);
     fromXyz(outDir, outTheta, outPhi);
+}
+
+inline void SphericalCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                               float* inTheta,
+                                               float* outTheta, float* outPhi)
+{
+    float inPhi; // inPhi is 0 for isotorpic data.
+    fromXyz(inDir, inTheta, &inPhi);
+    fromXyz(outDir, outTheta, outPhi);
+
+    *outPhi = *outPhi - inPhi;
+    if (*outPhi < 0.0f) {
+        *outPhi += 2.0f * PI_F;
+    }
 }
 
 inline Vec3 SphericalCoordinateSystem::toXyz(float theta, float phi)

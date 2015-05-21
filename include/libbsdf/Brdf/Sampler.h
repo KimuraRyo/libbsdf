@@ -11,12 +11,12 @@
 
 #include <cassert>
 
+#include <libbsdf/Brdf/SampleSet.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 namespace lb {
 
-class SampleSet;
 class SampleSet2D;
 
 /*!
@@ -48,16 +48,6 @@ public:
     static void getSpectrum(const SampleSet2D&  ss2,
                             const Vec3&         inDir,
                             Spectrum*           spectrum);
-
-private:
-    /*!
-     * Gets incoming and outgoing directions for an isotropic BRDF.
-     * The azimuthal angle of an incoming direction is transformed into 0 radian.
-     */
-    static void getIsotropicInOutDirection(const Vec3&  inDir,
-                                           const Vec3&  outDir,
-                                           Vec3*        isotropicInDir,
-                                           Vec3*        isotropicOutDir);
 };
 
 template <typename CoordSysT, typename InterpolatorT>
@@ -68,13 +58,15 @@ inline void Sampler::getSpectrum(const SampleSet&   samples,
 {
     assert(inDir.z() >= 0.0);
 
-    // temporary implementation for isotropic BRDF
-    Vec3 isoInDir, isoOutDir;
-    getIsotropicInOutDirection(inDir, outDir, &isoInDir, &isoOutDir);
-
     float angle0, angle1, angle2, angle3;
-    CoordSysT::fromXyz(isoInDir, isoOutDir, &angle0, &angle1, &angle2, &angle3);
-    InterpolatorT::getSpectrum(samples, angle0, angle1, angle2, angle3, spectrum);
+    if (samples.isIsotropic()) {
+        CoordSysT::fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
+        InterpolatorT::getSpectrum(samples, angle0, angle2, angle3, spectrum);
+    }
+    else {
+        CoordSysT::fromXyz(inDir, outDir, &angle0, &angle1, &angle2, &angle3);
+        InterpolatorT::getSpectrum(samples, angle0, angle1, angle2, angle3, spectrum);
+    }
 }
 
 template <typename CoordSysT, typename InterpolatorT>
@@ -85,13 +77,15 @@ inline float Sampler::getValue(const SampleSet& samples,
 {
     assert(inDir.z() >= 0.0);
 
-    // temporary implementation for isotropic BRDF
-    Vec3 isoInDir, isoOutDir;
-    getIsotropicInOutDirection(inDir, outDir, &isoInDir, &isoOutDir);
-
     float angle0, angle1, angle2, angle3;
-    CoordSysT::fromXyz(isoInDir, isoOutDir, &angle0, &angle1, &angle2, &angle3);
-    return InterpolatorT::getValue(samples, angle0, angle1, angle2, angle3, spectrumIndex);
+    if (samples.isIsotropic()) {
+        CoordSysT::fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
+        return InterpolatorT::getValue(samples, angle0, 0.0f, angle2, angle3, spectrumIndex);
+    }
+    else {
+        CoordSysT::fromXyz(inDir, outDir, &angle0, &angle1, &angle2, &angle3);
+        return InterpolatorT::getValue(samples, angle0, angle1, angle2, angle3, spectrumIndex);
+    }
 }
 
 template <typename InterpolatorT>
@@ -102,18 +96,6 @@ inline void Sampler::getSpectrum(const SampleSet2D& ss2,
     float inTheta, inPhi;
     SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
     InterpolatorT::getSpectrum(ss2, inTheta, inPhi, spectrum);
-}
-
-inline void Sampler::getIsotropicInOutDirection(const Vec3& inDir,
-                                                const Vec3& outDir,
-                                                Vec3*       isotropicInDir,
-                                                Vec3*       isotropicOutDir)
-{
-    float inTheta, inPhi, outTheta, outPhi;
-    SphericalCoordinateSystem::fromXyz(inDir, outDir,
-                                       &inTheta, &inPhi, &outTheta, &outPhi);
-    SphericalCoordinateSystem::toXyz(inTheta, 0, outTheta, std::abs(outPhi - inPhi),
-                                     isotropicInDir, isotropicOutDir);
 }
 
 } // namespace lb

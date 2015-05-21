@@ -142,12 +142,6 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         pos = fin.tellg();
     }
 
-    bool isAnisotropic = (symmetryType == ASYMMETRICAL_4D && inPhiDegrees.size() >= 2);
-    if (isAnisotropic) {
-        std::cerr << "[ZemaxBsdfReader::read] Anisotropic data isn't supported." << std::endl;
-        return 0;
-    }
-
     if (inThetaDegrees.empty() ||
         spThetaDegrees.empty() ||
         spPhiDegrees.empty()) {
