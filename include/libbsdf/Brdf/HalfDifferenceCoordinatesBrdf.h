@@ -58,27 +58,27 @@ public:
     
     using BaseBrdf::getSpectrum;
 
-    /*! Gets the spectrum of a BRDF at a set of angles. */
+    /*! Gets the spectrum of the BRDF at a set of angles. */
     Spectrum getSpectrum(float halfTheta, float halfPhi,
                          float diffTheta, float diffPhi) const;
 
-    /*! Gets the spectrum of a BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int halfThetaIndex, int halfPhiIndex,
                           int diffThetaIndex, int diffPhiIndex);
 
-    /*! Gets the spectrum of a BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the BRDF at a set of angle indices. */
     const Spectrum& getSpectrum(int halfThetaIndex, int halfPhiIndex,
                                 int diffThetaIndex, int diffPhiIndex) const;
 
-    /*! Gets the spectrum of an isotropic BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int halfThetaIndex,
                           int diffThetaIndex, int diffPhiIndex);
 
-    /*! Gets the spectrum of an isotropic BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     const Spectrum& getSpectrum(int halfThetaIndex,
                                 int diffThetaIndex, int diffPhiIndex) const;
 
-    /*! Sets the spectrum of a BRDF at a set of angle indices. */
+    /*! Sets the spectrum of the BRDF at a set of angle indices. */
     void setSpectrum(int halfThetaIndex, int halfPhiIndex,
                      int diffThetaIndex, int diffPhiIndex,
                      const Spectrum& spectrum);

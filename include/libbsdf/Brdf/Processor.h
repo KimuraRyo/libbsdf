@@ -15,6 +15,8 @@
 #define LIBBSDF_PROCESSOR_H
 
 #include <libbsdf/Brdf/Brdf.h>
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
 namespace lb {
 
@@ -23,6 +25,19 @@ namespace lb {
  * This function converts from a CCBRDF to a BRDF.
  */
 void divideByCosineOutTheta(Brdf* brdf);
+
+/*! Fills omitted data using a plane symmetry. */
+SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
+
+/*! Rotates a BRDF using an outgoing azimuthal angle. */
+SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
+                                       float                            rotationAngle);
+
+/*! Fixes the energy conservation of the BRDF with each incoming direction. */
+void fixEnergyConservation(SpecularCoordinatesBrdf* brdf);
+
+/*! Converts the color model from CIE-XYZ to sRGB. */
+void convertFromXyzToSrgb(SampleSet* samples);
 
 } // namespace lb
 

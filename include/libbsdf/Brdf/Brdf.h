@@ -26,10 +26,10 @@ class Brdf
 public:
     virtual ~Brdf();
 
-    /*! Gets the spectrum of a BRDF at incoming and outgoing directions. */
+    /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
     virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const = 0;
 
-    /*! Gets the value of a BRDF at incoming and outgoing directions and the index of wavelength. */
+    /*! Gets the value of the BRDF at incoming and outgoing directions and the index of wavelength. */
     virtual float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const = 0;
 
     /*!
@@ -54,7 +54,7 @@ public:
      * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
      * and constructs the extrapolated sample set.
      */
-    virtual bool expand() = 0;
+    virtual bool expandAngles() = 0;
 
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
     virtual void clampAngles() = 0;

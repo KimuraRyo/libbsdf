@@ -28,6 +28,7 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
     const int numDiffPhi = 360;
     const int numSamples = numHalfTheta * numDiffTheta * numDiffPhi / 2;
 
+    // Read a header.
     int dims[3];
     fin.read(reinterpret_cast<char*>(dims), sizeof(int) * 3);
 
@@ -39,10 +40,11 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
         return 0;
     }
 
+    // Read data.
     double* samples = new double[numSamples * 3];
     fin.read(reinterpret_cast<char*>(samples), sizeof(double) * numSamples * 3);
     if (fin.fail()) {
-        std::cerr << "[MerlBinaryReader::read] Invalid format" << std::endl;
+        std::cerr << "[MerlBinaryReader::read] Invalid format." << std::endl;
         delete[] samples;
     }
 

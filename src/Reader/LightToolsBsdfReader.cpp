@@ -12,6 +12,8 @@
 #include <iostream>
 #include <set>
 
+#include <libbsdf/Brdf/Processor.h>
+
 using namespace lb;
 
 TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
@@ -295,10 +297,10 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<Data*>&  
     
     SampleSet* ss = brdf->getSampleSet();
 
-    copy(inThetaDegrees,  ss->getAngles0());
+    copyArray(inThetaDegrees,  ss->getAngles0());
     brdf->setInPhi(0, 0.0f);
-    copy(outThetaDegrees, ss->getAngles2());
-    copy(outPhiDegrees,   ss->getAngles3());
+    copyArray(outThetaDegrees, ss->getAngles2());
+    copyArray(outPhiDegrees,   ss->getAngles3());
 
     ss->getAngles0() = toRadians(ss->getAngles0());
     ss->getAngles2() = toRadians(ss->getAngles2());
@@ -336,51 +338,5 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<Data*>&  
     rotatedBrdf->clampAngles();
 
     delete brdf;
-    return rotatedBrdf;
-}
-
-SphericalCoordinatesBrdf* LightToolsBsdfReader::rotateOutPhi(const SphericalCoordinatesBrdf& brdf, float rotationAngle)
-{
-    assert(rotationAngle > -2.0f * PI_F && rotationAngle < 2.0f * PI_F);
-
-    if (rotationAngle < 0.0f) {
-        rotationAngle += 2.0f * PI_F;
-    }
-
-    SphericalCoordinatesBrdf* rotatedBrdf = new SphericalCoordinatesBrdf(brdf);
-    SampleSet* ss = rotatedBrdf->getSampleSet();
-
-    ss->checkEqualIntervalAngles();
-    if (!ss->isEqualIntervalAngles3()) {
-        for (int i = 0; i < rotatedBrdf->getNumOutPhi(); ++i) {
-            float outPhi = rotatedBrdf->getOutPhi(i) + rotationAngle;
-            if (outPhi > 2.0f * PI_F) {
-                outPhi -= 2.0f * PI_F;
-            }
-
-            rotatedBrdf->setOutPhi(i, outPhi);
-        }
-
-        Arrayf& outPhiAngles = ss->getAngles3();
-        std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
-    }
-
-    for (int inThIndex  = 0; inThIndex  < rotatedBrdf->getNumInTheta();  ++inThIndex)  {
-    for (int inPhIndex  = 0; inPhIndex  < rotatedBrdf->getNumInPhi();    ++inPhIndex)  {
-    for (int outThIndex = 0; outThIndex < rotatedBrdf->getNumOutTheta(); ++outThIndex) {
-    for (int outPhIndex = 0; outPhIndex < rotatedBrdf->getNumOutPhi();   ++outPhIndex) {
-        float inTheta  = rotatedBrdf->getInTheta(inThIndex);
-        float inPhi    = rotatedBrdf->getInPhi(inPhIndex);
-        float outTheta = rotatedBrdf->getOutTheta(outThIndex);
-        float outPhi   = rotatedBrdf->getOutPhi(outPhIndex) - rotationAngle;
-
-        if (outPhi < 0.0f) {
-            outPhi += 2.0f * PI_F;
-        }
-
-        Spectrum sp = brdf.getSpectrum(inTheta, inPhi, outTheta, outPhi);
-        rotatedBrdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex, sp);
-    }}}}
-
     return rotatedBrdf;
 }

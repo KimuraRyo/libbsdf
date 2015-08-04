@@ -42,9 +42,6 @@ public:
               ColorModel    colorModel = RGB_MODEL,
               int           numWavelengths = 3);
 
-    /*! Sets spectra and angles to zero. */
-    void zeroOutSamples();
-
     /*! Gets the spectrum at a set of angle indices. */
     Spectrum& getSpectrum(int index0, int index1, int index2, int index3);
 
@@ -66,21 +63,6 @@ public:
     /*! Sets the spectrum at a set of angle indices. */
     void setSpectrum(int index0, int index1, int index2, int index3,
                      const Spectrum& spectrum);
-
-    /*! Gets the wavelength at an index. */
-    float getWavelength(int index) const;
-
-    /*! Sets the wavelength at an index. */
-    void setWavelength(int index, float wavelength);
-
-    /*! Gets the array of wavelengths. */
-    Arrayf& getWavelengths();
-
-    /*! Gets the array of wavelengths. */
-    const Arrayf& getWavelengths() const;
-
-    /*! Gets the number of wavelengths. */
-    int getNumWavelengths() const;
 
     float getAngle0(int index) const; /*!< Gets the angle0 at an index. */
     float getAngle1(int index) const; /*!< Gets the angle1 at an index. */
@@ -115,31 +97,56 @@ public:
     /*! Gets the color model. */
     ColorModel getColorModel() const;
 
+    /*! Sets the color model. */
+    void setColorModel(ColorModel colorModel);
+
+    /*! Gets the wavelength at an index. */
+    float getWavelength(int index) const;
+
+    /*! Sets the wavelength at an index. */
+    void setWavelength(int index, float wavelength);
+
+    /*! Gets the array of wavelengths. */
+    Arrayf& getWavelengths();
+
+    /*! Gets the array of wavelengths. */
+    const Arrayf& getWavelengths() const;
+
+    /*! Gets the number of wavelengths. */
+    int getNumWavelengths() const;
+
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
 
-    /*! Checks the attributes whether angles are set at equal intervals */
-    void checkEqualIntervalAngles();
+    /*! Returns true if sample points are containd in one side of the plane of incidence. */
+    bool isOneSide();
 
-    /*! Converts the color model from CIE-XYZ to sRGB. */
-    void convertFromXyzToSrgb();
+    /*! Updates angle attributes. */
+    void updateAngleAttributes();
 
     /*! Resizes the number of angles. Angles and spectra must be initialized. */
     void resizeAngles(int numAngles0, int numAngles1, int numAngles2, int numAngles3);
 
-private:
     /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
     void resizeWavelengths(int numWavelengths);
 
+    /*! Fills spectra of samples with a value. */
+    void fillSpectra(float value);
+
+private:
     /*! Gets the index of the spectrum from a set of angle indices. */
     int getIndex(int index0, int index1, int index2, int index3) const;
 
     /*! Gets the index of the spectrum from a set of angle indices of isotropic data. */
     int getIndex(int index0, int index2, int index3) const;
 
-    SpectrumList spectra_; /*!< The list of spectrum for each pair of incoming and outgoing directions. */
+    /*! Updates the attributes whether angles are set at equal intervals. */
+    void updateEqualIntervalAngles();
 
-    Arrayf wavelengths_; /*!< The array of wavelengths. */
+    /*! Updates the attributes whether sample points are containd in one side of the plane of incidence. */
+    void updateOneSide();
+
+    SpectrumList spectra_; /*!< The list of spectrum for each pair of incoming and outgoing directions. */
 
     Arrayf angles0_; /*!< The array of angles0. */
     Arrayf angles1_; /*!< The array of angles1. */
@@ -157,6 +164,11 @@ private:
     bool equalIntervalAngles3_; /*!< This attribute holds whether angles3 are set at equal intervals. */
 
     ColorModel colorModel_; /*!< The color model of spectra. */
+
+    Arrayf wavelengths_; /*!< The array of wavelengths. */
+
+    /*! This attribute holds whether sample points are containd in one side of the plane of incidence. */
+    bool oneSide_;
 };
 
 inline Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3)
@@ -188,33 +200,34 @@ inline void SampleSet::setSpectrum(int index0, int index1, int index2, int index
     spectra_.at(getIndex(index0, index1, index2, index3)) = spectrum;
 }
 
-inline float SampleSet::getWavelength(int index) const
-{
-    return wavelengths_[index];
-}
-
-inline void SampleSet::setWavelength(int index, float wavelength)
-{
-    wavelengths_[index] = wavelength;
-}
-
-inline       Arrayf& SampleSet::getWavelengths()       { return wavelengths_; }
-inline const Arrayf& SampleSet::getWavelengths() const { return wavelengths_; }
-
-inline int SampleSet::getNumWavelengths() const
-{
-    return wavelengths_.size();
-}
-
 inline float SampleSet::getAngle0(int index) const { return angles0_[index]; }
 inline float SampleSet::getAngle1(int index) const { return angles1_[index]; }
 inline float SampleSet::getAngle2(int index) const { return angles2_[index]; }
 inline float SampleSet::getAngle3(int index) const { return angles3_[index]; }
 
-inline void SampleSet::setAngle0(int index, float angle) { angles0_[index] = angle; }
-inline void SampleSet::setAngle1(int index, float angle) { angles1_[index] = angle; }
-inline void SampleSet::setAngle2(int index, float angle) { angles2_[index] = angle; }
-inline void SampleSet::setAngle3(int index, float angle) { angles3_[index] = angle; }
+inline void SampleSet::setAngle0(int index, float angle)
+{
+    angles0_[index] = angle;
+    equalIntervalAngles0_ = isEqualInterval(angles0_);
+}
+
+inline void SampleSet::setAngle1(int index, float angle)
+{
+    angles1_[index] = angle;
+    equalIntervalAngles1_ = isEqualInterval(angles1_);
+}
+
+inline void SampleSet::setAngle2(int index, float angle)
+{
+    angles2_[index] = angle;
+    equalIntervalAngles2_ = isEqualInterval(angles2_);
+}
+
+inline void SampleSet::setAngle3(int index, float angle)
+{
+    angles3_[index] = angle;
+    equalIntervalAngles3_ = isEqualInterval(angles3_);
+}
 
 inline Arrayf& SampleSet::getAngles0() { return angles0_; }
 inline Arrayf& SampleSet::getAngles1() { return angles1_; }
@@ -236,12 +249,31 @@ inline bool SampleSet::isEqualIntervalAngles1() const { return equalIntervalAngl
 inline bool SampleSet::isEqualIntervalAngles2() const { return equalIntervalAngles2_; }
 inline bool SampleSet::isEqualIntervalAngles3() const { return equalIntervalAngles3_; }
 
-inline ColorModel SampleSet::getColorModel() const
+inline ColorModel SampleSet::getColorModel() const { return colorModel_; }
+
+inline void SampleSet::setColorModel(ColorModel colorModel)
 {
-    return colorModel_;
+    colorModel_ = colorModel;
 }
 
+inline float SampleSet::getWavelength(int index) const
+{
+    return wavelengths_[index];
+}
+
+inline void SampleSet::setWavelength(int index, float wavelength)
+{
+    wavelengths_[index] = wavelength;
+}
+
+inline       Arrayf& SampleSet::getWavelengths()       { return wavelengths_; }
+inline const Arrayf& SampleSet::getWavelengths() const { return wavelengths_; }
+
+inline int SampleSet::getNumWavelengths() const { return wavelengths_.size(); }
+
 inline bool SampleSet::isIsotropic() const { return (numAngles1_ == 1); }
+
+inline bool SampleSet::isOneSide() { return oneSide_; }
 
 inline int SampleSet::getIndex(int index0, int index1, int index2, int index3) const
 {

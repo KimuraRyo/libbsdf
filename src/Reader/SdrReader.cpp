@@ -92,7 +92,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
     // Initialize the arrya of reflectance.
     SampleSet2D* ss2 = new SampleSet2D(inThetaDegrees.size(), 1, colorModel, numWavelengths);
 
-    copy(inThetaDegrees, ss2->getThetaArray());
+    copyArray(inThetaDegrees, ss2->getThetaArray());
     ss2->getThetaArray() = toRadians(ss2->getThetaArray());
 
     ss2->setPhi(0, 0.0);

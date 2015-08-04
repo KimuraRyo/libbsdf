@@ -9,12 +9,9 @@
 #ifndef LIBBSDF_ASTM_READER_H
 #define LIBBSDF_ASTM_READER_H
 
-#include <map>
 #include <string>
-#include <vector>
 
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-#include <libbsdf/Common/Global.h>
 
 namespace lb {
 
@@ -32,17 +29,6 @@ class AstmReader
 public:
     /*! Reads an ASTM file and creates the BRDF of a spherical coordinate system. */
     static SphericalCoordinatesBrdf* read(const std::string& fileName);
-
-private:
-    typedef std::vector<float> AngleList;
-    typedef std::map<AngleList, Spectrum, std::less<AngleList>,
-                     Eigen::aligned_allocator<std::pair<AngleList, Spectrum> > > SampleMap;
-
-    /*! Fills omitted data using a plane symmetry. */
-    static SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
-
-    /*! Finds the nearest sample and returns the spectrum. */
-    static const Spectrum& findNearestSample(const SampleMap& samples, const AngleList& sampleAngles);
 };
 
 } // namespace lb

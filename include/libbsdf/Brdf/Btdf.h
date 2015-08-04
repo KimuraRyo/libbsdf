@@ -32,7 +32,7 @@ public:
 
     virtual ~Btdf();
 
-    /*! Gets the spectrum of a BTDF at incoming and outgoing directions. */
+    /*! Gets the spectrum of the BTDF at incoming and outgoing directions. */
     Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
 
     /*!
@@ -59,13 +59,13 @@ private:
 
 inline Spectrum Btdf::getSpectrum(const Vec3& inDir, const Vec3& outDir) const
 {
-    Spectrum sp = brdf_->getSpectrum(Vec3(inDir.x(), inDir.y(), std::abs(inDir.z())),
-                                     Vec3(outDir.x(), outDir.y(), std::abs(outDir.z())));
+    Spectrum sp = brdf_->getSpectrum(Vec3(inDir[0], inDir[1], std::abs(inDir[2])),
+                                     Vec3(outDir[0], outDir[1], std::abs(outDir[2])));
     return sp;
 }
 
 inline void Btdf::getInOutDirection(int index0, int index1, int index2, int index3,
-                                  Vec3* inDir, Vec3* outDir) const
+                                    Vec3* inDir, Vec3* outDir) const
 {
     brdf_->getInOutDirection(index0, index1, index2, index3,
                              inDir, outDir);

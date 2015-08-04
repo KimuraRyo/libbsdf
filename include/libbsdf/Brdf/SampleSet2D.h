@@ -25,9 +25,6 @@ namespace lb {
  */
 class SampleSet2D
 {
-private:
-    typedef SphericalCoordinateSystem CoordSys;
-
 public:
     /*! Constructs a 2D sample array. */
     SampleSet2D(int         numTheta,
@@ -46,21 +43,6 @@ public:
 
     /*! Sets the spectrum at a set of angle indices. */
     void setSpectrum(int thetaIndex, int phiIndex, const Spectrum& spectrum);
-
-    /*! Gets the wavelength at an index. */
-    float getWavelength(int index) const;
-
-    /*! Sets the wavelength at an index. */
-    void setWavelength(int index, float wavelength);
-
-    /*! Gets the array of wavelengths. */
-    Arrayf& getWavelengths();
-
-    /*! Gets the array of wavelengths. */
-    const Arrayf& getWavelengths() const;
-
-    /*! Gets the number of wavelengths. */
-    int getNumWavelengths() const;
 
     float getTheta(int index) const; /*!< Gets the polar angle at an index. */
     float getPhi  (int index) const; /*!< Gets the azimuthal angle at an index. */
@@ -86,19 +68,35 @@ public:
     /*! Gets the color model. */
     ColorModel getColorModel() const;
 
+    /*! Sets the color model. */
+    void setColorModel(ColorModel colorModel);
+
+    /*! Gets the wavelength at an index. */
+    float getWavelength(int index) const;
+
+    /*! Sets the wavelength at an index. */
+    void setWavelength(int index, float wavelength);
+
+    /*! Gets the array of wavelengths. */
+    Arrayf& getWavelengths();
+
+    /*! Gets the array of wavelengths. */
+    const Arrayf& getWavelengths() const;
+
+    /*! Gets the number of wavelengths. */
+    int getNumWavelengths() const;
+
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
 
-    /*! Checks the attributes whether angles are set at equal intervals */
-    void checkEqualIntervalAngles();
+    /*! Updates angle attributes. */
+    void updateAngleAttributes();
 
     /*! Clamps all angles to minimum and maximum values. */
     void clampAngles();
 
-protected:
+private:
     SpectrumList spectra_; /*!< The list of spectrum for each direction. */
-
-    Arrayf wavelengths_; /*!< The array of wavelengths. */
 
     Arrayf thetaAngles_; /*!< The array of polar angles. */
     Arrayf phiAngles_;   /*!< The array of azimuthal angles. */
@@ -110,6 +108,8 @@ protected:
     bool equalIntervalPhi_;   /*!< This attribute holds whether azimuthal angles are set at equal intervals. */
 
     ColorModel colorModel_; /*!< The color model of spectra. */
+
+    Arrayf wavelengths_; /*!< The array of wavelengths. */
 };
 
 inline Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
@@ -134,42 +134,17 @@ inline void SampleSet2D::setSpectrum(int thetaIndex, int phiIndex, const Spectru
     spectra_.at(thetaIndex + numTheta_ * phiIndex) = spectrum;
 }
 
-inline float SampleSet2D::getWavelength(int index) const
-{
-    return wavelengths_[index];
-}
-
-inline void SampleSet2D::setWavelength(int index, float wavelength)
-{
-    wavelengths_[index] = wavelength;
-}
-
-inline Arrayf& SampleSet2D::getWavelengths()
-{
-    return wavelengths_;
-}
-
-inline const Arrayf& SampleSet2D::getWavelengths() const
-{
-    return wavelengths_;
-}
-
-inline int SampleSet2D::getNumWavelengths() const
-{
-    return wavelengths_.size();
-}
-
 inline float SampleSet2D::getTheta(int index) const { return thetaAngles_[index]; }
 inline float SampleSet2D::getPhi(int index)   const { return phiAngles_[index]; }
 
 inline void SampleSet2D::setTheta(int index, float angle)
 {
-    thetaAngles_[index] = clamp(angle, 0.0f, CoordSys::MAX_ANGLE0);
+    thetaAngles_[index] = clamp(angle, 0.0f, SphericalCoordinateSystem::MAX_ANGLE0);
 }
 
 inline void SampleSet2D::setPhi(int index, float angle)
 {
-    phiAngles_[index] = clamp(angle, 0.0f, CoordSys::MAX_ANGLE1);
+    phiAngles_[index] = clamp(angle, 0.0f, SphericalCoordinateSystem::MAX_ANGLE1);
 }
 
 inline Arrayf& SampleSet2D::getThetaArray() { return thetaAngles_; }
@@ -185,6 +160,27 @@ inline bool SampleSet2D::isEqualIntervalTheta() const { return equalIntervalThet
 inline bool SampleSet2D::isEqualIntervalPhi()   const { return equalIntervalPhi_; }
 
 inline ColorModel SampleSet2D::getColorModel() const { return colorModel_; }
+
+inline void SampleSet2D::setColorModel(ColorModel colorModel)
+{
+    colorModel_ = colorModel;
+}
+
+inline float SampleSet2D::getWavelength(int index) const
+{
+    return wavelengths_[index];
+}
+
+inline void SampleSet2D::setWavelength(int index, float wavelength)
+{
+    wavelengths_[index] = wavelength;
+}
+
+inline Arrayf& SampleSet2D::getWavelengths() { return wavelengths_; }
+
+inline const Arrayf& SampleSet2D::getWavelengths() const { return wavelengths_; }
+
+inline int SampleSet2D::getNumWavelengths() const { return wavelengths_.size(); }
 
 inline bool SampleSet2D::isIsotropic() const { return (numPhi_ == 1); }
 

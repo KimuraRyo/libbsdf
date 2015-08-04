@@ -35,11 +35,11 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir)
         sp *= outDir.z();
 
         #pragma omp critical
-        sumSpectrum += sp.cast<double>();
+        sumSpectrum += sp.cast<Arrayd::Scalar>();
     }
 
     sumSpectrum *= 2.0 * M_PI / numSampling_;
-    return sumSpectrum.cast<float>();
+    return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
 Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir, int numSampling)
@@ -57,11 +57,11 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir, int
         sp *= outDir.z();
 
         #pragma omp critical
-        sumSpectrum += sp.cast<double>();
+        sumSpectrum += sp.cast<Arrayd::Scalar>();
     }
 
     sumSpectrum *= 2.0 * M_PI / numSampling;
-    return sumSpectrum.cast<float>();
+    return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
 void Integrator::initializeOutDirs(bool usePoissonDiskDistribution)

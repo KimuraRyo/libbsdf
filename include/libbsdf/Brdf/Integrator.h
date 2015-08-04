@@ -33,10 +33,10 @@ public:
      */
     explicit Integrator(int numSampling = 100000, bool usePoissonDiskDistribution = false);
 
-    /*! Computes the reflectance of a BRDF at an incoming direction using precomputed outgoing directions. */
+    /*! Computes the reflectance of the BRDF at an incoming direction using precomputed outgoing directions. */
     Spectrum computeReflectance(const Brdf& brdf, const Vec3& inDir);
 
-    /*! Computes the reflectance of a BRDF at an incoming direction. */
+    /*! Computes the reflectance of the BRDF at an incoming direction. */
     static Spectrum computeReflectance(const Brdf& brdf, const Vec3& inDir, int numSampling);
 
 private:

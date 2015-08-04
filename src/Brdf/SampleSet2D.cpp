@@ -55,13 +55,13 @@ SampleSet2D::SampleSet2D(int        numTheta,
     }
 }
 
-void SampleSet2D::checkEqualIntervalAngles()
+void SampleSet2D::updateAngleAttributes()
 {
     equalIntervalTheta_ = isEqualInterval(thetaAngles_);
     equalIntervalPhi_   = isEqualInterval(phiAngles_);
 
-    std::cout << "[SampleSet2D::checkEqualIntervalAngles] equalIntervalTheta_: " << equalIntervalTheta_ << std::endl;
-    std::cout << "[SampleSet2D::checkEqualIntervalAngles] equalIntervalPhi_: "   << equalIntervalPhi_   << std::endl;
+    std::cout << "[SampleSet2D::updateAngleAttributes] Theta: " << equalIntervalTheta_ << std::endl;
+    std::cout << "[SampleSet2D::updateAngleAttributes] Phi: "   << equalIntervalPhi_   << std::endl;
 }
 
 void SampleSet2D::clampAngles()
@@ -69,6 +69,6 @@ void SampleSet2D::clampAngles()
     thetaAngles_ = thetaAngles_.cwiseMax(0.0);
     phiAngles_   = phiAngles_.cwiseMax(0.0);
 
-    thetaAngles_ = thetaAngles_.cwiseMin(CoordSys::MAX_ANGLE0);
-    phiAngles_   = phiAngles_.cwiseMin(CoordSys::MAX_ANGLE1);
+    thetaAngles_ = thetaAngles_.cwiseMin(SphericalCoordinateSystem::MAX_ANGLE0);
+    phiAngles_   = phiAngles_.cwiseMin(SphericalCoordinateSystem::MAX_ANGLE1);
 }

@@ -14,21 +14,13 @@
 #ifndef LIBBSDF_UTILITY_H
 #define LIBBSDF_UTILITY_H
 
-#include <libbsdf/Common/Vector.h>
+#include <libbsdf/Common/Global.h>
 
 namespace lb {
 
 /*! \brief Clamps a value between a minimum and maximum value. */
 template <typename T>
 T clamp(T value, T minValue, T maxValue);
-
-/*! \brief Copies an array. */
-template <typename SrcT, typename DestT>
-void copy(const SrcT& srcArray, DestT& destArray, int size);
-
-/*! \brief Copies an array. */
-template <typename SrcT, typename DestT>
-void copy(const SrcT& srcArray, DestT& destArray);
 
 /*! \brief Returns true if two values are nearly equal. */
 template <typename T>
@@ -50,13 +42,16 @@ T toDegree(T radian);
 template <typename T>
 T toRadian(T degree);
 
-/*! \brief Converts an array from degree to radian. */
-template <typename T>
-T toRadians(const T& degrees);
-
-/*! \brief Returns true if the elements of an array are equally-spaced intervals. */
-template <typename T>
-bool isEqualInterval(const T& array);
+/*! \brief Converts a coordinate system. */
+template <typename SrcCoordSysT, typename DestCoordSysT>
+void convertCoordinateSystem(float  srcAngle0,
+                             float  srcAngle1,
+                             float  srcAngle2,
+                             float  srcAngle3,
+                             float* destAngle0,
+                             float* destAngle1,
+                             float* destAngle2,
+                             float* destAngle3);
 
 /*! \brief Fixes a direction if the Z-component is negative. */
 template <typename Vec3T>
@@ -72,23 +67,6 @@ inline T clamp(T value, T minValue, T maxValue)
     using std::min;
     using std::max;
     return max(minValue, min(maxValue, value));
-}
-
-template <typename SrcT, typename DestT>
-inline void copy(const SrcT& srcArray, DestT& destArray, int size)
-{
-    for (int i = 0; i < size; ++i) {
-        destArray[i] = srcArray[i];
-    }
-}
-
-template <typename SrcT, typename DestT>
-inline void copy(const SrcT& srcArray, DestT& destArray)
-{
-    int i = 0;
-    for (auto it = srcArray.begin(); it != srcArray.end(); ++it, ++i) {
-        destArray[i] = *it;
-    }
 }
 
 template <typename T>
@@ -123,26 +101,22 @@ inline T toRadian(T degree)
     return degree / static_cast<T>(180.0) * static_cast<T>(PI_F);
 }
 
-template <typename T>
-inline T toRadians(const T& degrees)
+template <typename SrcCoordSysT, typename DestCoordSysT>
+inline void convertCoordinateSystem(float   srcAngle0,
+                                    float   srcAngle1,
+                                    float   srcAngle2,
+                                    float   srcAngle3,
+                                    float*  destAngle0,
+                                    float*  destAngle1,
+                                    float*  destAngle2,
+                                    float*  destAngle3)
 {
-    typedef typename T::Scalar ScalarType;
-    return degrees / static_cast<ScalarType>(180.0) * static_cast<ScalarType>(PI_F);
-}
+    Vec3 inDir, outDir;
+    SrcCoordSysT::toXyz(srcAngle0, srcAngle1, srcAngle2, srcAngle3,
+                        &inDir, &outDir);
 
-template <typename T>
-inline bool isEqualInterval(const T& array)
-{
-    if (array.size() <= 1) return false;
-
-    float interval = array[array.size() - 1] / (array.size() - 1);
-    for (int i = 0; i < array.size(); ++i) {
-        if (!isEqual(array[i], interval * i)) {
-            return false;
-        }
-    }
-
-    return true;
+    DestCoordSysT::fromXyz(inDir, outDir,
+                           destAngle0, destAngle1, destAngle2, destAngle3);
 }
 
 template <typename Vec3T>

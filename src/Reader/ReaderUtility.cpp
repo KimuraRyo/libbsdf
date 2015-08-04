@@ -19,9 +19,9 @@ void reader_utility::ignoreCommentLines(std::ifstream& fin, const std::string& l
     std::string peekStr;
     while (fin >> peekStr) {
         int strSize = lineHead.size();
-        bool isComment = (static_cast<int>(peekStr.size()) >= strSize &&
-                          peekStr.substr(0, strSize) == lineHead);
-        if (isComment) {
+        bool comment = (static_cast<int>(peekStr.size()) >= strSize &&
+                        peekStr.substr(0, strSize) == lineHead);
+        if (comment) {
             ignoreLine(fin);
             pos = fin.tellg();
         }

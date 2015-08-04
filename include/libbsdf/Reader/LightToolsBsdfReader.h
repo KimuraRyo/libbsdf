@@ -74,9 +74,6 @@ private:
                                                 const std::vector<float>&   outThetaDegrees,
                                                 const std::vector<float>&   outPhiDegrees,
                                                 ColorModel                  colorModel);
-
-    /*! Rotates a BRDF using an outgoing azimuthal angle. */
-    static SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf& brdf, float rotationAngle);
 };
 
 inline void LightToolsBsdfReader::ignoreCommentLines(std::ifstream& fin)

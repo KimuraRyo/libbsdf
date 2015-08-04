@@ -58,27 +58,27 @@ public:
     
     using BaseBrdf::getSpectrum;
 
-    /*! Gets the spectrum of a BRDF at a set of angles. */
+    /*! Gets the spectrum of the BRDF at a set of angles. */
     Spectrum getSpectrum(float inTheta, float inPhi,
                          float specTheta, float specPhi) const;
 
-    /*! Gets the spectrum of a BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int inThetaIndex, int inPhiIndex,
                           int specThetaIndex, int specPhiIndex);
 
-    /*! Gets the spectrum of a BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the BRDF at a set of angle indices. */
     const Spectrum& getSpectrum(int inThetaIndex, int inPhiIndex,
                                 int specThetaIndex, int specPhiIndex) const;
 
-    /*! Gets the spectrum of an isotropic BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int inThetaIndex,
                           int specThetaIndex, int specPhiIndex);
 
-    /*! Gets the spectrum of an isotropic BRDF at a set of angle indices. */
+    /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     const Spectrum& getSpectrum(int inThetaIndex,
                                 int specThetaIndex, int specPhiIndex) const;
 
-    /*! Sets the spectrum of a BRDF at a set of angle indices. */
+    /*! Sets the spectrum of the BRDF at a set of angle indices. */
     void setSpectrum(int inThetaIndex, int inPhiIndex,
                      int specThetaIndex, int specPhiIndex,
                      const Spectrum& spectrum);
@@ -97,9 +97,6 @@ public:
     int getNumInPhi()     const; /*!< Gets the number of azimuthal angles of an incoming direction. */
     int getNumSpecTheta() const; /*!< Gets the number of polar angles of a specular direction. */
     int getNumSpecPhi()   const; /*!< Gets the number of azimuthal angles of a specular direction. */
-
-    /*! Fixes the energy conservation of a BRDF with each incoming direction. */
-    void fixEnergyConservation();
 
 private:
     /*! Copy operator is disabled. */

@@ -25,7 +25,8 @@ SampleSet::SampleSet(int        numAngles0,
                      : equalIntervalAngles0_(false),
                        equalIntervalAngles1_(false),
                        equalIntervalAngles2_(false),
-                       equalIntervalAngles3_(false)
+                       equalIntervalAngles3_(false),
+                       oneSide_(false)
 {
     assert(numAngles0 > 0 && numAngles1 > 0 && numAngles2 > 0 && numAngles3 > 0);
 
@@ -46,52 +47,10 @@ SampleSet::SampleSet(int        numAngles0,
     }
 }
 
-void SampleSet::zeroOutSamples()
+void SampleSet::updateAngleAttributes()
 {
-    angles0_ = Arrayf::Zero(angles0_.size());
-    angles1_ = Arrayf::Zero(angles1_.size());
-    angles2_ = Arrayf::Zero(angles2_.size());
-    angles3_ = Arrayf::Zero(angles3_.size());
-
-    for (auto it = spectra_.begin(); it != spectra_.end(); ++it) {
-        *it = Spectrum::Zero(it->size());
-    }
-
-    wavelengths_ = Arrayf::Zero(wavelengths_.size());
-}
-
-void SampleSet::checkEqualIntervalAngles()
-{
-    equalIntervalAngles0_ = isEqualInterval(angles0_);
-    equalIntervalAngles1_ = isEqualInterval(angles1_);
-    equalIntervalAngles2_ = isEqualInterval(angles2_);
-    equalIntervalAngles3_ = isEqualInterval(angles3_);
-
-    std::cout << "[SampleSet::checkEqualIntervalAngles] Angle0: " << equalIntervalAngles0_ << std::endl;
-    std::cout << "[SampleSet::checkEqualIntervalAngles] Angle1: " << equalIntervalAngles1_ << std::endl;
-    std::cout << "[SampleSet::checkEqualIntervalAngles] Angle2: " << equalIntervalAngles2_ << std::endl;
-    std::cout << "[SampleSet::checkEqualIntervalAngles] Angle3: " << equalIntervalAngles3_ << std::endl;
-}
-
-void SampleSet::convertFromXyzToSrgb()
-{
-    if (colorModel_ != XYZ_MODEL) {
-        std::cerr
-            << "[SampleSet::xyzToSrgb] Not CIE-XYZ model: " << colorModel_
-            << std::endl;
-        return;
-    }
-
-    for (int i0 = 0; i0 < numAngles0_; ++i0) {
-    for (int i1 = 0; i1 < numAngles1_; ++i1) {
-    for (int i2 = 0; i2 < numAngles2_; ++i2) {
-    for (int i3 = 0; i3 < numAngles3_; ++i3) {
-        const Spectrum& xyz = getSpectrum(i0, i1, i2, i3);
-        Spectrum rgb = SpectrumUtility::xyzToSrgb(xyz);
-        setSpectrum(i0, i1, i2, i3, rgb);
-    }}}}
-
-    colorModel_ = RGB_MODEL;
+    updateEqualIntervalAngles();
+    updateOneSide();
 }
 
 void SampleSet::resizeAngles(int numAngles0,
@@ -122,10 +81,52 @@ void SampleSet::resizeWavelengths(int numWavelengths)
     int numSamples = numAngles0_ * numAngles1_ * numAngles2_ * numAngles3_;
 
     for (int i = 0; i < numSamples; ++i) {
-        Spectrum spectrum;
-        spectrum.resize(numWavelengths);
-        spectra_.at(i) = spectrum;
+        Spectrum sp;
+        sp.resize(numWavelengths);
+        spectra_.at(i) = sp;
     }
 
     wavelengths_.resize(numWavelengths);
+}
+
+void SampleSet::fillSpectra(float value)
+{
+    for (auto it = spectra_.begin(); it != spectra_.end(); ++it) {
+        it->fill(value);
+    }
+}
+
+void SampleSet::updateEqualIntervalAngles()
+{
+    equalIntervalAngles0_ = isEqualInterval(angles0_);
+    equalIntervalAngles1_ = isEqualInterval(angles1_);
+    equalIntervalAngles2_ = isEqualInterval(angles2_);
+    equalIntervalAngles3_ = isEqualInterval(angles3_);
+
+    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle0: " << equalIntervalAngles0_ << std::endl;
+    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle1: " << equalIntervalAngles1_ << std::endl;
+    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle2: " << equalIntervalAngles2_ << std::endl;
+    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle3: " << equalIntervalAngles3_ << std::endl;
+}
+
+void SampleSet::updateOneSide()
+{
+    bool contain_0_PI = false;
+    bool contain_PI_2PI = false;
+
+    for (int i = 0; i < angles3_.size(); ++i) {
+        float angle = angles3_[i];
+
+        if (angle > 0.0f && angle < PI_F) {
+            contain_0_PI = true;
+        }
+
+        if (angle > PI_F && angle < 2.0f * PI_F) {
+            contain_PI_2PI = true;
+        }
+    }
+
+    oneSide_ = (!contain_0_PI || !contain_PI_2PI);
+
+    std::cout << "[SampleSet::updateOneSide] " << oneSide_ << std::endl;
 }

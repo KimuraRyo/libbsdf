@@ -19,7 +19,7 @@ namespace lb {
  * \class   CoordinatesBrdf
  * \brief   The CoordinatesBrdf class provides the BRDF using the template of a coordinate system.
  *
- * The properties and data of a BRDF can be get and set with Brdf::samples_.
+ * The properties and data of the BRDF can be get and set with Brdf::samples_.
  */
 template <typename CoordSysT>
 class CoordinatesBrdf : public Brdf
@@ -58,10 +58,10 @@ public:
 
     virtual ~CoordinatesBrdf();
 
-    /*! Gets the spectrum of a BRDF at incoming and outgoing directions. */
+    /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
     Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
 
-    /*! Gets the value of a BRDF at incoming and outgoing directions and the index of wavelength. */
+    /*! Gets the value of the BRDF at incoming and outgoing directions and the index of wavelength. */
     float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const;
 
     /*!
@@ -80,7 +80,7 @@ public:
      * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
      * and constructs the extrapolated sample set.
      */
-    bool expand();
+    bool expandAngles();
 
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
     void clampAngles();
@@ -140,7 +140,7 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&     brdf,
     samples_->getAngles3() = angles3;
     samples_->getWavelengths() = ss->getWavelengths();
 
-    samples_->checkEqualIntervalAngles();
+    samples_->updateAngleAttributes();
     initializeSpecta(brdf);
 }
 
@@ -219,7 +219,7 @@ std::string CoordinatesBrdf<CoordSysT>::getAngle3Name() const
 }
 
 template <typename CoordSysT>
-bool CoordinatesBrdf<CoordSysT>::expand()
+bool CoordinatesBrdf<CoordSysT>::expandAngles()
 {
     bool expanded = false;
 
@@ -228,26 +228,26 @@ bool CoordinatesBrdf<CoordSysT>::expand()
     Arrayf angles2 = samples_->getAngles2();
     Arrayf angles3 = samples_->getAngles3();
 
-    if (angles0[0] != 0.0f) { append(angles0, 0.0f); }
-    if (angles1[0] != 0.0f) { append(angles1, 0.0f); }
-    if (angles2[0] != 0.0f) { append(angles2, 0.0f); }
-    if (angles3[0] != 0.0f) { append(angles3, 0.0f); }
+    if (angles0[0] != 0.0f) { appendElement(angles0, 0.0f); }
+    if (angles1[0] != 0.0f) { appendElement(angles1, 0.0f); }
+    if (angles2[0] != 0.0f) { appendElement(angles2, 0.0f); }
+    if (angles3[0] != 0.0f) { appendElement(angles3, 0.0f); }
 
     const float maxAngle0 = CoordSysT::MAX_ANGLE0;
     const float maxAngle1 = CoordSysT::MAX_ANGLE1;
     const float maxAngle2 = CoordSysT::MAX_ANGLE2;
     const float maxAngle3 = CoordSysT::MAX_ANGLE3;
 
-    if (angles0.size() > 1 && angles0[angles0.size() - 1] != maxAngle0) { append(angles0, maxAngle0); }
-    if (angles1.size() > 1 && angles1[angles1.size() - 1] != maxAngle1) { append(angles1, maxAngle1); }
-    if (angles2.size() > 1 && angles2[angles2.size() - 1] != maxAngle2) { append(angles2, maxAngle2); }
-    if (angles3.size() > 1 && angles3[angles3.size() - 1] != maxAngle3) { append(angles3, maxAngle3); }
+    if (angles0.size() > 1 && angles0[angles0.size() - 1] != maxAngle0) { appendElement(angles0, maxAngle0); }
+    if (angles1.size() > 1 && angles1[angles1.size() - 1] != maxAngle1) { appendElement(angles1, maxAngle1); }
+    if (angles2.size() > 1 && angles2[angles2.size() - 1] != maxAngle2) { appendElement(angles2, maxAngle2); }
+    if (angles3.size() > 1 && angles3[angles3.size() - 1] != maxAngle3) { appendElement(angles3, maxAngle3); }
 
-    bool isEqualSize = (angles0.size() != samples_->getNumAngles0() ||
-                        angles1.size() != samples_->getNumAngles1() ||
-                        angles2.size() != samples_->getNumAngles2() ||
-                        angles3.size() != samples_->getNumAngles3());
-    if (isEqualSize) {
+    bool sizeEqual = (angles0.size() != samples_->getNumAngles0() ||
+                      angles1.size() != samples_->getNumAngles1() ||
+                      angles2.size() != samples_->getNumAngles2() ||
+                      angles3.size() != samples_->getNumAngles3());
+    if (sizeEqual) {
         std::sort(angles0.data(), angles0.data() + angles0.size());
         std::sort(angles1.data(), angles1.data() + angles1.size());
         std::sort(angles2.data(), angles2.data() + angles2.size());
@@ -261,7 +261,7 @@ bool CoordinatesBrdf<CoordSysT>::expand()
         samples_->getAngles2() = angles2;
         samples_->getAngles3() = angles3;
 
-        samples_->checkEqualIntervalAngles();
+        samples_->updateAngleAttributes();
         initializeSpecta(origBrdf);
 
         expanded = true;
@@ -326,7 +326,7 @@ void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
     if (samples_->getNumAngles2() == 1) { setAngle2(0, 0.0f); }
     if (samples_->getNumAngles3() == 1) { setAngle3(0, 0.0f); }
 
-    samples_->checkEqualIntervalAngles();
+    samples_->updateAngleAttributes();
 }
 
 template <typename CoordSysT>

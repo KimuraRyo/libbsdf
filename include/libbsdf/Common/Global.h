@@ -18,6 +18,8 @@
 
 #include <Eigen/Core>
 
+#include <libbsdf/Common/Array.h>
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -29,7 +31,7 @@ const float PI_2_F = 1.57079632679489661923f;
 const float EPSILON_F = std::numeric_limits<float>::epsilon();
 
 /*! \brief The data type of a spectrum. */
-typedef Eigen::ArrayXf Spectrum;
+typedef Arrayf Spectrum;
 
 /*! \brief The data type of spectra. */
 typedef std::vector<Spectrum, Eigen::aligned_allocator<Spectrum> > SpectrumList;
