@@ -20,7 +20,15 @@
 
 namespace lb {
 
-/*! \brief Divides a BRDF by the cosine of the outgoing polar angle.
+/*!
+ * \brief Initializes all spectra of a BRDF using another BRDF.
+ *
+ * BRDFs must have the same wavelengths.
+ */
+bool initizlizeSpectra(const Brdf& baseBrdf, Brdf* brdf);
+    
+/*!
+ * \brief Divides a BRDF by the cosine of the outgoing polar angle.
  *
  * This function converts from a CCBRDF to a BRDF.
  */
@@ -36,8 +44,20 @@ SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
 /*! Fixes the energy conservation of the BRDF with each incoming direction. */
 void fixEnergyConservation(SpecularCoordinatesBrdf* brdf);
 
+/*! Copies spectra from the azimuthal angle of 0 to 2PI. */
+void copySpectraFromPhiOfZeroTo2PI(Brdf* brdf);
+
 /*! Converts the color model from CIE-XYZ to sRGB. */
 void convertFromXyzToSrgb(SampleSet* samples);
+
+/*! Fills spectra of samples with a value. */
+void fillSpectra(SampleSet* samples, float value);
+
+/*! Multiplies spectra of samples by a value. */
+void multiplySpectra(SampleSet* samples, float value);
+
+/*! Clamps negative values of spectra. */
+void clampNegativeSpectra(SampleSet* samples);
 
 } // namespace lb
 

@@ -28,7 +28,11 @@ bool isEqual(T lhs, T rhs);
 
 /*! \brief Computes linearly-interpolated values. */
 template <typename T>
-T lerp(const T& lhs, const T& rhs, float weight);
+T lerp(const T& v0, const T& v1, float t);
+
+/*! \brief Computes interpolated values using uniform Catmull-Rom spline. */
+template <typename T>
+T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t);
 
 /*! \brief Computes a specular direction. */
 template <typename Vec3T>
@@ -77,9 +81,21 @@ inline bool isEqual(T lhs, T rhs)
 }
 
 template <typename T>
-inline T lerp(const T& lhs, const T& rhs, float weight)
+inline T lerp(const T& v0, const T& v1, float t)
 {
-    return lhs + weight * (rhs - lhs);
+    return v0 + t * (v1 - v0);
+}
+
+template <typename T>
+inline T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t)
+{
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    return ((2 * v1) +
+            (-v0 + v2) * t +
+            (2 * v0 - 5 * v1 + 4 * v2 - v3) * t2 +
+            (-v0 + 3 * v1 - 3 * v2 + v3) * t3) * 0.5f;
 }
 
 template <typename Vec3T>

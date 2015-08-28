@@ -89,13 +89,6 @@ void SampleSet::resizeWavelengths(int numWavelengths)
     wavelengths_.resize(numWavelengths);
 }
 
-void SampleSet::fillSpectra(float value)
-{
-    for (auto it = spectra_.begin(); it != spectra_.end(); ++it) {
-        it->fill(value);
-    }
-}
-
 void SampleSet::updateEqualIntervalAngles()
 {
     equalIntervalAngles0_ = isEqualInterval(angles0_);

@@ -20,6 +20,44 @@
 
 using namespace lb;
 
+bool lb::initizlizeSpectra(const Brdf& baseBrdf, Brdf* brdf)
+{
+    const SampleSet* baseSs = baseBrdf.getSampleSet();
+    SampleSet* ss = brdf->getSampleSet();
+
+    bool same = true;
+
+    if (baseSs->getColorModel() != ss->getColorModel()) {
+        same = false;
+        std::cerr
+            << "[initizlizeSpectra] Color models don't match: "
+            << baseSs->getColorModel() << ", " << ss->getColorModel()
+            << std::endl;
+    }
+
+    if (!baseSs->getWavelengths().isApprox(ss->getWavelengths())) {
+        same = false;
+        std::cerr
+            << "[initizlizeSpectra] Wavelengths don't match: "
+            << baseSs->getWavelengths() << ", " << ss->getWavelengths()
+            << std::endl;
+    }
+
+    if (!same) return false;
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        ss->setSpectrum(i0, i1, i2, i3, baseBrdf.getSpectrum(inDir, outDir));
+    }}}}
+
+    return true;
+}
+
 void lb::divideByCosineOutTheta(Brdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
@@ -160,26 +198,6 @@ SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf
     return rotatedBrdf;
 }
 
-void lb::convertFromXyzToSrgb(SampleSet* samples)
-{
-    ColorModel cm = samples->getColorModel();
-    if (cm != XYZ_MODEL) {
-        std::cerr << "[SampleSet::xyzToSrgb] Not CIE-XYZ model: " << cm << std::endl;
-        return;
-    }
-
-    for (int i0 = 0; i0 < samples->getNumAngles0(); ++i0) {
-    for (int i1 = 0; i1 < samples->getNumAngles1(); ++i1) {
-    for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
-    for (int i3 = 0; i3 < samples->getNumAngles3(); ++i3) {
-        const Spectrum& xyz = samples->getSpectrum(i0, i1, i2, i3);
-        Spectrum rgb = SpectrumUtility::xyzToSrgb(xyz);
-        samples->setSpectrum(i0, i1, i2, i3, rgb);
-    }}}}
-
-    samples->setColorModel(RGB_MODEL);
-}
-
 void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
@@ -213,4 +231,75 @@ void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf)
             }}
         }
     }}
+}
+
+void lb::copySpectraFromPhiOfZeroTo2PI(Brdf* brdf)
+{
+    SampleSet* ss = brdf->getSampleSet();
+
+    if (ss->getNumAngles1() >= 2 &&
+        ss->getAngle1(0) == 0.0f &&
+        ss->getAngle1(ss->getNumAngles1() - 1) >= SphericalCoordinateSystem::MAX_ANGLE1) {
+        for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+        for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+        for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+            const Spectrum& sp = ss->getSpectrum(i0, 0, i2, i3);
+            ss->setSpectrum(i0, ss->getNumAngles1() - 1, i2, i3, sp);
+        }}}
+    }
+
+    if (ss->getNumAngles3() >= 2 &&
+        ss->getAngle3(0) == 0.0f &&
+        ss->getAngle3(ss->getNumAngles3() - 1) >= SphericalCoordinateSystem::MAX_ANGLE3) {
+        for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+        for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+        for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+            const Spectrum& sp = ss->getSpectrum(i0, i1, i2, 0);
+            ss->setSpectrum(i0, i1, i2, ss->getNumAngles3() - 1, sp);
+        }}}
+    }
+}
+
+void lb::convertFromXyzToSrgb(SampleSet* samples)
+{
+    ColorModel cm = samples->getColorModel();
+    if (cm != XYZ_MODEL) {
+        std::cerr << "[convertFromXyzToSrgb] Not CIE-XYZ model: " << cm << std::endl;
+        return;
+    }
+
+    for (int i0 = 0; i0 < samples->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < samples->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < samples->getNumAngles3(); ++i3) {
+        const Spectrum& xyz = samples->getSpectrum(i0, i1, i2, i3);
+        Spectrum rgb = SpectrumUtility::xyzToSrgb(xyz);
+        samples->setSpectrum(i0, i1, i2, i3, rgb);
+    }}}}
+
+    samples->setColorModel(RGB_MODEL);
+}
+
+void lb::fillSpectra(SampleSet* samples, float value)
+{
+    lb::SpectrumList& spectra = samples->getSpectra();
+    for (auto it = spectra.begin(); it != spectra.end(); ++it) {
+        it->fill(value);
+    }
+}
+
+void lb::multiplySpectra(SampleSet* samples, float value)
+{
+    lb::SpectrumList& spectra = samples->getSpectra();
+    for (auto it = spectra.begin(); it != spectra.end(); ++it) {
+        *it *= value;
+    }
+}
+
+void lb::clampNegativeSpectra(SampleSet* samples)
+{
+    lb::SpectrumList& spectra = samples->getSpectra();
+    for (auto it = spectra.begin(); it != spectra.end(); ++it) {
+        *it = it->cwiseMax(0.0f);
+    }
 }

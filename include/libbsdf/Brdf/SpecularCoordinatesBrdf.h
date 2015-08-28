@@ -60,6 +60,10 @@ public:
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
     Spectrum getSpectrum(float inTheta, float inPhi,
+                         float specTheta, float specPhi);
+
+    /*! Gets the spectrum of the BRDF at a set of angles. */
+    Spectrum getSpectrum(float inTheta, float inPhi,
                          float specTheta, float specPhi) const;
 
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
@@ -102,6 +106,14 @@ private:
     /*! Copy operator is disabled. */
     SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&);
 };
+
+inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
+                                                     float specTheta, float specPhi)
+{
+    Spectrum sp;
+    LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi, &sp);
+    return sp;
+}
 
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
                                                      float specTheta, float specPhi) const

@@ -64,6 +64,12 @@ public:
     void setSpectrum(int index0, int index1, int index2, int index3,
                      const Spectrum& spectrum);
 
+    /*! Gets all spectra. */
+    SpectrumList& getSpectra();
+
+    /*! Gets all spectra. */
+    const SpectrumList& getSpectra() const;
+
     float getAngle0(int index) const; /*!< Gets the angle0 at an index. */
     float getAngle1(int index) const; /*!< Gets the angle1 at an index. */
     float getAngle2(int index) const; /*!< Gets the angle2 at an index. */
@@ -129,9 +135,6 @@ public:
 
     /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
     void resizeWavelengths(int numWavelengths);
-
-    /*! Fills spectra of samples with a value. */
-    void fillSpectra(float value);
 
 private:
     /*! Gets the index of the spectrum from a set of angle indices. */
@@ -199,6 +202,9 @@ inline void SampleSet::setSpectrum(int index0, int index1, int index2, int index
 {
     spectra_.at(getIndex(index0, index1, index2, index3)) = spectrum;
 }
+
+inline       SpectrumList& SampleSet::getSpectra()       { return spectra_; }
+inline const SpectrumList& SampleSet::getSpectra() const { return spectra_; }
 
 inline float SampleSet::getAngle0(int index) const { return angles0_[index]; }
 inline float SampleSet::getAngle1(int index) const { return angles1_[index]; }

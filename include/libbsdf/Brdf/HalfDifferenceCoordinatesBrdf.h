@@ -60,6 +60,10 @@ public:
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
     Spectrum getSpectrum(float halfTheta, float halfPhi,
+                         float diffTheta, float diffPhi);
+
+    /*! Gets the spectrum of the BRDF at a set of angles. */
+    Spectrum getSpectrum(float halfTheta, float halfPhi,
                          float diffTheta, float diffPhi) const;
 
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
@@ -102,6 +106,14 @@ private:
     /*! Copy operator is disabled. */
     HalfDifferenceCoordinatesBrdf& operator=(const HalfDifferenceCoordinatesBrdf&);
 };
+
+inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta, float halfPhi,
+                                                           float diffTheta, float diffPhi)
+{
+    Spectrum sp;
+    LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi, &sp);
+    return sp;
+}
 
 inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta, float halfPhi,
                                                            float diffTheta, float diffPhi) const
