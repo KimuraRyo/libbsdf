@@ -14,7 +14,10 @@
 #ifndef LIBBSDF_UTILITY_H
 #define LIBBSDF_UTILITY_H
 
+#include <libbsdf/Common/CentripetalCatmullRomSpline.h>
+#include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 
@@ -34,9 +37,18 @@ T lerp(const T& v0, const T& v1, float t);
 template <typename T>
 T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t);
 
+/*!
+ * \brief Computes a interpolated value using centripetal Catmull-Rom spline
+ *        at \a pos in [\a pos1,\a pos2].
+ */
+template <typename T>
+T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
+                   const T& val0, const T& val1, const T& val2, const T& val3,
+                   const T& pos);
+
 /*! \brief Computes a specular direction. */
 template <typename Vec3T>
-Vec3T reflect(const Vec3T& inDir, const Vec3T& normalDir);
+Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir);
 
 /*! \brief Converts a value from radian to degree. */
 template <typename T>
@@ -57,9 +69,12 @@ void convertCoordinateSystem(float  srcAngle0,
                              float* destAngle2,
                              float* destAngle3);
 
+/*! \brief Converts from CIE-XYZ to sRGB. */
+Vec3f xyzToSrgb(const Vec3f& xyz);
+
 /*! \brief Fixes a direction if the Z-component is negative. */
 template <typename Vec3T>
-void fixDownwardDir(Vec3T& dir);
+void fixDownwardDir(Vec3T* dir);
 
 /*
  * Implementation
@@ -77,13 +92,18 @@ template <typename T>
 inline bool isEqual(T lhs, T rhs)
 {
     using std::abs;
-    return (abs(lhs - rhs) <= std::numeric_limits<T>::epsilon() * abs(lhs + rhs));
+    using std::max;
+
+    T tolerance = std::numeric_limits<T>::epsilon()
+                * max(max(abs(lhs), abs(rhs)), static_cast<T>(1.0))
+                * static_cast<T>(2.0);
+    return (abs(lhs - rhs) <= tolerance);
 }
 
 template <typename T>
 inline T lerp(const T& v0, const T& v1, float t)
 {
-    return v0 + t * (v1 - v0);
+    return v0 + (v1 - v0) * t;
 }
 
 template <typename T>
@@ -92,17 +112,31 @@ inline T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, fl
     float t2 = t * t;
     float t3 = t2 * t;
 
-    return ((2 * v1) +
-            (-v0 + v2) * t +
-            (2 * v0 - 5 * v1 + 4 * v2 - v3) * t2 +
-            (-v0 + 3 * v1 - 3 * v2 + v3) * t3) * 0.5f;
+    return static_cast<T>(((2.0 * v1) +
+                           (-v0 + v2) * t +
+                           (2.0 * v0 - 5.0 * v1 + 4.0 * v2 - v3) * t2 +
+                           (-v0 + 3.0 * v1 - 3.0 * v2 + v3) * t3) * 0.5);
+}
+
+template <typename T>
+inline T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
+                          const T& val0, const T& val1, const T& val2, const T& val3,
+                          const T& pos)
+{
+    Vec2 v0(pos0, val0);
+    Vec2 v1(pos1, val1);
+    Vec2 v2(pos2, val2);
+    Vec2 v3(pos3, val3);
+    CentripetalCatmullRomSpline ccrs(v0, v1, v2, v3);
+
+    return static_cast<T>(ccrs.interpolateY(pos));
 }
 
 template <typename Vec3T>
-inline Vec3T reflect(const Vec3T& inDir, const Vec3T& normalDir)
+inline Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir)
 {
     typedef typename Vec3T::Scalar ScalarType;
-    return static_cast<ScalarType>(2.0) * normalDir.dot(inDir) * normalDir - inDir;
+    return static_cast<ScalarType>(2.0) * normalDir.dot(dir) * normalDir - dir;
 }
 
 template <typename T>
@@ -135,16 +169,26 @@ inline void convertCoordinateSystem(float   srcAngle0,
                            destAngle0, destAngle1, destAngle2, destAngle3);
 }
 
-template <typename Vec3T>
-inline void fixDownwardDir(Vec3T& dir)
+inline Vec3f xyzToSrgb(const Vec3f& xyz)
 {
-    if (dir[2] < 0.0) {
-        dir[2] = 0.0;
-        if (dir[0] == 0.0 && dir[1] == 0.0) {
-            dir[0] = 1.0;
+    Eigen::Matrix3f mat;
+    mat << CieData::XYZ_sRGB[0], CieData::XYZ_sRGB[1], CieData::XYZ_sRGB[2],
+           CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
+           CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
+    return mat * xyz;
+}
+
+template <typename Vec3T>
+inline void fixDownwardDir(Vec3T* dir)
+{
+    Vec3T& d = *dir;
+    if (d[2] < 0.0) {
+        d[2] = 0.0;
+        if (d[0] == 0.0 && d[1] == 0.0) {
+            d[0] = 1.0;
         }
         else {
-            dir.normalize();
+            d.normalize();
         }
     }
 }

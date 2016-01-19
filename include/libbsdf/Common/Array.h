@@ -18,6 +18,7 @@
 
 #include <Eigen/Core>
 
+#include <libbsdf/Common/CentripetalCatmullRomSpline.h>
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {
@@ -27,15 +28,21 @@ typedef Eigen::ArrayXd Arrayd;
 
 /*! \brief Copies an array. */
 template <typename SrcT, typename DestT>
-void copyArray(const SrcT& srcArray, DestT& destArray, int size);
-
-/*! \brief Copies an array. */
-template <typename SrcT, typename DestT>
-void copyArray(const SrcT& srcArray, DestT& destArray);
+void copyArray(const SrcT& srcArray, DestT* destArray);
 
 /*! \brief Appends an element to the end of an array. */
 template <typename ArrayT, typename ScalarT>
-void appendElement(ArrayT& arrayf, ScalarT value);
+void appendElement(ArrayT* arrayf, ScalarT value);
+
+/*!
+ * \brief Interpolates arrays using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
+ *
+ * \param array Interpolated array.
+ */
+template <typename T>
+void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
+                      const T& array0, const T& array1, const T& array2, const T& array3,
+                      float pos, T* array);
 
 /*! \brief Converts an array from degree to radian. */
 template <typename T>
@@ -50,35 +57,50 @@ bool isEqualInterval(const T& array);
  */
 
 template <typename SrcT, typename DestT>
-inline void copyArray(const SrcT& srcArray, DestT& destArray, int size)
-{
-    for (int i = 0; i < size; ++i) {
-        destArray[i] = srcArray[i];
-    }
-}
-
-template <typename SrcT, typename DestT>
-inline void copyArray(const SrcT& srcArray, DestT& destArray)
+inline void copyArray(const SrcT& srcArray, DestT* destArray)
 {
     int i = 0;
     for (auto it = srcArray.begin(); it != srcArray.end(); ++it, ++i) {
-        destArray[i] = *it;
+        (*destArray)[i] = *it;
     }
 }
 
 template <typename ArrayT, typename ScalarT>
-inline void appendElement(ArrayT& arrayf, ScalarT value)
+inline void appendElement(ArrayT* arrayf, ScalarT value)
 {
-    std::vector<ScalarT> orig(arrayf.data(), arrayf.data() + arrayf.size());
+    ArrayT& a = *arrayf;
+    std::vector<ScalarT> orig(a.data(), a.data() + a.size());
     orig.push_back(value);
-    arrayf.resize(arrayf.size() + 1);
+    a.resize(a.size() + 1);
 
 #if (_MSC_VER >= 1600) // Visual Studio 2010
     std::copy(orig.begin(), orig.end(),
-              stdext::checked_array_iterator<ArrayT::Scalar*>(arrayf.data(), arrayf.size()));
+              stdext::checked_array_iterator<ArrayT::Scalar*>(a.data(), a.size()));
 #else
-    std::copy(orig.begin(), orig.end(), arrayf.data());
+    std::copy(orig.begin(), orig.end(), a.data());
 #endif
+}
+
+template <typename T>
+void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
+                      const T& array0, const T& array1, const T& array2, const T& array3,
+                      float pos, T* array)
+{
+    assert(array0.size() == array1.size() &&
+           array1.size() == array2.size() &&
+           array2.size() == array3.size());
+    
+    array->resize(array0.size());
+
+    for (int i = 0; i < array->size(); ++i) {
+        Vec2 v0(pos0, array0[i]);
+        Vec2 v1(pos1, array1[i]);
+        Vec2 v2(pos2, array2[i]);
+        Vec2 v3(pos3, array3[i]);
+        CentripetalCatmullRomSpline ccrs(v0, v1, v2, v3);
+
+        (*array)[i] = static_cast<T::Scalar>(ccrs.interpolateY(pos));
+    }
 }
 
 template <typename T>
@@ -91,7 +113,7 @@ inline T toRadians(const T& degrees)
 template <typename T>
 inline bool isEqualInterval(const T& array)
 {
-    if (array.size() <= 1) return false;
+    if (array.size() <= 2) return false;
 
     float interval = array[array.size() - 1] / (array.size() - 1);
     for (int i = 0; i < array.size(); ++i) {

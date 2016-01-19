@@ -11,8 +11,8 @@
 
 #include <limits>
 
-namespace lb
-{
+namespace lb {
+
 #if defined(__C99__) || (defined(__GNUC__) && __GNUC__ >= 3)
     #include <inttypes.h>
     #include <stdint.h>

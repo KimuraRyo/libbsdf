@@ -90,8 +90,7 @@ void Integrator::initializeOutDirs(bool usePoissonDiskDistribution)
 
         std::cout << "[Integrator::Integrator] numSampling_: " << numSampling_ << std::endl;
     }
-    else
-    {
+    else {
         outDirs_.resize(Eigen::NoChange, numSampling_);
         for (int i = 0; i < numSampling_; ++i) {
             outDirs_.col(i) = Xorshift::randomOnHemisphere<Vec3f>();

@@ -10,7 +10,6 @@
 
 #include <algorithm>
 
-#include <libbsdf/Brdf/SampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 
 using namespace lb;
@@ -79,7 +78,7 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
 
     *spectrum = lerp(sp0, sp1, weights[0]);
 
-    assert(!spectrum->hasNaN());
+    assert(spectrum->allFinite());
 }
 
 void LinearInterpolator::getSpectrum(const SampleSet&   samples,
@@ -124,7 +123,7 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
 
     *spectrum = lerp(sp00, sp10, weights[0]);
 
-    assert(!spectrum->hasNaN());
+    assert(spectrum->allFinite());
 }
 
 float LinearInterpolator::getValue(const SampleSet& samples,
@@ -132,7 +131,7 @@ float LinearInterpolator::getValue(const SampleSet& samples,
                                    float            angle1,
                                    float            angle2,
                                    float            angle3,
-                                   int              spectrumIndex)
+                                   int              wavelengthIndex)
 {
     const Arrayf& angles0 = samples.getAngles0();
     const Arrayf& angles1 = samples.getAngles1();
@@ -152,25 +151,25 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
     Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
-    float val0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3)[spectrumIndex];
-    float val0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3)[spectrumIndex];
-    float val0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3)[spectrumIndex];
-    float val0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3)[wavelengthIndex];
+    float val0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3)[wavelengthIndex];
+    float val0010 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, lIdx3)[wavelengthIndex];
+    float val0011 = samples.getSpectrum(lIdx0, lIdx1, uIdx2, uIdx3)[wavelengthIndex];
 
-    float val0100 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, lIdx3)[spectrumIndex];
-    float val0101 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, uIdx3)[spectrumIndex];
-    float val0110 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, lIdx3)[spectrumIndex];
-    float val0111 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val0100 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, lIdx3)[wavelengthIndex];
+    float val0101 = samples.getSpectrum(lIdx0, uIdx1, lIdx2, uIdx3)[wavelengthIndex];
+    float val0110 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, lIdx3)[wavelengthIndex];
+    float val0111 = samples.getSpectrum(lIdx0, uIdx1, uIdx2, uIdx3)[wavelengthIndex];
 
-    float val1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3)[spectrumIndex];
-    float val1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3)[spectrumIndex];
-    float val1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3)[spectrumIndex];
-    float val1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val1000 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, lIdx3)[wavelengthIndex];
+    float val1001 = samples.getSpectrum(uIdx0, lIdx1, lIdx2, uIdx3)[wavelengthIndex];
+    float val1010 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, lIdx3)[wavelengthIndex];
+    float val1011 = samples.getSpectrum(uIdx0, lIdx1, uIdx2, uIdx3)[wavelengthIndex];
 
-    float val1100 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, lIdx3)[spectrumIndex];
-    float val1101 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, uIdx3)[spectrumIndex];
-    float val1110 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, lIdx3)[spectrumIndex];
-    float val1111 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, uIdx3)[spectrumIndex];
+    float val1100 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, lIdx3)[wavelengthIndex];
+    float val1101 = samples.getSpectrum(uIdx0, uIdx1, lIdx2, uIdx3)[wavelengthIndex];
+    float val1110 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, lIdx3)[wavelengthIndex];
+    float val1111 = samples.getSpectrum(uIdx0, uIdx1, uIdx2, uIdx3)[wavelengthIndex];
 
     float val000 = lerp(val0000, val0001, weights[3]);
     float val001 = lerp(val0010, val0011, weights[3]);
@@ -191,7 +190,7 @@ float LinearInterpolator::getValue(const SampleSet& samples,
 
     float val = lerp(val0, val1, weights[0]);
 
-    assert(!std::isnan(val));
+    assert(!std::isnan(val) && !std::isinf(val));
     return val;
 }
 
@@ -199,7 +198,7 @@ float LinearInterpolator::getValue(const SampleSet& samples,
                                    float            angle0,
                                    float            angle2,
                                    float            angle3,
-                                   int              spectrumIndex)
+                                   int              wavelengthIndex)
 {
     const Arrayf& angles0 = samples.getAngles0();
     const Arrayf& angles2 = samples.getAngles2();
@@ -217,15 +216,15 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
     Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
-    float val0000 = samples.getSpectrum(lIdx0, lIdx2, lIdx3)[spectrumIndex];
-    float val0001 = samples.getSpectrum(lIdx0, lIdx2, uIdx3)[spectrumIndex];
-    float val0010 = samples.getSpectrum(lIdx0, uIdx2, lIdx3)[spectrumIndex];
-    float val0011 = samples.getSpectrum(lIdx0, uIdx2, uIdx3)[spectrumIndex];
+    float val0000 = samples.getSpectrum(lIdx0, lIdx2, lIdx3)[wavelengthIndex];
+    float val0001 = samples.getSpectrum(lIdx0, lIdx2, uIdx3)[wavelengthIndex];
+    float val0010 = samples.getSpectrum(lIdx0, uIdx2, lIdx3)[wavelengthIndex];
+    float val0011 = samples.getSpectrum(lIdx0, uIdx2, uIdx3)[wavelengthIndex];
 
-    float val1000 = samples.getSpectrum(uIdx0, lIdx2, lIdx3)[spectrumIndex];
-    float val1001 = samples.getSpectrum(uIdx0, lIdx2, uIdx3)[spectrumIndex];
-    float val1010 = samples.getSpectrum(uIdx0, uIdx2, lIdx3)[spectrumIndex];
-    float val1011 = samples.getSpectrum(uIdx0, uIdx2, uIdx3)[spectrumIndex];
+    float val1000 = samples.getSpectrum(uIdx0, lIdx2, lIdx3)[wavelengthIndex];
+    float val1001 = samples.getSpectrum(uIdx0, lIdx2, uIdx3)[wavelengthIndex];
+    float val1010 = samples.getSpectrum(uIdx0, uIdx2, lIdx3)[wavelengthIndex];
+    float val1011 = samples.getSpectrum(uIdx0, uIdx2, uIdx3)[wavelengthIndex];
 
     float val000 = lerp(val0000, val0001, weights[3]);
     float val001 = lerp(val0010, val0011, weights[3]);
@@ -237,13 +236,13 @@ float LinearInterpolator::getValue(const SampleSet& samples,
 
     float val = lerp(val00, val10, weights[0]);
 
-    assert(!std::isnan(val));
+    assert(!std::isnan(val) && !std::isinf(val));
     return val;
 }
 
 void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
-                                     float              inTheta,
-                                     float              inPhi,
+                                     float              theta,
+                                     float              phi,
                                      Spectrum*          spectrum)
 {
     const Arrayf& thetaArray = ss2.getThetaArray();
@@ -254,8 +253,8 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
     float lowerAngle0, lowerAngle1;
     float upperAngle0, upperAngle1;
 
-    findBounds(thetaArray, inTheta, ss2.isEqualIntervalTheta(), &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
-    findBounds(phiArray,   inPhi,   ss2.isEqualIntervalPhi(),   &lIdx1, &uIdx1, &lowerAngle1, &upperAngle1);
+    findBounds(thetaArray, theta, ss2.isEqualIntervalTheta(), &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
+    findBounds(phiArray,   phi,   ss2.isEqualIntervalPhi(),   &lIdx1, &uIdx1, &lowerAngle1, &upperAngle1);
 
     const Spectrum& sp00 = ss2.getSpectrum(lIdx0, lIdx1);
     const Spectrum& sp01 = ss2.getSpectrum(lIdx0, uIdx1);
@@ -265,15 +264,39 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
     float interval0 = std::max(upperAngle0 - lowerAngle0, EPSILON_F);
     float interval1 = std::max(upperAngle1 - lowerAngle1, EPSILON_F);
 
-    float weight0 = (inTheta - lowerAngle0) / interval0;
-    float weight1 = (inPhi   - lowerAngle1) / interval1;
+    float weight0 = (theta - lowerAngle0) / interval0;
+    float weight1 = (phi   - lowerAngle1) / interval1;
 
     Spectrum sp0 = lerp(sp00, sp01, weight1);
     Spectrum sp1 = lerp(sp10, sp11, weight1);
 
     *spectrum = lerp(sp0, sp1, weight0);
 
-    assert(!spectrum->hasNaN());
+    assert(spectrum->allFinite());
+}
+
+void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
+                                     float              theta,
+                                     Spectrum*          spectrum)
+{
+    const Arrayf& thetaArray = ss2.getThetaArray();
+
+    int lIdx0; // index of the lower bound sample point
+    int uIdx0; // index of the upper bound sample point
+    float lowerAngle0;
+    float upperAngle0;
+
+    findBounds(thetaArray, theta, ss2.isEqualIntervalTheta(), &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
+
+    const Spectrum& sp0 = ss2.getSpectrum(lIdx0);
+    const Spectrum& sp1 = ss2.getSpectrum(uIdx0);
+
+    float interval0 = std::max(upperAngle0 - lowerAngle0, EPSILON_F);
+    float weight0 = (theta - lowerAngle0) / interval0;
+
+    *spectrum = lerp(sp0, sp1, weight0);
+
+    assert(spectrum->allFinite());
 }
 
 void LinearInterpolator::findBounds(const Arrayf&   angles,
@@ -285,11 +308,10 @@ void LinearInterpolator::findBounds(const Arrayf&   angles,
                                     Vec4::Scalar*   upperAngle)
 {
     if (angles.size() == 1) {
-        const float* anglePtr = &angles[0];
         *lowerIndex = 0;
         *upperIndex = 0;
-        *lowerAngle = *anglePtr;
-        *upperAngle = *lowerAngle;
+        *lowerAngle = angles[0];
+        *upperAngle = angles[0];
 
         return;
     }

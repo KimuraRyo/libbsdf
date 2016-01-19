@@ -165,9 +165,9 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
 
     SampleSet* ss = brdf->getSampleSet();
 
-    copyArray(inThetaDegrees, ss->getAngles0());
-    copyArray(inPhiDegrees,   ss->getAngles1());
-    copyArray(spThetaDegrees, ss->getAngles2());
+    copyArray(inThetaDegrees, &ss->getAngles0());
+    copyArray(inPhiDegrees,   &ss->getAngles1());
+    copyArray(spThetaDegrees, &ss->getAngles2());
 
     ss->getAngles0() = toRadians(ss->getAngles0());
     ss->getAngles1() = toRadians(ss->getAngles1());

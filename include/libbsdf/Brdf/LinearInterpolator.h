@@ -9,12 +9,12 @@
 #ifndef LIBBSDF_LINEAR_INTERPOLATOR_H
 #define LIBBSDF_LINEAR_INTERPOLATOR_H
 
+#include <libbsdf/Brdf/SampleSet.h>
 #include <libbsdf/Common/Vector.h>
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
-class SampleSet;
 class SampleSet2D;
 
 /*!
@@ -47,19 +47,24 @@ public:
                           float             angle1,
                           float             angle2,
                           float             angle3,
-                          int               spectrumIndex);
+                          int               wavelengthIndex);
 
     /*! Gets the interpolated value of sample points at a set of angles and the index of wavelength. */
     static float getValue(const SampleSet&  samples,
                           float             angle0,
                           float             angle2,
                           float             angle3,
-                          int               spectrumIndex);
+                          int               wavelengthIndex);
 
     /*! Gets the interpolated spectrum of sample points at a set of angles. */
     static void getSpectrum(const SampleSet2D&  ss2,
-                            float               inTheta,
-                            float               inPhi,
+                            float               theta,
+                            float               phi,
+                            Spectrum*           spectrum);
+
+    /*! Gets the interpolated spectrum of sample points at a polar angle. */
+    static void getSpectrum(const SampleSet2D&  ss2,
+                            float               theta,
                             Spectrum*           spectrum);
 
 private:

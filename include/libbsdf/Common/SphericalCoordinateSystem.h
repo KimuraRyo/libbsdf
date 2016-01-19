@@ -15,8 +15,8 @@
 namespace lb {
 
 /*!
- * \class   SphericalCoordinateSystem
- * \brief   The SphericalCoordinateSystem class provides the functions of a spherical coordinate system.
+ * \struct  SphericalCoordinateSystem
+ * \brief   The SphericalCoordinateSystem struct provides the functions of a spherical coordinate system.
  *
  * The coordinate system has four angle parameters.
  *   - \a inTheta: the polar angle of an incoming direction
@@ -26,9 +26,8 @@ namespace lb {
  * 
  * \a inPhi isn't used for isotropic BRDFs.
  */
-class SphericalCoordinateSystem
+struct SphericalCoordinateSystem
 {
-public:
     /*!
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.
@@ -128,7 +127,8 @@ inline void SphericalCoordinateSystem::fromXyz(const Vec3& dir, float* theta, fl
         *phi += 2.0f * PI_F;
     }
 
-    assert(!std::isnan(*theta) && !std::isnan(*phi));
+    assert(!std::isnan(*theta) && !std::isnan(*phi) &&
+           !std::isinf(*theta) && !std::isinf(*phi));
 }
 
 } // namespace lb

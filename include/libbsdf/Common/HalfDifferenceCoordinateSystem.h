@@ -17,8 +17,8 @@
 namespace lb {
 
 /*!
- * \class   HalfDifferenceCoordinateSystem
- * \brief   The HalfDifferenceCoordinateSystem class provides the functions of a half difference coordinate system.
+ * \struct  HalfDifferenceCoordinateSystem
+ * \brief   The HalfDifferenceCoordinateSystem struct provides the functions of a half difference coordinate system.
  *
  * See Rusinkiewicz, S. 1998. A New Change of Variables for Efficient BRDF Representation.
  *
@@ -30,9 +30,8 @@ namespace lb {
  *
  * \a diff is an abbreviation for difference. \a halfPhi isn't used for isotropic BRDFs.
  */
-class HalfDifferenceCoordinateSystem
+struct HalfDifferenceCoordinateSystem
 {
-public:
     /*!
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.

@@ -30,16 +30,35 @@ public:
     SampleSet2D(int         numTheta,
                 int         numPhi,
                 ColorModel  colorModel = RGB_MODEL,
-                int         numWavelengths = 3);
+                int         numWavelengths = 3,
+                bool        equalIntervalAngles = false);
 
     /*! Gets the spectrum at a direction. */
     Spectrum getSpectrum(const Vec3& inDir) const;
 
-    /*! Gets the spectrum at a set of angle indices. */
-    Spectrum& getSpectrum(int thetaIndex, int phiIndex = 0);
+    /*! Gets the spectrum at a set of angles. */
+    Spectrum getSpectrum(float theta, float phi) const;
+
+    /*! Gets the spectrum at a set of angles. */
+    Spectrum getSpectrum(float theta, float phi);
+
+    /*! Gets the spectrum at a polar angle. */
+    Spectrum getSpectrum(float theta) const;
+
+    /*! Gets the spectrum at a polar angle. */
+    Spectrum getSpectrum(float theta);
 
     /*! Gets the spectrum at a set of angle indices. */
-    const Spectrum& getSpectrum(int thetaIndex, int phiIndex = 0) const;
+    Spectrum& getSpectrum(int thetaIndex, int phiIndex);
+
+    /*! Gets the spectrum at a set of angle indices. */
+    const Spectrum& getSpectrum(int thetaIndex, int phiIndex) const;
+
+    /*! Gets the spectrum at a angle indice. */
+    Spectrum& getSpectrum(int thetaIndex);
+
+    /*! Gets the spectrum at a angle indice. */
+    const Spectrum& getSpectrum(int thetaIndex) const;
 
     /*! Sets the spectrum at a set of angle indices. */
     void setSpectrum(int thetaIndex, int phiIndex, const Spectrum& spectrum);
@@ -119,6 +138,34 @@ inline Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
     return sp;
 }
 
+inline Spectrum SampleSet2D::getSpectrum(float theta, float phi) const
+{
+    Spectrum sp;
+    LinearInterpolator::getSpectrum(*this, theta, phi, &sp);
+    return sp;
+}
+
+inline Spectrum SampleSet2D::getSpectrum(float theta, float phi)
+{
+    Spectrum sp;
+    LinearInterpolator::getSpectrum(*this, theta, phi, &sp);
+    return sp;
+}
+
+inline Spectrum SampleSet2D::getSpectrum(float theta) const
+{
+    Spectrum sp;
+    LinearInterpolator::getSpectrum(*this, theta, &sp);
+    return sp;
+}
+
+inline Spectrum SampleSet2D::getSpectrum(float theta)
+{
+    Spectrum sp;
+    LinearInterpolator::getSpectrum(*this, theta, &sp);
+    return sp;
+}
+
 inline Spectrum& SampleSet2D::getSpectrum(int thetaIndex, int phiIndex)
 {
     return spectra_.at(thetaIndex + numTheta_ * phiIndex);
@@ -127,6 +174,16 @@ inline Spectrum& SampleSet2D::getSpectrum(int thetaIndex, int phiIndex)
 inline const Spectrum& SampleSet2D::getSpectrum(int thetaIndex, int phiIndex) const
 {
     return spectra_.at(thetaIndex + numTheta_ * phiIndex);
+}
+
+inline Spectrum& SampleSet2D::getSpectrum(int thetaIndex)
+{
+    return spectra_.at(thetaIndex);
+}
+
+inline const Spectrum& SampleSet2D::getSpectrum(int thetaIndex) const
+{
+    return spectra_.at(thetaIndex);
 }
 
 inline void SampleSet2D::setSpectrum(int thetaIndex, int phiIndex, const Spectrum& spectrum)
@@ -140,11 +197,13 @@ inline float SampleSet2D::getPhi(int index)   const { return phiAngles_[index]; 
 inline void SampleSet2D::setTheta(int index, float angle)
 {
     thetaAngles_[index] = clamp(angle, 0.0f, SphericalCoordinateSystem::MAX_ANGLE0);
+    equalIntervalTheta_ = isEqualInterval(thetaAngles_);
 }
 
 inline void SampleSet2D::setPhi(int index, float angle)
 {
     phiAngles_[index] = clamp(angle, 0.0f, SphericalCoordinateSystem::MAX_ANGLE1);
+    equalIntervalPhi_ = isEqualInterval(phiAngles_);
 }
 
 inline Arrayf& SampleSet2D::getThetaArray() { return thetaAngles_; }

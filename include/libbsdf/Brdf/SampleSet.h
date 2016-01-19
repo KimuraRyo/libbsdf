@@ -80,15 +80,15 @@ public:
     void setAngle2(int index, float angle); /*!< Sets the angle2 at an index. */
     void setAngle3(int index, float angle); /*!< Sets the angle3 at an index. */
 
-    Arrayf& getAngles0(); /*!< Gets the array of angles0. */
-    Arrayf& getAngles1(); /*!< Gets the array of angles1. */
-    Arrayf& getAngles2(); /*!< Gets the array of angles2. */
-    Arrayf& getAngles3(); /*!< Gets the array of angles3. */
+    Arrayf& getAngles0(); /*!< Gets The array of angle0. */
+    Arrayf& getAngles1(); /*!< Gets The array of angle1. */
+    Arrayf& getAngles2(); /*!< Gets The array of angle2. */
+    Arrayf& getAngles3(); /*!< Gets The array of angle3. */
 
-    const Arrayf& getAngles0() const; /*!< Gets the array of angles0. */
-    const Arrayf& getAngles1() const; /*!< Gets the array of angles1. */
-    const Arrayf& getAngles2() const; /*!< Gets the array of angles2. */
-    const Arrayf& getAngles3() const; /*!< Gets the array of angles3. */
+    const Arrayf& getAngles0() const; /*!< Gets The array of angle0. */
+    const Arrayf& getAngles1() const; /*!< Gets The array of angle1. */
+    const Arrayf& getAngles2() const; /*!< Gets The array of angle2. */
+    const Arrayf& getAngles3() const; /*!< Gets The array of angle3. */
 
     int getNumAngles0() const; /*!< Gets the number of angles0. */
     int getNumAngles1() const; /*!< Gets the number of angles1. */
@@ -121,6 +121,12 @@ public:
     /*! Gets the number of wavelengths. */
     int getNumWavelengths() const;
 
+    /*!
+     * Validates spectra, angles, and wavelengths.
+     * Returns false if the data contains positive or negative infinity, or NaN.
+     */
+    bool validate() const;
+
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
 
@@ -151,10 +157,10 @@ private:
 
     SpectrumList spectra_; /*!< The list of spectrum for each pair of incoming and outgoing directions. */
 
-    Arrayf angles0_; /*!< The array of angles0. */
-    Arrayf angles1_; /*!< The array of angles1. */
-    Arrayf angles2_; /*!< The array of angles2. */
-    Arrayf angles3_; /*!< The array of angles3. */
+    Arrayf angles0_; /*!< The array of angle0. */
+    Arrayf angles1_; /*!< The array of angle1. */
+    Arrayf angles2_; /*!< The array of angle2. */
+    Arrayf angles3_; /*!< The array of angle3. */
 
     int numAngles0_; /*!< The number of angles0. */
     int numAngles1_; /*!< The number of angles1. */

@@ -15,7 +15,8 @@ using namespace lb;
 SampleSet2D::SampleSet2D(int        numTheta,
                          int        numPhi,
                          ColorModel colorModel,
-                         int        numWavelengths)
+                         int        numWavelengths,
+                         bool       equalIntervalAngles)
                          : equalIntervalTheta_(false),
                            equalIntervalPhi_(false)
 {
@@ -29,8 +30,15 @@ SampleSet2D::SampleSet2D(int        numTheta,
     int numSamples = numTheta * numPhi;
     spectra_.resize(numSamples);
 
-    thetaAngles_.resize(numTheta);
-    phiAngles_.resize(numPhi);
+    if (equalIntervalAngles) {
+        thetaAngles_ = Arrayf::LinSpaced(numTheta, 0.0, SphericalCoordinateSystem::MAX_ANGLE0);
+        phiAngles_   = Arrayf::LinSpaced(numPhi,   0.0, SphericalCoordinateSystem::MAX_ANGLE1);
+        updateAngleAttributes();
+    }
+    else {
+        thetaAngles_.resize(numTheta);
+        phiAngles_.resize(numPhi);
+    }
 
     if (colorModel == MONOCHROMATIC_MODEL) {
         numWavelengths = 1;

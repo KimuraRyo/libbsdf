@@ -30,9 +30,6 @@ public:
     template <typename T>
     static Vec3 spectrumToXyz(const T& spectrum, const T& wavelengths, int numSamples);
 
-    /*! Converts from CIE-XYZ to sRGB. */
-    static Vec3f xyzToSrgb(const Vec3f& xyz);
-
     /*! Converts from a wavelength to sRGB. Negative or more than 1.0 sRGB values are clamped. */
     static Vec3 wavelengthToSrgb(float wavelength);
 
@@ -85,15 +82,6 @@ Vec3 SpectrumUtility::spectrumToXyz(const T& spectrum, const T& wavelengths, int
     sumXyz /= 2.0;
 
     return Vec3f(sumXyz.cast<Vec3f::Scalar>());
-}
-
-inline Vec3f SpectrumUtility::xyzToSrgb(const Vec3f& xyz)
-{
-    Eigen::Matrix3f mat;
-    mat << CieData::XYZ_sRGB[0], CieData::XYZ_sRGB[1], CieData::XYZ_sRGB[2],
-           CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
-           CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
-    return mat * xyz;
 }
 
 inline Vec3 SpectrumUtility::wavelengthToSrgb(float wavelength)

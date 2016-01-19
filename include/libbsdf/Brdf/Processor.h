@@ -25,7 +25,7 @@ namespace lb {
  *
  * BRDFs must have the same wavelengths.
  */
-bool initizlizeSpectra(const Brdf& baseBrdf, Brdf* brdf);
+bool initializeSpectra(const Brdf& baseBrdf, Brdf* brdf);
     
 /*!
  * \brief Divides a BRDF by the cosine of the outgoing polar angle.
@@ -48,7 +48,7 @@ void fixEnergyConservation(SpecularCoordinatesBrdf* brdf);
 void copySpectraFromPhiOfZeroTo2PI(Brdf* brdf);
 
 /*! Converts the color model from CIE-XYZ to sRGB. */
-void convertFromXyzToSrgb(SampleSet* samples);
+void xyzToSrgb(SampleSet* samples);
 
 /*! Fills spectra of samples with a value. */
 void fillSpectra(SampleSet* samples, float value);

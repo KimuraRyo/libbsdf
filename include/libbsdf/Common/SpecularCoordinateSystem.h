@@ -17,8 +17,8 @@
 namespace lb {
 
 /*!
- * \class   SpecularCoordinateSystem
- * \brief   The SpecularCoordinateSystem class provides the functions of a specular coordinate system.
+ * \struct  SpecularCoordinateSystem
+ * \brief   The SpecularCoordinateSystem struct provides the functions of a specular coordinate system.
  *
  * The coordinate system has four angle parameters.
  *   - \a inTheta: the polar angle of an incoming direction
@@ -28,9 +28,8 @@ namespace lb {
  *
  * \a spec is an abbreviation for specular. \a inPhi isn't used for isotropic BRDFs.
  */
-class SpecularCoordinateSystem
+struct SpecularCoordinateSystem
 {
-public:
     /*!
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.

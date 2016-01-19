@@ -26,6 +26,12 @@ class Brdf
 public:
     virtual ~Brdf();
 
+    /*! Gets the sample set including angles, wavelengths, and spectra. */
+    SampleSet* getSampleSet();
+
+    /*! Gets the sample set including angles, wavelengths, and spectra. */
+    const SampleSet* getSampleSet() const;
+
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
     virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const = 0;
 
@@ -39,11 +45,26 @@ public:
     virtual void getInOutDirection(int index0, int index1, int index2, int index3,
                                    Vec3* inDir, Vec3* outDir) const = 0;
 
-    /*! Gets the sample set including angles, wavelengths, and spectra. */
-    SampleSet* getSampleSet();
+    /*!
+     * Converts from four angles to incoming and outgoing directions and
+     * assigns them to \a inDir and \a outDir.
+     */
+    virtual void toXyz(float angle0, float angle1, float angle2, float angle3,
+                       Vec3* inDir, Vec3* outDir) const = 0;
 
-    /*! Gets the sample set including angles, wavelengths, and spectra. */
-    const SampleSet* getSampleSet() const;
+    /*!
+     * Converts from incoming and outgoing directions to four angles and
+     * assigns them to \a angle0, \a angle1, \a angle2, and \a angle3.
+     */
+    virtual void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                         float* angle0, float* angle1, float* angle2, float* angle3) const = 0;
+
+    /*!
+     * Converts from incoming and outgoing directions to three angles for an isotropic BRDF and
+     * assigns them to \a angle0, \a angle2, and \a angle3.
+     */
+    virtual void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                         float* angle0, float* angle2, float* angle3) const = 0;
 
     virtual std::string getAngle0Name() const = 0; /*!< Gets the name of angle0. */
     virtual std::string getAngle1Name() const = 0; /*!< Gets the name of angle1. */

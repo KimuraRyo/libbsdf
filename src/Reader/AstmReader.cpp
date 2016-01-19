@@ -225,10 +225,10 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     SampleSet* ss = brdf->getSampleSet();
 
     // Set angles.
-    copyArray(inThetaAngles,  ss->getAngles0());
-    copyArray(inPhiAngles,    ss->getAngles1());
-    copyArray(outThetaAngles, ss->getAngles2());
-    copyArray(outPhiAngles,   ss->getAngles3());
+    copyArray(inThetaAngles,  &ss->getAngles0());
+    copyArray(inPhiAngles,    &ss->getAngles1());
+    copyArray(outThetaAngles, &ss->getAngles2());
+    copyArray(outPhiAngles,   &ss->getAngles3());
 
     // Set wavelengths.
     for (int i = 0; i < static_cast<int>(wavelengths.size()); ++i) {

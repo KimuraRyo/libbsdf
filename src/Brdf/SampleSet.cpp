@@ -47,6 +47,88 @@ SampleSet::SampleSet(int        numAngles0,
     }
 }
 
+bool SampleSet::validate() const
+{
+    bool valid = true;
+
+    // Spectra
+    bool spectraValid = true;
+    for (int i0 = 0; i0 < numAngles0_; ++i0) {
+    for (int i1 = 0; i1 < numAngles1_; ++i1) {
+    for (int i2 = 0; i2 < numAngles2_; ++i2) {
+    for (int i3 = 0; i3 < numAngles3_; ++i3) {
+        const Spectrum& sp = getSpectrum(i0, i1, i2, i3);
+        
+        if (!sp.allFinite()) {
+            spectraValid = false;
+            if (sp.hasNaN()) {
+                std::cout
+                    << "[SampleSet::validate] The spectrum contains NaN values at ("
+                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ")."
+                    << std::endl;
+            }
+            else {
+                std::cout
+                << "[SampleSet::validate] The spectrum contains +/-INF values at ("
+                << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ")."
+                << std::endl;
+            }
+        }
+    }}}}
+
+    if (spectraValid) {
+        std::cout << "[SampleSet::validate] Spectra are valid." << std::endl;
+    }
+    else {
+        valid = false;
+        std::cout << "[SampleSet::validate] Invalid spectra are found." << std::endl;
+    }
+    
+    // Angles
+    if (angles0_.allFinite()) {
+        std::cout << "[SampleSet::validate] The array of angle0 is valid." << std::endl;
+    }
+    else {
+        valid = false;
+        std::cout << "[SampleSet::validate] The invalid angle0(s) is found." << std::endl;
+    }
+
+    if (angles1_.allFinite()) {
+        std::cout << "[SampleSet::validate] The array of angle1 is valid." << std::endl;
+    }
+    else {
+        valid = false;
+        std::cout << "[SampleSet::validate] The invalid angle1(s) is found." << std::endl;
+    }
+
+    if (angles2_.allFinite()) {
+        std::cout << "[SampleSet::validate] The array of angle2 is valid." << std::endl;
+    }
+    else {
+        valid = false;
+        std::cout << "[SampleSet::validate] The invalid angle2(s) is found." << std::endl;
+    }
+
+    if (angles3_.allFinite()) {
+        std::cout << "[SampleSet::validate] The array of angle3 is valid." << std::endl;
+    }
+    else {
+        valid = false;
+        std::cout << "[SampleSet::validate] The invalid angle3(s) is found." << std::endl;
+    }
+
+    // Wavelengths
+    if (wavelengths_.allFinite()) {
+        std::cout << "[SampleSet::validate] Wavelengths are valid." << std::endl;
+    }
+    else {
+        valid = false;
+        std::cout << "[SampleSet::validate] The invalid wavelength(s) is found." << std::endl;
+    }
+
+    return valid;
+}
+
 void SampleSet::updateAngleAttributes()
 {
     updateEqualIntervalAngles();

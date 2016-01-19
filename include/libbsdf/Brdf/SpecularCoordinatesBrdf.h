@@ -115,6 +115,7 @@ inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
     return sp;
 }
 
+
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
                                                      float specTheta, float specPhi) const
 {

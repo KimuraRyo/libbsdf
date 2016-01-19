@@ -71,6 +71,27 @@ public:
     void getInOutDirection(int index0, int index1, int index2, int index3,
                            Vec3* inDir, Vec3* outDir) const;
 
+    /*!
+     * Converts from four angles to incoming and outgoing directions and
+     * assigns them to \a inDir and \a outDir.
+     */
+    void toXyz(float angle0, float angle1, float angle2, float angle3,
+               Vec3* inDir, Vec3* outDir) const;
+
+    /*!
+     * Converts from incoming and outgoing directions to four angles and
+     * assigns them to \a angle0, \a angle1, \a angle2, and \a angle3.
+     */
+    void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                 float* angle0, float* angle1, float* angle2, float* angle3) const;
+
+    /*!
+     * Converts from incoming and outgoing directions to three angles for an isotropic BRDF and
+     * assigns them to \a angle0, \a angle2, and \a angle3.
+     */
+    void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                 float* angle0, float* angle2, float* angle3) const;
+
     std::string getAngle0Name() const; /*!< Gets a name of angle0. */
     std::string getAngle1Name() const; /*!< Gets a name of angle1. */
     std::string getAngle2Name() const; /*!< Gets a name of angle2. */
@@ -100,7 +121,7 @@ private:
     void initializeEqualIntervalAngles();
 
     /*! Initializes spectra using lb::Brdf. */
-    void initializeSpecta(const Brdf& brdf);
+    void initializeSpectra(const Brdf& brdf);
 };
 
 template <typename CoordSysT>
@@ -141,7 +162,7 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&     brdf,
     samples_->getWavelengths() = ss->getWavelengths();
 
     samples_->updateAngleAttributes();
-    initializeSpecta(brdf);
+    initializeSpectra(brdf);
 }
 
 template <typename CoordSysT>
@@ -160,7 +181,7 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf& brdf,
     initializeEqualIntervalAngles();
     samples_->getWavelengths() = ss->getWavelengths();
 
-    initializeSpecta(brdf);
+    initializeSpectra(brdf);
 }
 
 template <typename CoordSysT>
@@ -192,6 +213,30 @@ void CoordinatesBrdf<CoordSysT>::getInOutDirection(int index0, int index1, int i
                      samples_->getAngle2(index2),
                      samples_->getAngle3(index3),
                      inDir, outDir);
+
+    inDir->normalize();
+    outDir->normalize();
+}
+
+template <typename CoordSysT>
+void CoordinatesBrdf<CoordSysT>::toXyz(float angle0, float angle1, float angle2, float angle3,
+                                       Vec3* inDir, Vec3* outDir) const
+{
+    CoordSysT::toXyz(angle0, angle1, angle2, angle3, inDir, outDir);
+}
+
+template <typename CoordSysT>
+void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                         float* angle0, float* angle1, float* angle2, float* angle3) const
+{
+    CoordSysT::fromXyz(inDir, outDir, angle0, angle1, angle2, angle3);
+}
+
+template <typename CoordSysT>
+void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                         float* angle0, float* angle2, float* angle3) const
+{
+    CoordSysT::fromXyz(inDir, outDir, angle0, angle2, angle3);
 }
 
 template <typename CoordSysT>
@@ -228,20 +273,20 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
     Arrayf angles2 = samples_->getAngles2();
     Arrayf angles3 = samples_->getAngles3();
 
-    if (angles0[0] != 0.0f) { appendElement(angles0, 0.0f); }
-    if (angles1[0] != 0.0f) { appendElement(angles1, 0.0f); }
-    if (angles2[0] != 0.0f) { appendElement(angles2, 0.0f); }
-    if (angles3[0] != 0.0f) { appendElement(angles3, 0.0f); }
+    if (angles0[0] != 0.0f) { appendElement(&angles0, 0.0f); }
+    if (angles1[0] != 0.0f) { appendElement(&angles1, 0.0f); }
+    if (angles2[0] != 0.0f) { appendElement(&angles2, 0.0f); }
+    if (angles3[0] != 0.0f) { appendElement(&angles3, 0.0f); }
 
     const float maxAngle0 = CoordSysT::MAX_ANGLE0;
     const float maxAngle1 = CoordSysT::MAX_ANGLE1;
     const float maxAngle2 = CoordSysT::MAX_ANGLE2;
     const float maxAngle3 = CoordSysT::MAX_ANGLE3;
 
-    if (angles0.size() > 1 && angles0[angles0.size() - 1] != maxAngle0) { appendElement(angles0, maxAngle0); }
-    if (angles1.size() > 1 && angles1[angles1.size() - 1] != maxAngle1) { appendElement(angles1, maxAngle1); }
-    if (angles2.size() > 1 && angles2[angles2.size() - 1] != maxAngle2) { appendElement(angles2, maxAngle2); }
-    if (angles3.size() > 1 && angles3[angles3.size() - 1] != maxAngle3) { appendElement(angles3, maxAngle3); }
+    if (angles0.size() > 1 && angles0[angles0.size() - 1] != maxAngle0) { appendElement(&angles0, maxAngle0); }
+    if (angles1.size() > 1 && angles1[angles1.size() - 1] != maxAngle1) { appendElement(&angles1, maxAngle1); }
+    if (angles2.size() > 1 && angles2[angles2.size() - 1] != maxAngle2) { appendElement(&angles2, maxAngle2); }
+    if (angles3.size() > 1 && angles3[angles3.size() - 1] != maxAngle3) { appendElement(&angles3, maxAngle3); }
 
     bool sizeEqual = (angles0.size() != samples_->getNumAngles0() ||
                       angles1.size() != samples_->getNumAngles1() ||
@@ -262,7 +307,7 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
         samples_->getAngles3() = angles3;
 
         samples_->updateAngleAttributes();
-        initializeSpecta(origBrdf);
+        initializeSpectra(origBrdf);
 
         expanded = true;
     }
@@ -330,7 +375,7 @@ void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::initializeSpecta(const Brdf& brdf)
+void CoordinatesBrdf<CoordSysT>::initializeSpectra(const Brdf& brdf)
 {
     for (int i0 = 0; i0 < samples_->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < samples_->getNumAngles1(); ++i1) {
@@ -338,8 +383,8 @@ void CoordinatesBrdf<CoordSysT>::initializeSpecta(const Brdf& brdf)
     for (int i3 = 0; i3 < samples_->getNumAngles3(); ++i3) {
         Vec3 inDir, outDir;
         getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-        fixDownwardDir(inDir);
-        fixDownwardDir(outDir);
+        fixDownwardDir(&inDir);
+        fixDownwardDir(&outDir);
 
         Spectrum sp = brdf.getSpectrum(inDir, outDir);
         samples_->setSpectrum(i0, i1, i2, i3, sp.cwiseMax(0.0));

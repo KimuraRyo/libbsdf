@@ -297,10 +297,10 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<Data*>&  
     
     SampleSet* ss = brdf->getSampleSet();
 
-    copyArray(inThetaDegrees,  ss->getAngles0());
+    copyArray(inThetaDegrees,  &ss->getAngles0());
     brdf->setInPhi(0, 0.0f);
-    copyArray(outThetaDegrees, ss->getAngles2());
-    copyArray(outPhiDegrees,   ss->getAngles3());
+    copyArray(outThetaDegrees, &ss->getAngles2());
+    copyArray(outPhiDegrees,   &ss->getAngles3());
 
     ss->getAngles0() = toRadians(ss->getAngles0());
     ss->getAngles2() = toRadians(ss->getAngles2());

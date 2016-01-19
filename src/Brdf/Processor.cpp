@@ -20,7 +20,7 @@
 
 using namespace lb;
 
-bool lb::initizlizeSpectra(const Brdf& baseBrdf, Brdf* brdf)
+bool lb::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
 {
     const SampleSet* baseSs = baseBrdf.getSampleSet();
     SampleSet* ss = brdf->getSampleSet();
@@ -30,7 +30,7 @@ bool lb::initizlizeSpectra(const Brdf& baseBrdf, Brdf* brdf)
     if (baseSs->getColorModel() != ss->getColorModel()) {
         same = false;
         std::cerr
-            << "[initizlizeSpectra] Color models don't match: "
+            << "[initializeSpectra] Color models don't match: "
             << baseSs->getColorModel() << ", " << ss->getColorModel()
             << std::endl;
     }
@@ -38,7 +38,7 @@ bool lb::initizlizeSpectra(const Brdf& baseBrdf, Brdf* brdf)
     if (!baseSs->getWavelengths().isApprox(ss->getWavelengths())) {
         same = false;
         std::cerr
-            << "[initizlizeSpectra] Wavelengths don't match: "
+            << "[initializeSpectra] Wavelengths don't match: "
             << baseSs->getWavelengths() << ", " << ss->getWavelengths()
             << std::endl;
     }
@@ -260,11 +260,11 @@ void lb::copySpectraFromPhiOfZeroTo2PI(Brdf* brdf)
     }
 }
 
-void lb::convertFromXyzToSrgb(SampleSet* samples)
+void lb::xyzToSrgb(SampleSet* samples)
 {
     ColorModel cm = samples->getColorModel();
     if (cm != XYZ_MODEL) {
-        std::cerr << "[convertFromXyzToSrgb] Not CIE-XYZ model: " << cm << std::endl;
+        std::cerr << "[xyzToSrgb] Not CIE-XYZ model: " << cm << std::endl;
         return;
     }
 
@@ -273,7 +273,7 @@ void lb::convertFromXyzToSrgb(SampleSet* samples)
     for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < samples->getNumAngles3(); ++i3) {
         const Spectrum& xyz = samples->getSpectrum(i0, i1, i2, i3);
-        Spectrum rgb = SpectrumUtility::xyzToSrgb(xyz);
+        Spectrum rgb = xyzToSrgb(xyz);
         samples->setSpectrum(i0, i1, i2, i3, rgb);
     }}}}
 
