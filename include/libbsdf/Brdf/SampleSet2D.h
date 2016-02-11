@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,8 +10,8 @@
 #define LIBBSDF_SAMPLE_SET_2D_H
 
 #include <libbsdf/Brdf/LinearInterpolator.h>
-#include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/SphericalCoordinateSystem.h>
 #include <libbsdf/Common/Vector.h>
 
 namespace lb {
@@ -130,13 +130,6 @@ private:
 
     Arrayf wavelengths_; /*!< The array of wavelengths. */
 };
-
-inline Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
-{
-    Spectrum sp;
-    Sampler::getSpectrum<LinearInterpolator>(*this, inDir, &sp);
-    return sp;
-}
 
 inline Spectrum SampleSet2D::getSpectrum(float theta, float phi) const
 {

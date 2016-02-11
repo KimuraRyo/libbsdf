@@ -1,5 +1,5 @@
 ## =================================================================== ##
-## Copyright (C) 2014-2015 Kimura Ryo                                  ##
+## Copyright (C) 2014-2016 Kimura Ryo                                  ##
 ##                                                                     ##
 ## This Source Code Form is subject to the terms of the Mozilla Public ##
 ## License, v. 2.0. If a copy of the MPL was not distributed with this ##
@@ -28,9 +28,10 @@ endforeach()
 
 include_directories(include)
 
-set(CMAKE_MODULE_PATH "${EIGEN3_INCLUDE_DIR}/cmake")
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
+if(NOT EIGEN3_INCLUDE_DIR)
+    MESSAGE(FATAL_ERROR "Please set the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+endif()
+include_directories("${EIGEN3_INCLUDE_DIR}")
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

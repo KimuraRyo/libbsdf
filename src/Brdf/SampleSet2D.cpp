@@ -8,6 +8,8 @@
 
 #include <libbsdf/Brdf/SampleSet2D.h>
 
+#include <libbsdf/Brdf/Sampler.h>
+
 #include <iostream>
 
 using namespace lb;
@@ -61,6 +63,13 @@ SampleSet2D::SampleSet2D(int        numTheta,
         colorModel != SPECTRAL_MODEL) {
         wavelengths_ = Arrayf::Zero(numWavelengths);
     }
+}
+
+Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
+{
+    Spectrum sp;
+    Sampler::getSpectrum<LinearInterpolator>(*this, inDir, &sp);
+    return sp;
 }
 
 void SampleSet2D::updateAngleAttributes()

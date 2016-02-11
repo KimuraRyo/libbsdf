@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -99,7 +99,8 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
         Vec2 v3(pos3, array3[i]);
         CentripetalCatmullRomSpline ccrs(v0, v1, v2, v3);
 
-        (*array)[i] = static_cast<T::Scalar>(ccrs.interpolateY(pos));
+        typedef typename T::Scalar ScalarType;
+        (*array)[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));
     }
 }
 

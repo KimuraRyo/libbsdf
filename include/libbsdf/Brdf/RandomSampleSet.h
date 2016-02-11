@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
+#include <libbsdf/Common/SpecularCoordinateSystem.h>
 #include <libbsdf/Common/Global.h>
 
 namespace lb {

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -18,8 +18,6 @@
 
 #include <Eigen/Core>
 
-#include <libbsdf/Common/Array.h>
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -31,7 +29,7 @@ const float PI_2_F = 1.57079632679489661923f;
 const float EPSILON_F = std::numeric_limits<float>::epsilon();
 
 /*! \brief The data type of a spectrum. */
-typedef Arrayf Spectrum;
+typedef Eigen::ArrayXf Spectrum;
 
 /*! \brief The data type of spectra. */
 typedef std::vector<Spectrum, Eigen::aligned_allocator<Spectrum> > SpectrumList;
