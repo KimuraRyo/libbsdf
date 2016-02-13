@@ -8,9 +8,9 @@ See the LICENSE file.
 
 ## Make it build on OSX 10.10 with MacPorts
 * ports to install:
-** eigen3
-** qt4-mac
-** OpenSceneGraph (this needs an upgrade for the current version disables Qt support)
+  * eigen3
+  * qt4-mac
+  * OpenSceneGraph (this needs an upgrade for the current version disables Qt support)
 * ``cmake -DEIGEN3_INCLUDE_DIR=/opt/local/include/eigen3 -DCMAKE_CXX_FLAGS=-std=c++11 ..``
 
 
