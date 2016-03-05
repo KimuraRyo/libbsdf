@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -30,7 +30,7 @@ bool lb::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
     if (baseSs->getColorModel() != ss->getColorModel()) {
         same = false;
         std::cerr
-            << "[initializeSpectra] Color models don't match: "
+            << "[initializeSpectra] Color models do not match: "
             << baseSs->getColorModel() << ", " << ss->getColorModel()
             << std::endl;
     }
@@ -38,7 +38,7 @@ bool lb::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
     if (!baseSs->getWavelengths().isApprox(ss->getWavelengths())) {
         same = false;
         std::cerr
-            << "[initializeSpectra] Wavelengths don't match: "
+            << "[initializeSpectra] Wavelengths do not match: "
             << baseSs->getWavelengths() << ", " << ss->getWavelengths()
             << std::endl;
     }
@@ -280,15 +280,19 @@ void lb::xyzToSrgb(SampleSet* samples)
     samples->setColorModel(RGB_MODEL);
 }
 
-void lb::fillSpectra(SampleSet* samples, float value)
+void lb::fillSpectra(SampleSet* samples, Spectrum::Scalar value)
 {
-    lb::SpectrumList& spectra = samples->getSpectra();
+    fillSpectra(samples->getSpectra(), value);
+}
+
+void lb::fillSpectra(SpectrumList& spectra, Spectrum::Scalar value)
+{
     for (auto it = spectra.begin(); it != spectra.end(); ++it) {
         it->fill(value);
     }
 }
 
-void lb::multiplySpectra(SampleSet* samples, float value)
+void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
 {
     lb::SpectrumList& spectra = samples->getSpectra();
     for (auto it = spectra.begin(); it != spectra.end(); ++it) {
@@ -296,7 +300,7 @@ void lb::multiplySpectra(SampleSet* samples, float value)
     }
 }
 
-void lb::clampNegativeSpectra(SampleSet* samples)
+void lb::fixNegativeSpectra(SampleSet* samples)
 {
     lb::SpectrumList& spectra = samples->getSpectra();
     for (auto it = spectra.begin(); it != spectra.end(); ++it) {

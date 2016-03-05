@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -17,11 +17,13 @@ using namespace lb;
 
 HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileName)
 {
-    std::ifstream fin(fileName.c_str(), std::ifstream::binary);
-    if (fin.fail()) {
+    std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
+    if (ifs.fail()) {
         std::cerr << "[MerlBinaryReader::read] Could not open: " << fileName << std::endl;
         return 0;
     }
+
+    std::ios_base::sync_with_stdio(false);
 
     const int numHalfTheta = 90;
     const int numDiffTheta = 90;
@@ -30,20 +32,20 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
 
     // Read a header.
     int dims[3];
-    fin.read(reinterpret_cast<char*>(dims), sizeof(int) * 3);
+    ifs.read(reinterpret_cast<char*>(dims), sizeof(int) * 3);
 
     int numSamplesInFile = dims[0] * dims[1] * dims[2];
     if (numSamplesInFile != numSamples) {
         std::cerr
-            << "[MerlBinaryReader::read] Dimensions don't match: " << numSamplesInFile << ", " << numSamples
+            << "[MerlBinaryReader::read] Dimensions do not match: " << numSamplesInFile << ", " << numSamples
             << std::endl;
         return 0;
     }
 
     // Read data.
     double* samples = new double[numSamples * 3];
-    fin.read(reinterpret_cast<char*>(samples), sizeof(double) * numSamples * 3);
-    if (fin.fail()) {
+    ifs.read(reinterpret_cast<char*>(samples), sizeof(double) * numSamples * 3);
+    if (ifs.fail()) {
         std::cerr << "[MerlBinaryReader::read] Invalid format." << std::endl;
         delete[] samples;
     }

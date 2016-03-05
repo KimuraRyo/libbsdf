@@ -21,7 +21,7 @@ class SampleSet2D;
  * \class   CatmullRomSplineInterpolator
  * \brief   The CatmullRomSplineInterpolator class provides the functions for Catmull-Rom spline interpolation.
  *
- * \a angle1 isn't used for isotropic BRDFs.
+ * \a angle1 is not used for isotropic BRDFs.
  */
 class CatmullRomSplineInterpolator
 {

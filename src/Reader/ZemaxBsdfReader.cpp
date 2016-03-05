@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,8 +16,9 @@ using namespace lb;
 
 SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, DataType* dataType)
 {
-    std::ifstream fin(fileName.c_str());
-    if (fin.fail()) {
+    // std::ios_base::binary is used to read line endings of CR+LF and LF.
+    std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
+    if (ifs.fail()) {
         std::cerr << "[ZemaxBsdfReader::read] Could not open: " << fileName << std::endl;
         return 0;
     }
@@ -34,20 +35,20 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
 
     int numChannels = 1;
 
-    ignoreCommentLines(fin);
-    std::ifstream::pos_type pos = fin.tellg();
+    ignoreCommentLines(ifs);
+    std::ifstream::pos_type pos = ifs.tellg();
 
     // Read a header.
     std::string headStr;
-    while (fin >> headStr) {
-        ignoreCommentLines(fin);
+    while (ifs >> headStr) {
+        ignoreCommentLines(ifs);
 
         if (headStr.empty()) {
             continue;
         }
         else if (headStr == "Symmetry") {
             std::string typeStr;
-            fin >> typeStr;
+            ifs >> typeStr;
 
             if (typeStr == "PlaneSymmetrical") {
                 symmetryType = PLANE_SYMMETRICAL;
@@ -65,7 +66,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         }
         else if (headStr == "SpectralContent") {
             std::string typeStr;
-            fin >> typeStr;
+            ifs >> typeStr;
 
             if (typeStr == "Monochrome") {
                 colorModel = MONOCHROMATIC_MODEL;
@@ -82,7 +83,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         }
         else if (headStr == "ScatterType") {
             std::string scatterStr;
-            fin >> scatterStr;
+            ifs >> scatterStr;
 
             if (scatterStr == "BRDF") {
                 *dataType = BRDF_DATA;
@@ -97,37 +98,37 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         }
         else if (headStr == "SampleRotation") {
             int numInPhi;
-            fin >> numInPhi;
+            ifs >> numInPhi;
             for (int i = 0; i < numInPhi; ++i) {
                 float angle;
-                fin >> angle;
+                ifs >> angle;
                 inPhiDegrees.push_back(angle);
             }
         }
         else if (headStr == "AngleOfIncidence") {
             int numInTheta;
-            fin >> numInTheta;
+            ifs >> numInTheta;
             for (int i = 0; i < numInTheta; ++i) {
                 float angle;
-                fin >> angle;
+                ifs >> angle;
                 inThetaDegrees.push_back(angle);
             }
         }
         else if (headStr == "ScatterAzimuth") {
             int numSpPhi;
-            fin >> numSpPhi;
+            ifs >> numSpPhi;
             for (int i = 0; i < numSpPhi; ++i) {
                 float angle;
-                fin >> angle;
+                ifs >> angle;
                 spPhiDegrees.push_back(angle);
             }
         }
         else if (headStr == "ScatterRadial") {
             int numSpTheta;
-            fin >> numSpTheta;
+            ifs >> numSpTheta;
             for (int i = 0; i < numSpTheta; ++i) {
                 float angle;
-                fin >> angle;
+                ifs >> angle;
                 spThetaDegrees.push_back(angle);
             }
         }
@@ -135,11 +136,11 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
                  headStr == "TristimulusX" ||
                  headStr == "TristimulusY" ||
                  headStr == "TristimulusZ") {
-            fin.seekg(pos, std::ios_base::beg);
+            ifs.seekg(pos, std::ios_base::beg);
             break;
         }
 
-        pos = fin.tellg();
+        pos = ifs.tellg();
     }
 
     if (inThetaDegrees.empty() ||
@@ -192,8 +193,8 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
     int inThIndex = 0;
     int inPhIndex = 0;
     std::string dataStr;
-    while (fin >> dataStr) {
-        ignoreCommentLines(fin);
+    while (ifs >> dataStr) {
+        ignoreCommentLines(ifs);
 
         if (dataStr.empty()) {
             continue;
@@ -212,12 +213,13 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
             inThIndex = 0;
         }
         else if (dataStr == "TIS") {
-            reader_utility::ignoreLine(fin);
+            reader_utility::ignoreLine(ifs);
 
             for (int spPhIndex = 0; spPhIndex < static_cast<int>(spPhiDegrees.size());   ++spPhIndex) {
             for (int spThIndex = 0; spThIndex < static_cast<int>(spThetaDegrees.size()); ++spThIndex) {
-                float brdfValue;
-                fin >> brdfValue;
+                std::string brdfValueStr;
+                ifs >> brdfValueStr;
+                float brdfValue = static_cast<float>(std::atof(brdfValueStr.c_str()));
 
                 Spectrum& sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
                 sp[wlIndex] = brdfValue;
@@ -232,7 +234,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
             ++inThIndex;
         }
 
-        if (fin.fail()) {
+        if (ifs.fail()) {
             std::cerr << "[ZemaxBsdfReader::read] Invalid format. Head of line: " << dataStr << std::endl;
             delete brdf;
             return 0;

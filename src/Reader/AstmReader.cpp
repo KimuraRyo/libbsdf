@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,8 +20,9 @@ using namespace lb;
 
 SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 {
-    std::ifstream fin(fileName.c_str(), std::ifstream::binary);
-    if (fin.fail()) {
+    // std::ios_base::binary is used to read line endings of CR+LF and LF.
+    std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
+    if (ifs.fail()) {
         std::cerr << "[AstmReader::read] Could not open: " << fileName << std::endl;
         return 0;
     }
@@ -33,20 +34,20 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
     // Read a header.
     std::string headStr;
-    while (fin >> headStr) {
+    while (ifs >> headStr) {
         if (headStr.empty()) {
             continue;
         }
         else if (headStr == "NUM_POINTS") {
             int numPoints;
-            fin >> numPoints;
+            ifs >> numPoints;
             std::cout << "[AstmReader::read] NUM_POINTS: " << numPoints << std::endl;
         }
         else if (headStr == "VARS") {
-            fin.ignore(1);
+            ifs.ignore(1);
 
             std::string varStr;
-            std::getline(fin, varStr);
+            std::getline(ifs, varStr);
             std::stringstream stream(varStr);
             std::string token;
             std::vector<std::string> varNames;
@@ -127,7 +128,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
     // Read data.
     std::string dataStr;
-    while (std::getline(fin, dataStr)) {
+    while (std::getline(ifs, dataStr)) {
         if (dataStr.empty() || dataStr.at(0) == '\r') continue;
 
         RandomSampleSet::AngleList angles;
@@ -141,9 +142,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 token.erase(token.size() - 1);
             }
 
-            std::stringstream stream(token);
-            float val;
-            stream >> val;
+            float val = static_cast<float>(std::atof(token.c_str()));
 
             if (count <= 3) {
                 if (val < 0.0f) {

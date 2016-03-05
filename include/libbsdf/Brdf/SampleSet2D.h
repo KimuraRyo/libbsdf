@@ -34,7 +34,7 @@ public:
                 bool        equalIntervalAngles = false);
 
     /*! Gets the spectrum at a direction. */
-    Spectrum getSpectrum(const Vec3& inDir) const;
+    Spectrum getSpectrum(const Vec3& dir) const;
 
     /*! Gets the spectrum at a set of angles. */
     Spectrum getSpectrum(float theta, float phi) const;
@@ -62,6 +62,15 @@ public:
 
     /*! Sets the spectrum at a set of angle indices. */
     void setSpectrum(int thetaIndex, int phiIndex, const Spectrum& spectrum);
+
+    /*! Gets all spectra. */
+    SpectrumList& getSpectra();
+
+    /*! Gets all spectra. */
+    const SpectrumList& getSpectra() const;
+
+    /*! Gets a direction at a set of angle indices. */
+    Vec3 getDirection(int thetaIndex, int phiIndex) const;
 
     float getTheta(int index) const; /*!< Gets the polar angle at an index. */
     float getPhi  (int index) const; /*!< Gets the azimuthal angle at an index. */
@@ -182,6 +191,14 @@ inline const Spectrum& SampleSet2D::getSpectrum(int thetaIndex) const
 inline void SampleSet2D::setSpectrum(int thetaIndex, int phiIndex, const Spectrum& spectrum)
 {
     spectra_.at(thetaIndex + numTheta_ * phiIndex) = spectrum;
+}
+
+inline       SpectrumList& SampleSet2D::getSpectra()       { return spectra_; }
+inline const SpectrumList& SampleSet2D::getSpectra() const { return spectra_; }
+
+inline Vec3 SampleSet2D::getDirection(int thetaIndex, int phiIndex) const
+{
+    return SphericalCoordinateSystem::toXyz(thetaAngles_[thetaIndex], phiAngles_[phiIndex]);
 }
 
 inline float SampleSet2D::getTheta(int index) const { return thetaAngles_[index]; }

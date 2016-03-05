@@ -28,7 +28,7 @@ namespace lb {
  *   - \a diffTheta: the polar angle of a difference vector
  *   - \a diffPhi: the azimuthal angle of a difference vector
  *
- * \a diff is an abbreviation for difference. \a halfPhi isn't used for isotropic BRDFs.
+ * \a diff is an abbreviation for difference. \a halfPhi is not used for isotropic BRDFs.
  */
 struct HalfDifferenceCoordinateSystem
 {

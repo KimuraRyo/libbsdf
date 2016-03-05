@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -24,7 +24,24 @@ namespace lb {
 class Brdf
 {
 public:
+    /*! Constructs a BRDF. */
+    Brdf(int        numAngles0,
+         int        numAngles1,
+         int        numAngles2,
+         int        numAngles3,
+         ColorModel colorModel = RGB_MODEL,
+         int        numWavelengths = 3);
+
+    /*! Constructs an empty BRDF. Brdf::samples_ must be initialized in a derived class. */
+    Brdf();
+
+    /*! Copies and constructs a BRDF. */
+    Brdf(const Brdf& brdf);
+
     virtual ~Brdf();
+
+    /*! Virtual copy constructor. */
+    virtual Brdf* clone() const = 0;
 
     /*! Gets the sample set including angles, wavelengths, and spectra. */
     SampleSet* getSampleSet();
@@ -81,20 +98,6 @@ public:
     virtual void clampAngles() = 0;
 
 protected:
-    /*! Constructs a BRDF. */
-    Brdf(int        numAngles0,
-         int        numAngles1,
-         int        numAngles2,
-         int        numAngles3,
-         ColorModel colorModel = RGB_MODEL,
-         int        numWavelengths = 3);
-
-    /*! Constructs an empty BRDF. Brdf::samples_ must be initialized in a derived class. */
-    Brdf();
-
-    /*! Copies and constructs a BRDF. */
-    Brdf(const Brdf& brdf);
-
     /*! This attribute holds the sample set including angles, wavelengths, and spectra. */
     SampleSet* samples_;
 

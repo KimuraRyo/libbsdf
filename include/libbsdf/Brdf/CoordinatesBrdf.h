@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -57,6 +57,9 @@ public:
     CoordinatesBrdf(const CoordinatesBrdf& brdf);
 
     virtual ~CoordinatesBrdf();
+
+    /*! Virtual copy constructor. */
+    virtual CoordinatesBrdf<CoordSysT>* clone() const;
 
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
     Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
@@ -191,6 +194,12 @@ template <typename CoordSysT>
 CoordinatesBrdf<CoordSysT>::~CoordinatesBrdf() {}
 
 template <typename CoordSysT>
+CoordinatesBrdf<CoordSysT>* CoordinatesBrdf<CoordSysT>::clone() const
+{
+    return new CoordinatesBrdf<CoordSysT>(*this);
+}
+
+template <typename CoordSysT>
 Spectrum CoordinatesBrdf<CoordSysT>::getSpectrum(const Vec3& inDir, const Vec3& outDir) const
 {
     Spectrum sp;
@@ -283,10 +292,14 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
     const float maxAngle2 = CoordSysT::MAX_ANGLE2;
     const float maxAngle3 = CoordSysT::MAX_ANGLE3;
 
-    if (angles0.size() > 1 && angles0[angles0.size() - 1] != maxAngle0) { appendElement(&angles0, maxAngle0); }
-    if (angles1.size() > 1 && angles1[angles1.size() - 1] != maxAngle1) { appendElement(&angles1, maxAngle1); }
-    if (angles2.size() > 1 && angles2[angles2.size() - 1] != maxAngle2) { appendElement(&angles2, maxAngle2); }
-    if (angles3.size() > 1 && angles3[angles3.size() - 1] != maxAngle3) { appendElement(&angles3, maxAngle3); }
+    if (angles0[angles0.size() - 1] != maxAngle0) { appendElement(&angles0, maxAngle0); }
+    if (angles2[angles2.size() - 1] != maxAngle2) { appendElement(&angles2, maxAngle2); }
+    if (angles3[angles3.size() - 1] != maxAngle3) { appendElement(&angles3, maxAngle3); }
+
+    if (!samples_->isIsotropic() &&
+        angles1[angles1.size() - 1] != maxAngle1) {
+        appendElement(&angles1, maxAngle1);
+    }
 
     bool sizeEqual = (angles0.size() != samples_->getNumAngles0() ||
                       angles1.size() != samples_->getNumAngles1() ||
