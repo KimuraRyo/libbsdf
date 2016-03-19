@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -43,12 +43,12 @@ private:
     };
 
     /*! Skips comment lines. */
-    static void ignoreCommentLines(std::ifstream& fin);
+    static void ignoreCommentLines(std::istream& stream);
 };
 
-inline void ZemaxBsdfReader::ignoreCommentLines(std::ifstream& fin)
+inline void ZemaxBsdfReader::ignoreCommentLines(std::istream& stream)
 {
-    reader_utility::ignoreCommentLines(fin, "#");
+    reader_utility::ignoreCommentLines(stream, "#");
 }
 
 } // namespace lb

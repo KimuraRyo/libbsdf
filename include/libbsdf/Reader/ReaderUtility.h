@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -15,7 +15,7 @@
 #define LIBBSDF_READER_UTILITY_H
 
 #include <string>
-#include <fstream>
+#include <istream>
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -29,10 +29,10 @@ namespace reader_utility {
 void logNotImplementedKeyword(const std::string& keyword);
 
 /*! Skips a line. */
-void ignoreLine(std::ifstream& fin);
+void ignoreLine(std::istream& stream);
 
 /*! Skips comment lines. */
-void ignoreCommentLines(std::ifstream& fin, const std::string& lineHead);
+void ignoreCommentLines(std::istream& stream, const std::string& lineHead);
 
 /*! Converts a string to lower-case. */
 std::string toLower(const std::string& str);
@@ -50,9 +50,9 @@ inline void reader_utility::logNotImplementedKeyword(const std::string& keyword)
     std::cerr << "Not implemented: " << "\"" << keyword << "\"" << std::endl;
 }
 
-inline void reader_utility::ignoreLine(std::ifstream& fin)
+inline void reader_utility::ignoreLine(std::istream& stream)
 {
-    fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
 inline std::string reader_utility::toLower(const std::string& str)

@@ -24,7 +24,7 @@ namespace lb {
  *   - \a outTheta: the polar angle of an outgoing direction
  *   - \a outPhi: the azimuthal angle of an outgoing direction
  * 
- * \a inPhi isn't used for isotropic BRDFs.
+ * \a inPhi is not used for isotropic BRDFs.
  */
 struct SphericalCoordinateSystem
 {

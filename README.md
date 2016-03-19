@@ -15,8 +15,6 @@ See the LICENSE file.
 
 
 ## Future Plans
-* Adds spline or rational interpolation
-* Adds virtual constructors to create a copy of lb::Bsdf, lb::Brdf, or lb::Btdf
 * Adds FindLibbsdf.cmake
 * Prepares sample codes
 

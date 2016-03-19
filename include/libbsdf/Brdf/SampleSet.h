@@ -30,7 +30,7 @@ namespace lb {
  *   - \a angle2 (e.g. outgoing polar angle of a spherical coordinate system)
  *   - \a angle3 (e.g. outgoing azimuthal angle of a spherical coordinate system)
  *
- * \a angle1 isn't used for isotropic BRDFs.
+ * \a angle1 is not used for isotropic BRDFs.
  */
 class SampleSet
 {
@@ -132,9 +132,14 @@ public:
     bool isIsotropic() const;
 
     /*! Returns true if sample points are containd in one side of the plane of incidence. */
-    bool isOneSide();
+    bool isOneSide() const;
 
-    /*! Updates angle attributes. */
+    /*!
+     * \brief Updates angle attributes.
+     *
+     * Updates the attributes whether angles are set at equal intervals.
+     * Updates the attributes whether sample points are containd in one side of the plane of incidence.
+     */
     void updateAngleAttributes();
 
     /*! Resizes the number of angles. Angles and spectra must be initialized. */
@@ -286,7 +291,7 @@ inline int SampleSet::getNumWavelengths() const { return wavelengths_.size(); }
 
 inline bool SampleSet::isIsotropic() const { return (numAngles1_ == 1); }
 
-inline bool SampleSet::isOneSide() { return oneSide_; }
+inline bool SampleSet::isOneSide() const { return oneSide_; }
 
 inline int SampleSet::getIndex(int index0, int index1, int index2, int index3) const
 {

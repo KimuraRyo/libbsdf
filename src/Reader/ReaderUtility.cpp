@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -8,32 +8,34 @@
 
 #include <libbsdf/Reader/ReaderUtility.h>
 
+#include <fstream>
+
 using namespace lb;
 
-void reader_utility::ignoreCommentLines(std::ifstream& fin, const std::string& lineHead)
+void reader_utility::ignoreCommentLines(std::istream& stream, const std::string& lineHead)
 {
-    if (fin.fail() || fin.eof()) return;
+    if (stream.fail() || stream.eof()) return;
 
-    std::ifstream::pos_type pos = fin.tellg();
+    std::istream::pos_type pos = stream.tellg();
 
     std::string peekStr;
-    while (fin >> peekStr) {
+    while (stream >> peekStr) {
         int strSize = lineHead.size();
-        bool comment = (static_cast<int>(peekStr.size()) >= strSize &&
-                        peekStr.substr(0, strSize) == lineHead);
-        if (comment) {
-            ignoreLine(fin);
-            pos = fin.tellg();
+        bool commentFound = (static_cast<int>(peekStr.size()) >= strSize &&
+                             peekStr.substr(0, strSize) == lineHead);
+        if (commentFound) {
+            ignoreLine(stream);
+            pos = stream.tellg();
         }
         else {
-            fin.seekg(pos, std::ios_base::beg);
+            stream.seekg(pos, std::ios_base::beg);
             return;
         }
     }
 
-    if (fin.eof()) {
-        fin.clear();
-        fin.seekg(pos, std::ios_base::beg);
+    if (stream.eof()) {
+        stream.clear();
+        stream.seekg(pos, std::ios_base::beg);
     }
 }
 
@@ -49,8 +51,9 @@ bool reader_utility::hasSuffix(const std::string &str, const std::string &suffix
 
 FileType reader_utility::classifyFile(const std::string& fileName)
 {
-    std::ifstream fin(fileName.c_str());
-    if (fin.fail()) {
+    // std::ios_base::binary is used to read line endings of CR+LF and LF.
+    std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
+    if (ifs.fail()) {
         std::cerr << "[reader_utility::classifyFile] Could not open: " << fileName << std::endl;
         return UNKNOWN_FILE;
     }
@@ -71,12 +74,12 @@ FileType reader_utility::classifyFile(const std::string& fileName)
         return INTEGRA_SDT_FILE;
     }
     else if (hasSuffix(fileName, ".bsdf")) {
-        ignoreCommentLines(fin, "#");
+        ignoreCommentLines(ifs, "#");
 
         // Distinguish between LightTools and Zemax.
         std::string token;
-        while (fin >> token) {
-            ignoreCommentLines(fin, "#");
+        while (ifs >> token) {
+            ignoreCommentLines(ifs, "#");
 
             if (token == "AOI") {
                 return LIGHTTOOLS_FILE;
@@ -85,7 +88,7 @@ FileType reader_utility::classifyFile(const std::string& fileName)
                 return ZEMAX_FILE;
             }
             else {
-                ignoreLine(fin);
+                ignoreLine(ifs);
             }
         }
     }

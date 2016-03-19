@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -48,9 +48,9 @@ private:
     };
 
     /*! The data structure of a LightTools BRDF. */
-    struct Data
+    struct DataBlock
     {
-        Data();
+        DataBlock();
 
         float aoi;          /*!< Angle Of Incidence. */
         float poi;          /*!< Plane Of Incidence. */
@@ -63,22 +63,22 @@ private:
         
         Arrayf samples;
 
-        static bool cmp(Data* lhs, Data* rhs);
+        static bool cmp(DataBlock* lhs, DataBlock* rhs);
     };
 
     /*! Skips comment lines. */
-    static void ignoreCommentLines(std::ifstream& fin);
+    static void ignoreCommentLines(std::istream& stream);
 
     /*! Creates a BRDF from LightTools BRDF data. */
-    static SphericalCoordinatesBrdf* createBrdf(std::vector<Data*>&         brdfData,
+    static SphericalCoordinatesBrdf* createBrdf(std::vector<DataBlock*>&    brdfData,
                                                 const std::vector<float>&   outThetaDegrees,
                                                 const std::vector<float>&   outPhiDegrees,
                                                 ColorModel                  colorModel);
 };
 
-inline void LightToolsBsdfReader::ignoreCommentLines(std::ifstream& fin)
+inline void LightToolsBsdfReader::ignoreCommentLines(std::istream& stream)
 {
-    reader_utility::ignoreCommentLines(fin, "#");
+    reader_utility::ignoreCommentLines(stream, "#");
 }
 
 } // namespace lb

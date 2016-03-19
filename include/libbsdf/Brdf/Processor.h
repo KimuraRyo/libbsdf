@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -34,30 +34,39 @@ bool initializeSpectra(const Brdf& baseBrdf, Brdf* brdf);
  */
 void divideByCosineOutTheta(Brdf* brdf);
 
-/*! Fills omitted data using a plane symmetry. */
+/*!
+ * \brief Fills omitted data using a plane symmetry.
+ * \return A new BRDF with appended angles.
+ */
 SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
 
-/*! Rotates a BRDF using an outgoing azimuthal angle. */
+/*!
+ * \brief Rotates a BRDF using an outgoing azimuthal angle.
+ * \return A new BRDF with rotated angles.
+ */
 SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
                                        float                            rotationAngle);
 
-/*! Fixes the energy conservation of the BRDF with each incoming direction. */
+/*! \brief Fixes the energy conservation of the BRDF with each incoming direction. */
 void fixEnergyConservation(SpecularCoordinatesBrdf* brdf);
 
-/*! Copies spectra from the azimuthal angle of 0 to 2PI. */
+/*! \brief Copies spectra from the azimuthal angle of 0 to 2PI. */
 void copySpectraFromPhiOfZeroTo2PI(Brdf* brdf);
 
-/*! Converts the color model from CIE-XYZ to sRGB. */
+/*! \brief Converts the color model from CIE-XYZ to sRGB. */
 void xyzToSrgb(SampleSet* samples);
 
-/*! Fills spectra of samples with a value. */
-void fillSpectra(SampleSet* samples, float value);
+/*! \brief Fills spectra of samples with a value. */
+void fillSpectra(SampleSet* samples, Spectrum::Scalar value);
 
-/*! Multiplies spectra of samples by a value. */
-void multiplySpectra(SampleSet* samples, float value);
+/*! \brief Fills spectra with a value. */
+void fillSpectra(SpectrumList& spectra, Spectrum::Scalar value);
 
-/*! Clamps negative values of spectra. */
-void clampNegativeSpectra(SampleSet* samples);
+/*! \brief Multiplies spectra of samples by a value. */
+void multiplySpectra(SampleSet* samples, Spectrum::Scalar value);
+
+/*! \brief Fixes negative values of spectra to 0. */
+void fixNegativeSpectra(SampleSet* samples);
 
 } // namespace lb
 

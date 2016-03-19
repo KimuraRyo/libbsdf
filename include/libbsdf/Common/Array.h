@@ -36,7 +36,6 @@ void appendElement(ArrayT* arrayf, ScalarT value);
 
 /*!
  * \brief Interpolates arrays using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
- *
  * \param array Interpolated array.
  */
 template <typename T>

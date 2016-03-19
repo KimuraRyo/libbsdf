@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2016 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -35,13 +35,13 @@ enum UnitType {
 };
 
 /*! Skips comment lines. */
-void ignoreCommentLines(std::ifstream& fin);
+void ignoreCommentLines(std::istream& stream);
 
 } // namespace ddr_sdr_utility
 
-inline void ddr_sdr_utility::ignoreCommentLines(std::ifstream& fin)
+inline void ddr_sdr_utility::ignoreCommentLines(std::istream& stream)
 {
-    reader_utility::ignoreCommentLines(fin, ";;");
+    reader_utility::ignoreCommentLines(stream, ";;");
 }
 
 } // namespace lb
