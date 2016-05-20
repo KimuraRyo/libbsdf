@@ -16,7 +16,7 @@
 
 #define LIBBSDF_MAJOR_VERSION 0
 #define LIBBSDF_MINOR_VERSION 9
-#define LIBBSDF_PATCH_VERSION 1
+#define LIBBSDF_PATCH_VERSION 3
 
 namespace lb {
 
