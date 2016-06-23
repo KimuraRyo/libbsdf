@@ -4,11 +4,9 @@ build:
   pull: true
   shell: mingw$$arch
   commands:
-    - if [ $$arch = 32 ]; then MINGW_PACKAGE_PREFIX=mingw-w64-i686; MINGW_PREFIX=/mingw32; fi
-    - if [ $$arch = 64 ]; then MINGW_PACKAGE_PREFIX=mingw-w64-x86_64; MINGW_PREFIX=/mingw64; fi
-    - pacman -S --noconfirm --needed --noprogressbar ${MINGW_PACKAGE_PREFIX}-cmake ${MINGW_PACKAGE_PREFIX}-eigen3
-    - cmake -G"MSYS Makefiles" -DEIGEN3_INCLUDE_DIR=${MINGW_PREFIX}/include/eigen3 -DCMAKE_CXX_FLAGS=-std=c++11
-    - make
+    - svn co https://github.com/mkae/MINGW-packages/trunk/mingw-w64-libbsdf
+    - cd mingw-w64-libbsdf
+    - makepkg-mingw -s --noconfirm --skippgpcheck --noprogressbar
 
 # Notifications are according to @fracting broken at this point in time, that's why disable them (was stolen from BSDFProcessor anyways):
 #notify:
