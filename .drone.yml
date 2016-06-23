@@ -1,0 +1,22 @@
+debug: true
+build:
+  image: teaci/msys$$arch
+  pull: true
+  shell: mingw$$arch
+  commands:
+    - if [ $$arch = 32 ]; then MINGW_PACKAGE_PREFIX=mingw-w64-i686; MINGW_PREFIX=/mingw32; fi
+    - if [ $$arch = 64 ]; then MINGW_PACKAGE_PREFIX=mingw-w64-x86_64; MINGW_PREFIX=/mingw64; fi
+    - pacman -S --noconfirm --needed --noprogressbar ${MINGW_PACKAGE_PREFIX}-cmake ${MINGW_PACKAGE_PREFIX}-eigen3
+    - cmake -G"MSYS Makefiles" -DEIGEN3_INCLUDE_DIR=${MINGW_PREFIX}/include/eigen3 -DCMAKE_CXX_FLAGS=-std=c++11
+    - make
+
+# Notifications are according to @fracting broken at this point in time, that's why disable them (was stolen from BSDFProcessor anyways):
+#notify:
+#  gitter:
+#    webhook: https://webhooks.gitter.im/e/d8f2032e40a8e78a3882
+
+matrix:
+  arch:
+    - 64
+    - 32
+
