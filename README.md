@@ -13,7 +13,7 @@ See the LICENSE file.
 
 ## Install it on Windows using MSYS2
 * install MSYS2
-* ``pacman -S mingw-w64-(i686|x64_86)-bsdfprocessor`` (choose correct architecture)
+* ``pacman -S mingw-w64-(i686|x86_64)-bsdfprocessor`` (choose correct architecture)
 * Be aware that this is work in progress, as it is not yet as performant as it ought to be!
 
 ## Future Plans
