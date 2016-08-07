@@ -9,10 +9,12 @@ See the LICENSE file.
 ## Make it build on OSX 10.10 with MacPorts
 * ports to install:
   * eigen3
-  * qt4-mac
-  * OpenSceneGraph (this needs an upgrade for the current version disables Qt support)
 * ``cmake -DEIGEN3_INCLUDE_DIR=/opt/local/include/eigen3 -DCMAKE_CXX_FLAGS=-std=c++11 ..``
 
+## Install it on Windows using MSYS2
+* install MSYS2
+* ``pacman -S mingw-w64-(i686|x64_86)-bsdfprocessor`` (choose correct architecture)
+* Be aware that this is work in progress, as it is not yet as performant as it ought to be!
 
 ## Future Plans
 * Adds FindLibbsdf.cmake
