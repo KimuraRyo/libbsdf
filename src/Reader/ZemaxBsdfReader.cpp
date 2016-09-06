@@ -190,8 +190,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
 
     // Read data.
     int wlIndex = 0;
-    int inThIndex = 0;
-    int inPhIndex = 0;
+    int cntTis = 0;
     std::string dataStr;
     while (ifs >> dataStr) {
         ignoreCommentLines(ifs);
@@ -202,19 +201,22 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         else if (dataStr == "Monochrome" ||
                  dataStr == "TristimulusX") {
             wlIndex = 0;
-            inThIndex = 0;
+            cntTis = 0;
         }
         else if (dataStr == "TristimulusY") {
             wlIndex = 1;
-            inThIndex = 0;
+            cntTis = 0;
         }
         else if (dataStr == "TristimulusZ") {
             wlIndex = 2;
-            inThIndex = 0;
+            cntTis = 0;
         }
         else if (dataStr == "TIS") {
             reader_utility::ignoreLine(ifs);
-
+            
+            int inPhIndex = cntTis / inThetaDegrees.size();
+            int inThIndex = cntTis - inThetaDegrees.size() * inPhIndex;
+            
             for (int spPhIndex = 0; spPhIndex < static_cast<int>(spPhiDegrees.size());   ++spPhIndex) {
             for (int spThIndex = 0; spThIndex < static_cast<int>(spThetaDegrees.size()); ++spThIndex) {
                 std::string brdfValueStr;
@@ -231,7 +233,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
                 }
             }}
 
-            ++inThIndex;
+            ++cntTis;
         }
 
         if (ifs.fail()) {
