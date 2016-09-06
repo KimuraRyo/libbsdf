@@ -23,15 +23,15 @@ struct Phong : public ReflectanceModel
         parameters_["Shininess"] = &shininess_;
     }
 
-    static float getResult(const Vec3&  inDir,
-                           const Vec3&  outDir,
-                           const Vec3&  normalDir,
-                           float        shininess);
+    static float compute(const Vec3&    L,
+                         const Vec3&    V,
+                         const Vec3&    N,
+                         float          shininess);
 
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return getResult(inDir, outDir, N, shininess_);
+        return compute(inDir, outDir, N, shininess_);
     }
 
     float getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
@@ -47,6 +47,12 @@ struct Phong : public ReflectanceModel
 
     std::string getName() const { return "Phong"; }
 
+    std::string getDescription() const
+    {
+        std::string reference("Bui Tuong Phong, \"Illumination for computer generated pictures,\" Communications of the ACM, vol. 18, no. 6, pp. 311-317, June 1975.");
+        return reference;
+    }
+
 private:
     float shininess_;
 };
@@ -55,16 +61,16 @@ private:
  * Implementation
  */
 
-inline float Phong::getResult(const Vec3&   inDir,
-                              const Vec3&   outDir,
-                              const Vec3&   normalDir,
-                              float         shininess)
+inline float Phong::compute(const Vec3& L,
+                            const Vec3& V,
+                            const Vec3& N,
+                            float       shininess)
 {
     using std::max;
     using std::pow;
 
-    Vec3 R = reflect(inDir, normalDir);
-    return pow(max(R.dot(outDir), 0.0f), shininess);
+    Vec3 R = reflect(L, N);
+    return pow(max(R.dot(V), 0.0f), shininess);
 }
 
 } // namespace lb

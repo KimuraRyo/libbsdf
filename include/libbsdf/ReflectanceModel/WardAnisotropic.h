@@ -27,13 +27,13 @@ public:
         parameters_["Roughness Y"] = &roughnessY_;
     }
 
-    static float getResult(const Vec3&  inDir,
-                           const Vec3&  outDir,
-                           const Vec3&  normalDir,
-                           const Vec3&  tangentDir,
-                           const Vec3&  binormalDir,
-                           float        roughnessX,
-                           float        roughnessY);
+    static float compute(const Vec3&    L,
+                         const Vec3&    V,
+                         const Vec3&    N,
+                         const Vec3&    T,
+                         const Vec3&    B,
+                         float          roughnessX,
+                         float          roughnessY);
 
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -41,12 +41,18 @@ public:
         const Vec3 T = Vec3(1.0, 0.0, 0.0);
         const Vec3 B = Vec3(0.0, -1.0, 0.0);
 
-        return getResult(inDir, outDir, N, T, B, roughnessX_, roughnessY_);
+        return compute(inDir, outDir, N, T, B, roughnessX_, roughnessY_);
     }
 
     bool isIsotropic() const { return false; }
 
     std::string getName() const { return "Ward anisotropic"; }
+
+    std::string getDescription() const
+    {
+        std::string reference("Gregory J. Ward, \"Measuring and modeling anisotropic reflection,\" Computer Graphics (SIGGRAPH '92 Proceedings), pp. 265-272, July 1992.");
+        return reference;
+    }
 
 private:
     float roughnessX_;
@@ -57,26 +63,26 @@ private:
  * Implementation
  */
 
-inline float WardAnisotropic::getResult(const Vec3& inDir,
-                                        const Vec3& outDir,
-                                        const Vec3& normalDir,
-                                        const Vec3& tangentDir,
-                                        const Vec3& binormalDir,
-                                        float       roughnessX,
-                                        float       roughnessY)
+inline float WardAnisotropic::compute(const Vec3&   L,
+                                      const Vec3&   V,
+                                      const Vec3&   N,
+                                      const Vec3&   T,
+                                      const Vec3&   B,
+                                      float         roughnessX,
+                                      float         roughnessY)
 {
     using std::acos;
     using std::exp;
     using std::sqrt;
     using std::tan;
 
-    float dotLN = inDir.dot(normalDir);
-    float dotVN = outDir.dot(normalDir);
+    float dotLN = L.dot(N);
+    float dotVN = V.dot(N);
 
-    Vec3 H = (inDir + outDir).normalized();
-    float dotHN = H.dot(normalDir);
-    float dotHT = H.dot(tangentDir);
-    float dotHB = H.dot(binormalDir);
+    Vec3 H = (L + V).normalized();
+    float dotHN = H.dot(N);
+    float dotHT = H.dot(T);
+    float dotHB = H.dot(B);
 
     float sqDotHT = (dotHT / roughnessX) * (dotHT / roughnessX);
     float sqDotHB = (dotHB / roughnessY) * (dotHB / roughnessY);

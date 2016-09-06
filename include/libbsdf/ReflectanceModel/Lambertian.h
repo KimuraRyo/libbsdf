@@ -18,12 +18,12 @@ namespace lb {
 class Lambertian : public ReflectanceModel
 {
 public:
-    static float getResult(const Vec3& inDir, const Vec3& normalDir);
+    static float compute(const Vec3& L, const Vec3& N);
 
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return getResult(inDir, N);
+        return compute(inDir, N);
     }
 
     float getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
@@ -40,9 +40,9 @@ public:
  * Implementation
  */
 
-inline float Lambertian::getResult(const Vec3& inDir, const Vec3& normalDir)
+inline float Lambertian::compute(const Vec3& L, const Vec3& N)
 {
-    return inDir.dot(normalDir);
+    return L.dot(N);
 }
 
 } // namespace lb

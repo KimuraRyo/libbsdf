@@ -22,15 +22,15 @@ struct BlinnPhong : public ReflectanceModel
         parameters_["Shininess"] = &shininess_;
     }
 
-    static float getResult(const Vec3&  inDir,
-                           const Vec3&  outDir,
-                           const Vec3&  normalDir,
-                           float        shininess);
+    static float compute(const Vec3&    L,
+                         const Vec3&    V,
+                         const Vec3&    N,
+                         float          shininess);
 
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return getResult(inDir, outDir, N, shininess_);
+        return compute(inDir, outDir, N, shininess_);
     }
 
     float getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
@@ -46,6 +46,12 @@ struct BlinnPhong : public ReflectanceModel
 
     std::string getName() const { return "Blinn-Phong"; }
 
+    std::string getDescription() const
+    {
+        std::string reference("James F. Blinn, \"Models of light reflection for computer synthesized pictures,\" ACM Computer Graphics (SIGGRAPH '77 Proceedings), pp. 192-198, July 1977.");
+        return reference;
+    }
+
 private:
     float shininess_;
 };
@@ -54,16 +60,16 @@ private:
  * Implementation
  */
 
-inline float BlinnPhong::getResult(const Vec3&  inDir,
-                                   const Vec3&  outDir,
-                                   const Vec3&  normalDir,
-                                   float        shininess)
+inline float BlinnPhong::compute(const Vec3&    L,
+                                 const Vec3&    V,
+                                 const Vec3&    N,
+                                 float          shininess)
 {
     using std::max;
     using std::pow;
 
-    Vec3 H = (inDir + outDir).normalized();
-    float dotHN = H.dot(normalDir);
+    Vec3 H = (L + V).normalized();
+    float dotHN = H.dot(N);
     return pow(max(dotHN, 0.0f), shininess);
 }
 

@@ -27,21 +27,27 @@ struct CookTorrance : public ReflectanceModel
         parameters_["Refractive index"] = &refractiveIndex_;
     }
 
-    static float getResult(const Vec3&  inDir,
-                           const Vec3&  outDir,
-                           const Vec3&  normalDir,
-                           float        roughness,
-                           float        refractiveIndex);
+    static float compute(const Vec3&    L,
+                         const Vec3&    V,
+                         const Vec3&    N,
+                         float          roughness,
+                         float          refractiveIndex);
     
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return getResult(inDir, outDir, N, roughness_, refractiveIndex_);
+        return compute(inDir, outDir, N, roughness_, refractiveIndex_);
     }
 
     bool isIsotropic() const { return true; }
 
     std::string getName() const { return "Cook-Torrance"; }
+
+    std::string getDescription() const
+    {
+        std::string reference("Robert L. Cook and Kenneth E. Torrance, \"A reflectance model for computer graphics,\" Computer Graphics (SIGGRAPH '81 Proceedings), pp. 307-316, July 1981.");
+        return reference;
+    }
 
 private:
     float roughness_;
@@ -52,23 +58,23 @@ private:
  * Implementation
  */
 
-inline float CookTorrance::getResult(const Vec3&    inDir,
-                                     const Vec3&    outDir,
-                                     const Vec3&    normalDir,
-                                     float          roughness,
-                                     float          refractiveIndex)
+inline float CookTorrance::compute(const Vec3&  L,
+                                   const Vec3&  V,
+                                   const Vec3&  N,
+                                   float        roughness,
+                                   float        refractiveIndex)
 {
     using std::acos;
     using std::exp;
     using std::min;
 
-    float dotLN = inDir.dot(normalDir);
-    float dotVN = outDir.dot(normalDir);
+    float dotLN = L.dot(N);
+    float dotVN = V.dot(N);
 
-    Vec3 H = (inDir + outDir).normalized();
-    float dotHN = H.dot(normalDir);
+    Vec3 H = (L + V).normalized();
+    float dotHN = H.dot(N);
 
-    float dotVH = min(outDir.dot(H), 1.0f);
+    float dotVH = min(V.dot(H), 1.0f);
 
     float sqDotHN = dotHN * dotHN;
     float sqRoughness = roughness * roughness;

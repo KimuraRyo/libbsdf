@@ -23,15 +23,15 @@ struct ModifiedPhong : public ReflectanceModel
         parameters_["Shininess"] = &shininess_;
     }
 
-    static float getResult(const Vec3&  inDir,
-                           const Vec3&  outDir,
-                           const Vec3&  normalDir,
-                           float        shininess);
+    static float compute(const Vec3&    L,
+                         const Vec3&    V,
+                         const Vec3&    N,
+                         float          shininess);
 
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return getResult(inDir, outDir, N, shininess_);
+        return compute(inDir, outDir, N, shininess_);
     }
 
     bool isIsotropic() const { return true; }
@@ -40,8 +40,9 @@ struct ModifiedPhong : public ReflectanceModel
 
     std::string getDescription() const
     {
-        return "Lafortune, E.P., and Willems, Y.D. Using the modified phong reflectance model for physically based rendering. Tech.rep., Cornell University, 1994.";
-    }    
+        std::string reference("Eric P. Lafortune and Yves D. Willems, \"Using the modified phong reflectance model for physically based rendering,\" Technical Report CW197, Leuven, Belgium, 1994.");
+        return reference;
+    }
 
 private:
     float shininess_;
@@ -51,16 +52,16 @@ private:
  * Implementation
  */
 
-inline float ModifiedPhong::getResult(const Vec3&   inDir,
-                                      const Vec3&   outDir,
-                                      const Vec3&   normalDir,
-                                      float         shininess)
+inline float ModifiedPhong::compute(const Vec3& L,
+                                    const Vec3& V,
+                                    const Vec3& N,
+                                    float       shininess)
 {
     using std::max;
     using std::pow;
 
-    Vec3 R = reflect(inDir, normalDir);
-    float dotRV = R.dot(outDir);
+    Vec3 R = reflect(L, N);
+    float dotRV = R.dot(V);
     return (shininess + 2.0f) / (2.0f * PI_F) * pow(max(dotRV, 0.0f), shininess);
 }
 
