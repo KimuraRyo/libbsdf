@@ -11,13 +11,14 @@
 
 #include <cassert>
 
-#include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Brdf/SampleSet.h>
-#include <libbsdf/Brdf/SampleSet2D.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 namespace lb {
+
+class Brdf;
+class SampleSet;
+class SampleSet2D;
 
 /*!
  * \class   Sampler
@@ -65,6 +66,20 @@ public:
     static void getSpectrum(const SampleSet2D&  ss2,
                             const Vec3&         inDir,
                             Spectrum*           spectrum);
+    
+private:
+    static bool isIsotropic(const SampleSet& samples);
+    static bool isIsotropic(const SampleSet2D& ss2);
+    
+    static const SampleSet* getSampleSet(const Brdf& brdf);
+    
+    static void fromXyz(const Brdf& brdf,
+                        const Vec3& inDir, const Vec3& outDir,
+                        float* angle0, float* angle2, float* angle3);
+    
+    static void fromXyz(const Brdf& brdf,
+                        const Vec3& inDir, const Vec3& outDir,
+                        float* angle0, float* angle1, float* angle2, float* angle3);
 };
 
 template <typename CoordSysT, typename InterpolatorT>
@@ -76,7 +91,7 @@ inline void Sampler::getSpectrum(const SampleSet&   samples,
     assert(inDir.z() >= 0.0);
 
     float angle0, angle1, angle2, angle3;
-    if (samples.isIsotropic()) {
+    if (isIsotropic(samples)) {
         CoordSysT::fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
         InterpolatorT::getSpectrum(samples, angle0, angle2, angle3, spectrum);
     }
@@ -95,7 +110,7 @@ inline float Sampler::getValue(const SampleSet& samples,
     assert(inDir.z() >= 0.0);
 
     float angle0, angle1, angle2, angle3;
-    if (samples.isIsotropic()) {
+    if (isIsotropic(samples)) {
         CoordSysT::fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
         return InterpolatorT::getValue(samples, angle0, angle2, angle3, wavelengthIndex);
     }
@@ -113,15 +128,15 @@ inline void Sampler::getSpectrum(const Brdf&    brdf,
 {
     assert(inDir.z() >= 0.0);
 
-    const SampleSet* ss = brdf.getSampleSet();
+    const SampleSet* ss = getSampleSet(brdf);
 
     float angle0, angle1, angle2, angle3;
-    if (ss->isIsotropic()) {
-        brdf.fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
+    if (isIsotropic(*ss)) {
+        fromXyz(brdf, inDir, outDir, &angle0, &angle2, &angle3);
         InterpolatorT::getSpectrum(*ss, angle0, angle2, angle3, spectrum);
     }
     else {
-        brdf.fromXyz(inDir, outDir, &angle0, &angle1, &angle2, &angle3);
+        fromXyz(brdf, inDir, outDir, &angle0, &angle1, &angle2, &angle3);
         InterpolatorT::getSpectrum(*ss, angle0, angle1, angle2, angle3, spectrum);
     }
 }
@@ -134,15 +149,15 @@ inline float Sampler::getValue(const Brdf&  brdf,
 {
     assert(inDir.z() >= 0.0);
 
-    const SampleSet* ss = brdf.getSampleSet();
+    const SampleSet* ss = getSampleSet(brdf);
 
     float angle0, angle1, angle2, angle3;
-    if (ss->isIsotropic()) {
-        brdf.fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
+    if (isIsotropic(*ss)) {
+        fromXyz(brdf, inDir, outDir, &angle0, &angle2, &angle3);
         return InterpolatorT::getValue(*ss, angle0, angle2, angle3, wavelengthIndex);
     }
     else {
-        brdf.fromXyz(inDir, outDir, &angle0, &angle1, &angle2, &angle3);
+        fromXyz(brdf, inDir, outDir, &angle0, &angle1, &angle2, &angle3);
         return InterpolatorT::getValue(*ss, angle0, angle1, angle2, angle3, wavelengthIndex);
     }
 }
@@ -153,7 +168,7 @@ inline void Sampler::getSpectrum(const SampleSet2D& ss2,
                                  Spectrum*          spectrum)
 {
     float inTheta, inPhi;
-    if (ss2.isIsotropic()) {
+    if (isIsotropic(ss2)) {
         inTheta = std::acos(inDir[2]);
         InterpolatorT::getSpectrum(ss2, inTheta, spectrum);
     }

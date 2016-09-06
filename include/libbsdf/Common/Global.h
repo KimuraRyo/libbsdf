@@ -56,6 +56,7 @@ enum DataType {
 enum FileType {
     UNKNOWN_FILE = 0,
     ASTM_FILE,
+    GCMS4_FILE,
     INTEGRA_DDR_FILE,
     INTEGRA_DDT_FILE,
     INTEGRA_SDR_FILE,

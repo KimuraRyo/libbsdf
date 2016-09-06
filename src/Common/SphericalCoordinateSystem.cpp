@@ -15,6 +15,11 @@ const std::string SphericalCoordinateSystem::ANGLE1_NAME = "Incoming azimuthal a
 const std::string SphericalCoordinateSystem::ANGLE2_NAME = "Outgoing polar angle";
 const std::string SphericalCoordinateSystem::ANGLE3_NAME = "Outgoing azimuthal angle";
 
+const float SphericalCoordinateSystem::MIN_ANGLE0 = 0.0f;
+const float SphericalCoordinateSystem::MIN_ANGLE1 = 0.0f;
+const float SphericalCoordinateSystem::MIN_ANGLE2 = 0.0f;
+const float SphericalCoordinateSystem::MIN_ANGLE3 = 0.0f;
+
 const float SphericalCoordinateSystem::MAX_ANGLE0 = PI_2_F      - EPSILON_F * PI_2_F;
 const float SphericalCoordinateSystem::MAX_ANGLE1 = 2.0f * PI_F - EPSILON_F * 2.0f * PI_F;
 const float SphericalCoordinateSystem::MAX_ANGLE2 = PI_2_F      - EPSILON_F * PI_2_F;

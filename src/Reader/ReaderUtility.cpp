@@ -39,10 +39,10 @@ void reader_utility::ignoreCommentLines(std::istream& stream, const std::string&
     }
 }
 
-bool reader_utility::hasSuffix(const std::string &str, const std::string &suffix)
+bool reader_utility::hasSuffix(const std::string &fileName, const std::string &suffix)
 {
-    if (str.size() >= suffix.size()) {
-        return (str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0);
+    if (fileName.size() >= suffix.size()) {
+        return (fileName.compare(fileName.size() - suffix.size(), suffix.size(), suffix) == 0);
     }
     else {
         return false;
@@ -58,22 +58,27 @@ FileType reader_utility::classifyFile(const std::string& fileName)
         return UNKNOWN_FILE;
     }
 
-    if (hasSuffix(fileName, ".astm")) {
+    std::string name = toLower(fileName);
+
+    if (hasSuffix(name, ".astm")) {
         return ASTM_FILE;
     }
-    else if (hasSuffix(fileName, ".ddr")) {
+    else if (hasSuffix(name, ".csv")) {
+        return GCMS4_FILE;
+    }
+    else if (hasSuffix(name, ".ddr")) {
         return INTEGRA_DDR_FILE;
     }
-    else if (hasSuffix(fileName, ".ddt")) {
+    else if (hasSuffix(name, ".ddt")) {
         return INTEGRA_DDT_FILE;
     }
-    else if (hasSuffix(fileName, ".sdr")) {
+    else if (hasSuffix(name, ".sdr")) {
         return INTEGRA_SDR_FILE;
     }
-    else if (hasSuffix(fileName, ".sdt")) {
+    else if (hasSuffix(name, ".sdt")) {
         return INTEGRA_SDT_FILE;
     }
-    else if (hasSuffix(fileName, ".bsdf")) {
+    else if (hasSuffix(name, ".bsdf")) {
         ignoreCommentLines(ifs, "#");
 
         // Distinguish between LightTools and Zemax.
@@ -92,7 +97,7 @@ FileType reader_utility::classifyFile(const std::string& fileName)
             }
         }
     }
-    else if (hasSuffix(fileName, ".binary")) {
+    else if (hasSuffix(name, ".binary")) {
         return MERL_BINARY_FILE;
     }
 

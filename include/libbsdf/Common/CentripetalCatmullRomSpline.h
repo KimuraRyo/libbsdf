@@ -21,10 +21,18 @@ namespace lb {
 class CentripetalCatmullRomSpline
 {
 public:
+    CentripetalCatmullRomSpline();
+
     CentripetalCatmullRomSpline(const Vec2& pos0,
                                 const Vec2& pos1,
                                 const Vec2& pos2,
                                 const Vec2& pos3);
+
+    /*! Initializes parameters. */
+    void initialize(const Vec2& pos0,
+                    const Vec2& pos1,
+                    const Vec2& pos2,
+                    const Vec2& pos3);
 
     /*! Evaluates the spline at \a t in [0,1]. */
     Vec2 evaluate(const Vec2::Scalar& t);

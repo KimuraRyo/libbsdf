@@ -59,6 +59,11 @@ struct SpecularCoordinateSystem
     static const std::string ANGLE2_NAME; /*!< This attribute holds the name of specTheta. */
     static const std::string ANGLE3_NAME; /*!< This attribute holds the name of specPhi. */
 
+    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of inTheta. */
+    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of inPhi. */
+    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of specTheta. */
+    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of specPhi. */
+
     static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of inTheta. */
     static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of inPhi. */
     static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of specTheta. */

@@ -14,49 +14,16 @@
 #include <libbsdf/Brdf/RandomSampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 
+
+#include <libbsdf/Brdf/Brdf.h>
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
+
 #include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 using namespace lb;
-
-bool lb::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
-{
-    const SampleSet* baseSs = baseBrdf.getSampleSet();
-    SampleSet* ss = brdf->getSampleSet();
-
-    bool same = true;
-
-    if (baseSs->getColorModel() != ss->getColorModel()) {
-        same = false;
-        std::cerr
-            << "[initializeSpectra] Color models do not match: "
-            << baseSs->getColorModel() << ", " << ss->getColorModel()
-            << std::endl;
-    }
-
-    if (!baseSs->getWavelengths().isApprox(ss->getWavelengths())) {
-        same = false;
-        std::cerr
-            << "[initializeSpectra] Wavelengths do not match: "
-            << baseSs->getWavelengths() << ", " << ss->getWavelengths()
-            << std::endl;
-    }
-
-    if (!same) return false;
-
-    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
-    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
-    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
-    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
-        Vec3 inDir, outDir;
-        brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-
-        ss->setSpectrum(i0, i1, i2, i3, baseBrdf.getSpectrum(inDir, outDir));
-    }}}}
-
-    return true;
-}
 
 void lb::divideByCosineOutTheta(Brdf* brdf)
 {
@@ -86,7 +53,7 @@ void lb::divideByCosineOutTheta(Brdf* brdf)
 
 SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
 {
-    RandomSampleSet::AngleList filledAngles;
+    RandomSampleSet<SphericalCoordinateSystem>::AngleList filledAngles;
 
     for (int i = 0; i < brdf->getNumOutPhi(); ++i) {
         float outPhi = brdf->getOutPhi(i);
@@ -149,6 +116,40 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
     }}}}
 
     return filledBrdf;
+}
+
+void lb::fillIncomingPolar0Data(Brdf* brdf)
+{
+    SampleSet* ss = brdf->getSampleSet();
+
+    if ((!dynamic_cast<SphericalCoordinatesBrdf*>(brdf) ||
+         !dynamic_cast<SpecularCoordinatesBrdf*>(brdf)) &&
+        !ss->isIsotropic() &&
+        ss->getAngle0(0) == 0.0f) {
+        return;
+    }
+
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+        int numSamples = 0;
+        Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+
+        for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+            if (i3 == ss->getNumAngles3() - 1 &&
+                isEqual(ss->getAngle3(0), ss->getAngle3(ss->getNumAngles3() - 1)) &&
+                ss->getNumAngles3() > 1) {
+                break;
+            }
+
+            sumSp += ss->getSpectrum(0, i2, i3);
+            ++numSamples;
+        }
+
+        Spectrum avgSp = sumSp / static_cast<Spectrum::Scalar>(numSamples);
+
+        for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+            ss->setSpectrum(0, i2, i3, avgSp);
+        }
+    }
 }
 
 SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,

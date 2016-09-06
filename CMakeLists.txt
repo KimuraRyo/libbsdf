@@ -29,7 +29,7 @@ endforeach()
 include_directories(include)
 
 if(NOT EIGEN3_INCLUDE_DIR)
-    MESSAGE(FATAL_ERROR "Please set the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+    message(FATAL_ERROR "Please set the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
 endif()
 include_directories("${EIGEN3_INCLUDE_DIR}")
 

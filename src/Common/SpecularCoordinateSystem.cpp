@@ -15,6 +15,11 @@ const std::string SpecularCoordinateSystem::ANGLE1_NAME = "Incoming azimuthal an
 const std::string SpecularCoordinateSystem::ANGLE2_NAME = "Specular polar angle";
 const std::string SpecularCoordinateSystem::ANGLE3_NAME = "Specular azimuthal angle";
 
+const float SpecularCoordinateSystem::MIN_ANGLE0 = 0.0f;
+const float SpecularCoordinateSystem::MIN_ANGLE1 = 0.0f;
+const float SpecularCoordinateSystem::MIN_ANGLE2 = 0.0f;
+const float SpecularCoordinateSystem::MIN_ANGLE3 = 0.0f;
+
 const float SpecularCoordinateSystem::MAX_ANGLE0 = PI_2_F      - EPSILON_F * PI_2_F;
 const float SpecularCoordinateSystem::MAX_ANGLE1 = 2.0f * PI_F - EPSILON_F * 2.0f * PI_F;
 const float SpecularCoordinateSystem::MAX_ANGLE2 = PI_F        - EPSILON_F * PI_F;

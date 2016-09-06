@@ -61,6 +61,11 @@ struct HalfDifferenceCoordinateSystem
     static const std::string ANGLE2_NAME; /*!< This attribute holds the name of diffTheta. */
     static const std::string ANGLE3_NAME; /*!< This attribute holds the name of diffPhi. */
 
+    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of halfTheta. */
+    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of halfPhi. */
+    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of diffTheta. */
+    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of diffPhi. */
+
     static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of halfTheta. */
     static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of halfPhi. */
     static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of diffTheta. */

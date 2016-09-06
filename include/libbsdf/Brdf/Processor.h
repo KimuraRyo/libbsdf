@@ -14,19 +14,15 @@
 #ifndef LIBBSDF_PROCESSOR_H
 #define LIBBSDF_PROCESSOR_H
 
-#include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
+#include <libbsdf/Common/Global.h>
 
 namespace lb {
 
-/*!
- * \brief Initializes all spectra of a BRDF using another BRDF.
- *
- * BRDFs must have the same wavelengths.
- */
-bool initializeSpectra(const Brdf& baseBrdf, Brdf* brdf);
-    
+class Brdf;
+class SampleSet;
+class SpecularCoordinatesBrdf;
+class SphericalCoordinatesBrdf;
+
 /*!
  * \brief Divides a BRDF by the cosine of the outgoing polar angle.
  *
@@ -35,10 +31,13 @@ bool initializeSpectra(const Brdf& baseBrdf, Brdf* brdf);
 void divideByCosineOutTheta(Brdf* brdf);
 
 /*!
- * \brief Fills omitted data using a plane symmetry.
+ * \brief Fills omitted data using plane symmetry.
  * \return A new BRDF with appended angles.
  */
 SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
+
+/*! \brief Fills the samples at the incoming polar angle of 0 using rotational symmetry. */
+void fillIncomingPolar0Data(Brdf* brdf);
 
 /*!
  * \brief Rotates a BRDF using an outgoing azimuthal angle.

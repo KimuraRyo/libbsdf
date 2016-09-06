@@ -9,6 +9,9 @@
 #ifndef LIBBSDF_BRDF_H
 #define LIBBSDF_BRDF_H
 
+#include <iostream>
+
+#include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Brdf/SampleSet.h>
 
 namespace lb {
@@ -97,6 +100,14 @@ public:
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
     virtual void clampAngles() = 0;
 
+    /*!
+     * \brief Initializes all spectra of a BRDF using another BRDF.
+     *
+     * BRDFs must have the same wavelengths.
+     */
+    template <typename InterpolatorT>
+    static bool initializeSpectra(const Brdf& baseBrdf, Brdf* brdf);
+
 protected:
     /*! This attribute holds the sample set including angles, wavelengths, and spectra. */
     SampleSet* samples_;
@@ -108,6 +119,52 @@ private:
 
 inline       SampleSet* Brdf::getSampleSet()       { return samples_; }
 inline const SampleSet* Brdf::getSampleSet() const { return samples_; }
+
+template <typename InterpolatorT>
+bool Brdf::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
+{
+    std::cout << "[Brdf::initializeSpectra]" << std::endl;
+
+    const SampleSet* baseSs = baseBrdf.getSampleSet();
+    SampleSet* ss = brdf->getSampleSet();
+
+    bool same = true;
+
+    if (baseSs->getColorModel() != ss->getColorModel()) {
+        same = false;
+        std::cerr
+            << "[Brdf::initializeSpectra] Color models do not match: "
+            << baseSs->getColorModel() << ", " << ss->getColorModel()
+            << std::endl;
+    }
+
+    if (!baseSs->getWavelengths().isApprox(ss->getWavelengths())) {
+        same = false;
+        std::cerr
+            << "[Brdf::initializeSpectra] Wavelengths do not match: "
+            << baseSs->getWavelengths() << ", " << ss->getWavelengths()
+            << std::endl;
+    }
+
+    if (!same) return false;
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+        fixDownwardDir(&inDir);
+        fixDownwardDir(&outDir);
+
+        Spectrum sp;
+        Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir, &sp);
+
+        ss->setSpectrum(i0, i1, i2, i3, sp.cwiseMax(0.0));
+    }}}}
+
+    return true;
+}
 
 } // namespace lb
 
