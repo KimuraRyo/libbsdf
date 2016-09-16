@@ -46,13 +46,13 @@ public:
     /*! Gets the spectrum at a set of angle indices. */
     Spectrum& getSpectrum(int index0, int index1, int index2, int index3);
 
-    /*! Gets the spectrum at a set of angle indices. */
+    /*! Gets the spectrum at a set of angle indices of isotropic data. */
     Spectrum& getSpectrum(int index0, int index2, int index3);
 
     /*! Gets the spectrum at a set of angle indices. */
     const Spectrum& getSpectrum(int index0, int index1, int index2, int index3) const;
 
-    /*! Gets the spectrum at a set of angle indices. */
+    /*! Gets the spectrum at a set of angle indices of isotropic data. */
     const Spectrum& getSpectrum(int index0, int index2, int index3) const;
 
     /*! Gets the spectrum at an index. */
@@ -63,6 +63,10 @@ public:
 
     /*! Sets the spectrum at a set of angle indices. */
     void setSpectrum(int index0, int index1, int index2, int index3,
+                     const Spectrum& spectrum);
+
+    /*! Sets the spectrum at a set of angle indices of isotropic data. */
+    void setSpectrum(int index0, int index2, int index3,
                      const Spectrum& spectrum);
 
     /*! Gets all spectra. */
@@ -215,6 +219,12 @@ inline void SampleSet::setSpectrum(int index0, int index1, int index2, int index
     spectra_.at(getIndex(index0, index1, index2, index3)) = spectrum;
 }
 
+inline void SampleSet::setSpectrum(int index0, int index2, int index3,
+                                   const Spectrum& spectrum)
+{
+    spectra_.at(getIndex(index0, index2, index3)) = spectrum;
+}
+
 inline       SpectrumList& SampleSet::getSpectra()       { return spectra_; }
 inline const SpectrumList& SampleSet::getSpectra() const { return spectra_; }
 
@@ -231,7 +241,7 @@ inline void SampleSet::setAngle0(int index, float angle)
 
 inline void SampleSet::setAngle1(int index, float angle)
 {
-    angles1_[index] = angle;
+    angles1_[index] = angle;        
     equalIntervalAngles1_ = isEqualInterval(angles1_);
 }
 

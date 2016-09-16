@@ -22,20 +22,26 @@ struct WardIsotropic : public ReflectanceModel
         parameters_["Roughness"] = &roughness_;
     }
 
-    static float getResult(const Vec3&  inDir,
-                           const Vec3&  outDir,
-                           const Vec3&  normalDir,
-                           float        roughness);
+    static float compute(const Vec3&    L,
+                         const Vec3&    V,
+                         const Vec3&    N,
+                         float          roughness);
 
     float getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return getResult(inDir, outDir, N, roughness_);
+        return compute(inDir, outDir, N, roughness_);
     }
 
     bool isIsotropic() const { return true; }
 
     std::string getName() const { return "Ward isotropic"; }
+
+    std::string getDescription() const
+    {
+        std::string reference("Gregory J. Ward, \"Measuring and modeling anisotropic reflection,\" Computer Graphics (SIGGRAPH '92 Proceedings), pp. 265-272, July 1992.");
+        return reference;
+    }
 
 private:
     float roughness_;
@@ -45,21 +51,21 @@ private:
  * Implementation
  */
 
-inline float WardIsotropic::getResult(const Vec3&   inDir,
-                                      const Vec3&   outDir,
-                                      const Vec3&   normalDir,
-                                      float         roughness)
+inline float WardIsotropic::compute(const Vec3& L,
+                                    const Vec3& V,
+                                    const Vec3& N,
+                                    float       roughness)
 {
     using std::acos;
     using std::exp;
     using std::sqrt;
     using std::tan;
 
-    float dotLN = inDir.dot(normalDir);
-    float dotVN = outDir.dot(normalDir);
+    float dotLN = L.dot(N);
+    float dotVN = V.dot(N);
 
-    Vec3 H = (inDir + outDir).normalized();
-    float dotHN = H.dot(normalDir);
+    Vec3 H = (L + V).normalized();
+    float dotHN = H.dot(N);
 
     float sqRoughness = roughness * roughness;
     float tanHN = tan(acos(dotHN));

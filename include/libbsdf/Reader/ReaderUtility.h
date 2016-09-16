@@ -38,7 +38,7 @@ void ignoreCommentLines(std::istream& stream, const std::string& lineHead);
 std::string toLower(const std::string& str);
 
 /*! Returns true if the string ends with \a suffix. */
-bool hasSuffix(const std::string &str, const std::string &suffix);
+bool hasSuffix(const std::string &fileName, const std::string &suffix);
 
 /*! Classifies the type of a file. */
 FileType classifyFile(const std::string& fileName);

@@ -261,7 +261,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 }
 
                 ddr_sdr_utility::ignoreCommentLines(ifs);
-                // Skip "def"
+                // Skip "def".
                 std::string defStr;
                 ifs >> defStr;
             }

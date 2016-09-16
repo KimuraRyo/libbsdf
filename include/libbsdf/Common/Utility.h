@@ -33,6 +33,22 @@ bool isEqual(T lhs, T rhs);
 template <typename T>
 T lerp(const T& v0, const T& v1, float t);
 
+/*! \brief Interpolates smoothly between two input values with cubic Hermite interpolation. */
+template <typename T>
+T smoothstep(const T& v0, const T& v1, const T& t);
+
+/*! \brief Interpolates smoothly between two input values with 5th-order Hermite interpolation. */
+template <typename T>
+T smootherstep(const T& v0, const T& v1, const T& t);
+
+/*! \brief Computes smoothly interpolated values with cubic Hermite interpolation. */
+template <typename T>
+T hermiteInterpolation3(const T& v0, const T& v1, float t);
+
+/*! \brief Computes smoothly interpolated values with 5th-order Hermite interpolation. */
+template <typename T>
+T hermiteInterpolation5(const T& v0, const T& v1, float t);
+
 /*! \brief Computes interpolated values using uniform Catmull-Rom spline. */
 template <typename T>
 T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t);
@@ -76,6 +92,10 @@ Vec3f xyzToSrgb(const Vec3f& xyz);
 template <typename Vec3T>
 void fixDownwardDir(Vec3T* dir);
 
+/*! \brief Fits the angle with about the same value. */
+template <typename T>
+T fitAngle(T angle, T value);
+
 /*
  * Implementation
  */
@@ -104,6 +124,34 @@ template <typename T>
 inline T lerp(const T& v0, const T& v1, float t)
 {
     return v0 + (v1 - v0) * t;
+}
+
+template <typename T>
+inline T smoothstep(const T& v0, const T& v1, const T& t)
+{
+    T coeff = clamp((t - v0) / (v1 - v0), 0.0f, 1.0f);
+    return coeff * coeff * (3.0f - 2.0f * coeff);
+}
+
+template <typename T>
+inline T smootherstep(const T& v0, const T& v1, const T& t)
+{
+    T coeff = clamp((t - v0) / (v1 - v0), 0.0f, 1.0f);
+    return coeff * coeff * coeff * (coeff * (coeff * 6.0f - 15.0f) + 10.0f);
+}
+
+template <typename T>
+inline T hermiteInterpolation3(const T& v0, const T& v1, float t)
+{
+    float coeff = smoothstep(0.0f, 1.0f, t);
+    return lerp(v0, v1, coeff);
+}
+
+template <typename T>
+inline T hermiteInterpolation5(const T& v0, const T& v1, float t)
+{
+    float coeff = smootherstep(0.0f, 1.0f, t);
+    return lerp(v0, v1, coeff);
 }
 
 template <typename T>
@@ -190,6 +238,17 @@ inline void fixDownwardDir(Vec3T* dir)
         else {
             d.normalize();
         }
+    }
+}
+
+template <typename T>
+inline T fitAngle(T angle, T value)
+{
+    if (isEqual(angle, value)) {
+        return value;
+    }
+    else {
+        return angle;
     }
 }
 

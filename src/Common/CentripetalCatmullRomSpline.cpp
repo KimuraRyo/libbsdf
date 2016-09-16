@@ -14,10 +14,20 @@
 
 using namespace lb;
 
+CentripetalCatmullRomSpline::CentripetalCatmullRomSpline() {}
+
 CentripetalCatmullRomSpline::CentripetalCatmullRomSpline(const Vec2& pos0,
                                                          const Vec2& pos1,
                                                          const Vec2& pos2,
                                                          const Vec2& pos3)
+{
+    initialize(pos0, pos1, pos2, pos3);
+}
+
+void CentripetalCatmullRomSpline::initialize(const Vec2& pos0,
+                                             const Vec2& pos1,
+                                             const Vec2& pos2,
+                                             const Vec2& pos3)
 {
     using std::max;
     using std::sqrt;
@@ -48,8 +58,8 @@ CentripetalCatmullRomSpline::CentripetalCatmullRomSpline(const Vec2& pos0,
 
 Vec2::Scalar CentripetalCatmullRomSpline::interpolateY(const Vec2::Scalar& x)
 {
-    assert((x >= pos1_.x() && x <= pos2_.x()) ||
-           (x <= pos1_.x() && x >= pos2_.x()));
+    assert((x > pos1_.x() - EPSILON_F * 10.0f && x < pos2_.x() + EPSILON_F * 10.0f) ||
+           (x < pos1_.x() + EPSILON_F * 10.0f && x > pos2_.x() - EPSILON_F * 10.0f));
 
     Vec2::Scalar t = 0.5;
     Vec2 currentPos = evaluate(t);

@@ -91,12 +91,10 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
     
     array->resize(array0.size());
 
+    CentripetalCatmullRomSpline ccrs;
+    #pragma omp parallel for private(ccrs)
     for (int i = 0; i < array->size(); ++i) {
-        Vec2 v0(pos0, array0[i]);
-        Vec2 v1(pos1, array1[i]);
-        Vec2 v2(pos2, array2[i]);
-        Vec2 v3(pos3, array3[i]);
-        CentripetalCatmullRomSpline ccrs(v0, v1, v2, v3);
+        ccrs.initialize(Vec2(pos0, array0[i]), Vec2(pos1, array1[i]), Vec2(pos2, array2[i]), Vec2(pos3, array3[i]));
 
         typedef typename T::Scalar ScalarType;
         (*array)[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));

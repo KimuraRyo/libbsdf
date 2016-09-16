@@ -15,6 +15,11 @@ const std::string HalfDifferenceCoordinateSystem::ANGLE1_NAME = "Half azimuthal 
 const std::string HalfDifferenceCoordinateSystem::ANGLE2_NAME = "Difference polar angle";
 const std::string HalfDifferenceCoordinateSystem::ANGLE3_NAME = "Difference azimuthal angle";
 
+const float HalfDifferenceCoordinateSystem::MIN_ANGLE0 = 0.0f;
+const float HalfDifferenceCoordinateSystem::MIN_ANGLE1 = 0.0f;
+const float HalfDifferenceCoordinateSystem::MIN_ANGLE2 = 0.0f;
+const float HalfDifferenceCoordinateSystem::MIN_ANGLE3 = 0.0f;
+
 const float HalfDifferenceCoordinateSystem::MAX_ANGLE0 = PI_2_F      - EPSILON_F * PI_2_F;
 const float HalfDifferenceCoordinateSystem::MAX_ANGLE1 = 2.0f * PI_F - EPSILON_F * 2.0f * PI_F;
 const float HalfDifferenceCoordinateSystem::MAX_ANGLE2 = PI_2_F      - EPSILON_F * PI_2_F;

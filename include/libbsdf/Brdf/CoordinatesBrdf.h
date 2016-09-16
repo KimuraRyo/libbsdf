@@ -282,22 +282,22 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
     Arrayf angles2 = samples_->getAngles2();
     Arrayf angles3 = samples_->getAngles3();
 
-    if (angles0[0] != 0.0f) { appendElement(&angles0, 0.0f); }
-    if (angles1[0] != 0.0f) { appendElement(&angles1, 0.0f); }
-    if (angles2[0] != 0.0f) { appendElement(&angles2, 0.0f); }
-    if (angles3[0] != 0.0f) { appendElement(&angles3, 0.0f); }
+    if (!isEqual(angles0[0], CoordSysT::MIN_ANGLE0)) { appendElement(&angles0, CoordSysT::MIN_ANGLE0); }
+    if (!isEqual(angles1[0], CoordSysT::MIN_ANGLE1)) { appendElement(&angles1, CoordSysT::MIN_ANGLE1); }
+    if (!isEqual(angles2[0], CoordSysT::MIN_ANGLE2)) { appendElement(&angles2, CoordSysT::MIN_ANGLE2); }
+    if (!isEqual(angles3[0], CoordSysT::MIN_ANGLE3)) { appendElement(&angles3, CoordSysT::MIN_ANGLE3); }
 
     const float maxAngle0 = CoordSysT::MAX_ANGLE0;
     const float maxAngle1 = CoordSysT::MAX_ANGLE1;
     const float maxAngle2 = CoordSysT::MAX_ANGLE2;
     const float maxAngle3 = CoordSysT::MAX_ANGLE3;
 
-    if (angles0[angles0.size() - 1] != maxAngle0) { appendElement(&angles0, maxAngle0); }
-    if (angles2[angles2.size() - 1] != maxAngle2) { appendElement(&angles2, maxAngle2); }
-    if (angles3[angles3.size() - 1] != maxAngle3) { appendElement(&angles3, maxAngle3); }
+    if (!isEqual(angles0[angles0.size() - 1], maxAngle0)) { appendElement(&angles0, maxAngle0); }
+    if (!isEqual(angles2[angles2.size() - 1], maxAngle2)) { appendElement(&angles2, maxAngle2); }
+    if (!isEqual(angles3[angles3.size() - 1], maxAngle3)) { appendElement(&angles3, maxAngle3); }
 
     if (!samples_->isIsotropic() &&
-        angles1[angles1.size() - 1] != maxAngle1) {
+        !isEqual(angles1[angles1.size() - 1], maxAngle1)) {
         appendElement(&angles1, maxAngle1);
     }
 
@@ -336,10 +336,10 @@ void CoordinatesBrdf<CoordSysT>::clampAngles()
     Arrayf& angles2 = samples_->getAngles2();
     Arrayf& angles3 = samples_->getAngles3();
 
-    angles0 = angles0.cwiseMax(0.0);
-    angles1 = angles1.cwiseMax(0.0);
-    angles2 = angles2.cwiseMax(0.0);
-    angles3 = angles3.cwiseMax(0.0);
+    angles0 = angles0.cwiseMax(CoordSysT::MIN_ANGLE0);
+    angles1 = angles1.cwiseMax(CoordSysT::MIN_ANGLE1);
+    angles2 = angles2.cwiseMax(CoordSysT::MIN_ANGLE2);
+    angles3 = angles3.cwiseMax(CoordSysT::MIN_ANGLE3);
 
     angles0 = angles0.cwiseMin(CoordSysT::MAX_ANGLE0);
     angles1 = angles1.cwiseMin(CoordSysT::MAX_ANGLE1);
@@ -350,34 +350,34 @@ void CoordinatesBrdf<CoordSysT>::clampAngles()
 template <typename CoordSysT>
 inline void CoordinatesBrdf<CoordSysT>::setAngle0(int index, float angle)
 {
-    samples_->setAngle0(index, clamp(angle, 0.0f, CoordSysT::MAX_ANGLE0));
+    samples_->setAngle0(index, clamp(angle, CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0));
 }
 
 template <typename CoordSysT>
 inline void CoordinatesBrdf<CoordSysT>::setAngle1(int index, float angle)
 {
-    samples_->setAngle1(index, clamp(angle, 0.0f, CoordSysT::MAX_ANGLE1));
+    samples_->setAngle1(index, clamp(angle, CoordSysT::MIN_ANGLE1, CoordSysT::MAX_ANGLE1));
 }
 
 template <typename CoordSysT>
 inline void CoordinatesBrdf<CoordSysT>::setAngle2(int index, float angle)
 {
-    samples_->setAngle2(index, clamp(angle, 0.0f, CoordSysT::MAX_ANGLE2));
+    samples_->setAngle2(index, clamp(angle, CoordSysT::MIN_ANGLE2, CoordSysT::MAX_ANGLE2));
 }
 
 template <typename CoordSysT>
 inline void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
 {
-    samples_->setAngle3(index, clamp(angle, 0.0f, CoordSysT::MAX_ANGLE3));
+    samples_->setAngle3(index, clamp(angle, CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3));
 }
 
 template <typename CoordSysT>
 void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
 {
-    samples_->getAngles0() = Arrayf::LinSpaced(samples_->getNumAngles0(), 0.0, CoordSysT::MAX_ANGLE0);
-    samples_->getAngles1() = Arrayf::LinSpaced(samples_->getNumAngles1(), 0.0, CoordSysT::MAX_ANGLE1);
-    samples_->getAngles2() = Arrayf::LinSpaced(samples_->getNumAngles2(), 0.0, CoordSysT::MAX_ANGLE2);
-    samples_->getAngles3() = Arrayf::LinSpaced(samples_->getNumAngles3(), 0.0, CoordSysT::MAX_ANGLE3);
+    samples_->getAngles0() = Arrayf::LinSpaced(samples_->getNumAngles0(), CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0);
+    samples_->getAngles1() = Arrayf::LinSpaced(samples_->getNumAngles1(), CoordSysT::MIN_ANGLE1, CoordSysT::MAX_ANGLE1);
+    samples_->getAngles2() = Arrayf::LinSpaced(samples_->getNumAngles2(), CoordSysT::MIN_ANGLE2, CoordSysT::MAX_ANGLE2);
+    samples_->getAngles3() = Arrayf::LinSpaced(samples_->getNumAngles3(), CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3);
 
     if (samples_->getNumAngles0() == 1) { setAngle0(0, 0.0f); }
     if (samples_->getNumAngles1() == 1) { setAngle1(0, 0.0f); }
@@ -390,18 +390,7 @@ void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
 template <typename CoordSysT>
 void CoordinatesBrdf<CoordSysT>::initializeSpectra(const Brdf& brdf)
 {
-    for (int i0 = 0; i0 < samples_->getNumAngles0(); ++i0) {
-    for (int i1 = 0; i1 < samples_->getNumAngles1(); ++i1) {
-    for (int i2 = 0; i2 < samples_->getNumAngles2(); ++i2) {
-    for (int i3 = 0; i3 < samples_->getNumAngles3(); ++i3) {
-        Vec3 inDir, outDir;
-        getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-        fixDownwardDir(&inDir);
-        fixDownwardDir(&outDir);
-
-        Spectrum sp = brdf.getSpectrum(inDir, outDir);
-        samples_->setSpectrum(i0, i1, i2, i3, sp.cwiseMax(0.0));
-    }}}}
+    Brdf::initializeSpectra<LinearInterpolator>(brdf, this);
 }
 
 } // namespace lb
