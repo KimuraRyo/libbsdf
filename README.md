@@ -14,7 +14,6 @@ See the LICENSE file.
 ## Install it on Windows using MSYS2
 * install MSYS2
 * ``pacman -S mingw-w64-(i686|x86_64)-libbsdf`` (choose correct architecture)
-* Be aware that this is work in progress, as it is not yet as performant as it ought to be!
 
 ## Future Plans
 * Adds FindLibbsdf.cmake
