@@ -25,6 +25,11 @@ public:
     /*! Writes the BRDF of a specular coordinate system in a DDR or DDT file. */
     static bool write(const std::string& fileName, const SpecularCoordinatesBrdf& brdf);
 
+    /*! Converts and exports a DDR or DDT file. */
+    static void write(const std::string&    fileName,
+                      const Brdf&           brdf,
+                      bool                  inDirDependentCoordSysUsed);
+
     /*! Outputs character data of a DDR or DDT file to a stream. */
     static bool output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream);
 };

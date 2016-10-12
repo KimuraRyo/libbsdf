@@ -254,7 +254,9 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             ifs >> kbdfStr;
             std::vector<float> kbdfs;
             if (reader_utility::toLower(kbdfStr) == "kbdf") {
-                for (int i = 0; i < static_cast<int>(inThetaDegrees.size()); ++i) {
+                for (int i = 0;
+                     i < static_cast<int>(inThetaDegrees.size() * inPhiDegrees.size());
+                     ++i) {
                     float kbdf;
                     ifs >> kbdf;
                     kbdfs.push_back(kbdf);
@@ -286,7 +288,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 }
 
                 if (!kbdfs.empty()) {
-                    brdfValue *= kbdfs.at(inThIndex);
+                    brdfValue *= kbdfs.at(inThIndex + numInTheta * inPhIndex);
                 }
 
                 Spectrum& sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);

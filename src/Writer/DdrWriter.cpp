@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 
+#include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Version.h>
 
@@ -25,6 +26,61 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
     }
 
     return output(brdf, fout);
+}
+
+void DdrWriter::write(const std::string&    fileName,
+                      const Brdf&           brdf,
+                      bool                  inDirDependentCoordSysUsed)
+{
+    typedef SpecularCoordinatesBrdf SpecBrdf;
+    typedef SpecularCoordinateSystem SpecCoordSys;
+
+    SpecBrdf* exportedBrdf;
+    if (dynamic_cast<const SpecBrdf*>(&brdf)) {
+        exportedBrdf = new SpecBrdf(dynamic_cast<const SpecBrdf&>(brdf));
+    }
+    else if (!inDirDependentCoordSysUsed) {
+        exportedBrdf = new SpecBrdf(brdf, 10, 1, 181, 37);
+    }
+    else {
+        const SampleSet* ss = brdf.getSampleSet();
+
+        Arrayf inThetaAngles    = ss->getAngles0();
+        Arrayf inPhiAngles      = Arrayf::LinSpaced(ss->getNumAngles1(), 0.0, SpecCoordSys::MAX_ANGLE1);
+        Arrayf outThetaAngles   = Arrayf::LinSpaced(181,                 0.0, SpecCoordSys::MAX_ANGLE2);
+        Arrayf outPhiAngles     = Arrayf::LinSpaced(37,                  0.0, SpecCoordSys::MAX_ANGLE3);
+
+        if (inPhiAngles.size() == 1) {
+            inPhiAngles[0] = 0.0f;
+        }
+
+        exportedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, outThetaAngles, outPhiAngles);
+    }
+
+    SampleSet* exportedSs = exportedBrdf->getSampleSet();
+    if (exportedSs->getColorModel() == XYZ_MODEL) {
+        xyzToSrgb(exportedSs);
+    }
+
+    if (exportedBrdf->getNumInTheta() == 1) {
+        const SampleSet* ss = exportedBrdf->getSampleSet();
+
+        Arrayf inThetaAngles = Arrayf::LinSpaced(10, 0.0, SpecCoordSys::MAX_ANGLE0);
+
+        SpecBrdf* filledBrdf = new SpecBrdf(*exportedBrdf,
+                                            inThetaAngles,
+                                            ss->getAngles1(),
+                                            ss->getAngles2(),
+                                            ss->getAngles3());
+        delete exportedBrdf;
+        exportedBrdf = filledBrdf;
+    }
+
+    exportedBrdf->expandAngles();
+    fixEnergyConservation(exportedBrdf);
+
+    DdrWriter::write(fileName, *exportedBrdf);
+    delete exportedBrdf;
 }
 
 bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream)
@@ -52,7 +108,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream
         stream << "BW" << std::endl;
     }
     else if (ss->getColorModel() == RGB_MODEL ||
-             ss->getColorModel() == XYZ_MODEL) {
+        ss->getColorModel() == XYZ_MODEL) {
         colorModel = RGB_MODEL;
         stream << "RGB" << std::endl;
     }
@@ -110,7 +166,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream
 
         stream << " kbdf" << std::endl;
         stream << " ";
-        for (int i = 0; i < brdf.getNumInTheta(); ++i) {
+        for (int i = 0; i < brdf.getNumInTheta() * brdf.getNumInPhi(); ++i) {
             stream << " 1.0";
         }
 
