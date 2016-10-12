@@ -12,9 +12,9 @@
 #include <map>
 #include <vector>
 
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Utility.h>
+#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 
@@ -32,6 +32,8 @@ public:
     typedef std::vector<float> AngleList;
     typedef std::map<AngleList, Spectrum, std::less<AngleList>,
                      Eigen::aligned_allocator<std::pair<AngleList, Spectrum> > > SampleMap;
+
+    virtual ~RandomSampleSet() {}
 
     /*! Gets random sample points. */
     SampleMap& getSampleMap();
@@ -51,17 +53,7 @@ public:
                                      float              weight2 = 1.0f,
                                      float              weight3 = 1.0f) const;
 
-    /*! Sets up a BRDF using random sample points. */
-    void setupBrdf(SphericalCoordinatesBrdf* brdf);
-
-    /*! Sets up a BRDF using random sample points. */
-    void setupBrdf(SpecularCoordinatesBrdf* brdf,
-                   float                    weight0 = 1.0f,
-                   float                    weight1 = 1.0f,
-                   float                    weight2 = 1.0f,
-                   float                    weight3 = 1.0f);
-
-private:
+protected:
     SampleMap sampleMap_; /*!< Random sample points. */
 };
 
@@ -177,85 +169,6 @@ const Spectrum& RandomSampleSet<CoordSysT>::estimateSpectrum(const AngleList&   
     }
 
     return *sp;
-}
-
-template <typename CoordSysT>
-void RandomSampleSet<CoordSysT>::setupBrdf(SphericalCoordinatesBrdf* brdf)
-{
-    for (int inThIndex = 0;  inThIndex < brdf->getNumInTheta();   ++inThIndex)  {
-    for (int inPhIndex = 0;  inPhIndex < brdf->getNumInPhi();     ++inPhIndex)  {
-    for (int outThIndex = 0; outThIndex < brdf->getNumOutTheta(); ++outThIndex) {
-        RandomSampleSet::AngleList angles;
-        SampleMap::iterator it;
-        #pragma omp parallel for private(angles, it)
-        for (int outPhIndex = 0; outPhIndex < brdf->getNumOutPhi(); ++outPhIndex) {
-            angles.resize(4);
-            angles.at(0) = brdf->getInTheta(inThIndex);
-            angles.at(1) = brdf->getInPhi(inPhIndex);
-            angles.at(2) = brdf->getOutTheta(outThIndex);
-            angles.at(3) = brdf->getOutPhi(outPhIndex);
-
-            convertCoordinateSystem<SphericalCoordinateSystem, CoordSysT>(
-                angles.at(0), angles.at(1), angles.at(2), angles.at(3),
-                &angles[0], &angles[1], &angles[2], &angles[3]);
-
-            it = sampleMap_.find(angles);
-            if (it != sampleMap_.end()) {
-                brdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex,
-                                  it->second);
-            }
-            else {
-                brdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex,
-                                  findSpectrumOfNearestSample(angles, false));
-                //brdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex,
-                //                  estimateSpectrum<CoordSysT>(angles));
-            }
-        }
-    }}}
-
-    brdf->getSampleSet()->updateAngleAttributes();
-}
-
-template <typename CoordSysT>
-void RandomSampleSet<CoordSysT>::setupBrdf(SpecularCoordinatesBrdf* brdf,
-                                           float                    weight0,
-                                           float                    weight1,
-                                           float                    weight2,
-                                           float                    weight3)
-{
-    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
-    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
-    for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
-        RandomSampleSet::AngleList angles;
-        SampleMap::iterator it;
-        float w3;
-        #pragma omp parallel for private(angles, it, w3)
-        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-            angles.resize(4);
-            angles.at(0) = brdf->getInTheta(inThIndex);
-            angles.at(1) = brdf->getInPhi(inPhIndex);
-            angles.at(2) = brdf->getSpecTheta(spThIndex);
-            angles.at(3) = brdf->getSpecPhi(spPhIndex);
-
-            convertCoordinateSystem<SpecularCoordinateSystem, CoordSysT>(
-                angles.at(0), angles.at(1), angles.at(2), angles.at(3),
-                &angles[0], &angles[1], &angles[2], &angles[3]);
-
-            it = sampleMap_.find(angles);
-            if (it != sampleMap_.end()) {
-                brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex,
-                                  it->second);
-            }
-            else {
-                // Modify a weight coefficient.
-                w3 = weight3 * hermiteInterpolation3(1.0f, 1.0f / weight3, brdf->getSpecTheta(spThIndex) / PI_2_F);
-                Spectrum sp = estimateSpectrum<SpecularCoordinateSystem>(angles, weight0, weight1, weight2, w3);
-                brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
-            }
-        }
-    }}}
-
-    brdf->getSampleSet()->updateAngleAttributes();
 }
 
 } // namespace lb

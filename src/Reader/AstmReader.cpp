@@ -14,7 +14,7 @@
 #include <sstream>
 
 #include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Brdf/RandomSampleSet.h>
+#include <libbsdf/Brdf/SphericalCoordinatesRandomSampleSet.h>
 
 using namespace lb;
 
@@ -123,15 +123,15 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     std::set<float> outThetaAngles;
     std::set<float> outPhiAngles;
 
-    RandomSampleSet<SphericalCoordinateSystem> rss;
-    RandomSampleSet<SphericalCoordinateSystem>::SampleMap& samples = rss.getSampleMap();
+    SphericalCoordinatesRandomSampleSet rss;
+    SphericalCoordinatesRandomSampleSet::SampleMap& samples = rss.getSampleMap();
 
     // Read data.
     std::string dataStr;
     while (std::getline(ifs, dataStr)) {
         if (dataStr.empty() || dataStr.at(0) == '\r') continue;
 
-        RandomSampleSet<SphericalCoordinateSystem>::AngleList angles;
+        SphericalCoordinatesRandomSampleSet::AngleList angles;
         Spectrum values(wavelengths.size());
 
         std::stringstream stream(dataStr);
@@ -179,7 +179,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     // Modify data for the isotropic BRDF with the incoming azimuthal angle of non-zero radian.
     if (inPhiAngles.size() == 1 && *inPhiAngles.begin() != 0.0f) {
         // Rotate outgoing azimuthal angles using the incoming azimuthal angle.
-        RandomSampleSet<SphericalCoordinateSystem>::AngleList angles;
+        SphericalCoordinatesRandomSampleSet::AngleList angles;
         for (auto it = outPhiAngles.begin(); it != outPhiAngles.end(); ++it) {
             float outPhi = *it - *inPhiAngles.begin();
             if (outPhi < 0.0f) {
@@ -192,9 +192,9 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         std::copy(angles.begin(), angles.end(), std::inserter(outPhiAngles, outPhiAngles.begin()));
 
         // Rotate sample points using the incoming azimuthal angle.
-        RandomSampleSet<SphericalCoordinateSystem>::SampleMap modifiedSamples;
+        SphericalCoordinatesRandomSampleSet::SampleMap modifiedSamples;
         for (auto it = samples.begin(); it != samples.end(); ++it) {
-            RandomSampleSet<SphericalCoordinateSystem>::AngleList angles = it->first;
+            SphericalCoordinatesRandomSampleSet::AngleList angles = it->first;
             float outPhi = angles.at(3) - *inPhiAngles.begin();
             if (outPhi < 0.0f) {
                 outPhi += 2.0f * PI_F;
