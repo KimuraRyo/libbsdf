@@ -15,22 +15,30 @@
 namespace lb {
 
 /*! Ward isotropic reflectance model. */
-struct WardIsotropic : public ReflectanceModel
+class WardIsotropic : public ReflectanceModel
 {
-    explicit WardIsotropic(float roughness) : roughness_(roughness)
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    WardIsotropic(const Vec3&   color,
+                  float         roughness)
+                  : color_(color),
+                    roughness_(roughness)
     {
-        parameters_["Roughness"] = &roughness_;
+        parameters_.push_back(Parameter("Color",        &color_));
+        parameters_.push_back(Parameter("Roughness",    &roughness_));
     }
 
-    static float compute(const Vec3&    L,
-                         const Vec3&    V,
-                         const Vec3&    N,
-                         float          roughness);
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& V,
+                        const Vec3& N,
+                        const Vec3& color,
+                        float       roughness);
 
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, outDir, N, roughness_);
+        return compute(inDir, outDir, N, color_, roughness_);
     }
 
     bool isIsotropic() const { return true; }
@@ -44,17 +52,19 @@ struct WardIsotropic : public ReflectanceModel
     }
 
 private:
-    float roughness_;
+    Vec3    color_;
+    float   roughness_;
 };
 
 /*
  * Implementation
  */
 
-inline float WardIsotropic::compute(const Vec3& L,
-                                    const Vec3& V,
-                                    const Vec3& N,
-                                    float       roughness)
+inline Vec3 WardIsotropic::compute(const Vec3&  L,
+                                   const Vec3&  V,
+                                   const Vec3&  N,
+                                   const Vec3&  color,
+                                   float        roughness)
 {
     using std::acos;
     using std::exp;
@@ -73,7 +83,7 @@ inline float WardIsotropic::compute(const Vec3& L,
     float brdf = 1.0f / sqrt(dotLN * dotVN)
                * exp(-(tanHN * tanHN / sqRoughness))
                / (4.0f * PI_F * sqRoughness);
-    return brdf;
+    return color * brdf;
 }
 
 } // namespace lb

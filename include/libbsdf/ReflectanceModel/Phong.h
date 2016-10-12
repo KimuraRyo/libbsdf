@@ -16,25 +16,33 @@
 namespace lb {
 
 /*! Phong reflectance model. */
-struct Phong : public ReflectanceModel
+class Phong : public ReflectanceModel
 {
-    explicit Phong(float shininess) : shininess_(shininess)
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    Phong(const Vec3&   color,
+          float         shininess)
+          : color_(color),
+            shininess_(shininess)
     {
-        parameters_["Shininess"] = &shininess_;
+        parameters_.push_back(Parameter("Color",        &color_));
+        parameters_.push_back(Parameter("Shininess",    &shininess_));
     }
 
-    static float compute(const Vec3&    L,
-                         const Vec3&    V,
-                         const Vec3&    N,
-                         float          shininess);
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& V,
+                        const Vec3& N,
+                        const Vec3& color,
+                        float       shininess);
 
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, outDir, N, shininess_);
+        return compute(inDir, outDir, N, color_, shininess_);
     }
 
-    float getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
     {
         using std::max;
 
@@ -54,23 +62,25 @@ struct Phong : public ReflectanceModel
     }
 
 private:
-    float shininess_;
+    Vec3    color_;
+    float   shininess_;
 };
 
 /*
  * Implementation
  */
 
-inline float Phong::compute(const Vec3& L,
-                            const Vec3& V,
-                            const Vec3& N,
-                            float       shininess)
+inline Vec3 Phong::compute(const Vec3&  L,
+                           const Vec3&  V,
+                           const Vec3&  N,
+                           const Vec3&  color,
+                           float        shininess)
 {
     using std::max;
     using std::pow;
 
     Vec3 R = reflect(L, N);
-    return pow(max(R.dot(V), 0.0f), shininess);
+    return color * pow(max(R.dot(V), 0.0f), shininess);
 }
 
 } // namespace lb

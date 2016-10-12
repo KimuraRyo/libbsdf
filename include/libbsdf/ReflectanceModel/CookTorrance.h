@@ -16,27 +16,34 @@
 namespace lb {
 
 /*! Cook-Torrance reflectance model. */
-struct CookTorrance : public ReflectanceModel
+class CookTorrance : public ReflectanceModel
 {
-    CookTorrance(float roughness,
-                 float refractiveIndex)
-                 : roughness_(roughness),
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    CookTorrance(const Vec3&    color,
+                 float          roughness,
+                 float          refractiveIndex)
+                 : color_(color),
+                   roughness_(roughness),
                    refractiveIndex_(refractiveIndex)
     {
-        parameters_["Roughness"] = &roughness_;
-        parameters_["Refractive index"] = &refractiveIndex_;
+        parameters_.push_back(Parameter("Color",            &color_));
+        parameters_.push_back(Parameter("Roughness",        &roughness_));
+        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_));
     }
 
-    static float compute(const Vec3&    L,
-                         const Vec3&    V,
-                         const Vec3&    N,
-                         float          roughness,
-                         float          refractiveIndex);
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& V,
+                        const Vec3& N,
+                        const Vec3& color,
+                        float       roughness,
+                        float       refractiveIndex);
     
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, outDir, N, roughness_, refractiveIndex_);
+        return compute(inDir, outDir, N, color_, roughness_, refractiveIndex_);
     }
 
     bool isIsotropic() const { return true; }
@@ -50,19 +57,21 @@ struct CookTorrance : public ReflectanceModel
     }
 
 private:
-    float roughness_;
-    float refractiveIndex_;
+    Vec3    color_;
+    float   roughness_;
+    float   refractiveIndex_;
 };
 
 /*
  * Implementation
  */
 
-inline float CookTorrance::compute(const Vec3&  L,
-                                   const Vec3&  V,
-                                   const Vec3&  N,
-                                   float        roughness,
-                                   float        refractiveIndex)
+inline Vec3 CookTorrance::compute(const Vec3&   L,
+                                  const Vec3&   V,
+                                  const Vec3&   N,
+                                  const Vec3&   color,
+                                  float         roughness,
+                                  float         refractiveIndex)
 {
     using std::acos;
     using std::exp;
@@ -86,7 +95,7 @@ inline float CookTorrance::compute(const Vec3&  L,
                   dotHN * dotLN / dotVH);
     G = min(1.0f, 2.0f * G);
 
-    return (1.0f / PI_F) * D * F * G / (dotLN * dotVN);
+    return color * (1.0f / PI_F) * D * F * G / (dotLN * dotVN);
 }
 
 } // namespace lb

@@ -18,30 +18,36 @@ namespace lb {
 class WardAnisotropic : public ReflectanceModel
 {
 public:
-    WardAnisotropic(float roughnessX,
-                    float roughnessY)
-                    : roughnessX_(roughnessX),
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    WardAnisotropic(const Vec3& color,
+                    float       roughnessX,
+                    float       roughnessY)
+                    : color_(color),
+                      roughnessX_(roughnessX),
                       roughnessY_(roughnessY)
     {
-        parameters_["Roughness X"] = &roughnessX_;
-        parameters_["Roughness Y"] = &roughnessY_;
+        parameters_.push_back(Parameter("Color",        &color_));
+        parameters_.push_back(Parameter("Roughness X",  &roughnessX_));
+        parameters_.push_back(Parameter("Roughness Y",  &roughnessY_));
     }
 
-    static float compute(const Vec3&    L,
-                         const Vec3&    V,
-                         const Vec3&    N,
-                         const Vec3&    T,
-                         const Vec3&    B,
-                         float          roughnessX,
-                         float          roughnessY);
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& V,
+                        const Vec3& N,
+                        const Vec3& T,
+                        const Vec3& B,
+                        const Vec3& color,
+                        float       roughnessX,
+                        float       roughnessY);
 
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
         const Vec3 T = Vec3(1.0, 0.0, 0.0);
         const Vec3 B = Vec3(0.0, -1.0, 0.0);
 
-        return compute(inDir, outDir, N, T, B, roughnessX_, roughnessY_);
+        return compute(inDir, outDir, N, T, B, color_, roughnessX_, roughnessY_);
     }
 
     bool isIsotropic() const { return false; }
@@ -55,24 +61,27 @@ public:
     }
 
 private:
-    float roughnessX_;
-    float roughnessY_;
+    Vec3    color_;
+    float   roughnessX_;
+    float   roughnessY_;
 };
 
 /*
  * Implementation
  */
 
-inline float WardAnisotropic::compute(const Vec3&   L,
-                                      const Vec3&   V,
-                                      const Vec3&   N,
-                                      const Vec3&   T,
-                                      const Vec3&   B,
-                                      float         roughnessX,
-                                      float         roughnessY)
+inline Vec3 WardAnisotropic::compute(const Vec3&    L,
+                                     const Vec3&    V,
+                                     const Vec3&    N,
+                                     const Vec3&    T,
+                                     const Vec3&    B,
+                                     const Vec3&    color,
+                                     float          roughnessX,
+                                     float          roughnessY)
 {
     using std::acos;
     using std::exp;
+    using std::max;
     using std::sqrt;
     using std::tan;
 
@@ -87,10 +96,11 @@ inline float WardAnisotropic::compute(const Vec3&   L,
     float sqDotHT = (dotHT / roughnessX) * (dotHT / roughnessX);
     float sqDotHB = (dotHB / roughnessY) * (dotHB / roughnessY);
 
-    float brdf = 1.0f / sqrt(dotLN * dotVN)
+    float brdf = 1.0f / sqrt(max(dotLN * dotVN, EPSILON_F))
                * exp(-2.0f * (sqDotHT + sqDotHB) / (1.0f + dotHN))
                / (4.0f * PI_F * roughnessX * roughnessY);
-    return brdf;
+
+    return color * brdf;
 }
 
 } // namespace lb

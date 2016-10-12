@@ -18,31 +18,45 @@ namespace lb {
 class Lambertian : public ReflectanceModel
 {
 public:
-    static float compute(const Vec3& L, const Vec3& N);
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    explicit Lambertian(const Vec3& color) : color_(color)
     {
-        const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, N);
+        parameters_.push_back(Parameter("Color", &color_));
     }
 
-    float getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& N,
+                        const Vec3& color);
+
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
-        return 1.0f / PI_F;
+        const Vec3 N = Vec3(0.0, 0.0, 1.0);
+        return compute(inDir, N, color_);
+    }
+
+    Vec3 getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
+    {
+        return color_ * 1.0f / PI_F;
     }
 
     bool isIsotropic() const { return true; }
 
     std::string getName() const { return "Lambertian"; }
+
+private:
+    Vec3 color_;
 };
 
 /*
  * Implementation
  */
 
-inline float Lambertian::compute(const Vec3& L, const Vec3& N)
+inline Vec3 Lambertian::compute(const Vec3& L,
+                                const Vec3& N,
+                                const Vec3& color)
 {
-    return L.dot(N);
+    return color * L.dot(N);
 }
 
 } // namespace lb

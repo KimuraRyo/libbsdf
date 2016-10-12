@@ -15,24 +15,27 @@
 namespace lb {
 
 /*! Oren-Nayar reflectance model. */
-struct OrenNayar : public ReflectanceModel
+class OrenNayar : public ReflectanceModel
 {
-    OrenNayar(float albedo,
-              float roughness)
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    OrenNayar(const Vec3&   albedo,
+              float         roughness)
               : albedo_(albedo),
                 roughness_(roughness)
     {
-        parameters_["Albedo"] = &albedo_;
-        parameters_["Roughness"] = &roughness_;
+        parameters_.push_back(Parameter("Albedo",       &albedo_));
+        parameters_.push_back(Parameter("Roughness",    &roughness_));
     }
 
-    static float compute(const Vec3&    L,
-                         const Vec3&    V,
-                         const Vec3&    N,
-                         float          albedo,
-                         float          roughness);
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& V,
+                        const Vec3& N,
+                        const Vec3& albedo,
+                        float       roughness);
 
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
         return compute(inDir, outDir, N, albedo_, roughness_);
@@ -49,19 +52,19 @@ struct OrenNayar : public ReflectanceModel
     }
 
 private:
-    float albedo_;
-    float roughness_;
+    Vec3    albedo_;
+    float   roughness_;
 };
 
 /*
  * Implementation
  */
 
-inline float OrenNayar::compute(const Vec3& L,
-                                const Vec3& V,
-                                const Vec3& N,
-                                float       albedo,
-                                float       roughness)
+inline Vec3 OrenNayar::compute(const Vec3& L,
+                               const Vec3& V,
+                               const Vec3& N,
+                               const Vec3& albedo,
+                               float       roughness)
 {
     using std::abs;
     using std::acos;
@@ -74,7 +77,7 @@ inline float OrenNayar::compute(const Vec3& L,
     float dotLN = L.dot(N);
     float dotVN = V.dot(N);
 
-    if (dotLN <= 0.0f || dotVN  <= 0.0f) return 0.0f;
+    if (dotLN <= 0.0f || dotVN <= 0.0f) return Vec3::Zero();
 
     float cosPhiDiff;
     if (dotLN == 1.0f || dotVN == 1.0f) {
@@ -106,15 +109,15 @@ inline float OrenNayar::compute(const Vec3& L,
     float alphaBetaPi_C3 = (4.0f * alpha * beta) / (PI_F * PI_F);
     float C3 = 0.125f * sqR / (sqR + 0.09f) * alphaBetaPi_C3 * alphaBetaPi_C3;
 
-    float L1 = albedo / PI_F
-             * (C1 +
-                cosPhiDiff * C2 * tan(beta) +
-                (1.0f - abs(cosPhiDiff)) * C3 * tan((alpha + beta) / 2.0f));
+    Vec3 L1 = albedo / PI_F
+            * (C1 +
+               cosPhiDiff * C2 * tan(beta) +
+               (1.0f - abs(cosPhiDiff)) * C3 * tan((alpha + beta) / 2.0f));
 
     float betaPi_L2 = 2.0f * beta / PI_F;
-    float L2 = 0.17f * albedo * albedo / PI_F
-             * sqR / (sqR + 0.13f)
-             * (1.0f - cosPhiDiff * betaPi_L2 * betaPi_L2);
+    Vec3 L2 = 0.17f * albedo.cwiseProduct(albedo) / PI_F
+            * sqR / (sqR + 0.13f)
+            * (1.0f - cosPhiDiff * betaPi_L2 * betaPi_L2);
     
     return L1 + L2;
 }

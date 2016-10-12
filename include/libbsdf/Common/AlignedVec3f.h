@@ -19,6 +19,8 @@ namespace lb {
  */
 struct AlignedVec3f : public Eigen::Vector4f
 {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     AlignedVec3f();
 
     AlignedVec3f(const float& x, const float& y, const float& z);
@@ -40,8 +42,6 @@ struct AlignedVec3f : public Eigen::Vector4f
 
     /*! Returns the cross product. */
     AlignedVec3f cross(const AlignedVec3f& other) const;
-
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 inline AlignedVec3f::AlignedVec3f() : Eigen::Vector4f() {}

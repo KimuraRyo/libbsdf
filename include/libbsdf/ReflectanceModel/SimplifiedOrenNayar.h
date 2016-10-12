@@ -15,24 +15,27 @@
 namespace lb {
 
 /*! Oren-Nayar reflectance model (qualitative model). */
-struct SimplifiedOrenNayar : public ReflectanceModel
+class SimplifiedOrenNayar : public ReflectanceModel
 {
-    SimplifiedOrenNayar(float albedo,
-                        float roughness)
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    SimplifiedOrenNayar(const Vec3& albedo,
+                        float       roughness)
                         : albedo_(albedo),
                           roughness_(roughness)
     {
-        parameters_["Albedo"] = &albedo_;
-        parameters_["Roughness"] = &roughness_;
+        parameters_.push_back(Parameter("Albedo",       &albedo_));
+        parameters_.push_back(Parameter("Roughness",    &roughness_));
     }
 
-    static float compute(const Vec3&    L,
-                         const Vec3&    V,
-                         const Vec3&    N,
-                         float          albedo,
-                         float          roughness);
+    static Vec3 compute(const Vec3& L,
+                        const Vec3& V,
+                        const Vec3& N,
+                        const Vec3& albedo,
+                        float       roughness);
 
-    float getValue(const Vec3& inDir, const Vec3& outDir) const
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
         return compute(inDir, outDir, N, albedo_, roughness_);
@@ -49,19 +52,19 @@ struct SimplifiedOrenNayar : public ReflectanceModel
     }
 
 private:
-    float albedo_;
-    float roughness_;
+    Vec3    albedo_;
+    float   roughness_;
 };
 
 /*
  * Implementation
  */
 
-inline float SimplifiedOrenNayar::compute(const Vec3&   L,
-                                          const Vec3&   V,
-                                          const Vec3&   N,
-                                          float         albedo,
-                                          float         roughness)
+inline Vec3 SimplifiedOrenNayar::compute(const Vec3&    L,
+                                         const Vec3&    V,
+                                         const Vec3&    N,
+                                         const Vec3&    albedo,
+                                         float          roughness)
 {
     using std::acos;
     using std::max;
@@ -72,7 +75,7 @@ inline float SimplifiedOrenNayar::compute(const Vec3&   L,
     float dotLN = L.dot(N);
     float dotVN = V.dot(N);
 
-    if (dotLN <= 0.0f || dotVN  <= 0.0f) return 0.0f;
+    if (dotLN <= 0.0f || dotVN  <= 0.0f) return Vec3::Zero();
 
     float cosPhiDiff;
     if (dotLN == 1.0f || dotVN == 1.0f) {

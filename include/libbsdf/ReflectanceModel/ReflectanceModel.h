@@ -9,7 +9,7 @@
 #ifndef LIBBSDF_REFLECTANCE_MODEL_H
 #define LIBBSDF_REFLECTANCE_MODEL_H
 
-#include<map>
+#include<vector>
 
 #include <libbsdf/Common/Vector.h>
 
@@ -26,35 +26,87 @@ namespace lb {
 class ReflectanceModel
 {
 public:
-    typedef std::map<std::string, float*> Parameters;
+    class Parameter
+    {
+    public:
+        enum ParameterType
+        {
+            FLOAT_PARAMETER,
+            VEC3_PARAMETER
+        };
 
-    virtual ~ReflectanceModel() {}
+        union ValueUnion
+        {
+            float*  scalar;
+            Vec3*   vec3;
+        };
+
+        Parameter(const std::string& name, float* value);
+        Parameter(const std::string& name, Vec3* value);
+
+        const std::string&  getName() const;
+        ParameterType       getType() const;
+
+        float*  getFloat();
+        Vec3*   getVec3();
+
+    private:
+        std::string     name_;
+        ParameterType   type_;
+        ValueUnion      value_;
+    };
+
+    typedef std::vector<Parameter> Parameters;
+
+    virtual ~ReflectanceModel();
     
     /*! Gets a reflected value with incoming and outgoing directions in tangent space. */
-    virtual float getValue(const Vec3& inDir, const Vec3& outDir) const = 0;
+    virtual Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const = 0;
 
     /*!
      * Gets a BRDF value. If a reflectance model is not an analytical BRDF, it
      * should be converted to a BRDF value.
      */
-    virtual float getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
-    {
-        return getValue(inDir, outDir);
-    }
+    virtual Vec3 getBrdfValue(const Vec3& inDir, const Vec3& outDir) const;
 
     /*! Returns ture if this reflectance model is isotropic. */
     virtual bool isIsotropic() const = 0;
 
     /*! Gets the list of parameters for a reflectance model. */
-    Parameters& getParameters() { return parameters_; }
+    Parameters& getParameters();
 
-    virtual std::string getName() const { return ""; }
+    virtual std::string getName() const;
 
-    virtual std::string getDescription() const { return ""; }
+    virtual std::string getDescription() const;
 
 protected:
     Parameters parameters_;
 };
+
+inline const std::string& ReflectanceModel::Parameter::getName() const
+{
+    return name_;
+}
+
+inline ReflectanceModel::Parameter::ParameterType ReflectanceModel::Parameter::getType() const
+{
+    return type_;
+}
+
+inline float* ReflectanceModel::Parameter::getFloat()
+{
+    return value_.scalar;
+}
+
+inline Vec3* ReflectanceModel::Parameter::getVec3()
+{
+    return value_.vec3;
+}
+
+inline ReflectanceModel::Parameters& ReflectanceModel::getParameters()
+{
+    return parameters_;
+}
 
 } // namespace lb
 
