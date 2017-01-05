@@ -14,6 +14,7 @@
 #ifndef LIBBSDF_ARRAY_H
 #define LIBBSDF_ARRAY_H
 
+#include <iterator>
 #include <vector>
 
 #include <Eigen/Core>

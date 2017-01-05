@@ -10,6 +10,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <set>
 #include <sstream>
 
