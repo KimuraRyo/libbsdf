@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -66,11 +66,11 @@ T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
 template <typename Vec3T>
 Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir);
 
-/*! \brief Converts a value from radian to degree. */
+/*! \brief Converts a value from radians to degrees. */
 template <typename T>
 T toDegree(T radian);
 
-/*! \brief Converts a value from degree to radian. */
+/*! \brief Converts a value from degrees to radians. */
 template <typename T>
 T toRadian(T degree);
 

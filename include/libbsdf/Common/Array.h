@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -44,7 +44,7 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
                       const T& array0, const T& array1, const T& array2, const T& array3,
                       float pos, T* array);
 
-/*! \brief Converts an array from degree to radian. */
+/*! \brief Converts an array from degrees to radians. */
 template <typename T>
 T toRadians(const T& degrees);
 
@@ -95,7 +95,10 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
     CentripetalCatmullRomSpline ccrs;
     #pragma omp parallel for private(ccrs)
     for (int i = 0; i < array->size(); ++i) {
-        ccrs.initialize(Vec2(pos0, array0[i]), Vec2(pos1, array1[i]), Vec2(pos2, array2[i]), Vec2(pos3, array3[i]));
+        ccrs.initialize(Vec2(pos0, array0[i]),
+                        Vec2(pos1, array1[i]),
+                        Vec2(pos2, array2[i]),
+                        Vec2(pos3, array3[i]));
 
         typedef typename T::Scalar ScalarType;
         (*array)[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));
