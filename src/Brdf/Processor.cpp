@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -14,7 +14,6 @@
 #include <libbsdf/Brdf/RandomSampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 
-
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
@@ -22,6 +21,8 @@
 #include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
+
+#include <libbsdf/ReflectanceModel/Fresnel.h>
 
 using namespace lb;
 
@@ -37,7 +38,7 @@ void lb::divideByCosineOutTheta(Brdf* brdf)
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
         float cosOutTheta = outDir.dot(Vec3(0.0, 0.0, 1.0));
 
-        lb::Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
+        Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
 
         // Copy the spectrum if the Z-component of the outgoing direction is zero or negative.
         if (cosOutTheta <= 0.0f && i2 > 0) {
@@ -203,23 +204,13 @@ void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
 
-    int numInTheta = brdf->getNumInTheta();
-    int numInPhi = brdf->getNumInPhi();
-
-    SampleSet2D reflectances(numInTheta, numInPhi,
-                             ss->getColorModel(), ss->getNumWavelengths());
-    reflectances.getThetaArray()  = ss->getAngles0();
-    reflectances.getPhiArray()    = ss->getAngles1();
-    reflectances.getWavelengths() = ss->getWavelengths();
-
     Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
 
-    for (int inThIndex = 0; inThIndex < numInTheta; ++inThIndex) {
-    for (int inPhIndex = 0; inPhIndex < numInPhi;   ++inPhIndex) {
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();   ++inPhIndex) {
         Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf->getInTheta(inThIndex),
                                                       brdf->getInPhi(inPhIndex));
         Spectrum sp = integrator.computeReflectance(*brdf, inDir);
-        reflectances.setSpectrum(inThIndex, inPhIndex, sp);
 
         // Fix samples to conserve energy.
         float maxReflectance = sp.maxCoeff();
@@ -232,6 +223,264 @@ void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf)
             }}
         }
     }}
+}
+
+void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
+                               const SampleSet2D&       specularReflectances)
+{
+    SampleSet* ss = brdf->getSampleSet();
+
+    Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
+
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();   ++inPhIndex) {
+        Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf->getInTheta(inThIndex),
+                                                      brdf->getInPhi(inPhIndex));
+        Spectrum sp = integrator.computeReflectance(*brdf, inDir);
+
+        // Fix samples to conserve energy.
+        float maxReflectance = sp.maxCoeff();
+        if (maxReflectance > 1.0f) {
+            for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+            for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+                Spectrum& fixedSp = ss->getSpectrum(inThIndex, inPhIndex, i2, i3);
+                const float coeff = 0.999546f; // Reflectance of Lambertian using lb::Integrator.
+                fixedSp /= maxReflectance / coeff;
+            }}
+        }
+
+        Spectrum specRefSp = specularReflectances.getSpectrum(inDir);
+        sp += specRefSp;
+
+        maxReflectance = 0;
+        int maxIndex;
+        for (int i = 0; i < sp.size(); ++i) {
+            if (sp[i] > maxReflectance) {
+                maxReflectance = sp[i];
+                maxIndex = i;
+            }
+        }
+
+        // Fix samples to conserve energy with specular reflectances.
+        if (maxReflectance > 1.0f) {
+            for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+            for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+                Spectrum& fixedSp = ss->getSpectrum(inThIndex, inPhIndex, i2, i3);
+                fixedSp *= 1.0f - specRefSp[maxIndex];
+            }}
+        }
+    }}
+}
+
+void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
+{
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
+    for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+        bool found = false;
+        
+        int boundary0;
+        // Search a boundary.
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+            Vec3 inDir, outDir;
+            brdf->toXyz(brdf->getInTheta(inThIndex),
+                        brdf->getInPhi(inPhIndex),
+                        brdf->getSpecTheta(spThIndex),
+                        brdf->getSpecPhi(spPhIndex),
+                        &inDir, &outDir);
+
+            boundary0 = spPhIndex;
+            if (outDir.z() < 0.0) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            continue;
+        }
+
+        int boundary1;
+        // Search a boundary from the opposite direction.
+        for (int spPhIndex = brdf->getNumSpecPhi() - 1; spPhIndex >= 0; --spPhIndex) {
+            Vec3 inDir, outDir;
+            brdf->toXyz(brdf->getInTheta(inThIndex),
+                        brdf->getInPhi(inPhIndex),
+                        brdf->getSpecTheta(spThIndex),
+                        brdf->getSpecPhi(spPhIndex),
+                        &inDir, &outDir);
+
+            boundary1 = spPhIndex;
+            if (outDir.z() < 0.0) {
+                break;
+            }
+        }
+
+        // Fill values.
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+            Vec3 inDir, outDir;
+            brdf->toXyz(brdf->getInTheta(inThIndex),
+                        brdf->getInPhi(inPhIndex),
+                        brdf->getSpecTheta(spThIndex),
+                        brdf->getSpecPhi(spPhIndex),
+                        &inDir, &outDir);
+
+            if (outDir.z() >= 0.0) {
+                continue;
+            }
+
+            float spPh = brdf->getSpecPhi(spPhIndex);
+            float spPh0 = brdf->getSpecPhi(boundary0);
+            float spPh1 = brdf->getSpecPhi(boundary1);
+
+            int boundary;
+            if (spPh - spPh0 <= spPh1 - spPh) {
+                boundary = boundary0;
+            }
+            else {
+                boundary = boundary1;
+            }
+
+            Spectrum sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, boundary);
+            brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
+        }
+    }}}
+}
+
+void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta)
+{
+    if (brdf->getNumSpecTheta() == 1 ||
+        brdf->getNumSpecPhi() == 1) {
+        return;
+    }
+
+    const SampleSet* ss = brdf->getSampleSet();
+
+    int spThBoundary;
+
+    // Extrapolate values in specular directions and search the index of boundaries.
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();       ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();         ++inPhIndex) {
+    for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta() - 1; ++spThIndex) {
+        if (brdf->getSpecTheta(spThIndex) <= maxSpecularTheta) {
+            continue;
+        }
+
+        Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+
+        int numSpectra = 0;
+
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi() - 1; ++spPhIndex) {
+            Vec3 inDir, outDir;
+            brdf->toXyz(brdf->getInTheta(inThIndex),
+                        brdf->getInPhi(inPhIndex),
+                        brdf->getSpecTheta(spThIndex),
+                        brdf->getSpecPhi(spPhIndex),
+                        &inDir, &outDir);
+
+            if (outDir.z() < 0.0) {
+                continue;
+            }
+
+            Spectrum sp     = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+            Spectrum nextSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex + 1, spPhIndex);
+
+            float spTh     = brdf->getSpecTheta(spThIndex);
+            float nextSpTh = brdf->getSpecTheta(spThIndex + 1);
+
+            float ratio = (0.0f - spTh) / (nextSpTh - spTh);
+            Spectrum extrapolatedSp = lerp(sp, nextSp, ratio);
+            sumSp += extrapolatedSp.cwiseMax(0.0);
+
+            ++numSpectra;
+        }
+
+        if (numSpectra == 0) {
+            break;
+        }
+
+        Spectrum specularSp = sumSp / numSpectra;
+
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+            brdf->setSpectrum(inThIndex, inPhIndex, 0, spPhIndex, specularSp);
+        }
+
+        spThBoundary = spThIndex;
+
+        break;
+    }}}
+
+    // Interpolate values between specular directions and the maximum specular polar angle.
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
+    for (int spThIndex = 1; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+        if (brdf->getSpecTheta(spThIndex) > maxSpecularTheta) {
+            break;
+        }
+
+        Spectrum specularSp = brdf->getSpectrum(inThIndex, inPhIndex, 0, 0);
+        
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+            Spectrum boundarySp = brdf->getSpectrum(inThIndex, inPhIndex, spThBoundary, spPhIndex);
+            float boundarySpTh = brdf->getSpecTheta(spThBoundary);
+
+            float ratio = brdf->getSpecTheta(spThIndex) / boundarySpTh;
+
+            // Smooth a peak.
+            if (ratio < 0.5f) {
+                ratio = smoothstep(0.0f, boundarySpTh, brdf->getSpecTheta(spThIndex));
+            }
+
+            Spectrum sp = lerp(specularSp, boundarySp, ratio);
+            brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
+        }
+    }}}
+}
+
+SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
+                                             const Brdf&    standardBrdf,
+                                             float          ior)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+    const SampleSet* standardSs = standardBrdf.getSampleSet();
+
+    if (ss->getNumWavelengths() != standardSs->getNumWavelengths() ||
+        !ss->getWavelengths().isApprox(standardSs->getWavelengths())) {
+        std::cerr
+            << "[lb::computeSpecularReflectances] Wavelengths do not match."
+            << std::endl;
+        return 0;
+    }
+
+    SampleSet2D* ss2 = new SampleSet2D(ss->getNumAngles0(),
+                                       ss->getNumAngles1(),
+                                       ss->getColorModel(),
+                                       ss->getNumWavelengths());
+    ss2->getThetaArray() = ss->getAngles0();
+    ss2->getPhiArray() = ss->getAngles1();
+    ss2->getWavelengths() = ss->getWavelengths();
+
+    for (int thIndex = 0; thIndex < ss2->getNumTheta(); ++thIndex) {
+    for (int phIndex = 0; phIndex < ss2->getNumPhi();   ++phIndex) {
+        Vec3 inDir = ss2->getDirection(thIndex, phIndex);
+        Vec3 specularDir = reflect(inDir, Vec3(0.0, 0.0, 1.0));
+
+        Spectrum brdfSp = brdf.getSpectrum(inDir, specularDir);
+        Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
+
+        float standardRef;
+        if (ior == 1.0f) {
+            standardRef = 1.0f;
+        }
+        else {
+            standardRef = fresnelReflection(ss2->getTheta(thIndex), ior);
+        }
+
+        Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
+        ss2->setSpectrum(thIndex, phIndex, refSp);
+    }}
+
+    return ss2;
 }
 
 void lb::copySpectraFromPhiOfZeroTo2PI(Brdf* brdf)
@@ -293,9 +542,46 @@ void lb::fillSpectra(SpectrumList& spectra, Spectrum::Scalar value)
     }
 }
 
+bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
+{
+    const SampleSet* ss0 = src0.getSampleSet();
+    const SampleSet* ss1 = src1.getSampleSet();
+    SampleSet* ss = dest->getSampleSet();
+
+    if (ss0->getColorModel() != ss1->getColorModel() ||
+        ss0->getColorModel() != ss->getColorModel()) {
+        std::cerr << "[subtract] Color models are not identical." << std::endl;
+        return false;
+    }
+
+    const Arrayf& wls0 = ss0->getWavelengths();
+    const Arrayf& wls1 = ss1->getWavelengths();
+    const Arrayf& wls = ss->getWavelengths();
+    if (!wls0.isApprox(wls1) ||
+        !wls0.isApprox(wls)) {
+        std::cerr << "[subtract] Wavelengths are not identical." << std::endl;
+        return false;
+    }
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        dest->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        const Spectrum& sp0 = src0.getSpectrum(inDir, outDir);
+        const Spectrum& sp1 = src1.getSpectrum(inDir, outDir);
+
+        ss->setSpectrum(i0, i1, i2, i3, sp0 - sp1);
+    }}}}
+
+    return true;
+}
+
 void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
 {
-    lb::SpectrumList& spectra = samples->getSpectra();
+    SpectrumList& spectra = samples->getSpectra();
     for (auto it = spectra.begin(); it != spectra.end(); ++it) {
         *it *= value;
     }
@@ -303,7 +589,11 @@ void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
 
 void lb::fixNegativeSpectra(SampleSet* samples)
 {
-    lb::SpectrumList& spectra = samples->getSpectra();
+    fixNegativeSpectra(samples->getSpectra());
+}
+
+void lb::fixNegativeSpectra(SpectrumList& spectra)
+{
     for (auto it = spectra.begin(); it != spectra.end(); ++it) {
         *it = it->cwiseMax(0.0f);
     }

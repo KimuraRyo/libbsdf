@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -8,6 +8,8 @@
 
 #ifndef LIBBSDF_SAMPLE_SET_2D_H
 #define LIBBSDF_SAMPLE_SET_2D_H
+
+#include <iostream>
 
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Common/Global.h>
@@ -231,13 +233,13 @@ inline float SampleSet2D::getPhi(int index)   const { return phiAngles_[index]; 
 
 inline void SampleSet2D::setTheta(int index, float angle)
 {
-    thetaAngles_[index] = clamp(angle, 0.0f, SphericalCoordinateSystem::MAX_ANGLE0);
+    thetaAngles_[index] = angle;
     equalIntervalTheta_ = isEqualInterval(thetaAngles_);
 }
 
 inline void SampleSet2D::setPhi(int index, float angle)
 {
-    phiAngles_[index] = clamp(angle, 0.0f, SphericalCoordinateSystem::MAX_ANGLE1);
+    phiAngles_[index] = angle;
     equalIntervalPhi_ = isEqualInterval(phiAngles_);
 }
 
@@ -276,7 +278,49 @@ inline const Arrayf& SampleSet2D::getWavelengths() const { return wavelengths_; 
 
 inline int SampleSet2D::getNumWavelengths() const { return wavelengths_.size(); }
 
+inline SourceType SampleSet2D::getSourceType() const { return sourceType_; }
+
+inline void SampleSet2D::setSourceType(SourceType type) { sourceType_ = type; }
+
 inline bool SampleSet2D::isIsotropic() const { return (numPhi_ == 1); }
+
+template <typename InterpolatorT>
+bool SampleSet2D::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples)
+{
+    std::cout << "[SampleSet2D::initializeSpectra]" << std::endl;
+
+    bool same = true;
+
+    if (baseSamples.getColorModel() != samples->getColorModel()) {
+        same = false;
+        std::cerr
+            << "[SampleSet2D::initializeSpectra] Color models do not match: "
+            << baseSamples.getColorModel() << ", " << samples->getColorModel()
+            << std::endl;
+    }
+
+    if (!baseSamples.getWavelengths().isApprox(samples->getWavelengths())) {
+        same = false;
+        std::cerr
+            << "[SampleSet2D::initializeSpectra] Wavelengths do not match: "
+            << baseSamples.getWavelengths() << ", " << samples->getWavelengths()
+            << std::endl;
+    }
+
+    if (!same) return false;
+
+    for (int i0 = 0; i0 < samples->getNumTheta(); ++i0) {
+    for (int i1 = 0; i1 < samples->getNumPhi();   ++i1) {
+        Spectrum sp;
+        float theta = samples->getTheta(i0);
+        float phi = samples->getPhi(i1);
+        InterpolatorT::getSpectrum(baseSamples, theta, phi, &sp);
+
+        samples->setSpectrum(i0, i1, sp);
+    }}
+
+    return true;
+}
 
 } // namespace lb
 

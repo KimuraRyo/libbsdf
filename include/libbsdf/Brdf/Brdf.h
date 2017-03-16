@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -174,7 +174,7 @@ bool Brdf::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
         Spectrum sp;
         Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir, &sp);
 
-        ss->setSpectrum(i0, i1, i2, i3, sp.cwiseMax(0.0));
+        ss->setSpectrum(i0, i1, i2, i3, sp);
     }}}}
 
     return true;

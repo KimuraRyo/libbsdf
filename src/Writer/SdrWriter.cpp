@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2016 Kimura Ryo                                  //
+// Copyright (C) 2015-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -89,7 +89,8 @@ bool SdrWriter::output(const SampleSet2D& samples2D, std::ostream& stream)
         stream << " def" << std::endl;
 
         for (int inThIndex = 0; inThIndex < samples2D.getNumTheta(); ++inThIndex) {
-            const Spectrum& sp = samples2D.getSpectrum(inThIndex);
+            Spectrum sp = samples2D.getSpectrum(inThIndex);
+            sp = sp.cwiseMax(0.0);
 
             if (samples2D.getColorModel() == XYZ_MODEL) {
                 Spectrum rgb = xyzToSrgb(sp);

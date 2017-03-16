@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -9,8 +9,6 @@
 #include <libbsdf/Brdf/SampleSet2D.h>
 
 #include <libbsdf/Brdf/Sampler.h>
-
-#include <iostream>
 
 using namespace lb;
 
@@ -78,8 +76,43 @@ void SampleSet2D::updateAngleAttributes()
     equalIntervalTheta_ = isEqualInterval(thetaAngles_);
     equalIntervalPhi_   = isEqualInterval(phiAngles_);
 
-    std::cout << "[SampleSet2D::updateAngleAttributes] Theta: " << equalIntervalTheta_ << std::endl;
-    std::cout << "[SampleSet2D::updateAngleAttributes] Phi: "   << equalIntervalPhi_   << std::endl;
+    std::cout
+        << "[SampleSet2D::updateAngleAttributes] equalIntervalTheta_: "
+        << equalIntervalTheta_
+        << std::endl;
+    std::cout
+        << "[SampleSet2D::updateAngleAttributes] equalIntervalPhi_: "
+        << equalIntervalPhi_
+        << std::endl;
+}
+
+void SampleSet2D::resizeAngles(int numTheta, int numPhi)
+{
+    assert(numTheta > 0 && numPhi > 0);
+
+    numTheta_ = numTheta;
+    numPhi_ = numPhi;
+
+    int numSamples = numTheta * numPhi;
+    spectra_.resize(numSamples);
+
+    thetaAngles_.resize(numTheta);
+    phiAngles_.resize(numPhi);
+}
+
+void SampleSet2D::resizeWavelengths(int numWavelengths)
+{
+    assert(numWavelengths > 0);
+
+    int numSamples = numTheta_ * numPhi_;
+
+    for (int i = 0; i < numSamples; ++i) {
+        Spectrum sp;
+        sp.resize(numWavelengths);
+        spectra_.at(i) = sp;
+    }
+
+    wavelengths_.resize(numWavelengths);
 }
 
 void SampleSet2D::clampAngles()

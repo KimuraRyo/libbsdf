@@ -37,7 +37,7 @@ public:
 
     Vec3 getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
     {
-        return color_ * 1.0f / PI_F;
+        return color_ / PI_F;
     }
 
     bool isIsotropic() const { return true; }

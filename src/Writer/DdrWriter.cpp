@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -189,20 +189,21 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream
             for (int inThIndex = 0; inThIndex < brdf.getNumInTheta(); ++inThIndex) {
                 stream << ";; Sigma = " << toDegree(brdf.getInTheta(inThIndex)) << std::endl;
 
-                for (int spPhIndex = 0; spPhIndex < brdf.getNumSpecPhi(); ++spPhIndex) {
-                    for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
-                        const Spectrum& sp = brdf.getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+                for (int spPhIndex = 0; spPhIndex < brdf.getNumSpecPhi();   ++spPhIndex) {
+                for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
+                    Spectrum sp = brdf.getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+                    sp = sp.cwiseMax(0.0);
 
-                        if (ss->getColorModel() == XYZ_MODEL) {
-                            Spectrum rgb = xyzToSrgb(sp);
-                            stream << " " << rgb[wlIndex] * PI_F;
-                        }
-                        else {
-                            stream << " " << sp[wlIndex] * PI_F;
-                        }
+                    if (ss->getColorModel() == XYZ_MODEL) {
+                        Spectrum rgb = xyzToSrgb(sp);
+                        stream << " " << rgb[wlIndex] * PI_F;
                     }
+                    else {
+                        stream << " " << sp[wlIndex] * PI_F;
+                    }
+                }
 
-                    stream << std::endl;
+                stream << std::endl;
                 }
             }
         }
