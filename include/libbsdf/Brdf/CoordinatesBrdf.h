@@ -166,6 +166,8 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&     brdf,
 
     samples_->updateAngleAttributes();
     initializeSpectra(brdf);
+
+    sourceType_ = brdf.getSourceType();
 }
 
 template <typename CoordSysT>
@@ -185,6 +187,8 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf& brdf,
     samples_->getWavelengths() = ss->getWavelengths();
 
     initializeSpectra(brdf);
+
+    sourceType_ = brdf.getSourceType();
 }
 
 template <typename CoordSysT>

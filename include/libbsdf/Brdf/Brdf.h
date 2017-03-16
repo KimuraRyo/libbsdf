@@ -14,6 +14,8 @@
 #include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Brdf/SampleSet.h>
 
+#include <libbsdf/Common/Global.h>
+
 namespace lb {
 
 /*!
@@ -51,6 +53,12 @@ public:
 
     /*! Gets the sample set including angles, wavelengths, and spectra. */
     const SampleSet* getSampleSet() const;
+
+    /*! Gets the source type. */
+    SourceType getSourceType() const;
+
+    /*! Sets the source type. */
+    void setSourceType(SourceType type);
 
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
     virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const = 0;
@@ -112,6 +120,8 @@ protected:
     /*! This attribute holds the sample set including angles, wavelengths, and spectra. */
     SampleSet* samples_;
 
+    SourceType sourceType_; /*!< The data type of source. */
+
 private:
     /*! Copy operator is disabled. */
     Brdf& operator=(const Brdf&);
@@ -119,6 +129,10 @@ private:
 
 inline       SampleSet* Brdf::getSampleSet()       { return samples_; }
 inline const SampleSet* Brdf::getSampleSet() const { return samples_; }
+
+inline SourceType Brdf::getSourceType() const { return sourceType_; }
+
+inline void Brdf::setSourceType(SourceType type) { sourceType_ = type; }
 
 template <typename InterpolatorT>
 bool Brdf::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)

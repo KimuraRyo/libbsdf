@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,6 +25,8 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
 
     std::ios_base::sync_with_stdio(false);
 
+    SourceType sourceType = UNKNOWN_SOURCE;
+
     ddr_sdr_utility::SymmetryType symmetryType  = ddr_sdr_utility::PLANE_SYMMETRICAL;
     ddr_sdr_utility::UnitType     unitType      = ddr_sdr_utility::LUMINANCE_ABSOLUTE;
 
@@ -49,7 +51,24 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             continue;
         }
         else if (headStr == "Source") {
-            reader_utility::ignoreLine(ifs);
+            std::string typeStr;
+            ifs >> typeStr;
+
+            if (typeStr == "Measured") {
+                sourceType = MEASURED_SOURCE;
+            }
+            else if (typeStr == "Generated") {
+                sourceType = GENERATED_SOURCE;
+            }
+            else if (typeStr == "Edited") {
+                sourceType = EDITED_SOURCE;
+            }
+            else if (typeStr == "Morphed") {
+                sourceType = UNKNOWN_SOURCE;
+            }
+            else {
+                reader_utility::logNotImplementedKeyword(typeStr);
+            }
         }
         else if (headStr == "TypeSym") {
             std::string typeStr;
@@ -201,6 +220,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                                                                 spThetaDegrees.size(), numSpecPhi,
                                                                 colorModel,
                                                                 numWavelengths);
+    brdf->setSourceType(sourceType);
 
     SampleSet* ss = brdf->getSampleSet();
 

@@ -20,7 +20,8 @@ SampleSet2D::SampleSet2D(int        numTheta,
                          int        numWavelengths,
                          bool       equalIntervalAngles)
                          : equalIntervalTheta_(false),
-                           equalIntervalPhi_(false)
+                           equalIntervalPhi_(false),
+                           sourceType_(UNKNOWN_SOURCE)
 {
     assert(numTheta > 0 && numPhi > 0);
 

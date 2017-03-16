@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2016 Kimura Ryo                                  //
+// Copyright (C) 2015-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -296,8 +296,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
     SphericalCoordinatesBrdf* brdf = new SphericalCoordinatesBrdf(inThetaDegrees.size(), 1,
                                                                   outThetaDegrees.size(), outPhiDegrees.size(),
                                                                   colorModel,
-                                                                  numChannels);
-    
+                                                                  numChannels);    
     SampleSet* ss = brdf->getSampleSet();
 
     copyArray(inThetaDegrees,  &ss->getAngles0());
@@ -339,6 +338,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
     // An incoming azimuthal angle of an isotropic LightTools BSDF is 90 degrees.
     SphericalCoordinatesBrdf* rotatedBrdf = rotateOutPhi(*brdf, -PI_2_F);
     rotatedBrdf->clampAngles();
+    brdf->setSourceType(MEASURED_SOURCE);
 
     delete brdf;
     return rotatedBrdf;

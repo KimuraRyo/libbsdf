@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -23,8 +23,11 @@ Brdf::Brdf(int          numAngles0,
                                     numAngles2,
                                     numAngles3,
                                     colorModel,
-                                    numWavelengths)) {}
+                                    numWavelengths)),
+             sourceType_(UNKNOWN_SOURCE) {}
 
-Brdf::Brdf() : samples_(0) {}
+Brdf::Brdf() : samples_(0),
+               sourceType_(UNKNOWN_SOURCE) {}
 
-Brdf::Brdf(const Brdf& brdf) : samples_(new SampleSet(*brdf.getSampleSet())) {}
+Brdf::Brdf(const Brdf& brdf) : samples_(new SampleSet(*brdf.getSampleSet())),
+                               sourceType_(brdf.getSourceType()) {}

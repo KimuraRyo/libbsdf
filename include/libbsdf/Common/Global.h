@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -64,6 +64,14 @@ enum FileType {
     LIGHTTOOLS_FILE,
     MERL_BINARY_FILE,
     ZEMAX_FILE
+};
+
+/*! \brief The data type of source. */
+enum SourceType {
+    UNKNOWN_SOURCE = 0,
+    MEASURED_SOURCE,
+    EDITED_SOURCE,
+    GENERATED_SOURCE
 };
 
 } // namespace lb

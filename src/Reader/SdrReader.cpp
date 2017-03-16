@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -26,6 +26,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
 
     std::ios_base::sync_with_stdio(false);
 
+    SourceType sourceType = UNKNOWN_SOURCE;
     ColorModel colorModel = RGB_MODEL;
 
     int numWavelengths = 1;
@@ -43,7 +44,24 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
             continue;
         }
         else if (headStr == "Source") {
-            reader_utility::ignoreLine(ifs);
+            std::string typeStr;
+            ifs >> typeStr;
+
+            if (typeStr == "Measured") {
+                sourceType = MEASURED_SOURCE;
+            }
+            else if (typeStr == "Generated") {
+                sourceType = GENERATED_SOURCE;
+            }
+            else if (typeStr == "Edited") {
+                sourceType = EDITED_SOURCE;
+            }
+            else if (typeStr == "Morphed") {
+                sourceType = UNKNOWN_SOURCE;
+            }
+            else {
+                reader_utility::logNotImplementedKeyword(typeStr);
+            }
         }
         else if (headStr == "TypeColorModel") {
             std::string typeStr;
@@ -91,8 +109,10 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
         return 0;
     }
 
-    // Initialize the arrya of reflectance.
+    // Initialize the array of reflectance.
     SampleSet2D* ss2 = new SampleSet2D(inThetaDegrees.size(), 1, colorModel, numWavelengths);
+
+    ss2->setSourceType(sourceType);
 
     copyArray(inThetaDegrees, &ss2->getThetaArray());
     ss2->getThetaArray() = toRadians(ss2->getThetaArray());

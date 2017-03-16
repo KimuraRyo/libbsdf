@@ -91,9 +91,19 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream
 
     const SampleSet* ss = brdf.getSampleSet();
 
-    ColorModel colorModel;
-
-    stream << "Source Measured" << std::endl;
+    SourceType sourceType = brdf.getSourceType();
+    if (sourceType == MEASURED_SOURCE) {
+        stream << "Source Measured" << std::endl;
+    }
+    else if (sourceType == GENERATED_SOURCE) {
+        stream << "Source Generated" << std::endl;
+    }
+    else if (sourceType == EDITED_SOURCE) {
+        stream << "Source Edited" << std::endl;
+    }
+    else {
+        stream << "Source Measured" << std::endl;
+    }
 
     if (ss->isIsotropic()) {
         stream << "TypeSym ASymmetrical" << std::endl;
@@ -102,6 +112,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream
         stream << "TypeSym ASymmetrical 4D" << std::endl;
     }
 
+    ColorModel colorModel;
     stream << "TypeColorModel ";
     if (ss->getNumWavelengths() == 1) {
         colorModel = MONOCHROMATIC_MODEL;

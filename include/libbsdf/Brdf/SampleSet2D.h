@@ -114,14 +114,37 @@ public:
     /*! Gets the number of wavelengths. */
     int getNumWavelengths() const;
 
+    /*! Gets the source type. */
+    SourceType getSourceType() const;
+
+    /*! Sets the source type. */
+    void setSourceType(SourceType type);
+
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
 
-    /*! Updates angle attributes. */
+    /*! \brief Updates angle attributes.
+     *
+     * Updates the attributes whether angles are set at equal intervals.
+     */
     void updateAngleAttributes();
+
+    /*! Resizes the number of angles. Angles and spectra must be initialized. */
+    void resizeAngles(int numTheta, int numPhi);
+
+    /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
+    void resizeWavelengths(int numWavelengths);
 
     /*! Clamps all angles to minimum and maximum values. */
     void clampAngles();
+
+    /*!
+     * \brief Initializes all spectra of samples using another samples.
+     *
+     * Both samples must have the same wavelengths.
+     */
+    template <typename InterpolatorT>
+    static bool initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples);
 
 private:
     SpectrumList spectra_; /*!< The list of spectrum for each direction. */
@@ -138,6 +161,8 @@ private:
     ColorModel colorModel_; /*!< The color model of spectra. */
 
     Arrayf wavelengths_; /*!< The array of wavelengths. */
+
+    SourceType sourceType_; /*!< The data type of source. */
 };
 
 inline Spectrum SampleSet2D::getSpectrum(float theta, float phi) const
