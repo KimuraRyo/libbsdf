@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016 Kimura Ryo                                       //
+// Copyright (C) 2016-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,7 +16,7 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel& model,
     SampleSet* ss = brdf->getSampleSet();
 
     if (ss->getNumWavelengths() != 3) {
-        std::cerr << "[setupBrdf] Currently, BRDF not using RGB mode is not supported." << std::endl;
+        std::cerr << "[setupTabularBrdf] Currently, BRDF not using RGB mode is not supported." << std::endl;
         return false;
     }
 
