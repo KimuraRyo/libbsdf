@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016 Kimura Ryo                                       //
+// Copyright (C) 2016-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,11 +10,12 @@
 #define LIBBSDF_ASHIKHMIN_SHIRLEY_H
 
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/ReflectanceModel/Fresnel.h>
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
 
 namespace lb {
 
-/*! Ward anisotropic reflectance model. */
+/*! Ashikhmin-Shirley reflectance model. */
 class AshikhminShirley : public ReflectanceModel
 {
 public:
@@ -24,10 +25,10 @@ public:
                      const Vec3&    diffuseColor,
                      float          roughnessX,
                      float          roughnessY)
-                     : specularColor_(specularColor),
-                       diffuseColor_(diffuseColor),
-                       roughnessX_(roughnessX),
-                       roughnessY_(roughnessY)
+                     : specularColor_   (specularColor),
+                       diffuseColor_    (diffuseColor),
+                       roughnessX_      (roughnessX),
+                       roughnessY_      (roughnessY)
     {
         parameters_.push_back(Parameter("Specular color",   &specularColor_));
         parameters_.push_back(Parameter("Roughness X",      &roughnessX_));
@@ -104,7 +105,7 @@ inline Vec3 AshikhminShirley::compute(const Vec3&   L,
     float sqDotHN = dotHN * dotHN;
 
     // specular component
-    Vec3 F = specularColor + (Vec3(1.0, 1.0, 1.0) - specularColor) * pow(1.0f - dotHL, 5.0f);
+    Vec3 F = schlickFresnel(dotHL, specularColor);
     Vec3 sBrdf = sqrt((roughnessX + 1.0f) * (roughnessY + 1.0f)) / (8.0f * PI_F)
                * pow(dotHN, (roughnessX * sqDotHT + roughnessY * sqDotHB) / max(1.0f - sqDotHN, EPSILON_F))
                / (dotHL * max(dotLN, dotVN))

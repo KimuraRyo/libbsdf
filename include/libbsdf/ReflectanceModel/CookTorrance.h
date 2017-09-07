@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2016 Kimura Ryo                                  //
+// Copyright (C) 2015-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,28 +22,24 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     CookTorrance(const Vec3&    color,
-                 float          roughness,
-                 float          refractiveIndex)
-                 : color_(color),
-                   roughness_(roughness),
-                   refractiveIndex_(refractiveIndex)
+                 float          roughness)
+                 : color_       (color),
+                   roughness_   (roughness)
     {
-        parameters_.push_back(Parameter("Color",            &color_));
-        parameters_.push_back(Parameter("Roughness",        &roughness_));
-        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_));
+        parameters_.push_back(Parameter("Color",        &color_));
+        parameters_.push_back(Parameter("Roughness",    &roughness_));
     }
 
     static Vec3 compute(const Vec3& L,
                         const Vec3& V,
                         const Vec3& N,
                         const Vec3& color,
-                        float       roughness,
-                        float       refractiveIndex);
+                        float       roughness);
     
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, outDir, N, color_, roughness_, refractiveIndex_);
+        return compute(inDir, outDir, N, color_, roughness_);
     }
 
     bool isIsotropic() const { return true; }
@@ -59,7 +55,6 @@ public:
 private:
     Vec3    color_;
     float   roughness_;
-    float   refractiveIndex_;
 };
 
 /*
@@ -70,32 +65,32 @@ inline Vec3 CookTorrance::compute(const Vec3&   L,
                                   const Vec3&   V,
                                   const Vec3&   N,
                                   const Vec3&   color,
-                                  float         roughness,
-                                  float         refractiveIndex)
+                                  float         roughness)
 {
     using std::acos;
     using std::exp;
     using std::min;
+
+    float alpha = roughness * roughness;
 
     float dotLN = L.dot(N);
     float dotVN = V.dot(N);
 
     Vec3 H = (L + V).normalized();
     float dotHN = H.dot(N);
-
     float dotVH = min(V.dot(H), 1.0f);
 
     float sqDotHN = dotHN * dotHN;
-    float sqRoughness = roughness * roughness;
-    float sqTanHN = (1.0f - sqDotHN) / (sqRoughness * sqDotHN);
+    float sqAlpha = alpha * alpha;
+    float sqTanHN = (1.0f - sqDotHN) / (sqAlpha * sqDotHN);
 
-    float D = exp(-sqTanHN) / (4.0f * sqRoughness * sqDotHN * sqDotHN);
-    float F = fresnelReflection(acos(dotVH), refractiveIndex);
+    float D = exp(-sqTanHN) / (4.0f * sqAlpha * sqDotHN * sqDotHN);
+    Vec3  F = schlickFresnel(dotVH, color);
     float G = min(dotHN * dotVN / dotVH,
                   dotHN * dotLN / dotVH);
     G = min(1.0f, 2.0f * G);
 
-    return color * (1.0f / PI_F) * D * F * G / (dotLN * dotVN);
+    return (1.0f / PI_F) * D * F * G / (dotLN * dotVN);
 }
 
 } // namespace lb
