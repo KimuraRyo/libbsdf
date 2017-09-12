@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -28,7 +28,8 @@ public:
     /*! Converts and exports a DDR or DDT file. */
     static void write(const std::string&    fileName,
                       const Brdf&           brdf,
-                      bool                  inDirDependentCoordSysUsed);
+                      bool                  inDirDependentCoordSysUsed,
+                      DataType              dataType);
 
     /*! Outputs character data of a DDR or DDT file to a stream. */
     static bool output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream);

@@ -30,7 +30,8 @@ bool DdrWriter::write(const std::string& fileName, const SpecularCoordinatesBrdf
 
 void DdrWriter::write(const std::string&    fileName,
                       const Brdf&           brdf,
-                      bool                  inDirDependentCoordSysUsed)
+                      bool                  inDirDependentCoordSysUsed,
+                      DataType              dataType)
 {
     typedef SpecularCoordinatesBrdf SpecBrdf;
     typedef SpecularCoordinateSystem SpecCoordSys;
@@ -78,6 +79,10 @@ void DdrWriter::write(const std::string&    fileName,
 
     exportedBrdf->expandAngles();
     fixEnergyConservation(exportedBrdf);
+
+    if (dataType == BTDF_DATA) {
+        fillSpectraAtInThetaOf90(exportedBrdf);
+    }
 
     DdrWriter::write(fileName, *exportedBrdf);
     delete exportedBrdf;
