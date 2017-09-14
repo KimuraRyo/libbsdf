@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,25 +25,32 @@
 namespace lb {
 namespace reader_utility {
 
-/*! Outputs an unsupported keyword. */
+/*! \brief Outputs an unsupported keyword. */
 void logNotImplementedKeyword(const std::string& keyword);
 
-/*! Skips a line. */
+/*! \brief Skips a line. */
 void ignoreLine(std::istream& stream);
 
-/*! Skips comment lines. */
+/*! \brief Skips comment lines. */
 void ignoreCommentLines(std::istream& stream, const std::string& lineHead);
 
-/*! Converts a string to lower-case. */
+/*! \brief Converts a string to lower-case. */
 std::string toLower(const std::string& str);
 
-/*! Returns true if the string ends with \a suffix. */
+/*! \brief Returns true if two strings converted to lower-case are equal. */
+bool isEqual(const std::string& lhs, const std::string& rhs);
+
+/*! \brief Returns true if the string ends with \a suffix. */
 bool hasSuffix(const std::string &fileName, const std::string &suffix);
 
-/*! Classifies the type of a file. */
+/*! \brief Classifies the type of a file. */
 FileType classifyFile(const std::string& fileName);
 
 } // namespace reader_utility
+
+/*
+ * Implementation
+ */
 
 inline void reader_utility::logNotImplementedKeyword(const std::string& keyword)
 {
@@ -60,6 +67,11 @@ inline std::string reader_utility::toLower(const std::string& str)
     std::string lowerStr(str);
     std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
     return lowerStr;
+}
+
+inline bool reader_utility::isEqual(const std::string& lhs, const std::string& rhs)
+{
+    return (toLower(lhs) == toLower(rhs));
 }
 
 } // namespace lb
