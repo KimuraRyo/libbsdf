@@ -37,8 +37,8 @@ void divideByCosineOutTheta(Brdf* brdf);
  */
 SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
 
-/*! \brief Fills the samples at the incoming polar angle of 0 using rotational symmetry. */
-void fillIncomingPolar0Data(Brdf* brdf);
+/*! \brief Fills the samples at the incoming polar angle of 0 degrees using rotational symmetry. */
+void fillSpectraAtInThetaOf0(Brdf* brdf);
 
 /*!
  * \brief Rotates a BRDF using an outgoing azimuthal angle.
@@ -73,8 +73,11 @@ SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
                                          const Brdf&    standardBrdf,
                                          float          ior);
 
-/*! \brief Copies spectra from the azimuthal angle of 0 to 2PI. */
-void copySpectraFromPhiOfZeroTo2PI(Brdf* brdf);
+/*! \brief Copies spectra from the azimuthal angle of 0 degrees to 90 degrees. */
+void copySpectraFromPhiOfZeroTo90(Brdf* brdf);
+
+/*! \brief Fills spectra of samples if incoming polar angle is 90 degrees. */
+bool fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value = 0.0);
 
 /*! \brief Converts the color model from CIE-XYZ to sRGB. */
 void xyzToSrgb(SampleSet* samples);

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -28,6 +28,7 @@ struct CieData
     static const float D65[]; /*!< CIE Standard Illuminant D65 relative spectral power distribution. */
 
     static const float XYZ_sRGB[9]; /*!< Transformation matrix from CIE-XYZ to sRGB. */
+    static const float sRGB_XYZ[9]; /*!< Transformation matrix from sRGB to CIE-XYZ. */
 };
 
 } // namespace lb

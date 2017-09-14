@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -217,4 +217,11 @@ const float CieData::XYZ_sRGB[9] =
     3.2404542f, -1.5371385f, -0.4985314f,
     -0.9692660f, 1.8760108f, 0.0415560f,
     0.0556434f, -0.2040259f, 1.0572252f
+};
+
+const float CieData::sRGB_XYZ[9] =
+{
+    0.4124564f, 0.3575761f, 0.1804375f,
+    0.2126729f, 0.7151522f, 0.0721750f,
+    0.0193339f, 0.1191920f, 0.9503041f
 };

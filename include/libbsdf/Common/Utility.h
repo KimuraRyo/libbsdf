@@ -88,6 +88,9 @@ void convertCoordinateSystem(float  srcAngle0,
 /*! \brief Converts from CIE-XYZ to sRGB. */
 Vec3f xyzToSrgb(const Vec3f& xyz);
 
+/*! \brief Converts from sRGB to CIE-XYZ. */
+Vec3f srgbToXyz(const Vec3f& rgb);
+
 /*! \brief Fixes a direction if the Z-component is negative. */
 template <typename Vec3T>
 void fixDownwardDir(Vec3T* dir);
@@ -224,6 +227,15 @@ inline Vec3f xyzToSrgb(const Vec3f& xyz)
            CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
            CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
     return mat * xyz;
+}
+
+inline Vec3f srgbToXyz(const Vec3f& rgb)
+{
+    Eigen::Matrix3f mat;
+    mat << CieData::sRGB_XYZ[0], CieData::sRGB_XYZ[1], CieData::sRGB_XYZ[2],
+           CieData::sRGB_XYZ[3], CieData::sRGB_XYZ[4], CieData::sRGB_XYZ[5],
+           CieData::sRGB_XYZ[6], CieData::sRGB_XYZ[7], CieData::sRGB_XYZ[8];
+    return mat * rgb;
 }
 
 template <typename Vec3T>

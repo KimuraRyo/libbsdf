@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -12,15 +12,20 @@ using namespace lb;
 
 Vec3 SpectrumUtility::computeNormalizingConstant_sRGB()
 {
-    Vec3 prevXyz(CieData::XYZ[0], CieData::XYZ[1], CieData::XYZ[2]);
+    Vec3 prevXyz(CieData::XYZ[0],
+                 CieData::XYZ[1],
+                 CieData::XYZ[2]);
     prevXyz *= CieData::D65[0];
 
     Vec3d sumXyz = Vec3d::Zero();
-    const float interval = (CieData::maxWavelength - CieData::minWavelength) / (CieData::numWavelengths - 1);
+    const float interval = (CieData::maxWavelength - CieData::minWavelength)
+                         / (CieData::numWavelengths - 1);
 
     // Trapezoidal rule
     for (int i = 1; i < CieData::numWavelengths; ++i) {
-        Vec3 xyz(CieData::XYZ[i * 3], CieData::XYZ[i * 3 + 1], CieData::XYZ[i * 3 + 2]);
+        Vec3 xyz(CieData::XYZ[i * 3],
+                 CieData::XYZ[i * 3 + 1],
+                 CieData::XYZ[i * 3 + 2]);
         xyz *= CieData::D65[i];
 
         Vec3 area = interval * (prevXyz + xyz);
@@ -36,3 +41,4 @@ Vec3 SpectrumUtility::computeNormalizingConstant_sRGB()
 }
 
 const Vec3 SpectrumUtility::NORMALIZING_CONSTANT_SRGB(10566.4f, 10567.4f, 10568.8f);
+const Vec3 SpectrumUtility::NORMALIZING_CONSTANT_CIE_XYZ(10043.8f, 10567.3f, 11507.4f);

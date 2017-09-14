@@ -119,7 +119,7 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
     return filledBrdf;
 }
 
-void lb::fillIncomingPolar0Data(Brdf* brdf)
+void lb::fillSpectraAtInThetaOf0(Brdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -473,7 +473,7 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
             standardRef = 1.0f;
         }
         else {
-            standardRef = fresnelReflection(ss2->getTheta(thIndex), ior);
+            standardRef = fresnel(ss2->getTheta(thIndex), ior);
         }
 
         Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
@@ -483,7 +483,7 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
     return ss2;
 }
 
-void lb::copySpectraFromPhiOfZeroTo2PI(Brdf* brdf)
+void lb::copySpectraFromPhiOfZeroTo90(Brdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -508,6 +508,31 @@ void lb::copySpectraFromPhiOfZeroTo2PI(Brdf* brdf)
             ss->setSpectrum(i0, i1, i2, ss->getNumAngles3() - 1, sp);
         }}}
     }
+}
+
+bool lb::fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value)
+{
+    if (!dynamic_cast<SpecularCoordinatesBrdf*>(brdf) &&
+        !dynamic_cast<SphericalCoordinatesBrdf*>(brdf)) {
+        std::cerr << "[fillSpectraAtInThetaOf90] Unsupported type of BRDF" << std::endl;
+        return false;
+    }
+
+    SampleSet* ss = brdf->getSampleSet();
+
+    int endIndex0 = ss->getNumAngles0() - 1;
+    if (!isEqual(ss->getAngle0(endIndex0), PI_2_F)) {
+        return false;
+    }
+
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Spectrum& sp = ss->getSpectrum(endIndex0, i1, i2, i3);
+        sp.fill(value);
+    }}}
+
+    return true;
 }
 
 void lb::xyzToSrgb(SampleSet* samples)
