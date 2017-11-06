@@ -147,7 +147,14 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
             for (int inThIndex = 0; inThIndex < static_cast<int>(inThetaDegrees.size()); ++inThIndex) {
                 std::string srValueStr;
                 ifs >> srValueStr;
-                float srValue = static_cast<float>(std::atof(srValueStr.c_str()));
+
+                char* end;
+                float srValue = static_cast<float>(std::strtod(srValueStr.c_str(), &end));
+                if (*end != '\0') {
+                    std::cerr << "[SdrReader::read] Invalid value: " << srValueStr << std::endl;
+                    delete ss2;
+                    return 0;
+                }
 
                 ss2->getSpectrum(inThIndex)[wlIndex] = srValue;
 

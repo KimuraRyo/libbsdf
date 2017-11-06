@@ -34,6 +34,12 @@ void ignoreLine(std::istream& stream);
 /*! \brief Skips comment lines. */
 void ignoreCommentLines(std::istream& stream, const std::string& lineHead);
 
+/*!
+ * \brief \a getline function to handle all three line endings ("\r", "\n" and "\r\n").
+ * See https://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
+*/
+std::istream& safeGetline(std::istream& stream, std::string& token);
+
 /*! \brief Converts a string to lower-case. */
 std::string toLower(const std::string& str);
 

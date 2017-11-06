@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -36,6 +36,32 @@ void reader_utility::ignoreCommentLines(std::istream& stream, const std::string&
     if (stream.eof()) {
         stream.clear();
         stream.seekg(pos, std::ios_base::beg);
+    }
+}
+
+std::istream& reader_utility::safeGetline(std::istream& stream, std::string& token)
+{
+    token.clear();
+
+    std::istream::sentry se(stream, true);
+    std::streambuf* sb = stream.rdbuf();
+
+    for (;;) {
+        int c = sb->sbumpc();
+        switch (c) {
+            case '\n':
+                return stream;
+            case '\r':
+                if (sb->sgetc() == '\n')
+                    sb->sbumpc();
+                return stream;
+            case EOF:
+                if (token.empty())
+                    stream.setstate(std::ios::eofbit);
+                return stream;
+            default:
+                token += (char)c;
+        }
     }
 }
 
