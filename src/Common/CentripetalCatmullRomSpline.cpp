@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -61,7 +61,12 @@ Vec2::Scalar CentripetalCatmullRomSpline::interpolateY(const Vec2::Scalar& x)
     assert((x > pos1_.x() - EPSILON_F * 10.0f && x < pos2_.x() + EPSILON_F * 10.0f) ||
            (x < pos1_.x() + EPSILON_F * 10.0f && x > pos2_.x() - EPSILON_F * 10.0f));
 
-    Vec2::Scalar t = 0.5;
+    Vec2::Scalar t = (x - pos1_.x()) / (pos2_.x() - pos1_.x());
+
+    using std::abs;
+    if (abs(pos1_.x() - x) < EPSILON_F * 10.0f) return pos1_.y();
+    if (abs(pos2_.x() - x) < EPSILON_F * 10.0f) return pos2_.y();
+
     Vec2 currentPos = evaluate(t);
 
     Vec2::Scalar minT = 0.0;
