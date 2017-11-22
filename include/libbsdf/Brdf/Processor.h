@@ -73,6 +73,21 @@ SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
                                          const Brdf&    standardBrdf,
                                          float          ior);
 
+/*!
+ * \brief Computes specular reflectances using a standard sample.
+ *
+ * The maximum spectrum found around a specular direction is used as the specular
+ * reflected or transmitted spectrum for each incoming direction. A sample may lean
+ * to one side, when it is measured.
+ *
+ * \param ior               Index of refraction of the standard material. 1.0 is used for transmittance.
+ * \param maxSpecularTheta  The maximum angle in radians to find the specular reflected/transmitted spectrum.
+ */
+SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
+                                         const Brdf&                    standardBrdf,
+                                         float                          ior,
+                                         float                          maxSpecularTheta);
+
 /*! \brief Copies spectra from the azimuthal angle of 0 degrees to 90 degrees. */
 void copySpectraFromPhiOfZeroTo90(Brdf* brdf);
 

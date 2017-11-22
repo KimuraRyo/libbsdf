@@ -71,7 +71,7 @@ inline const typename RandomSampleSet<CoordSysT>::SampleMap& RandomSampleSet<Coo
 
 template <typename CoordSysT>
 const Spectrum& RandomSampleSet<CoordSysT>::findSpectrumOfNearestSample(const AngleList& angles,
-                                                                        bool              reciprocity) const
+                                                                        bool             reciprocity) const
 {
     using std::acos;
 

@@ -483,6 +483,63 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
     return ss2;
 }
 
+SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
+                                             const Brdf&                    standardBrdf,
+                                             float                          ior,
+                                             float                          maxSpecularTheta)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+    const SampleSet* standardSs = standardBrdf.getSampleSet();
+
+    if (ss->getNumWavelengths() != standardSs->getNumWavelengths() ||
+        !ss->getWavelengths().isApprox(standardSs->getWavelengths())) {
+        std::cerr
+            << "[lb::computeSpecularReflectances] Wavelengths do not match."
+            << std::endl;
+        return 0;
+    }
+
+    SampleSet2D* ss2 = new SampleSet2D(ss->getNumAngles0(),
+                                       ss->getNumAngles1(),
+                                       ss->getColorModel(),
+                                       ss->getNumWavelengths());
+    ss2->getThetaArray()    = ss->getAngles0();
+    ss2->getPhiArray()      = ss->getAngles1();
+    ss2->getWavelengths()   = ss->getWavelengths();
+
+    for (int thIndex = 0; thIndex < ss2->getNumTheta(); ++thIndex) {
+    for (int phIndex = 0; phIndex < ss2->getNumPhi();   ++phIndex) {
+        Vec3 inDir = ss2->getDirection(thIndex, phIndex);
+        Vec3 specularDir = reflect(inDir, Vec3(0.0, 0.0, 1.0));
+
+        Spectrum brdfSp = brdf.getSpectrum(inDir, specularDir);
+
+        for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
+        for (int spPhIndex = 0; spPhIndex < brdf.getNumSpecPhi();   ++spPhIndex) {
+            const Spectrum& sp = brdf.getSpectrum(thIndex, phIndex, spThIndex, spPhIndex);
+
+            if (brdfSp.sum() < sp.sum()) {
+                brdfSp = sp;
+            }
+        }}
+
+        Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
+
+        float standardRef;
+        if (ior == 1.0f) {
+            standardRef = 1.0f;
+        }
+        else {
+            standardRef = fresnel(ss2->getTheta(thIndex), ior);
+        }
+
+        Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
+        ss2->setSpectrum(thIndex, phIndex, refSp);
+    }}
+
+    return ss2;
+}
+
 void lb::copySpectraFromPhiOfZeroTo90(Brdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
