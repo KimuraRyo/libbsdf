@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -123,10 +123,12 @@ void lb::fillSpectraAtInThetaOf0(Brdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
 
-    if ((!dynamic_cast<SphericalCoordinatesBrdf*>(brdf) ||
-         !dynamic_cast<SpecularCoordinatesBrdf*>(brdf)) &&
-        !ss->isIsotropic() &&
-        ss->getAngle0(0) == 0.0f) {
+    bool acceptable = (dynamic_cast<SphericalCoordinatesBrdf*>(brdf) ||
+                       dynamic_cast<SpecularCoordinatesBrdf*>(brdf));
+
+    if (!acceptable ||
+        !ss->isIsotropic() ||
+        ss->getAngle0(0) != 0.0f) {
         return;
     }
 
