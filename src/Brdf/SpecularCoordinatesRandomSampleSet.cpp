@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016 Kimura Ryo                                       //
+// Copyright (C) 2016-2017 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,7 +22,8 @@ void SpecularCoordinatesRandomSampleSet::setupBrdf(SpecularCoordinatesBrdf* brdf
         RandomSampleSet::AngleList angles;
         SampleMap::iterator it;
         float w3;
-        #pragma omp parallel for private(angles, it, w3)
+        Spectrum sp;
+        #pragma omp parallel for private(angles, it, w3, sp)
         for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
             angles.resize(4);
             angles.at(0) = brdf->getInTheta(inThIndex);
@@ -38,7 +39,7 @@ void SpecularCoordinatesRandomSampleSet::setupBrdf(SpecularCoordinatesBrdf* brdf
             else {
                 // Modify a weight coefficient.
                 w3 = weight3 * hermiteInterpolation3(1.0f, 1.0f / weight3, brdf->getSpecTheta(spThIndex) / PI_2_F);
-                Spectrum sp = estimateSpectrum<SpecularCoordinateSystem>(angles, weight0, weight1, weight2, w3);
+                sp = estimateSpectrum<SpecularCoordinateSystem>(angles, weight0, weight1, weight2, w3);
                 brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
             }
         }
