@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <libbsdf/Brdf/Processor.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Version.h>
 
@@ -40,22 +41,27 @@ void DdrWriter::write(const std::string&    fileName,
     if (dynamic_cast<const SpecBrdf*>(&brdf)) {
         exportedBrdf = new SpecBrdf(dynamic_cast<const SpecBrdf&>(brdf));
     }
-    else if (!inDirDependentCoordSysUsed) {
-        exportedBrdf = new SpecBrdf(brdf, 10, 1, 181, 37);
-    }
-    else {
+    else if (dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf)) {
         const SampleSet* ss = brdf.getSampleSet();
 
+        using std::max;
+
+        Arrayf::Index numOutThetaAngles = max(ss->getNumAngles2(), 181);
+        Arrayf::Index numOutPhiAngles   = max(ss->getNumAngles3(), 37);
+
         Arrayf inThetaAngles    = ss->getAngles0();
-        Arrayf inPhiAngles      = Arrayf::LinSpaced(ss->getNumAngles1(), 0.0, SpecCoordSys::MAX_ANGLE1);
-        Arrayf outThetaAngles   = Arrayf::LinSpaced(181,                 0.0, SpecCoordSys::MAX_ANGLE2);
-        Arrayf outPhiAngles     = Arrayf::LinSpaced(37,                  0.0, SpecCoordSys::MAX_ANGLE3);
+        Arrayf inPhiAngles      = Arrayf::LinSpaced(ss->getNumAngles1(),    0.0, SpecCoordSys::MAX_ANGLE1);
+        Arrayf outThetaAngles   = Arrayf::LinSpaced(numOutThetaAngles,      0.0, SpecCoordSys::MAX_ANGLE2);
+        Arrayf outPhiAngles     = Arrayf::LinSpaced(numOutPhiAngles,        0.0, SpecCoordSys::MAX_ANGLE3);
 
         if (inPhiAngles.size() == 1) {
             inPhiAngles[0] = 0.0f;
         }
 
         exportedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, outThetaAngles, outPhiAngles);
+    }
+    else {
+        exportedBrdf = new SpecBrdf(brdf, 10, 1, 181, 37);
     }
 
     SampleSet* exportedSs = exportedBrdf->getSampleSet();
@@ -81,7 +87,7 @@ void DdrWriter::write(const std::string&    fileName,
     fixEnergyConservation(exportedBrdf);
 
     if (dataType == BTDF_DATA) {
-        fillSpectraAtInThetaOf90(exportedBrdf);
+        fillSpectraAtInThetaOf90(exportedBrdf, 0.0f);
     }
 
     DdrWriter::write(fileName, *exportedBrdf);

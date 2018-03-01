@@ -206,6 +206,8 @@ void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
 
+    fixNegativeSpectra(ss);
+
     Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
 
     for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
