@@ -309,6 +309,13 @@ bool SampleSet2D::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D*
 
     if (!same) return false;
 
+    //if (!hasSameColor(baseSamples, *samples)) {
+    //    std::cerr
+    //        << "[lb::initializeSpectra] Color models or wavelengths do not match."
+    //        << std::endl;
+    //    return false;
+    //}
+
     for (int i0 = 0; i0 < samples->getNumTheta(); ++i0) {
     for (int i1 = 0; i1 < samples->getNumPhi();   ++i1) {
         Spectrum sp;

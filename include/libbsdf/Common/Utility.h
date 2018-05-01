@@ -85,6 +85,10 @@ void convertCoordinateSystem(float  srcAngle0,
                              float* destAngle2,
                              float* destAngle3);
 
+/*! \brief Returns true if two sample sets have the same color model and wavelengths. */
+template <typename T>
+bool hasSameColor(const T& ss0, const T& ss1);
+
 /*! \brief Converts from CIE-XYZ to sRGB. */
 Vec3f xyzToSrgb(const Vec3f& xyz);
 
@@ -181,6 +185,30 @@ inline T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& 
     CentripetalCatmullRomSpline ccrs(v0, v1, v2, v3);
 
     return static_cast<T>(ccrs.interpolateY(pos));
+}
+
+template <typename T>
+inline bool hasSameColor(const T& ss0, const T& ss1)
+{
+    ColorModel cm = ss0.getColorModel();
+    if (ss0.getColorModel() != ss1.getColorModel()) {
+        std::cout
+            << "[lb::hasSameColor] Color models do not match: "
+            << ss0.getColorModel() << ", " << ss1.getColorModel()
+            << std::endl;
+        return false;
+    }
+
+    if (ss0.getNumWavelengths() != ss1.getNumWavelengths() ||
+        !ss0.getWavelengths().isApprox(ss1.getWavelengths())) {
+        std::cout
+            << "[lb::hasSameColor] Wavelengths do not match: "
+            << ss0.getWavelengths() << ", " << ss1.getWavelengths()
+            << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 template <typename Vec3T>
