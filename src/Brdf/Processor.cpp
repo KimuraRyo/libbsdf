@@ -441,6 +441,122 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
     }}}
 }
 
+Brdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
+                               const SphericalCoordinatesBrdf&  insertedBrdf,
+                               float                            inPhi)
+{
+    //bool inPhiUsed = (dynamic_cast<const SphericalCoordinatesBrdf*>(&baseBrdf) &&
+    //                  dynamic_cast<const SphericalCoordinatesBrdf*>(&insertedBrdf)) ||
+    //                 (dynamic_cast<const SpecularCoordinatesBrdf*>(&baseBrdf) &&
+    //                  dynamic_cast<const SpecularCoordinatesBrdf*>(&insertedBrdf));
+
+    //if (!inPhiUsed) {
+    //    std::cerr
+    //        << "[lb::insertBrdfAlongInPhi] Invalid coordinate system is used."
+    //        << std::endl;
+    //    return 0;
+    //}
+
+    const SampleSet* baseSs = baseBrdf.getSampleSet();
+    const SampleSet* insertedSs = insertedBrdf.getSampleSet();
+
+    //if (!hasSameColor(baseSs, insertedSs)) {
+    //    std::cerr
+    //        << "[lb::insertBrdfAlongInPhi] Color models or wavelengths do not match."
+    //        << std::endl;
+    //    return 0;
+    //}
+
+    if (baseSs->getColorModel() != insertedSs->getColorModel()) {
+        std::cerr
+            << "[Brdf::insertBrdfAlongInPhi] Color models do not match: "
+            << baseSs->getColorModel() << ", " << insertedSs->getColorModel()
+            << std::endl;
+        return 0;
+    }
+
+    if (baseSs->getNumWavelengths() != insertedSs->getNumWavelengths() ||
+        !baseSs->getWavelengths().isApprox(insertedSs->getWavelengths())) {
+        std::cerr
+            << "[lb::insertBrdfAlongInPhi] Wavelengths do not match: "
+            << baseSs->getWavelengths() << ", " << insertedSs->getWavelengths()
+            << std::endl;
+        return 0;
+    }
+
+    if (insertedSs->getNumAngles1() != 1) {
+        std::cerr
+            << "[lb::insertBrdfAlongInPhi] The number of incoming azimuthal angles must be 1. insertedSs->getNumAngles1(): "
+            << insertedSs->getNumAngles1() << std::endl;
+        return 0;
+    }
+
+    if (inPhi < 0.0f || inPhi > 2.0 * PI_F) {
+        std::cerr << "[lb::insertBrdfAlongInPhi] inPhi is out of range: " << inPhi << std::endl;
+        return 0;
+    }
+
+    // Find the index of the inserted angle.
+    int insertedIndex = baseSs->getNumAngles1();
+    for (int i = 0; i < baseSs->getNumAngles1(); ++i) {
+        if (baseSs->getAngle1(i) == inPhi) {
+            std::cerr << "[lb::insertBrdfAlongInPhi] inPhi is already used: " << inPhi << std::endl;
+            return 0;
+        }
+
+        if (baseSs->getAngle1(i) > inPhi) {
+            insertedIndex = i;
+            break;
+        }
+    }
+
+    Brdf* brdf = baseBrdf.clone();
+    SampleSet* ss = brdf->getSampleSet();
+
+    ss->resizeAngles(baseSs->getNumAngles0(),
+                     baseSs->getNumAngles1() + 1,
+                     baseSs->getNumAngles2(),
+                     baseSs->getNumAngles3());
+
+    ss->getAngles0() = baseSs->getAngles0();
+    ss->getAngles2() = baseSs->getAngles2();
+    ss->getAngles3() = baseSs->getAngles3();
+
+    // Add the inserted angle.
+    Arrayf& angles1 = ss->getAngles1();
+    for (int i = 0; i < baseSs->getNumAngles1(); ++i) {
+        angles1[i] = baseSs->getAngles1()[i];
+    }
+    angles1[angles1.size() - 1] = inPhi;
+    std::sort(angles1.data(), angles1.data() + angles1.size());
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Spectrum sp;
+        if (i1 < insertedIndex) {
+            sp = baseSs->getSpectrum(i0, i1, i2, i3);
+        }
+        else if (i1 == insertedIndex) {
+            Vec3 inDir, outDir;
+            insertedBrdf.toXyz(insertedSs->getAngle0(i0),
+                               insertedSs->getAngle1(i1),
+                               insertedSs->getAngle2(i2),
+                               insertedSs->getAngle3(i3) - inPhi,
+                               &inDir, &outDir);
+            sp = insertedBrdf.getSpectrum(inDir, outDir);
+        }
+        else {
+            sp = baseSs->getSpectrum(i0, i1 - 1, i2, i3);
+        }
+
+        ss->setSpectrum(i0, i1, i2, i3, sp);
+    }}}}
+
+    return brdf;
+}
+
 SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
                                              const Brdf&    standardBrdf,
                                              float          ior)
@@ -544,29 +660,27 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
     return ss2;
 }
 
-void lb::copySpectraFromPhiOfZeroTo90(Brdf* brdf)
+void lb::copySpectraFromPhiOfZeroTo2PI(SampleSet* samples)
 {
-    SampleSet* ss = brdf->getSampleSet();
-
-    if (ss->getNumAngles1() >= 2 &&
-        ss->getAngle1(0) == 0.0f &&
-        ss->getAngle1(ss->getNumAngles1() - 1) >= SphericalCoordinateSystem::MAX_ANGLE1) {
-        for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
-        for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
-        for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
-            const Spectrum& sp = ss->getSpectrum(i0, 0, i2, i3);
-            ss->setSpectrum(i0, ss->getNumAngles1() - 1, i2, i3, sp);
+    if (samples->getNumAngles1() >= 2 &&
+        samples->getAngle1(0) == 0.0f &&
+        samples->getAngle1(samples->getNumAngles1() - 1) >= SphericalCoordinateSystem::MAX_ANGLE1) {
+        for (int i0 = 0; i0 < samples->getNumAngles0(); ++i0) {
+        for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
+        for (int i3 = 0; i3 < samples->getNumAngles3(); ++i3) {
+            const Spectrum& sp = samples->getSpectrum(i0, 0, i2, i3);
+            samples->setSpectrum(i0, samples->getNumAngles1() - 1, i2, i3, sp);
         }}}
     }
 
-    if (ss->getNumAngles3() >= 2 &&
-        ss->getAngle3(0) == 0.0f &&
-        ss->getAngle3(ss->getNumAngles3() - 1) >= SphericalCoordinateSystem::MAX_ANGLE3) {
-        for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
-        for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
-        for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
-            const Spectrum& sp = ss->getSpectrum(i0, i1, i2, 0);
-            ss->setSpectrum(i0, i1, i2, ss->getNumAngles3() - 1, sp);
+    if (samples->getNumAngles3() >= 2 &&
+        samples->getAngle3(0) == 0.0f &&
+        samples->getAngle3(samples->getNumAngles3() - 1) >= SphericalCoordinateSystem::MAX_ANGLE3) {
+        for (int i0 = 0; i0 < samples->getNumAngles0(); ++i0) {
+        for (int i1 = 0; i1 < samples->getNumAngles1(); ++i1) {
+        for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
+            const Spectrum& sp = samples->getSpectrum(i0, i1, i2, 0);
+            samples->setSpectrum(i0, i1, i2, samples->getNumAngles3() - 1, sp);
         }}}
     }
 }

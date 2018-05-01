@@ -37,22 +37,22 @@ void DdrWriter::write(const std::string&    fileName,
     typedef SpecularCoordinatesBrdf SpecBrdf;
     typedef SpecularCoordinateSystem SpecCoordSys;
 
+    const SampleSet* ss = brdf.getSampleSet();
+
     SpecBrdf* exportedBrdf;
     if (dynamic_cast<const SpecBrdf*>(&brdf)) {
         exportedBrdf = new SpecBrdf(dynamic_cast<const SpecBrdf&>(brdf));
     }
     else if (dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf)) {
-        const SampleSet* ss = brdf.getSampleSet();
-
         using std::max;
 
         Arrayf::Index numOutThetaAngles = max(ss->getNumAngles2(), 181);
         Arrayf::Index numOutPhiAngles   = max(ss->getNumAngles3(), 37);
 
         Arrayf inThetaAngles    = ss->getAngles0();
-        Arrayf inPhiAngles      = Arrayf::LinSpaced(ss->getNumAngles1(),    0.0, SpecCoordSys::MAX_ANGLE1);
-        Arrayf outThetaAngles   = Arrayf::LinSpaced(numOutThetaAngles,      0.0, SpecCoordSys::MAX_ANGLE2);
-        Arrayf outPhiAngles     = Arrayf::LinSpaced(numOutPhiAngles,        0.0, SpecCoordSys::MAX_ANGLE3);
+        Arrayf inPhiAngles      = ss->getAngles1();
+        Arrayf outThetaAngles   = Arrayf::LinSpaced(numOutThetaAngles,  0.0, SpecCoordSys::MAX_ANGLE2);
+        Arrayf outPhiAngles     = Arrayf::LinSpaced(numOutPhiAngles,    0.0, SpecCoordSys::MAX_ANGLE3);
 
         if (inPhiAngles.size() == 1) {
             inPhiAngles[0] = 0.0f;
@@ -61,7 +61,7 @@ void DdrWriter::write(const std::string&    fileName,
         exportedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, outThetaAngles, outPhiAngles);
     }
     else {
-        exportedBrdf = new SpecBrdf(brdf, 10, 1, 181, 37);
+        exportedBrdf = new SpecBrdf(brdf, 10, ss->getNumAngles1(), 181, 37);
     }
 
     SampleSet* exportedSs = exportedBrdf->getSampleSet();
@@ -84,6 +84,7 @@ void DdrWriter::write(const std::string&    fileName,
     }
 
     exportedBrdf->expandAngles();
+    copySpectraFromPhiOfZeroTo2PI(exportedBrdf->getSampleSet());
     fixEnergyConservation(exportedBrdf);
 
     if (dataType == BTDF_DATA) {

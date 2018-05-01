@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -66,6 +66,17 @@ void fillBackSide(SpecularCoordinatesBrdf* brdf);
 void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta);
 
 /*!
+ * \brief Insert a BRDF in a base BRDF along incoming azimuthal angle.
+ *
+ * Both BRDFs must have the same color model, wavelengths, and angles without incoming azimuth.
+ *
+ * \return A new BRDF with an inserted angle.
+ */
+Brdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
+                           const SphericalCoordinatesBrdf&  insertedBrdf,
+                           float                            inPhi);
+
+/*!
  * \brief Computes specular reflectances using a standard sample.
  * \param ior   Index of refraction of the standard material. 1.0 is used for transmittance.
  */
@@ -88,8 +99,12 @@ SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                          float                          ior,
                                          float                          maxSpecularTheta);
 
-/*! \brief Copies spectra from the azimuthal angle of 0 degrees to 90 degrees. */
-void copySpectraFromPhiOfZeroTo90(Brdf* brdf);
+/*!
+ * \brief Copies spectra from the azimuthal angle of 0 degrees to 360 degrees.
+ *
+ * Fixes values at the end of azimuthal angles if the start and end points have the same angle.
+ */
+void copySpectraFromPhiOfZeroTo2PI(SampleSet* samples);
 
 /*! \brief Fills spectra of samples if incoming polar angle is 90 degrees. */
 bool fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value = 0.0);
