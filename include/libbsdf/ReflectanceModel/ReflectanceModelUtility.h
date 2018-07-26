@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2016 Kimura Ryo                                  //
+// Copyright (C) 2015-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -24,8 +24,11 @@
 namespace lb {
 namespace reflectance_model_utility {
 
-/*! Sets up a lb::Brdf using a reflectance model. */
-bool setupTabularBrdf(const ReflectanceModel& model, Brdf* brdf);
+/*! Sets up a lb::Brdf using an analytic reflectance or transmittance model. */
+bool setupTabularBrdf(const ReflectanceModel&   model,
+                      Brdf*                     brdf,
+                      DataType                  dataType = BRDF_DATA,
+                      float                     maxValue = 10000000000.0f);
 
 } // namespace lb
 } // namespace reflectance_model_utility
