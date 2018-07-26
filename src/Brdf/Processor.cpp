@@ -276,6 +276,55 @@ void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
     }}
 }
 
+void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
+                               SpecularCoordinatesBrdf* btdf)
+{
+    fixNegativeSpectra(brdf->getSampleSet());
+    fixNegativeSpectra(btdf->getSampleSet());
+
+    SampleSet2D* reflectances = computeReflectances(*brdf);
+    SampleSet2D* transmittances = computeReflectances(*btdf);
+
+    // Process BRDF.
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();   ++inPhIndex) {
+        Spectrum sp = reflectances->getSpectrum(inThIndex, inPhIndex)
+                    + transmittances->getSpectrum(btdf->getInTheta(inThIndex), btdf->getInPhi(inPhIndex));
+
+        // Fix samples to conserve energy.
+        float maxReflectance = sp.maxCoeff();
+        if (maxReflectance > 1.0f) {
+            for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+            for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
+                Spectrum& fixedSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+                const float coeff = 0.999546f; // Reflectance of Lambertian using lb::Integrator.
+                fixedSp /= maxReflectance / coeff;
+            }}
+        }
+    }}
+
+    // Process BTDF.
+    for (int inThIndex = 0; inThIndex < btdf->getNumInTheta(); ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < btdf->getNumInPhi();   ++inPhIndex) {
+        Spectrum sp = reflectances->getSpectrum(btdf->getInTheta(inThIndex), btdf->getInPhi(inPhIndex))
+                    + transmittances->getSpectrum(inThIndex, inPhIndex);
+
+        // Fix samples to conserve energy.
+        float maxReflectance = sp.maxCoeff();
+        if (maxReflectance > 1.0f) {
+            for (int spThIndex = 0; spThIndex < btdf->getNumSpecTheta(); ++spThIndex) {
+            for (int spPhIndex = 0; spPhIndex < btdf->getNumSpecPhi();   ++spPhIndex) {
+                Spectrum& fixedSp = btdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+                const float coeff = 0.999546f; // Reflectance of Lambertian using lb::Integrator.
+                fixedSp /= maxReflectance / coeff;
+            }}
+        }
+    }}
+
+    delete reflectances;
+    delete transmittances;
+}
+
 void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
 {
     for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
@@ -555,6 +604,31 @@ Brdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
     }}}}
 
     return brdf;
+}
+
+SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+
+    Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
+
+    SampleSet2D* reflectances = new SampleSet2D(brdf.getNumInTheta(),
+                                                brdf.getNumInPhi(),
+                                                ss->getColorModel(),
+                                                ss->getNumWavelengths());
+    reflectances->getThetaArray() = ss->getAngles0();
+    reflectances->getPhiArray() = ss->getAngles1();
+    reflectances->getWavelengths() = ss->getWavelengths();
+
+    for (int inThIndex = 0; inThIndex < brdf.getNumInTheta(); ++inThIndex) {
+    for (int inPhIndex = 0; inPhIndex < brdf.getNumInPhi();   ++inPhIndex) {
+        Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf.getInTheta(inThIndex),
+                                                      brdf.getInPhi(inPhIndex));
+        Spectrum sp = integrator.computeReflectance(brdf, inDir);
+        reflectances->setSpectrum(inThIndex, inPhIndex, sp);
+    }}
+
+    return reflectances;
 }
 
 SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,

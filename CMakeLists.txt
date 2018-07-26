@@ -57,4 +57,16 @@ if(USE_OpenMP)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
+
+option(BUILD_LIBBSDF_APPLICATIONS "Enable to build libbsdf Applications" ON)
+if(BUILD_LIBBSDF_APPLICATIONS)
+    add_subdirectory(applications)
+
+    if(NOT DEFINED LIBBSDF_CORE_FOLDER_NAME)
+        set(LIBBSDF_CORE_FOLDER_NAME Core)
+    endif()
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${LIBBSDF_CORE_FOLDER_NAME})
+endif()
+
 target_link_libraries(${PROJECT_NAME})

@@ -59,6 +59,15 @@ void fixEnergyConservation(SpecularCoordinatesBrdf* brdf);
 void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
                            const SampleSet2D&       specularReflectances);
 
+/*!
+ * \brief Fixes the energy conservation of the BSDF with each incoming direction.
+ *
+ * Reflected and transmitted energy of a BRDF and BTDF are reduced if the sum of
+ * reflectances and transmittances exceed one.
+ */
+void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
+                           SpecularCoordinatesBrdf* btdf);
+
 /*! \brief Fills the back side of a BRDF. */
 void fillBackSide(SpecularCoordinatesBrdf* brdf);
 
@@ -75,6 +84,11 @@ void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta)
 Brdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
                            const SphericalCoordinatesBrdf&  insertedBrdf,
                            float                            inPhi);
+
+/*!
+ * \brief Computes reflectances at each incoming direction.
+ */
+SampleSet2D* computeReflectances(const SpecularCoordinatesBrdf& brdf);
 
 /*!
  * \brief Computes specular reflectances using a standard sample.
