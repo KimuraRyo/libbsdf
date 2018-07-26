@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -69,7 +69,6 @@ struct SpecularCoordinateSystem
     static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of specTheta. */
     static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of specPhi. */
 
-private:
     /*! Converts an outgoing direction from a specular coordinate system to a Cartesian. */
     static Vec3 toOutDirXyz(float inTheta, float inPhi,
                             float specTheta, float specPhi);
@@ -117,6 +116,8 @@ inline Vec3 SpecularCoordinateSystem::toOutDirXyz(float inTheta, float inPhi,
 inline void SpecularCoordinateSystem::fromOutDirXyz(const Vec3& outDir, float inTheta, float inPhi,
                                                     float* specTheta, float* specPhi)
 {
+    assert(inTheta >= 0.0f && inTheta <= PI_2_F);
+
     Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-inPhi) * Vec2f(outDir[0], outDir[1]);
     Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(-inTheta) * Vec2f(rotPhVec[0], outDir[2]);
     rotThVec[1] = clamp(rotThVec[1], -1.0f, 1.0f);

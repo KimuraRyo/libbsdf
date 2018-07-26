@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -19,7 +19,7 @@ namespace lb {
  * \brief   The SpecularCoordinatesBrdf class provides the BRDF of a specular coordinate system.
  *
  * Functions depending on the coordinate system are implemented.
- * Spec is an abbreviation for specular.
+ * \a spec is an abbreviation for specular.
  */
 class SpecularCoordinatesBrdf : public CoordinatesBrdf<SpecularCoordinateSystem>
 {
@@ -60,6 +60,19 @@ public:
     virtual SpecularCoordinatesBrdf* clone() const;
     
     using BaseBrdf::getSpectrum;
+
+    /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
+    virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
+
+    /*! Gets the value of the BRDF at incoming and outgoing directions and the index of wavelength. */
+    virtual float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const;
+
+    /*!
+     * Computes incoming and outgoing directions of a Cartesian coordinate system
+     * using a set of angle indices.
+     */
+    virtual void getInOutDirection(int index0, int index1, int index2, int index3,
+                                   Vec3* inDir, Vec3* outDir) const;
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
     Spectrum getSpectrum(float inTheta, float inPhi,
@@ -105,10 +118,96 @@ public:
     int getNumSpecTheta() const; /*!< Gets the number of polar angles of a specular direction. */
     int getNumSpecPhi()   const; /*!< Gets the number of azimuthal angles of a specular direction. */
 
+    float getSpecularOffset(int index) const;       /*!< Gets the specular offset at an index. */
+    void setSpecularOffset(int index, float angle); /*!< Sets the specular offset at an index. */
+
+    Arrayf&       getSpecularOffsets();       /*!< Gets the array of specular offsets. */
+    const Arrayf& getSpecularOffsets() const; /*!< Gets the array of specular offsets. */
+
+    int getNumSpecularOffsets() const; /*!< Gets the number of specular offsets. */
+
+    /*! Gets the specular offset at an incoming polar angle. */
+    float getSpecularOffset(float inTheta) const;
+
+    /*!
+     * Converts from incoming and outgoing directions to four angles and assigns them
+     * to \a inTheta, \a inPhi, \a specTheta, and \a specPhi.
+     * If specular offsets are set, \a specTheta and \a specPhi are affected by them.
+     */
+    void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                 float* inTheta, float* inPhi,
+                 float* specTheta, float* specPhi) const;
+
 private:
     /*! Copy operator is disabled. */
     SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&);
+
+    /*!
+     * The array of offsets from specular polar angles.
+     * The size of the array is equal to the number of incoming polar angles.
+     * If offsets are not used, the array is empty.
+     */
+    Arrayf specularOffsets_;
 };
+
+inline Spectrum SpecularCoordinatesBrdf::getSpectrum(const Vec3& inDir, const Vec3& outDir) const
+{
+    if (specularOffsets_.size() == 0) {
+        return BaseBrdf::getSpectrum(inDir, outDir);
+    }
+
+    float inTheta, inPhi, specTheta, specPhi;
+    fromXyz(inDir, outDir, &inTheta, &inPhi, &specTheta, &specPhi);
+
+    Spectrum sp;
+    if (samples_->isIsotropic()) {
+        LinearInterpolator::getSpectrum(*samples_, inTheta, specTheta, specPhi, &sp);
+    }
+    else {
+        LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi, &sp);
+    }
+
+    return sp;
+}
+
+inline float SpecularCoordinatesBrdf::getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const
+{
+    if (specularOffsets_.size() == 0) {
+        return BaseBrdf::getValue(inDir, outDir, wavelengthIndex);
+    }
+
+    float inTheta, inPhi, specTheta, specPhi;
+    fromXyz(inDir, outDir, &inTheta, &inPhi, &specTheta, &specPhi);
+
+    if (samples_->isIsotropic()) {
+        return LinearInterpolator::getValue(*samples_, inTheta, specTheta, specPhi, wavelengthIndex);
+    }
+    else {
+        return LinearInterpolator::getValue(*samples_, inTheta, inPhi, specTheta, specPhi, wavelengthIndex);
+    }
+}
+
+inline void SpecularCoordinatesBrdf::getInOutDirection(int index0, int index1, int index2, int index3,
+                                                       Vec3* inDir, Vec3* outDir) const
+{
+    if (specularOffsets_.size() == 0) {
+        BaseBrdf::getInOutDirection(index0, index1, index2, index3, inDir, outDir);
+        return;
+    }
+
+    float inTheta = samples_->getAngle0(index0);
+
+    *inDir = SphericalCoordinateSystem::toXyz(inTheta,
+                                              samples_->getAngle1(index1));
+    inDir->normalize();
+
+    float offset = getSpecularOffset(inTheta);
+    *outDir = SpecularCoordinateSystem::toOutDirXyz(inTheta + offset,
+                                                    samples_->getAngle1(index1),
+                                                    samples_->getAngle2(index2),
+                                                    samples_->getAngle3(index3));
+    outDir->normalize();
+}
 
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
                                                      float specTheta, float specPhi)
@@ -117,7 +216,6 @@ inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
     LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi, &sp);
     return sp;
 }
-
 
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
                                                      float specTheta, float specPhi) const
@@ -172,6 +270,49 @@ inline int SpecularCoordinatesBrdf::getNumInTheta()   const { return samples_->g
 inline int SpecularCoordinatesBrdf::getNumInPhi()     const { return samples_->getNumAngles1(); }
 inline int SpecularCoordinatesBrdf::getNumSpecTheta() const { return samples_->getNumAngles2(); }
 inline int SpecularCoordinatesBrdf::getNumSpecPhi()   const { return samples_->getNumAngles3(); }
+
+inline float SpecularCoordinatesBrdf::getSpecularOffset(int index) const
+{
+    return (specularOffsets_.size() == 0) ? 0.0f : specularOffsets_[index];
+}
+
+inline void SpecularCoordinatesBrdf::setSpecularOffset(int index, float angle)
+{
+    if (specularOffsets_.size() == 0) {
+        specularOffsets_.resize(getNumInTheta());
+    }
+    specularOffsets_[index] = angle;
+}
+
+inline Arrayf&       SpecularCoordinatesBrdf::getSpecularOffsets()       { return specularOffsets_; }
+inline const Arrayf& SpecularCoordinatesBrdf::getSpecularOffsets() const { return specularOffsets_; }
+
+inline int SpecularCoordinatesBrdf::getNumSpecularOffsets() const { return specularOffsets_.size(); }
+
+inline float SpecularCoordinatesBrdf::getSpecularOffset(float inTheta) const
+{
+    int lIdx0; // index of the lower bound sample point
+    int uIdx0; // index of the upper bound sample point
+    float lowerAngle0;
+    float upperAngle0;
+
+    LinearInterpolator::findBounds(samples_->getAngles0(), inTheta, samples_->isEqualIntervalAngles0(),
+                                   &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
+
+    float interval = std::max(upperAngle0 - lowerAngle0, EPSILON_F);
+    float weight = (inTheta - lowerAngle0) / interval;
+    return (specularOffsets_[uIdx0] - specularOffsets_[lIdx0]) * weight + specularOffsets_[lIdx0];
+}
+
+inline void SpecularCoordinatesBrdf::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                             float* inTheta, float* inPhi,
+                                             float* specTheta, float* specPhi) const
+{
+    SphericalCoordinateSystem::fromXyz(inDir, inTheta, inPhi);
+
+    float offset = getSpecularOffset(*inTheta);
+    SpecularCoordinateSystem::fromOutDirXyz(outDir, *inTheta + offset, *inPhi, specTheta, specPhi);
+}
 
 } // namespace lb
 

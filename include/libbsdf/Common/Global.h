@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -19,7 +19,11 @@
 #include <Eigen/Core>
 
 #ifndef M_PI
-#define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846 // pi
+#endif
+
+#ifndef M_SQRT2
+#define M_SQRT2 1.41421356237309504880 // sqrt(2)
 #endif
 
 namespace lb {
@@ -27,6 +31,9 @@ namespace lb {
 const float PI_F = 3.14159265358979323846f;
 const float PI_2_F = 1.57079632679489661923f;
 const float EPSILON_F = std::numeric_limits<float>::epsilon();
+
+const double PI_D = 3.14159265358979323846;
+const double PI_2_D = 1.57079632679489661923;
 
 /*! \brief The data type of a spectrum. */
 typedef Eigen::ArrayXf Spectrum;

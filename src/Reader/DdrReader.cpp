@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -40,6 +40,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
     std::vector<float> inPhiDegrees;
     std::vector<float> spThetaDegrees;
     std::vector<float> spPhiDegrees;
+    std::vector<float> spThetaOffsetDegrees;
 
     ddr_sdr_utility::ignoreCommentLines(ifs);
     std::ifstream::pos_type pos = ifs.tellg();
@@ -180,8 +181,12 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             }
         }
         else if (isEqual(headStr, "sigmaT")) {
-            reader_utility::logNotImplementedKeyword(headStr);
-            reader_utility::ignoreLine(ifs);
+            int numSpecThetaOffsets = inThetaDegrees.size();
+            for (int i = 0; i < numSpecThetaOffsets; ++i) {
+                float angle;
+                ifs >> angle;
+                spThetaOffsetDegrees.push_back(angle - inThetaDegrees[i]);
+            }
         }
         else if (isEqual(headStr, "phi")) {
             int numSpecPhi;
@@ -206,8 +211,8 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                  isEqual(headStr, "red") ||
                  isEqual(headStr, "gre") ||
                  isEqual(headStr, "blu") ||
-                 isEqual(headStr, "green") ||   // Not correct specification
-                 isEqual(headStr, "blue")) {    // Not correct specification
+                 isEqual(headStr, "green") ||   // Not correct keyword in the specification
+                 isEqual(headStr, "blue")) {    // Not correct keyword in the specification
             ifs.seekg(pos, std::ios_base::beg);
             break;
         }
@@ -260,6 +265,12 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
              ++i, --reverseIndex) {
             brdf->setSpecPhi(i, PI_F + (PI_F - brdf->getSpecPhi(reverseIndex)));
         }
+    }
+
+    if (!spThetaOffsetDegrees.empty()) {
+        brdf->getSpecularOffsets().resize(spThetaOffsetDegrees.size());
+        copyArray(spThetaOffsetDegrees, &brdf->getSpecularOffsets());
+        brdf->getSpecularOffsets() = toRadians(brdf->getSpecularOffsets());
     }
 
     std::vector<float> kbdfs;
@@ -328,17 +339,10 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                 // Convert intensity to radiance.
                 if (unitType == ddr_sdr_utility::INTENSITY_ABSOLUTE ||
                     unitType == ddr_sdr_utility::INTENSITY_RELATIVE) {
-                    std::vector<float> angles;
-                    angles.push_back(toRadian(inThetaDegrees.at(inThIndex)));
-                    angles.push_back(toRadian(inPhiDegrees.at(inPhIndex)));
-                    angles.push_back(toRadian(spThetaDegrees.at(spThIndex)));
-                    angles.push_back(toRadian(spPhiDegrees.at(spPhIndex)));
+                    Vec3 inDir, outDir;
+                    brdf->getInOutDirection(inThIndex, inPhIndex, spThIndex, spPhIndex, &inDir, &outDir);
 
-                    convertCoordinateSystem<SpecularCoordinateSystem, SphericalCoordinateSystem>(
-                        angles.at(0), angles.at(1), angles.at(2), angles.at(3),
-                        &angles[0], &angles[1], &angles[2], &angles[3]);
-
-                    brdfValue /= std::max(std::cos(angles.at(2)), EPSILON_F);
+                    brdfValue /= std::max(outDir[2], EPSILON_F);
                     brdfValue *=  PI_F;
                 }
 

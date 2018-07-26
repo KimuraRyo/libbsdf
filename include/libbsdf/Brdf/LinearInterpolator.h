@@ -67,7 +67,6 @@ public:
                             float               theta,
                             Spectrum*           spectrum);
 
-private:
     /*!
      * Finds neighbor indices and angles.
      *

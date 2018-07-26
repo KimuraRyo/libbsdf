@@ -156,6 +156,14 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream
     }
     stream << std::endl;
 
+    if (brdf.getNumSpecularOffsets() == brdf.getNumInTheta()) {
+        stream << "sigmat" << std::endl;
+        for (int i = 0; i < brdf.getNumSpecularOffsets(); ++i) {
+            stream << " " << toDegree(brdf.getInTheta(i) + brdf.getSpecularOffset(i));
+        }
+        stream << std::endl;
+    }
+
     stream << "phi " << brdf.getNumSpecPhi() << std::endl;
     for (int i = 0; i < brdf.getNumSpecPhi(); ++i) {
         stream << " " << toDegree(brdf.getSpecPhi(i));

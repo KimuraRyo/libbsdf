@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -62,17 +62,17 @@ public:
     virtual CoordinatesBrdf<CoordSysT>* clone() const;
 
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
-    Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
+    virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
 
     /*! Gets the value of the BRDF at incoming and outgoing directions and the index of wavelength. */
-    float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const;
+    virtual float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const;
 
     /*!
      * Computes incoming and outgoing directions of a Cartesian coordinate system
      * using a set of angle indices.
      */
-    void getInOutDirection(int index0, int index1, int index2, int index3,
-                           Vec3* inDir, Vec3* outDir) const;
+    virtual void getInOutDirection(int index0, int index1, int index2, int index3,
+                                   Vec3* inDir, Vec3* outDir) const;
 
     /*!
      * Converts from four angles to incoming and outgoing directions and
