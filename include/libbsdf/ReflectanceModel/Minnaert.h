@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016 Kimura Ryo                                       //
+// Copyright (C) 2016-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -27,7 +27,7 @@ public:
                darkness_(darkness)
     {
         parameters_.push_back(Parameter("Albedo",   &albedo_));
-        parameters_.push_back(Parameter("Darkness", &darkness_));
+        parameters_.push_back(Parameter("Darkness", &darkness_, 0.0f, 100.0f));
     }
 
     static Vec3 compute(const Vec3& L,

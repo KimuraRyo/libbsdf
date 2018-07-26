@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2016 Kimura Ryo                                  //
+// Copyright (C) 2015-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -27,7 +27,7 @@ public:
             shininess_(shininess)
     {
         parameters_.push_back(Parameter("Color",        &color_));
-        parameters_.push_back(Parameter("Shininess",    &shininess_));
+        parameters_.push_back(Parameter("Shininess",    &shininess_, 0.0f, 1000.0f));
     }
 
     static Vec3 compute(const Vec3& L,

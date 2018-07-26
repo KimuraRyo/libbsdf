@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016 Kimura Ryo                                       //
+// Copyright (C) 2016-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,8 +22,8 @@ public:
 
     OrenNayar(const Vec3&   albedo,
               float         roughness)
-              : albedo_(albedo),
-                roughness_(roughness)
+              : albedo_     (albedo),
+                roughness_  (roughness)
     {
         parameters_.push_back(Parameter("Albedo",       &albedo_));
         parameters_.push_back(Parameter("Roughness",    &roughness_));
@@ -77,7 +77,9 @@ inline Vec3 OrenNayar::compute(const Vec3& L,
     float dotLN = L.dot(N);
     float dotVN = V.dot(N);
 
-    if (dotLN <= 0.0f || dotVN <= 0.0f) return Vec3::Zero();
+    if (dotLN <= 0.0f || dotVN <= 0.0f) {
+        return Vec3::Zero();
+    }
 
     float cosPhiDiff;
     if (dotLN == 1.0f || dotVN == 1.0f) {

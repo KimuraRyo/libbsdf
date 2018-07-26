@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2017 Kimura Ryo                                  //
+// Copyright (C) 2016-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -23,16 +23,16 @@ public:
 
     AshikhminShirley(const Vec3&    specularColor,
                      const Vec3&    diffuseColor,
-                     float          roughnessX,
-                     float          roughnessY)
+                     float          shininessX,
+                     float          shininessY)
                      : specularColor_   (specularColor),
                        diffuseColor_    (diffuseColor),
-                       roughnessX_      (roughnessX),
-                       roughnessY_      (roughnessY)
+                       shininessX_      (shininessX),
+                       shininessY_      (shininessY)
     {
         parameters_.push_back(Parameter("Specular color",   &specularColor_));
-        parameters_.push_back(Parameter("Roughness X",      &roughnessX_));
-        parameters_.push_back(Parameter("Roughness Y",      &roughnessY_));
+        parameters_.push_back(Parameter("Shininess X",      &shininessX_, 0.0f, 1000.0f));
+        parameters_.push_back(Parameter("Shininess Y",      &shininessY_, 0.0f, 1000.0f));
         parameters_.push_back(Parameter("Diffuse color",    &diffuseColor_));
     }
 
@@ -43,8 +43,8 @@ public:
                         const Vec3& B,
                         const Vec3& specularColor,
                         const Vec3& diffuseColor,
-                        float       roughnessX,
-                        float       roughnessY);
+                        float       shininessX,
+                        float       shininessY);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -53,7 +53,7 @@ public:
         const Vec3 B = Vec3(0.0, -1.0, 0.0);
 
         return compute(inDir, outDir, N, T, B,
-                       specularColor_, diffuseColor_, roughnessX_, roughnessY_);
+                       specularColor_, diffuseColor_, shininessX_, shininessY_);
     }
 
     bool isIsotropic() const { return false; }
@@ -69,8 +69,8 @@ public:
 private:
     Vec3    specularColor_;
     Vec3    diffuseColor_;
-    float   roughnessX_;
-    float   roughnessY_;
+    float   shininessX_;
+    float   shininessY_;
 };
 
 /*
@@ -84,8 +84,8 @@ inline Vec3 AshikhminShirley::compute(const Vec3&   L,
                                       const Vec3&   B,
                                       const Vec3&   specularColor,
                                       const Vec3&   diffuseColor,
-                                      float         roughnessX,
-                                      float         roughnessY)
+                                      float         shininessX,
+                                      float         shininessY)
 {
     using std::max;
     using std::pow;
@@ -105,9 +105,9 @@ inline Vec3 AshikhminShirley::compute(const Vec3&   L,
     float sqDotHN = dotHN * dotHN;
 
     // specular component
-    Vec3 F = schlickFresnel(dotHL, specularColor);
-    Vec3 sBrdf = sqrt((roughnessX + 1.0f) * (roughnessY + 1.0f)) / (8.0f * PI_F)
-               * pow(dotHN, (roughnessX * sqDotHT + roughnessY * sqDotHB) / max(1.0f - sqDotHN, EPSILON_F))
+    Vec3 F = fresnelSchlick(dotHL, specularColor);
+    Vec3 sBrdf = sqrt((shininessX + 1.0f) * (shininessY + 1.0f)) / (8.0f * PI_F)
+               * pow(dotHN, (shininessX * sqDotHT + shininessY * sqDotHB) / max(1.0f - sqDotHN, EPSILON_F))
                / (dotHL * max(dotLN, dotVN))
                * F;
 

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2017 Kimura Ryo                                  //
+// Copyright (C) 2015-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -15,31 +15,44 @@
 
 namespace lb {
 
-/*! Cook-Torrance reflectance model. */
+/*!
+ * Cook-Torrance reflectance model.
+ * The default refractive index and extinction coefficient are values of aluminium at 550nm.
+ */
 class CookTorrance : public ReflectanceModel
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     CookTorrance(const Vec3&    color,
-                 float          roughness)
+                 float          roughness,
+                 float          refractiveIndex = 0.96521f,
+                 float          extinctionCoefficient = 6.3995f)
                  : color_       (color),
-                   roughness_   (roughness)
+                   roughness_   (roughness),
+                   refractiveIndex_       (refractiveIndex),
+                   extinctionCoefficient_ (extinctionCoefficient)
     {
-        parameters_.push_back(Parameter("Color",        &color_));
-        parameters_.push_back(Parameter("Roughness",    &roughness_));
+        parameters_.push_back(Parameter("Color",                    &color_));
+        parameters_.push_back(Parameter("Roughness",                &roughness_, 0.01f, 1.0f));
+#if !defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
+        parameters_.push_back(Parameter("Refractive index",         &refractiveIndex_, 0.01f, 100.0f));
+        parameters_.push_back(Parameter("Extinction coefficient",   &extinctionCoefficient_, 0.0f, 100.0f));
+#endif
     }
 
     static Vec3 compute(const Vec3& L,
                         const Vec3& V,
                         const Vec3& N,
                         const Vec3& color,
-                        float       roughness);
-    
+                        float       roughness,
+                        float       refractiveIndex = 0.96521f,
+                        float       extinctionCoefficient = 6.3995f);
+
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, outDir, N, color_, roughness_);
+        return compute(inDir, outDir, N, color_, roughness_, refractiveIndex_, extinctionCoefficient_);
     }
 
     bool isIsotropic() const { return true; }
@@ -55,6 +68,8 @@ public:
 private:
     Vec3    color_;
     float   roughness_;
+    float   refractiveIndex_;
+    float   extinctionCoefficient_;
 };
 
 /*
@@ -65,32 +80,40 @@ inline Vec3 CookTorrance::compute(const Vec3&   L,
                                   const Vec3&   V,
                                   const Vec3&   N,
                                   const Vec3&   color,
-                                  float         roughness)
+                                  float         roughness,
+                                  float         refractiveIndex,
+                                  float         extinctionCoefficient)
 {
     using std::acos;
     using std::exp;
     using std::min;
 
-    float alpha = roughness * roughness;
+    double alpha = roughness * roughness;
 
-    float dotLN = L.dot(N);
-    float dotVN = V.dot(N);
+    double dotLN = L.dot(N);
+    double dotVN = V.dot(N);
 
     Vec3 H = (L + V).normalized();
-    float dotHN = H.dot(N);
-    float dotVH = min(V.dot(H), 1.0f);
+    double dotHN = H.dot(N);
+    double dotVH = min(V.dot(H), 1.0f);
 
-    float sqDotHN = dotHN * dotHN;
-    float sqAlpha = alpha * alpha;
-    float sqTanHN = (1.0f - sqDotHN) / (sqAlpha * sqDotHN);
+#if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
+    Vec3 F = fresnelSchlick(dotVH, color);
+#else
+    float inTheta = static_cast<float>(std::acos(dotVH));
+    Vec3 F = color * fresnelComplex(inTheta, refractiveIndex, extinctionCoefficient);
+#endif
 
-    float D = exp(-sqTanHN) / (4.0f * sqAlpha * sqDotHN * sqDotHN);
-    Vec3  F = schlickFresnel(dotVH, color);
-    float G = min(dotHN * dotVN / dotVH,
-                  dotHN * dotLN / dotVH);
-    G = min(1.0f, 2.0f * G);
+    double G = min(dotHN * dotVN / dotVH,
+                   dotHN * dotLN / dotVH);
+    G = min(1.0, 2.0 * G);
 
-    return (1.0f / PI_F) * D * F * G / (dotLN * dotVN);
+    double sqDotHN = dotHN * dotHN;
+    double sqAlpha = alpha * alpha;
+    double sqTanHN = (1.0 - sqDotHN) / (sqAlpha * sqDotHN);
+    double D = exp(-sqTanHN) / (PI_D * sqAlpha * sqDotHN * sqDotHN);
+
+    return F * G * D / (4.0 * dotLN * dotVN);
 }
 
 } // namespace lb
