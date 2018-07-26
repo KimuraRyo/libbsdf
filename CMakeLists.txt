@@ -1,14 +1,16 @@
 ## =================================================================== ##
-## Copyright (C) 2014-2016 Kimura Ryo                                  ##
+## Copyright (C) 2014-2018 Kimura Ryo                                  ##
 ##                                                                     ##
 ## This Source Code Form is subject to the terms of the Mozilla Public ##
 ## License, v. 2.0. If a copy of the MPL was not distributed with this ##
 ## file, You can obtain one at http://mozilla.org/MPL/2.0/.            ##
 ## =================================================================== ##
 
-cmake_minimum_required(VERSION 2.8.10)
+cmake_minimum_required(VERSION 3.0.0)
 
 project(libbsdf)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(HEADER_PATH include/libbsdf)
 set(SOURCE_PATH src)
@@ -43,7 +45,7 @@ else(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
 endif(MSVC)
 
-option(USE_OpenMP "Use OpenMP." ON)
+option(USE_OpenMP "Use OpenMP" ON)
 if(USE_OpenMP)
     find_package(OpenMP QUIET)
     if(OPENMP_FOUND)
