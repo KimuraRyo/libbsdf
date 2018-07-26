@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -28,6 +28,11 @@ T clamp(T value, T minValue, T maxValue);
 /*! \brief Returns true if two values are nearly equal. */
 template <typename T>
 bool isEqual(T lhs, T rhs);
+
+/*! \brief Returns -1 for a negative number, +1 for a positive number, and 0 for 0. */
+template <typename T> int sign(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 /*! \brief Computes linearly-interpolated values. */
 template <typename T>
