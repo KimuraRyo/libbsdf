@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -28,7 +28,10 @@ namespace lb {
 class SampleSet2D
 {
 public:
-    /*! Constructs a 2D sample array. */
+    /*!
+     * Constructs a 2D sample array.
+     * The initialization of angles, wavelengths, and spectra is required.
+     */
     SampleSet2D(int         numTheta,
                 int         numPhi,
                 ColorModel  colorModel = RGB_MODEL,

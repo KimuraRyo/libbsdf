@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -35,7 +35,10 @@ namespace lb {
 class SampleSet
 {
 public:
-    /*! Constructs the sample points of a BRDF. */
+    /*!
+     * Constructs the sample points of a BRDF.
+     * The initialization of angles, wavelengths, and spectra is required.
+     */
     SampleSet(int           numAngles0,
               int           numAngles1,
               int           numAngles2,
