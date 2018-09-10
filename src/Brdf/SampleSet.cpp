@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -53,10 +53,10 @@ bool SampleSet::validate() const
 
     // Spectra
     bool spectraValid = true;
-    for (int i0 = 0; i0 < numAngles0_; ++i0) {
-    for (int i1 = 0; i1 < numAngles1_; ++i1) {
-    for (int i2 = 0; i2 < numAngles2_; ++i2) {
-    for (int i3 = 0; i3 < numAngles3_; ++i3) {
+    for (int i0 = 0; i0 < angles0_.size(); ++i0) {
+    for (int i1 = 0; i1 < angles1_.size(); ++i1) {
+    for (int i2 = 0; i2 < angles2_.size(); ++i2) {
+    for (int i3 = 0; i3 < angles3_.size(); ++i3) {
         const Spectrum& sp = getSpectrum(i0, i1, i2, i3);
         
         if (!sp.allFinite()) {
@@ -142,25 +142,20 @@ void SampleSet::resizeAngles(int numAngles0,
 {
     assert(numAngles0 > 0 && numAngles1 > 0 && numAngles2 > 0 && numAngles3 > 0);
 
-    numAngles0_ = numAngles0;
-    numAngles1_ = numAngles1;
-    numAngles2_ = numAngles2;
-    numAngles3_ = numAngles3;
-
-    int numSamples = numAngles0 * numAngles1 * numAngles2 * numAngles3;
-    spectra_.resize(numSamples);
-
     angles0_.resize(numAngles0);
     angles1_.resize(numAngles1);
     angles2_.resize(numAngles2);
     angles3_.resize(numAngles3);
+
+    int numSamples = numAngles0 * numAngles1 * numAngles2 * numAngles3;
+    spectra_.resize(numSamples);
 }
 
 void SampleSet::resizeWavelengths(int numWavelengths)
 {
     assert(numWavelengths > 0);
 
-    int numSamples = numAngles0_ * numAngles1_ * numAngles2_ * numAngles3_;
+    int numSamples = angles0_.size() * angles1_.size() * angles2_.size() * angles3_.size();
 
     for (int i = 0; i < numSamples; ++i) {
         Spectrum sp;

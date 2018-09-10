@@ -175,11 +175,6 @@ private:
     Arrayf angles2_; /*!< The array of angle2. */
     Arrayf angles3_; /*!< The array of angle3. */
 
-    int numAngles0_; /*!< The number of angles0. */
-    int numAngles1_; /*!< The number of angles1. */
-    int numAngles2_; /*!< The number of angles2. */
-    int numAngles3_; /*!< The number of angles3. */
-
     bool equalIntervalAngles0_; /*!< This attribute holds whether angles0 are set at equal intervals. */
     bool equalIntervalAngles1_; /*!< This attribute holds whether angles1 are set at equal intervals. */
     bool equalIntervalAngles2_; /*!< This attribute holds whether angles2 are set at equal intervals. */
@@ -270,10 +265,10 @@ inline const Arrayf& SampleSet::getAngles1() const { return angles1_; }
 inline const Arrayf& SampleSet::getAngles2() const { return angles2_; }
 inline const Arrayf& SampleSet::getAngles3() const { return angles3_; }
 
-inline int SampleSet::getNumAngles0() const { return numAngles0_; }
-inline int SampleSet::getNumAngles1() const { return numAngles1_; }
-inline int SampleSet::getNumAngles2() const { return numAngles2_; }
-inline int SampleSet::getNumAngles3() const { return numAngles3_; }
+inline int SampleSet::getNumAngles0() const { return angles0_.size(); }
+inline int SampleSet::getNumAngles1() const { return angles1_.size(); }
+inline int SampleSet::getNumAngles2() const { return angles2_.size(); }
+inline int SampleSet::getNumAngles3() const { return angles3_.size(); }
 
 inline bool SampleSet::isEqualIntervalAngles0() const { return equalIntervalAngles0_; }
 inline bool SampleSet::isEqualIntervalAngles1() const { return equalIntervalAngles1_; }
@@ -302,30 +297,30 @@ inline const Arrayf& SampleSet::getWavelengths() const { return wavelengths_; }
 
 inline int SampleSet::getNumWavelengths() const { return wavelengths_.size(); }
 
-inline bool SampleSet::isIsotropic() const { return (numAngles1_ == 1); }
+inline bool SampleSet::isIsotropic() const { return (angles1_.size() == 1); }
 
 inline bool SampleSet::isOneSide() const { return oneSide_; }
 
 inline int SampleSet::getIndex(int index0, int index1, int index2, int index3) const
 {
     assert(index0 >= 0 && index1 >= 0 && index2 >= 0 && index3 >= 0);
-    assert(index0 < numAngles0_ && index1 < numAngles1_ && index2 < numAngles2_ && index3 < numAngles3_);
+    assert(index0 < angles0_.size() && index1 < angles1_.size() && index2 < angles2_.size() && index3 < angles3_.size());
 
     int index = index0
-              + numAngles0_ * index1
-              + numAngles0_ * numAngles1_ * index2
-              + numAngles0_ * numAngles1_ * numAngles2_ * index3;
+              + angles0_.size() * index1
+              + angles0_.size() * angles1_.size() * index2
+              + angles0_.size() * angles1_.size() * angles2_.size() * index3;
     return index;
 }
 
 inline int SampleSet::getIndex(int index0, int index2, int index3) const
 {
     assert(index0 >= 0 && index2 >= 0 && index3 >= 0);
-    assert(index0 < numAngles0_ && index2 < numAngles2_ && index3 < numAngles3_);
+    assert(index0 < angles0_.size() && index2 < angles2_.size() && index3 < angles3_.size());
 
     int index = index0
-              + numAngles0_ * index2
-              + numAngles0_ * numAngles2_ * index3;
+              + angles0_.size() * index2
+              + angles0_.size() * angles2_.size() * index3;
     return index;
 }
 
