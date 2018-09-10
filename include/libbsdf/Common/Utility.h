@@ -104,6 +104,9 @@ Vec3f srgbToXyz(const Vec3f& rgb);
 template <typename Vec3T>
 void fixDownwardDir(Vec3T* dir);
 
+/*! \brief Returns true if a direction faces the back of a surface. */
+bool isDownwardDir(const Vec3& dir);
+
 /*! \brief Fits the angle with about the same value. */
 template <typename T>
 T fitAngle(T angle, T value);
@@ -284,6 +287,11 @@ inline void fixDownwardDir(Vec3T* dir)
             d.normalize();
         }
     }
+}
+
+inline bool isDownwardDir(const Vec3& dir)
+{
+    return (dir.z() < -0.00001);
 }
 
 template <typename T>

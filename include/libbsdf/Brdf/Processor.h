@@ -25,6 +25,38 @@ class SpecularCoordinatesBrdf;
 class SphericalCoordinatesBrdf;
 
 /*!
+ * \brief Edits diffuse and glossy components of a BRDF.
+ * \param diffuseThresholds Thresholds to separate the diffuse component from a BRDF.
+ * \param glossyIntensity   Rate of change of a glossy intensity. If 1.0 is specified, it is not changed.
+ * \param glossyShininess   Ratio of the thinness of a glossy lobe. If 1.0 is specified, shininess is not changed.
+ * \param diffuseIntensity  Rate of change of a diffuse intensity. If 1.0 is specified, it is not changed.
+ */
+void editComponents(const Brdf&         origBrdf,
+                    Brdf*               brdf,
+                    const Spectrum&     diffuseThresholds,
+                    Spectrum::Scalar    glossyIntensity,
+                    Spectrum::Scalar    glossyShininess,
+                    Spectrum::Scalar    diffuseIntensity);
+
+/*!
+ * \brief Edits diffuse and glossy components of a BRDF value at a sample point.
+ * \param diffuseThresholds Thresholds to separate the diffuse component from a BRDF.
+ * \param glossyIntensity   Rate of change of a glossy intensity. If 1.0 is specified, it is not changed.
+ * \param glossyShininess   Ratio of the thinness of a glossy lobe. If 1.0 is specified, shininess is not changed.
+ * \param diffuseIntensity  Rate of change of a diffuse intensity. If 1.0 is specified, it is not changed.
+ */
+void editComponents(int                 i0,
+                    int                 i1,
+                    int                 i2,
+                    int                 i3,
+                    const Brdf&         origBrdf,
+                    Brdf*               brdf,
+                    const Spectrum&     diffuseThresholds,
+                    Spectrum::Scalar    glossyIntensity,
+                    Spectrum::Scalar    glossyShininess,
+                    Spectrum::Scalar    diffuseIntensity);
+
+/*!
  * \brief Divides a BRDF by the cosine of the outgoing polar angle.
  *
  * This function converts from a CCBRDF to a BRDF.
@@ -71,6 +103,9 @@ void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
 /*! \brief Fills the back side of a BRDF. */
 void fillBackSide(SpecularCoordinatesBrdf* brdf);
 
+/*! \brief Averages samples with overlapping angles. */
+void equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf);
+
 /*! \brief Removes specular peaks and interpolates using surrounding values. */
 void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta);
 
@@ -86,32 +121,10 @@ Brdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
                            float                            inPhi);
 
 /*!
- * \brief Computes reflectances at each incoming direction.
+ * \brief Extrapolates a BRDF with linearly extrapolated reflectances.
+ * \param incomingTheta Minimum incoming polar angle of extrapolated samples.
  */
-SampleSet2D* computeReflectances(const SpecularCoordinatesBrdf& brdf);
-
-/*!
- * \brief Computes specular reflectances using a standard sample.
- * \param ior   Index of refraction of the standard material. 1.0 is used for transmittance.
- */
-SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
-                                         const Brdf&    standardBrdf,
-                                         float          ior);
-
-/*!
- * \brief Computes specular reflectances using a standard sample.
- *
- * The maximum spectrum found around a specular direction is used as the specular
- * reflected or transmitted spectrum for each incoming direction. A sample may lean
- * to one side, when it is measured.
- *
- * \param ior               Index of refraction of the standard material. 1.0 is used for transmittance.
- * \param maxSpecularTheta  The maximum angle in radians to find the specular reflected/transmitted spectrum.
- */
-SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
-                                         const Brdf&                    standardBrdf,
-                                         float                          ior,
-                                         float                          maxSpecularTheta);
+void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta);
 
 /*!
  * \brief Copies spectra from the azimuthal angle of 0 degrees to 360 degrees.
