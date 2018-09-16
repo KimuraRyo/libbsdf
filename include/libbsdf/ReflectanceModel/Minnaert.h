@@ -30,6 +30,7 @@ public:
         parameters_.push_back(Parameter("Darkness", &darkness_, 0.0f, 100.0f));
     }
 
+    /*! \warning The unit of a returned value is the radiance factor. */
     static Vec3 compute(const Vec3& L,
                         const Vec3& V,
                         const Vec3& N,
@@ -72,13 +73,15 @@ inline Vec3 Minnaert::compute(const Vec3&   L,
                               const Vec3&   albedo,
                               float         darkness)
 {
-    using std::max;
     using std::pow;
 
     float dotLN = L.dot(N);
     float dotVN = V.dot(N);
 
-    return albedo * pow(dotLN * dotVN, darkness - 1.0f);
+    Vec3 val = albedo * pow(dotLN * dotVN, darkness - 1.0f);
+
+    // Normalized values are returned.
+    return (darkness + 1.0f) * 0.5f * val;
 }
 
 } // namespace lb

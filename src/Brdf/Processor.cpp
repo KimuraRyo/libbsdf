@@ -10,6 +10,7 @@
 
 #include <iostream>
 
+#include <libbsdf/Brdf/Analyzer.h>
 #include <libbsdf/Brdf/Integrator.h>
 #include <libbsdf/Brdf/RandomSampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
@@ -18,13 +19,87 @@
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
+#include <libbsdf/Common/Array.h>
 #include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
-#include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 
-#include <libbsdf/ReflectanceModel/Fresnel.h>
-
 using namespace lb;
+
+void lb::editComponents(const Brdf&         origBrdf,
+                        Brdf*               brdf,
+                        const Spectrum&     diffuseThresholds,
+                        Spectrum::Scalar    glossyIntensity,
+                        Spectrum::Scalar    glossyShininess,
+                        Spectrum::Scalar    diffuseIntensity)
+{
+    const SampleSet* ss = brdf->getSampleSet();
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    #pragma omp parallel for
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        editComponents(i0, i1, i2, i3,
+                       origBrdf, brdf,
+                       diffuseThresholds,
+                       glossyIntensity, glossyShininess, diffuseIntensity);
+    }}}}
+
+    brdf->setSourceType(EDITED_SOURCE);
+}
+
+void lb::editComponents(int                 i0,
+                        int                 i1,
+                        int                 i2,
+                        int                 i3,
+                        const Brdf&         origBrdf,
+                        Brdf*               brdf,
+                        const Spectrum&     diffuseThresholds,
+                        Spectrum::Scalar    glossyIntensity,
+                        Spectrum::Scalar    glossyShininess,
+                        Spectrum::Scalar    diffuseIntensity)
+{
+    using std::pow;
+    using std::max;
+
+    SampleSet* ss = brdf->getSampleSet();
+
+    Vec3 inDir, outDir;
+    brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+    // Offset outgoing directions to edit a glossy component with shininess.
+    if (glossyShininess != 1.0) {
+        float inTh, inPh, specTh, specPh;
+        SpecularCoordinateSystem::fromXyz(inDir, outDir, &inTh, &inPh, &specTh, &specPh);
+        float specThWeight = specTh / SpecularCoordinateSystem::MAX_ANGLE2;
+        specThWeight = pow(specThWeight, 1.0f / max(glossyShininess, EPSILON_F));
+        float newSpecTh = specThWeight * SpecularCoordinateSystem::MAX_ANGLE2;
+        SpecularCoordinateSystem::toXyz(inTh, inPh, newSpecTh, specPh, &inDir, &outDir);
+
+        if (outDir[2] <= 0.0) {
+            outDir[2] = 0.0;
+        }
+        outDir.normalize();
+    }
+
+    Spectrum origSp = origBrdf.getSpectrum(inDir, outDir);
+    Spectrum sp(origSp.size());
+
+    // Edit a BRDF with glossy and diffuse intensity.
+    for (int i = 0; i < sp.size(); ++i) {
+        Spectrum::Scalar origVal = origSp[i];
+        Spectrum::Scalar threshold = diffuseThresholds[i];
+        if (origVal <= threshold) {
+            sp[i] = origVal * diffuseIntensity;
+        }
+        else {
+            Spectrum::Scalar glossy = origVal - threshold;
+            sp[i] = glossy * glossyIntensity + threshold * diffuseIntensity;
+        }
+    }
+
+    ss->setSpectrum(i0, i1, i2, i3, sp);
+}
 
 void lb::divideByCosineOutTheta(Brdf* brdf)
 {
@@ -330,10 +405,10 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
     for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
     for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
     for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
-        bool found = false;
-        
+        bool spPhBoundaryfound = false;
+
         int boundary0;
-        // Search a boundary.
+        // Search the boundary of specular azimuthal angles.
         for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
             Vec3 inDir, outDir;
             brdf->toXyz(brdf->getInTheta(inThIndex),
@@ -343,61 +418,166 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
                         &inDir, &outDir);
 
             boundary0 = spPhIndex;
-            if (outDir.z() < 0.0) {
-                found = true;
+            if (isDownwardDir(outDir)) {
+                spPhBoundaryfound = true;
                 break;
             }
         }
 
-        if (!found) {
-            continue;
-        }
+        if (spPhBoundaryfound) {
+            int boundary1;
+            // Search another boundary from the opposite direction.
+            for (int spPhIndex = brdf->getNumSpecPhi() - 1; spPhIndex >= 0; --spPhIndex) {
+                Vec3 inDir, outDir;
+                brdf->toXyz(brdf->getInTheta(inThIndex),
+                            brdf->getInPhi(inPhIndex),
+                            brdf->getSpecTheta(spThIndex),
+                            brdf->getSpecPhi(spPhIndex),
+                            &inDir, &outDir);
 
-        int boundary1;
-        // Search a boundary from the opposite direction.
-        for (int spPhIndex = brdf->getNumSpecPhi() - 1; spPhIndex >= 0; --spPhIndex) {
-            Vec3 inDir, outDir;
-            brdf->toXyz(brdf->getInTheta(inThIndex),
-                        brdf->getInPhi(inPhIndex),
-                        brdf->getSpecTheta(spThIndex),
-                        brdf->getSpecPhi(spPhIndex),
-                        &inDir, &outDir);
+                boundary1 = spPhIndex;
+                if (isDownwardDir(outDir)) {
+                    break;
+                }
+            }
 
-            boundary1 = spPhIndex;
-            if (outDir.z() < 0.0) {
-                break;
+            // Fill values.
+            for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                Vec3 inDir, outDir;
+                brdf->toXyz(brdf->getInTheta(inThIndex),
+                            brdf->getInPhi(inPhIndex),
+                            brdf->getSpecTheta(spThIndex),
+                            brdf->getSpecPhi(spPhIndex),
+                            &inDir, &outDir);
+
+                if (!isDownwardDir(outDir)) {
+                    continue;
+                }
+
+                float spPh = brdf->getSpecPhi(spPhIndex);
+                float spPh0 = brdf->getSpecPhi(boundary0);
+                float spPh1 = brdf->getSpecPhi(boundary1);
+
+                int boundary;
+                if (spPh - spPh0 <= spPh1 - spPh) {
+                    boundary = boundary0;
+                }
+                else {
+                    boundary = boundary1;
+                }
+
+                Spectrum sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, boundary);
+                brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
             }
         }
+        else if (spThIndex >= 1) {
+            // Copy the sample at the previous specular polar angle.
+            for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                Vec3 inDir, outDir;
+                brdf->toXyz(brdf->getInTheta(inThIndex),
+                            brdf->getInPhi(inPhIndex),
+                            brdf->getSpecTheta(spThIndex),
+                            brdf->getSpecPhi(spPhIndex),
+                            &inDir, &outDir);
 
-        // Fill values.
-        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-            Vec3 inDir, outDir;
-            brdf->toXyz(brdf->getInTheta(inThIndex),
-                        brdf->getInPhi(inPhIndex),
-                        brdf->getSpecTheta(spThIndex),
-                        brdf->getSpecPhi(spPhIndex),
-                        &inDir, &outDir);
-
-            if (outDir.z() >= 0.0) {
-                continue;
+                if (isDownwardDir(outDir)) {
+                    Spectrum sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex - 1, spPhIndex);
+                    brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
+                }
             }
-
-            float spPh = brdf->getSpecPhi(spPhIndex);
-            float spPh0 = brdf->getSpecPhi(boundary0);
-            float spPh1 = brdf->getSpecPhi(boundary1);
-
-            int boundary;
-            if (spPh - spPh0 <= spPh1 - spPh) {
-                boundary = boundary0;
-            }
-            else {
-                boundary = boundary1;
-            }
-
-            Spectrum sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, boundary);
-            brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, sp);
         }
     }}}
+}
+
+void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
+{
+    const SampleSet* ss = brdf->getSampleSet();
+
+    if (brdf->getNumInPhi() >= 2) {
+        if (isEqual(brdf->getInTheta(0), 0.0f)) {
+            // Equalize samples for incoming azimuthal angles if an incoming polar angle is 0.
+            for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+            for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
+                Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+                for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi(); ++inPhIndex) {
+                    sumSp += brdf->getSpectrum(0, inPhIndex, spThIndex, spPhIndex);
+                }
+
+                Spectrum sp = sumSp / brdf->getNumInPhi();
+                for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi(); ++inPhIndex) {
+                    brdf->setSpectrum(0, inPhIndex, spThIndex, spPhIndex, sp);
+                }
+            }}
+        }
+
+        int minInPhiIndex = 0;
+        int maxInPhiIndex = brdf->getNumInPhi() - 1;
+        if (isEqual(brdf->getInPhi(minInPhiIndex), SpecularCoordinateSystem::MIN_ANGLE1) &&
+            isEqual(brdf->getInPhi(maxInPhiIndex), SpecularCoordinateSystem::MAX_ANGLE1)) {
+            // Equalize samples if an incoming azimuthal angle is 0 or 2PI radian.
+            for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
+            for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+            for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
+                Spectrum minSp = brdf->getSpectrum(inThIndex, minInPhiIndex, spThIndex, spPhIndex);
+                Spectrum maxSp = brdf->getSpectrum(inThIndex, maxInPhiIndex, spThIndex, spPhIndex);
+                Spectrum sp = (minSp + maxSp) / 2.0;
+
+                brdf->setSpectrum(inThIndex, minInPhiIndex, spThIndex, spPhIndex, sp);
+                brdf->setSpectrum(inThIndex, maxInPhiIndex, spThIndex, spPhIndex, sp);
+            }}}
+        }
+    }
+
+    if (brdf->getNumSpecPhi() >= 2) {
+        if (isEqual(brdf->getSpecTheta(0), 0.0f)) {
+            // Equalize samples for specular azimuthal angles if a specular polar angle is 0.
+            for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
+            for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
+                Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+                for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, 0, spPhIndex);
+                }
+
+                Spectrum sp = sumSp / brdf->getNumSpecPhi();
+                for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                    brdf->setSpectrum(inThIndex, inPhIndex, 0, spPhIndex, sp);
+                }
+            }}
+        }
+
+        if (isEqual(brdf->getSpecTheta(brdf->getNumSpecTheta() - 1), SpecularCoordinateSystem::MAX_ANGLE2)) {
+            // Equalize samples for specular azimuthal angles if a specular polar angle is 2PI.
+            for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
+            for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();   ++inPhIndex) {
+                Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+                for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex);
+                }
+
+                Spectrum sp = sumSp / brdf->getNumSpecPhi();
+                for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                    brdf->setSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex, sp);
+                }
+            }}
+        }
+
+        int minSpPhiIndex = 0;
+        int maxSpPhiIndex = brdf->getNumSpecPhi() - 1;
+        if (isEqual(brdf->getSpecPhi(minSpPhiIndex), SpecularCoordinateSystem::MIN_ANGLE3) &&
+            isEqual(brdf->getSpecPhi(maxSpPhiIndex), SpecularCoordinateSystem::MAX_ANGLE3)) {
+            // Equalize samples with overlapping specular azimuthal angles.
+            for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
+            for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
+            for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+                Spectrum minSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, minSpPhiIndex);
+                Spectrum maxSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, maxSpPhiIndex);
+                Spectrum sp = (minSp + maxSp) / 2.0;
+
+                brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, minSpPhiIndex, sp);
+                brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, maxSpPhiIndex, sp);
+            }}}
+        }
+    }
 }
 
 void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta)
@@ -431,7 +611,7 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
                         brdf->getSpecPhi(spPhIndex),
                         &inDir, &outDir);
 
-            if (outDir.z() < 0.0) {
+            if (isDownwardDir(outDir)) {
                 continue;
             }
 
@@ -606,132 +786,68 @@ Brdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
     return brdf;
 }
 
-SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
+void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta)
 {
-    const SampleSet* ss = brdf.getSampleSet();
-
-    Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
-
-    SampleSet2D* reflectances = new SampleSet2D(brdf.getNumInTheta(),
-                                                brdf.getNumInPhi(),
-                                                ss->getColorModel(),
-                                                ss->getNumWavelengths());
-    reflectances->getThetaArray() = ss->getAngles0();
-    reflectances->getPhiArray() = ss->getAngles1();
-    reflectances->getWavelengths() = ss->getWavelengths();
-
-    for (int inThIndex = 0; inThIndex < brdf.getNumInTheta(); ++inThIndex) {
-    for (int inPhIndex = 0; inPhIndex < brdf.getNumInPhi();   ++inPhIndex) {
-        Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf.getInTheta(inThIndex),
-                                                      brdf.getInPhi(inPhIndex));
-        Spectrum sp = integrator.computeReflectance(brdf, inDir);
-        reflectances->setSpectrum(inThIndex, inPhIndex, sp);
-    }}
-
-    return reflectances;
-}
-
-SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
-                                             const Brdf&    standardBrdf,
-                                             float          ior)
-{
-    const SampleSet* ss = brdf.getSampleSet();
-    const SampleSet* standardSs = standardBrdf.getSampleSet();
-
-    if (ss->getNumWavelengths() != standardSs->getNumWavelengths() ||
-        !ss->getWavelengths().isApprox(standardSs->getWavelengths())) {
-        std::cerr
-            << "[lb::computeSpecularReflectances] Wavelengths do not match."
-            << std::endl;
-        return 0;
+    if (brdf->getNumInTheta() < 3 ||
+        brdf->getInTheta(1) > incomingTheta ||
+        brdf->getInTheta(brdf->getNumInTheta() - 1) <= incomingTheta) {
+        return;
     }
 
-    SampleSet2D* ss2 = new SampleSet2D(ss->getNumAngles0(),
-                                       ss->getNumAngles1(),
-                                       ss->getColorModel(),
-                                       ss->getNumWavelengths());
-    ss2->getThetaArray() = ss->getAngles0();
-    ss2->getPhiArray() = ss->getAngles1();
-    ss2->getWavelengths() = ss->getWavelengths();
+    Spectrum diffuseThresholds = findDiffuseThresholds(*brdf, incomingTheta);
 
-    for (int thIndex = 0; thIndex < ss2->getNumTheta(); ++thIndex) {
-    for (int phIndex = 0; phIndex < ss2->getNumPhi();   ++phIndex) {
-        Vec3 inDir = ss2->getDirection(thIndex, phIndex);
-        Vec3 specularDir = reflect(inDir, Vec3(0.0, 0.0, 1.0));
+    SpecularCoordinatesBrdf* glossyBrdf = brdf->clone();
+    SpecularCoordinatesBrdf* diffuseBrdf = brdf->clone();
 
-        Spectrum brdfSp = brdf.getSpectrum(inDir, specularDir);
-        Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
+    editComponents(*brdf, glossyBrdf,  diffuseThresholds, 1.0f, 1.0f, 0.0f);
+    editComponents(*brdf, diffuseBrdf, diffuseThresholds, 0.0f, 1.0f, 1.0f);
 
-        float standardRef;
-        if (ior == 1.0f) {
-            standardRef = 1.0f;
-        }
-        else {
-            standardRef = fresnel(ss2->getTheta(thIndex), ior);
+    SampleSet2D* gRefs = computeReflectances(*glossyBrdf);
+    SampleSet2D* dRefs = computeReflectances(*diffuseBrdf);
+
+    int inThBoundaryIndex = 0;
+    for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
+        if (brdf->getInTheta(inThIndex) > incomingTheta) {
+            break;
         }
 
-        Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
-        ss2->setSpectrum(thIndex, phIndex, refSp);
-    }}
-
-    return ss2;
-}
-
-SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
-                                             const Brdf&                    standardBrdf,
-                                             float                          ior,
-                                             float                          maxSpecularTheta)
-{
-    const SampleSet* ss = brdf.getSampleSet();
-    const SampleSet* standardSs = standardBrdf.getSampleSet();
-
-    if (ss->getNumWavelengths() != standardSs->getNumWavelengths() ||
-        !ss->getWavelengths().isApprox(standardSs->getWavelengths())) {
-        std::cerr
-            << "[lb::computeSpecularReflectances] Wavelengths do not match."
-            << std::endl;
-        return 0;
+        inThBoundaryIndex = inThIndex;
     }
 
-    SampleSet2D* ss2 = new SampleSet2D(ss->getNumAngles0(),
-                                       ss->getNumAngles1(),
-                                       ss->getColorModel(),
-                                       ss->getNumWavelengths());
-    ss2->getThetaArray()    = ss->getAngles0();
-    ss2->getPhiArray()      = ss->getAngles1();
-    ss2->getWavelengths()   = ss->getWavelengths();
+    for (int inThIndex = inThBoundaryIndex + 1; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
+        for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
+        for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
+            Spectrum gRef0 = gRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
+            Spectrum gRef1 = gRefs->getSpectrum(inThBoundaryIndex    , inPhIndex);
 
-    for (int thIndex = 0; thIndex < ss2->getNumTheta(); ++thIndex) {
-    for (int phIndex = 0; phIndex < ss2->getNumPhi();   ++phIndex) {
-        Vec3 inDir = ss2->getDirection(thIndex, phIndex);
-        Vec3 specularDir = reflect(inDir, Vec3(0.0, 0.0, 1.0));
+            Spectrum dRef0 = dRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
+            Spectrum dRef1 = dRefs->getSpectrum(inThBoundaryIndex,     inPhIndex);
 
-        Spectrum brdfSp = brdf.getSpectrum(inDir, specularDir);
+            float angle0 = brdf->getInTheta(inThBoundaryIndex - 1);
+            float angle1 = brdf->getInTheta(inThBoundaryIndex);
+            float t = (brdf->getInTheta(inThIndex) - angle0) / (angle1 - angle0);
 
-        for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
-        for (int spPhIndex = 0; spPhIndex < brdf.getNumSpecPhi();   ++spPhIndex) {
-            const Spectrum& sp = brdf.getSpectrum(thIndex, phIndex, spThIndex, spPhIndex);
+            Spectrum extrapolatedGRef = lerp(gRef0, gRef1, t);
+            Spectrum extrapolatedDRef = lerp(dRef0, dRef1, t);
 
-            if (brdfSp.sum() < sp.sum()) {
-                brdfSp = sp;
-            }
-        }}
+            Spectrum gRef = gRefs->getSpectrum(inThIndex, inPhIndex);
+            Spectrum dRef = dRefs->getSpectrum(inThIndex, inPhIndex);
 
-        Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
+            Spectrum gSp = glossyBrdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+            Spectrum dSp = diffuseBrdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
 
-        float standardRef;
-        if (ior == 1.0f) {
-            standardRef = 1.0f;
-        }
-        else {
-            standardRef = fresnel(ss2->getTheta(thIndex), ior);
-        }
+            gSp *= extrapolatedGRef / gRef;
+            dSp *= extrapolatedDRef / dRef;
 
-        Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
-        ss2->setSpectrum(thIndex, phIndex, refSp);
-    }}
+            brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, gSp + dSp);
+        }}}
+    }
 
-    return ss2;
+    delete diffuseBrdf;
+    delete glossyBrdf;
+    delete dRefs;
+    delete gRefs;
 }
 
 void lb::copySpectraFromPhiOfZeroTo2PI(SampleSet* samples)

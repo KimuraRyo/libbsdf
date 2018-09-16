@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -168,8 +168,6 @@ bool Brdf::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         Vec3 inDir, outDir;
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-        fixDownwardDir(&inDir);
-        fixDownwardDir(&outDir);
 
         Spectrum sp;
         Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir, &sp);
