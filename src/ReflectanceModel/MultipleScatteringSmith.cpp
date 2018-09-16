@@ -272,6 +272,7 @@ public:
 // Implementation
 //
 
+#include <cfloat>
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -389,16 +390,18 @@ static double  abgam(double x)
     return temp;
 }
 
+namespace mss {
 static double  gamma(double x)
 {
     double  result;
     result = exp(abgam(x + 5)) / (x*(x + 1)*(x + 2)*(x + 3)*(x + 4));
     return result;
 }
+} // namespace mss
 
 static double  beta(double m, double n)
 {
-    return (gamma(m)*gamma(n) / gamma(m + n));
+    return (mss::gamma(m) * mss::gamma(n) / mss::gamma(m + n));
 }
 
 

@@ -31,7 +31,7 @@ class RandomSampleSet
 public:
     typedef std::vector<float> AngleList;
     typedef std::map<AngleList, Spectrum, std::less<AngleList>,
-                     Eigen::aligned_allocator<std::pair<AngleList, Spectrum> > > SampleMap;
+                     Eigen::aligned_allocator<std::pair<const AngleList, Spectrum> > > SampleMap;
 
     virtual ~RandomSampleSet() {}
 

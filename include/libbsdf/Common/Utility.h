@@ -14,6 +14,8 @@
 #ifndef LIBBSDF_UTILITY_H
 #define LIBBSDF_UTILITY_H
 
+#include <iostream>
+
 #include <libbsdf/Common/CentripetalCatmullRomSpline.h>
 #include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Global.h>
@@ -195,7 +197,6 @@ inline T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& 
 template <typename T>
 inline bool hasSameColor(const T& ss0, const T& ss1)
 {
-    ColorModel cm = ss0.getColorModel();
     if (ss0.getColorModel() != ss1.getColorModel()) {
         std::cout
             << "[lb::hasSameColor] Color models do not match: "
