@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -15,9 +15,9 @@
 
 using namespace lb;
 
-Integrator::Integrator(int numSampling, bool usePoissonDiskDistribution) : numSampling_(numSampling)
+Integrator::Integrator(int numSampling, bool poissonDiskDistributionUsed) : numSampling_(numSampling)
 {
-    initializeOutDirs(usePoissonDiskDistribution);
+    initializeOutDirs(poissonDiskDistributionUsed);
 }
 
 Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir)
@@ -64,9 +64,9 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir, int
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
-void Integrator::initializeOutDirs(bool usePoissonDiskDistribution)
+void Integrator::initializeOutDirs(bool poissonDiskDistributionUsed)
 {
-    if (usePoissonDiskDistribution) {
+    if (poissonDiskDistributionUsed) {
         std::vector<Vec3f> dirsOnHemisphere;
 
         int numPoissonDiskSampling = (sizeof(PoissonDiskDistributionOnSphere::data) / sizeof(float)) / 3;

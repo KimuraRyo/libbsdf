@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2018 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -29,9 +29,9 @@ public:
      * Constructs the integrator for BRDF.
      *
      * \param numSampling                   The number of samples of Monte Carlo integration.
-     * \param usePoissonDiskDistribution    If this parameter is true, precomputed Poisson disk distribution is used.
+     * \param poissonDiskDistributionUsed   If this parameter is true, precomputed Poisson disk distribution is used.
      */
-    explicit Integrator(int numSampling = 100000, bool usePoissonDiskDistribution = false);
+    explicit Integrator(int numSampling = 100000, bool poissonDiskDistributionUsed = false);
 
     /*! Computes the reflectance of the BRDF at an incoming direction using precomputed outgoing directions. */
     Spectrum computeReflectance(const Brdf& brdf, const Vec3& inDir);
@@ -41,7 +41,7 @@ public:
 
 private:
     /*! Initializes outgoing directions for integration. */
-    void initializeOutDirs(bool usePoissonDiskDistribution = false);
+    void initializeOutDirs(bool poissonDiskDistributionUsed = false);
 
     int numSampling_; /*!< The number of samples of Monte Carlo integration. */
 
