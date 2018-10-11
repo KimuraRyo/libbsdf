@@ -123,6 +123,8 @@ Brdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
 /*!
  * \brief Extrapolates a BRDF with linearly extrapolated reflectances.
  * \param incomingTheta Minimum incoming polar angle of extrapolated samples.
+ *
+ * When a BRDF is extrapolated, it is separated into glossy and diffuse components to improve calculation results.
  */
 void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta);
 

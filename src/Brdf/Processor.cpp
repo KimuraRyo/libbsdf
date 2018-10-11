@@ -814,35 +814,43 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
         inThBoundaryIndex = inThIndex;
     }
 
-    for (int inThIndex = inThBoundaryIndex + 1; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
-        for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
-        for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
-        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
-            Spectrum gRef0 = gRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
-            Spectrum gRef1 = gRefs->getSpectrum(inThBoundaryIndex    , inPhIndex);
+    for (int inThIndex = inThBoundaryIndex + 1; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
+    for (int inPhIndex = 0;                     inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
+    for (int spThIndex = 0;                     spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
+        Spectrum gRef0 = gRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
+        Spectrum gRef1 = gRefs->getSpectrum(inThBoundaryIndex    , inPhIndex);
 
-            Spectrum dRef0 = dRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
-            Spectrum dRef1 = dRefs->getSpectrum(inThBoundaryIndex,     inPhIndex);
+        Spectrum dRef0 = dRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
+        Spectrum dRef1 = dRefs->getSpectrum(inThBoundaryIndex,     inPhIndex);
 
-            float angle0 = brdf->getInTheta(inThBoundaryIndex - 1);
-            float angle1 = brdf->getInTheta(inThBoundaryIndex);
-            float t = (brdf->getInTheta(inThIndex) - angle0) / (angle1 - angle0);
+        float angle0 = brdf->getInTheta(inThBoundaryIndex - 1);
+        float angle1 = brdf->getInTheta(inThBoundaryIndex);
+        float t = (brdf->getInTheta(inThIndex) - angle0) / (angle1 - angle0);
 
-            Spectrum extrapolatedGRef = lerp(gRef0, gRef1, t);
-            Spectrum extrapolatedDRef = lerp(dRef0, dRef1, t);
+        Spectrum extrapolatedGRef = lerp(gRef0, gRef1, t);
+        Spectrum extrapolatedDRef = lerp(dRef0, dRef1, t);
 
-            Spectrum gRef = gRefs->getSpectrum(inThIndex, inPhIndex);
-            Spectrum dRef = dRefs->getSpectrum(inThIndex, inPhIndex);
+        Spectrum gRef = gRefs->getSpectrum(inThIndex, inPhIndex);
+        Spectrum dRef = dRefs->getSpectrum(inThIndex, inPhIndex);
 
+        // Avoid dividing by zero.
+        const float minRef = 0.01f;
+        extrapolatedGRef = extrapolatedGRef.cwiseMax(minRef);
+        extrapolatedDRef = extrapolatedDRef.cwiseMax(minRef);
+        gRef = gRef.cwiseMax(minRef);
+        dRef = dRef.cwiseMax(minRef);
+
+        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
             Spectrum gSp = glossyBrdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
             Spectrum dSp = diffuseBrdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
 
             gSp *= extrapolatedGRef / gRef;
             dSp *= extrapolatedDRef / dRef;
 
-            brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, gSp + dSp);
-        }}}
-    }
+            Spectrum gdSp = (gSp + dSp).cwiseMax(0.0f);
+            brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex, gdSp);
+        }
+    }}}
 
     delete diffuseBrdf;
     delete glossyBrdf;
