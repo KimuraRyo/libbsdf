@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -11,9 +11,12 @@
 
 #include <string>
 
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Common/Global.h>
 
 namespace lb {
+
+class Brdf;
+class SpecularCoordinatesBrdf;
 
 /*!
  * \class DdrWriter
@@ -23,16 +26,21 @@ class DdrWriter
 {
 public:
     /*! Writes the BRDF of a specular coordinate system in a DDR or DDT file. */
-    static bool write(const std::string& fileName, const SpecularCoordinatesBrdf& brdf);
+    static bool write(const std::string&                fileName,
+                      const SpecularCoordinatesBrdf&    brdf,
+                      const std::string&                comments = "");
 
-    /*! Converts and exports a DDR or DDT file. */
+    /*! Converts and writes a DDR or DDT file. */
     static void write(const std::string&    fileName,
                       const Brdf&           brdf,
                       bool                  inDirDependentCoordSysUsed,
-                      DataType              dataType);
+                      DataType              dataType,
+                      const std::string&    comments = "");
 
     /*! Outputs character data of a DDR or DDT file to a stream. */
-    static bool output(const SpecularCoordinatesBrdf& brdf, std::ostream& stream);
+    static bool output(const SpecularCoordinatesBrdf&   brdf,
+                       std::ostream&                    stream,
+                       const std::string&               comments = "");
 };
 
 } // namespace lb

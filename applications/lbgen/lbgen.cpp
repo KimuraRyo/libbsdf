@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018 Kimura Ryo                                       //
+// Copyright (C) 2018-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -100,28 +100,33 @@ int main(int argc, char** argv)
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
         std::cout << "Usage: lbgen [options ...] bsdf_model out_file" << std::endl;
         std::cout << std::endl;
-        std::cout << "Generate BRDF/BTDF data and save an Integra BSDF file" << std::endl;
+        std::cout << "lbgen generates BRDF/BTDF data and save an Integra BSDF file." << std::endl;
         std::cout << std::endl;
         std::cout << "Positional Arguments:" << std::endl;
-        std::cout << "  model       Analytic BSDF model" << std::endl;
-        std::cout << "  out_file    Name of generated file.";
+        std::cout << "  bsdf_model  Analytic BSDF model" << std::endl;
+        std::cout << "  out_file    Name of generated file";
         std::cout << " (\".ddr\" or \".ddt\" is acceptable as a suffix for BRDF or BTDF.";
-        std::cout << " Otherwise BRDF and BTDF (\".ddr\" and \".ddt\") files are generated.)" << std::endl;
+        std::cout << " Otherwise, \".ddr\" and \".ddt\" files are generated.)" << std::endl;
         std::cout << std::endl;
         std::cout << "Options:" << std::endl;
         std::cout << "  -h, --help                  show this help message and exit" << std::endl;
         std::cout << "  -v, --version               show program's version number and exit" << std::endl;
-        std::cout << "  -l, --list                  show acceptable BSDF models and exit" << std::endl;
+        std::cout << "  -l, --list                  show acceptable models and parameters of BSDF and exit" << std::endl;
         std::cout << "  -r, --reference             show the references of BSDF models and exit" << std::endl;
         std::cout << "  -numIncomingPolarAngles     set the division number of incoming polar angles (default: 90)" << std::endl;
         std::cout << "  -numSpecularPolarAngles     set the division number of specular polar angles (default: 90)" << std::endl;
         std::cout << "  -numSpecularAzimuthalAngles set the division number of specular azimuthal angles (default: 72)" << std::endl;
         std::cout << "  -conservationOfEnergy       fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << std::endl;
+#ifdef _OPENMP
+        std::cout << "  -numThreads                 set the number of threads used by parallel processing" << std::endl;
+#endif
         return 0;
     }
 
+    const std::string version("1.0.6");
+
     if (ap.read("-v") || ap.read("--version")) {
-        std::cout << "Version: lbgen 1.0.2 (libbsdf-" << getVersion() << ")" << std::endl;
+        std::cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << std::endl;
         return 0;
     }
 
@@ -138,8 +143,9 @@ int main(int argc, char** argv)
         std::cout << "          -k          set extinction coefficient (default: 0.0)" << std::endl;
         std::cout << "  " << MultipleScatteringSmithName << std::endl;
         std::cout << "      Valid options:" << std::endl;
-        std::cout << "          -roughness  set roughness of surface (default: 0.3, range: [0.01, 1.0])" << std::endl;
-        std::cout << "          -n          set refractive index (default: 1.5)" << std::endl;
+        std::cout << "          -roughness      set roughness of surface (default: 0.3, range: [0.01, 1.0])" << std::endl;
+        std::cout << "          -n              set refractive index (default: 1.5)" << std::endl;
+        std::cout << "          -numIterations  set the number of sampling iterations (default: 10)" << std::endl;
         std::cout << "  " << LambertianName << std::endl;
         std::cout << "      Valid options: none" << std::endl;
         return 0;
@@ -184,6 +190,16 @@ int main(int argc, char** argv)
         conservationOfEnergyUsed = true;
     }
 
+#ifdef _OPENMP
+    int numThreads;
+    if (ap.read("-numThreads", &numThreads) == ArgumentParser::ERROR) {
+        return 1;
+    }
+    else {
+        omp_set_num_threads(numThreads);
+    }
+#endif
+
     float roughness = 0.3f;
     if (ap.read("-roughness", &roughness) == ArgumentParser::ERROR) {
         return 1;
@@ -207,6 +223,14 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    int numIterations = 10;
+    if (ap.read("-numIterations", &numIterations) == ArgumentParser::ERROR) {
+        return 1;
+    }
+    else {
+        numIterations = clampParameter("numIterations", numIterations, 1, 10000);
+    }
+
     // Read the model name and file name.
     if (ap.getTokens().size() == 2) {
         std::string modelName = ap.getTokens().at(0);
@@ -228,7 +252,7 @@ int main(int argc, char** argv)
                                                 static_cast<int>(matType),
                                                 static_cast<int>(MultipleScatteringSmith::GAUSSIAN_HEIGHT),
                                                 static_cast<int>(MultipleScatteringSmith::BECKMANN_SLOPE),
-                                                10);
+                                                numIterations);
         }
         else if (modelName == LambertianName) {
             n = 1.0f;
@@ -237,6 +261,12 @@ int main(int argc, char** argv)
         else {
             std::cerr << "Invalid model name: " << modelName << std::endl;
             return 1;
+        }
+
+        std::string comments("Software: lbgen-" + version);
+        comments += "\n;; Arguments:";
+        for (int i = 1; i < argc; ++i) {
+            comments += " " + std::string(argv[i]);
         }
 
         if (reader_utility::hasSuffix(fileName, ".ddr")) {
@@ -251,7 +281,7 @@ int main(int argc, char** argv)
                 fixEnergyConservation(brdf);
             }
 
-            DdrWriter::write(fileName, *brdf);
+            DdrWriter::write(fileName, *brdf, comments);
 
             delete model;
             delete brdf;
@@ -270,7 +300,7 @@ int main(int argc, char** argv)
                 fixEnergyConservation(btdf);
             }
 
-            DdrWriter::write(fileName, *btdf);
+            DdrWriter::write(fileName, *btdf, comments);
 
             delete model;
             delete btdf;
@@ -298,8 +328,8 @@ int main(int argc, char** argv)
                 std::cout.clear();
             }
 
-            DdrWriter::write(fileName + ".ddr", *brdf);
-            DdrWriter::write(fileName + ".ddt", *btdf);
+            DdrWriter::write(fileName + ".ddr", *brdf, comments);
+            DdrWriter::write(fileName + ".ddt", *btdf, comments);
 
             std::cout << "Generated: " << fileName + ".ddr" << std::endl;
             std::cout << "Generated: " << fileName + ".ddt" << std::endl;

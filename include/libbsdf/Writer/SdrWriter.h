@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -11,9 +11,9 @@
 
 #include <string>
 
-#include <libbsdf/Brdf/SampleSet2D.h>
-
 namespace lb {
+
+class SampleSet2D;
 
 /*!
  * \class SdrWriter
@@ -23,10 +23,14 @@ class SdrWriter
 {
 public:
     /*! Writes specular reflectances or transmittances in a SDR or SDT file. */
-    static bool write(const std::string& fileName, const SampleSet2D& samples2D);
+    static bool write(const std::string& fileName,
+                      const SampleSet2D& samples2D,
+                      const std::string& comments = "");
 
     /*! Outputs character data of a SDR or SDT file to the stream. */
-    static bool output(const SampleSet2D& samples2D, std::ostream& stream);
+    static bool output(const SampleSet2D&   samples2D,
+                       std::ostream&        stream,
+                       const std::string&   comments = "");
 };
 
 } // namespace lb
