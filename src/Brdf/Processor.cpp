@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -405,28 +405,37 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
     for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
     for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
     for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
-        bool spPhBoundaryfound = false;
-
+        bool spPhBoundaryFound = false;
         int boundary0;
-        // Search the boundary of specular azimuthal angles.
-        for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-            Vec3 inDir, outDir;
-            brdf->toXyz(brdf->getInTheta(inThIndex),
-                        brdf->getInPhi(inPhIndex),
-                        brdf->getSpecTheta(spThIndex),
-                        brdf->getSpecPhi(spPhIndex),
-                        &inDir, &outDir);
 
-            boundary0 = spPhIndex;
-            if (isDownwardDir(outDir)) {
-                spPhBoundaryfound = true;
-                break;
+        if (brdf->getInTheta(inThIndex) > 0.0f) {
+            // Search the boundary of specular azimuthal angles.
+            bool upwardDirFound = false;
+            for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
+                Vec3 inDir, outDir;
+                brdf->toXyz(brdf->getInTheta(inThIndex),
+                            brdf->getInPhi(inPhIndex),
+                            brdf->getSpecTheta(spThIndex),
+                            brdf->getSpecPhi(spPhIndex),
+                            &inDir, &outDir);
+
+                if (!isDownwardDir(outDir)) {
+                    upwardDirFound = true;
+                }
+                else if (upwardDirFound) {
+                    spPhBoundaryFound = true;
+                    break;
+                }
+
+                boundary0 = spPhIndex;
             }
         }
 
-        if (spPhBoundaryfound) {
+        if (spPhBoundaryFound) {
             int boundary1;
+
             // Search another boundary from the opposite direction.
+            bool upwardDirFound = false;
             for (int spPhIndex = brdf->getNumSpecPhi() - 1; spPhIndex >= 0; --spPhIndex) {
                 Vec3 inDir, outDir;
                 brdf->toXyz(brdf->getInTheta(inThIndex),
@@ -435,10 +444,14 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
                             brdf->getSpecPhi(spPhIndex),
                             &inDir, &outDir);
 
-                boundary1 = spPhIndex;
-                if (isDownwardDir(outDir)) {
+                if (!isDownwardDir(outDir)) {
+                    upwardDirFound = true;
+                }
+                else if (upwardDirFound) {
                     break;
                 }
+
+                boundary1 = spPhIndex;
             }
 
             // Fill values.
@@ -459,7 +472,7 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
                 float spPh1 = brdf->getSpecPhi(boundary1);
 
                 int boundary;
-                if (spPh - spPh0 <= spPh1 - spPh) {
+                if ((spPh - spPh0) <= (spPh1 - spPh)) {
                     boundary = boundary0;
                 }
                 else {
