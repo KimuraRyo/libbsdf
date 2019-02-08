@@ -1262,5 +1262,5 @@ Vec3 MultipleScatteringSmith::compute(const Vec3&   L,
 
     delete microsurface;
 
-    return color * val / std::max(V.z(), EPSILON_F);
+    return color * val / std::max(std::abs(V.z()), EPSILON_F);
 }
