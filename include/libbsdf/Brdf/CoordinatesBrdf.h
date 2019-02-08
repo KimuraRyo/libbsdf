@@ -305,11 +305,11 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
         appendElement(&angles1, maxAngle1);
     }
 
-    bool sizeEqual = (angles0.size() != samples_->getNumAngles0() ||
-                      angles1.size() != samples_->getNumAngles1() ||
-                      angles2.size() != samples_->getNumAngles2() ||
-                      angles3.size() != samples_->getNumAngles3());
-    if (sizeEqual) {
+    bool angleAppended = (angles0.size() != samples_->getNumAngles0() ||
+                          angles1.size() != samples_->getNumAngles1() ||
+                          angles2.size() != samples_->getNumAngles2() ||
+                          angles3.size() != samples_->getNumAngles3());
+    if (angleAppended) {
         std::sort(angles0.data(), angles0.data() + angles0.size());
         std::sort(angles1.data(), angles1.data() + angles1.size());
         std::sort(angles2.data(), angles2.data() + angles2.size());

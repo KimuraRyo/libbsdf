@@ -100,7 +100,11 @@ void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
 void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
                            SpecularCoordinatesBrdf* btdf);
 
-/*! \brief Fills the back side of a BRDF. */
+/*!
+ * \brief Fills the back side of a BRDF.
+ *
+ * Samples in the back side of a surface are filled with copies of boundary samples in the front side.
+ */
 void fillBackSide(SpecularCoordinatesBrdf* brdf);
 
 /*! \brief Averages samples with overlapping angles. */
@@ -121,7 +125,7 @@ Brdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
                            float                            inPhi);
 
 /*!
- * \brief Extrapolates a BRDF with linearly extrapolated reflectances.
+ * \brief Recalculates a BRDF with linearly extrapolated reflectances.
  * \param incomingTheta Minimum incoming polar angle of extrapolated samples.
  *
  * When a BRDF is extrapolated, it is separated into glossy and diffuse components to improve calculation results.

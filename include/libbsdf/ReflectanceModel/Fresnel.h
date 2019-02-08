@@ -83,7 +83,7 @@ inline float fresnelComplex(float inTheta, float n, float k)
     float sqTanI = tanI * tanI;
     float sqN = n * n;
     float sqK = k * k;
-    
+
     float nks = sqN - sqK - sqSinI;
     float sqA = (sqrt(nks * nks + 4.0f * sqN * sqK) + (sqN - sqK - sqSinI)) / 2.0f;
     float sqB = (sqrt(nks * nks + 4.0f * sqN * sqK) - (sqN - sqK - sqSinI)) / 2.0f;

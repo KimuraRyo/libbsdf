@@ -411,7 +411,7 @@ float CatmullRomSplineInterpolator::getValue(const SampleSet&   samples,
     const Arrayf& angles2 = samples.getAngles2();
     const Arrayf& angles3 = samples.getAngles3();
 
-        int pos0Idx0, pos0Idx2, pos0Idx3;
+    int pos0Idx0, pos0Idx2, pos0Idx3;
     int pos1Idx0, pos1Idx2, pos1Idx3;
     int pos2Idx0, pos2Idx2, pos2Idx3;
     int pos3Idx0, pos3Idx2, pos3Idx3;
