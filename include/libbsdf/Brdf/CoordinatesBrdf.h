@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -78,22 +78,22 @@ public:
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.
      */
-    void toXyz(float angle0, float angle1, float angle2, float angle3,
-               Vec3* inDir, Vec3* outDir) const;
+    virtual void toXyz(float angle0, float angle1, float angle2, float angle3,
+                       Vec3* inDir, Vec3* outDir) const;
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
      * assigns them to \a angle0, \a angle1, \a angle2, and \a angle3.
      */
-    void fromXyz(const Vec3& inDir, const Vec3& outDir,
-                 float* angle0, float* angle1, float* angle2, float* angle3) const;
+    virtual void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                         float* angle0, float* angle1, float* angle2, float* angle3) const;
 
     /*!
      * Converts from incoming and outgoing directions to three angles for an isotropic BRDF and
      * assigns them to \a angle0, \a angle2, and \a angle3.
      */
-    void fromXyz(const Vec3& inDir, const Vec3& outDir,
-                 float* angle0, float* angle2, float* angle3) const;
+    virtual void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                         float* angle0, float* angle2, float* angle3) const;
 
     std::string getAngle0Name() const; /*!< Gets a name of angle0. */
     std::string getAngle1Name() const; /*!< Gets a name of angle1. */

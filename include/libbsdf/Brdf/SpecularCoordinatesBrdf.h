@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -130,6 +130,15 @@ public:
     float getSpecularOffset(float inTheta) const;
 
     /*!
+     * Converts from four angles to incoming and outgoing directions and
+     * assigns them to \a inDir and \a outDir.
+     * If specular offsets are set, \a inDir and \a outDir are affected by them.
+     */
+    void toXyz(float inTheta, float inPhi,
+               float specTheta, float specPhi,
+               Vec3* inDir, Vec3* outDir) const;
+
+    /*!
      * Converts from incoming and outgoing directions to four angles and assigns them
      * to \a inTheta, \a inPhi, \a specTheta, and \a specPhi.
      * If specular offsets are set, \a specTheta and \a specPhi are affected by them.
@@ -138,12 +147,21 @@ public:
                  float* inTheta, float* inPhi,
                  float* specTheta, float* specPhi) const;
 
+    /*!
+     * Converts from incoming and outgoing directions to three angles and assigns them
+     * to \a inTheta, \a specTheta, and \a specPhi.
+     * If specular offsets are set, \a specTheta and \a specPhi are affected by them.
+     */
+    void fromXyz(const Vec3& inDir, const Vec3& outDir,
+                 float* inTheta,
+                 float* specTheta, float* specPhi) const;
+
 private:
     /*! Copy operator is disabled. */
     SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&);
 
     /*!
-     * The array of offsets from specular polar angles.
+     * The array of offsets from specular polar angles for refraction.
      * The size of the array is equal to the number of incoming polar angles.
      * If offsets are not used, the array is empty.
      */
@@ -291,6 +309,8 @@ inline int SpecularCoordinatesBrdf::getNumSpecularOffsets() const { return specu
 
 inline float SpecularCoordinatesBrdf::getSpecularOffset(float inTheta) const
 {
+    if (specularOffsets_.size() == 0) return 0.0f;
+
     int lIdx0; // index of the lower bound sample point
     int uIdx0; // index of the upper bound sample point
     float lowerAngle0;
@@ -304,6 +324,15 @@ inline float SpecularCoordinatesBrdf::getSpecularOffset(float inTheta) const
     return (specularOffsets_[uIdx0] - specularOffsets_[lIdx0]) * weight + specularOffsets_[lIdx0];
 }
 
+inline void SpecularCoordinatesBrdf::toXyz(float inTheta, float inPhi,
+                                           float specTheta, float specPhi,
+                                           Vec3* inDir, Vec3* outDir) const
+{
+    float offset = getSpecularOffset(inTheta);
+
+    SpecularCoordinateSystem::toXyz(inTheta + offset, inPhi, specTheta, specPhi, inDir, outDir);
+}
+
 inline void SpecularCoordinatesBrdf::fromXyz(const Vec3& inDir, const Vec3& outDir,
                                              float* inTheta, float* inPhi,
                                              float* specTheta, float* specPhi) const
@@ -312,6 +341,17 @@ inline void SpecularCoordinatesBrdf::fromXyz(const Vec3& inDir, const Vec3& outD
 
     float offset = getSpecularOffset(*inTheta);
     SpecularCoordinateSystem::fromOutDirXyz(outDir, *inTheta + offset, *inPhi, specTheta, specPhi);
+}
+
+inline void SpecularCoordinatesBrdf::fromXyz(const Vec3& inDir, const Vec3& outDir,
+                                             float* inTheta,
+                                             float* specTheta, float* specPhi) const
+{
+    float inPhi;
+    SphericalCoordinateSystem::fromXyz(inDir, inTheta, &inPhi);
+
+    float offset = getSpecularOffset(*inTheta);
+    SpecularCoordinateSystem::fromOutDirXyz(outDir, *inTheta + offset, inPhi, specTheta, specPhi);
 }
 
 } // namespace lb

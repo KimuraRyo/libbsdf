@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -158,9 +158,7 @@ void SampleSet::resizeWavelengths(int numWavelengths)
     int numSamples = angles0_.size() * angles1_.size() * angles2_.size() * angles3_.size();
 
     for (int i = 0; i < numSamples; ++i) {
-        Spectrum sp;
-        sp.resize(numWavelengths);
-        spectra_.at(i) = sp;
+        spectra_.at(i) = Spectrum::Zero(numWavelengths);
     }
 
     wavelengths_.resize(numWavelengths);
