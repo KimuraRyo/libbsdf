@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -215,13 +215,12 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     outPhiAngles.insert(0.0f);
     outPhiAngles.insert(SphericalCoordinateSystem::MAX_ANGLE3);
 
-    int numInTheta  = inThetaAngles.size();
-    int numInPhi    = inPhiAngles.size();
-    int numOutTheta = outThetaAngles.size();
-    int numOutPhi   = outPhiAngles.size();
-    SphericalCoordinatesBrdf* brdf = new SphericalCoordinatesBrdf(numInTheta, numInPhi,
-                                                                  numOutTheta, numOutPhi,
-                                                                  colorModel, wavelengths.size());
+    SphericalCoordinatesBrdf* brdf = new SphericalCoordinatesBrdf(static_cast<int>(inThetaAngles.size()),
+                                                                  static_cast<int>(inPhiAngles.size()),
+                                                                  static_cast<int>(outThetaAngles.size()),
+                                                                  static_cast<int>(outPhiAngles.size()),
+                                                                  colorModel,
+                                                                  static_cast<int>(wavelengths.size()));
     SampleSet* ss = brdf->getSampleSet();
 
     // Set angles.

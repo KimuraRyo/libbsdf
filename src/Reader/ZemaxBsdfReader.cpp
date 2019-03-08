@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2017 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -154,14 +154,16 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         inPhiDegrees.push_back(0.0f);
     }
 
-    int numSpecPhi = spPhiDegrees.size();
+    size_t numSpecPhi = spPhiDegrees.size();
     if (symmetryType == PLANE_SYMMETRICAL) {
         numSpecPhi = spPhiDegrees.size() + (spPhiDegrees.size() - 1);
     }
 
     // Initialize BRDF.
-    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(inThetaDegrees.size(), inPhiDegrees.size(),
-                                                                spThetaDegrees.size(), numSpecPhi,
+    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(static_cast<int>(inThetaDegrees.size()),
+                                                                static_cast<int>(inPhiDegrees.size()),
+                                                                static_cast<int>(spThetaDegrees.size()),
+                                                                static_cast<int>(numSpecPhi),
                                                                 colorModel);
     SampleSet* ss = brdf->getSampleSet();
 
@@ -212,9 +214,9 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         }
         else if (dataStr == "TIS") {
             reader_utility::ignoreLine(ifs);
-            
-            int inPhIndex = cntTis / inThetaDegrees.size();
-            int inThIndex = cntTis - inThetaDegrees.size() * inPhIndex;
+
+            int inPhIndex = cntTis / static_cast<int>(inThetaDegrees.size());
+            int inThIndex = cntTis - static_cast<int>(inThetaDegrees.size()) * inPhIndex;
             
             for (int spPhIndex = 0; spPhIndex < static_cast<int>(spPhiDegrees.size());   ++spPhIndex) {
             for (int spThIndex = 0; spThIndex < static_cast<int>(spThetaDegrees.size()); ++spThIndex) {

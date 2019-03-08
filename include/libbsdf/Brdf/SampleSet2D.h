@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -157,9 +157,6 @@ private:
     Arrayf thetaAngles_; /*!< The array of polar angles. */
     Arrayf phiAngles_;   /*!< The array of azimuthal angles. */
 
-    int numTheta_; /*!< The number of polar angles. */
-    int numPhi_;   /*!< The number of azimuthal angles. */
-
     bool equalIntervalTheta_; /*!< This attribute holds whether polar angles are set at equal intervals. */
     bool equalIntervalPhi_;   /*!< This attribute holds whether azimuthal angles are set at equal intervals. */
 
@@ -200,12 +197,12 @@ inline Spectrum SampleSet2D::getSpectrum(float theta)
 
 inline Spectrum& SampleSet2D::getSpectrum(int thetaIndex, int phiIndex)
 {
-    return spectra_.at(thetaIndex + numTheta_ * phiIndex);
+    return spectra_.at(thetaIndex + thetaAngles_.size() * phiIndex);
 }
 
 inline const Spectrum& SampleSet2D::getSpectrum(int thetaIndex, int phiIndex) const
 {
-    return spectra_.at(thetaIndex + numTheta_ * phiIndex);
+    return spectra_.at(thetaIndex + thetaAngles_.size() * phiIndex);
 }
 
 inline Spectrum& SampleSet2D::getSpectrum(int thetaIndex)
@@ -220,7 +217,7 @@ inline const Spectrum& SampleSet2D::getSpectrum(int thetaIndex) const
 
 inline void SampleSet2D::setSpectrum(int thetaIndex, int phiIndex, const Spectrum& spectrum)
 {
-    spectra_.at(thetaIndex + numTheta_ * phiIndex) = spectrum;
+    spectra_.at(thetaIndex + thetaAngles_.size() * phiIndex) = spectrum;
 }
 
 inline       SpectrumList& SampleSet2D::getSpectra()       { return spectra_; }
@@ -252,8 +249,8 @@ inline Arrayf& SampleSet2D::getPhiArray()   { return phiAngles_; }
 inline const Arrayf& SampleSet2D::getThetaArray() const { return thetaAngles_; }
 inline const Arrayf& SampleSet2D::getPhiArray()   const { return phiAngles_; }
 
-inline int SampleSet2D::getNumTheta() const { return numTheta_; }
-inline int SampleSet2D::getNumPhi()   const { return numPhi_; }
+inline int SampleSet2D::getNumTheta() const { return static_cast<int>(thetaAngles_.size()); }
+inline int SampleSet2D::getNumPhi()   const { return static_cast<int>(phiAngles_.size()); }
 
 inline bool SampleSet2D::isEqualIntervalTheta() const { return equalIntervalTheta_; }
 inline bool SampleSet2D::isEqualIntervalPhi()   const { return equalIntervalPhi_; }
@@ -279,13 +276,13 @@ inline Arrayf& SampleSet2D::getWavelengths() { return wavelengths_; }
 
 inline const Arrayf& SampleSet2D::getWavelengths() const { return wavelengths_; }
 
-inline int SampleSet2D::getNumWavelengths() const { return wavelengths_.size(); }
+inline int SampleSet2D::getNumWavelengths() const { return static_cast<int>(wavelengths_.size()); }
 
 inline SourceType SampleSet2D::getSourceType() const { return sourceType_; }
 
 inline void SampleSet2D::setSourceType(SourceType type) { sourceType_ = type; }
 
-inline bool SampleSet2D::isIsotropic() const { return (numPhi_ == 1); }
+inline bool SampleSet2D::isIsotropic() const { return (phiAngles_.size() == 1); }
 
 template <typename InterpolatorT>
 bool SampleSet2D::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples)

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,7 +20,7 @@ void reader_utility::ignoreCommentLines(std::istream& stream, const std::string&
 
     std::string peekStr;
     while (stream >> peekStr) {
-        int strSize = lineHead.size();
+        size_t strSize = lineHead.size();
         bool commentFound = (static_cast<int>(peekStr.size()) >= strSize &&
                              peekStr.substr(0, strSize) == lineHead);
         if (commentFound) {

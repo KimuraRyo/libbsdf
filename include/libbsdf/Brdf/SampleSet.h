@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -157,10 +157,10 @@ public:
 
 private:
     /*! Gets the index of the spectrum from a set of angle indices. */
-    int getIndex(int index0, int index1, int index2, int index3) const;
+    size_t getIndex(int index0, int index1, int index2, int index3) const;
 
     /*! Gets the index of the spectrum from a set of angle indices of isotropic data. */
-    int getIndex(int index0, int index2, int index3) const;
+    size_t getIndex(int index0, int index2, int index3) const;
 
     /*! Updates the attributes whether angles are set at equal intervals. */
     void updateEqualIntervalAngles();
@@ -265,10 +265,10 @@ inline const Arrayf& SampleSet::getAngles1() const { return angles1_; }
 inline const Arrayf& SampleSet::getAngles2() const { return angles2_; }
 inline const Arrayf& SampleSet::getAngles3() const { return angles3_; }
 
-inline int SampleSet::getNumAngles0() const { return angles0_.size(); }
-inline int SampleSet::getNumAngles1() const { return angles1_.size(); }
-inline int SampleSet::getNumAngles2() const { return angles2_.size(); }
-inline int SampleSet::getNumAngles3() const { return angles3_.size(); }
+inline int SampleSet::getNumAngles0() const { return static_cast<int>(angles0_.size()); }
+inline int SampleSet::getNumAngles1() const { return static_cast<int>(angles1_.size()); }
+inline int SampleSet::getNumAngles2() const { return static_cast<int>(angles2_.size()); }
+inline int SampleSet::getNumAngles3() const { return static_cast<int>(angles3_.size()); }
 
 inline bool SampleSet::isEqualIntervalAngles0() const { return equalIntervalAngles0_; }
 inline bool SampleSet::isEqualIntervalAngles1() const { return equalIntervalAngles1_; }
@@ -295,32 +295,32 @@ inline void SampleSet::setWavelength(int index, float wavelength)
 inline       Arrayf& SampleSet::getWavelengths()       { return wavelengths_; }
 inline const Arrayf& SampleSet::getWavelengths() const { return wavelengths_; }
 
-inline int SampleSet::getNumWavelengths() const { return wavelengths_.size(); }
+inline int SampleSet::getNumWavelengths() const { return static_cast<int>(wavelengths_.size()); }
 
 inline bool SampleSet::isIsotropic() const { return (angles1_.size() == 1); }
 
 inline bool SampleSet::isOneSide() const { return oneSide_; }
 
-inline int SampleSet::getIndex(int index0, int index1, int index2, int index3) const
+inline size_t SampleSet::getIndex(int index0, int index1, int index2, int index3) const
 {
     assert(index0 >= 0 && index1 >= 0 && index2 >= 0 && index3 >= 0);
     assert(index0 < angles0_.size() && index1 < angles1_.size() && index2 < angles2_.size() && index3 < angles3_.size());
 
-    int index = index0
-              + angles0_.size() * index1
-              + angles0_.size() * angles1_.size() * index2
-              + angles0_.size() * angles1_.size() * angles2_.size() * index3;
+    size_t index = index0
+                 + angles0_.size() * index1
+                 + angles0_.size() * angles1_.size() * index2
+                 + angles0_.size() * angles1_.size() * angles2_.size() * index3;
     return index;
 }
 
-inline int SampleSet::getIndex(int index0, int index2, int index3) const
+inline size_t SampleSet::getIndex(int index0, int index2, int index3) const
 {
     assert(index0 >= 0 && index2 >= 0 && index3 >= 0);
     assert(index0 < angles0_.size() && index2 < angles2_.size() && index3 < angles3_.size());
 
-    int index = index0
-              + angles0_.size() * index2
-              + angles0_.size() * angles2_.size() * index3;
+    size_t index = index0
+                 + angles0_.size() * index2
+                 + angles0_.size() * angles2_.size() * index3;
     return index;
 }
 

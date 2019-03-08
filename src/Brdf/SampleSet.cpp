@@ -147,7 +147,7 @@ void SampleSet::resizeAngles(int numAngles0,
     angles2_.resize(numAngles2);
     angles3_.resize(numAngles3);
 
-    int numSamples = numAngles0 * numAngles1 * numAngles2 * numAngles3;
+    size_t numSamples = numAngles0 * numAngles1 * numAngles2 * numAngles3;
     spectra_.resize(numSamples);
 }
 
@@ -155,9 +155,9 @@ void SampleSet::resizeWavelengths(int numWavelengths)
 {
     assert(numWavelengths > 0);
 
-    int numSamples = angles0_.size() * angles1_.size() * angles2_.size() * angles3_.size();
+    size_t numSamples = angles0_.size() * angles1_.size() * angles2_.size() * angles3_.size();
 
-    for (int i = 0; i < numSamples; ++i) {
+    for (size_t i = 0; i < numSamples; ++i) {
         spectra_.at(i) = Spectrum::Zero(numWavelengths);
     }
 

@@ -156,8 +156,12 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&     brdf,
                                             : Brdf()
 {
     const SampleSet* ss = brdf.getSampleSet();
-    samples_ = new SampleSet(angles0.size(), angles1.size(), angles2.size(), angles3.size(),
-                             ss->getColorModel(), ss->getNumWavelengths());
+    samples_ = new SampleSet(static_cast<int>(angles0.size()),
+                             static_cast<int>(angles1.size()),
+                             static_cast<int>(angles2.size()),
+                             static_cast<int>(angles3.size()),
+                             ss->getColorModel(),
+                             ss->getNumWavelengths());
     samples_->getAngles0() = angles0;
     samples_->getAngles1() = angles1;
     samples_->getAngles2() = angles2;
@@ -305,19 +309,24 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
         appendElement(&angles1, maxAngle1);
     }
 
-    bool angleAppended = (angles0.size() != samples_->getNumAngles0() ||
-                          angles1.size() != samples_->getNumAngles1() ||
-                          angles2.size() != samples_->getNumAngles2() ||
-                          angles3.size() != samples_->getNumAngles3());
+    int numAngles0 = static_cast<int>(angles0.size());
+    int numAngles1 = static_cast<int>(angles1.size());
+    int numAngles2 = static_cast<int>(angles2.size());
+    int numAngles3 = static_cast<int>(angles3.size());
+
+    bool angleAppended = (numAngles0 != samples_->getNumAngles0() ||
+                          numAngles1 != samples_->getNumAngles1() ||
+                          numAngles2 != samples_->getNumAngles2() ||
+                          numAngles3 != samples_->getNumAngles3());
     if (angleAppended) {
-        std::sort(angles0.data(), angles0.data() + angles0.size());
-        std::sort(angles1.data(), angles1.data() + angles1.size());
-        std::sort(angles2.data(), angles2.data() + angles2.size());
-        std::sort(angles3.data(), angles3.data() + angles3.size());
+        std::sort(angles0.data(), angles0.data() + numAngles0);
+        std::sort(angles1.data(), angles1.data() + numAngles1);
+        std::sort(angles2.data(), angles2.data() + numAngles2);
+        std::sort(angles3.data(), angles3.data() + numAngles3);
 
         CoordinatesBrdf<CoordSysT> origBrdf(*this);
 
-        samples_->resizeAngles(angles0.size(), angles1.size(), angles2.size(), angles3.size());
+        samples_->resizeAngles(numAngles0, numAngles1, numAngles2, numAngles3);
         samples_->getAngles0() = angles0;
         samples_->getAngles1() = angles1;
         samples_->getAngles2() = angles2;

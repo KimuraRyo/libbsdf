@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017 Kimura Ryo                                       //
+// Copyright (C) 2017-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -134,7 +134,7 @@ bool Smoother2D::insertAngle(std::set<Arrayf::Scalar>&  angleSet,
 void Smoother2D::updateSamples()
 {
     SampleSet2D* origSs2 = new SampleSet2D(*samples_);
-    samples_->resizeAngles(angles0_.size(), angles1_.size());
+    samples_->resizeAngles(static_cast<int>(angles0_.size()), static_cast<int>(angles1_.size()));
 
     copyArray(angles0_, &samples_->getThetaArray());
     copyArray(angles1_, &samples_->getPhiArray());

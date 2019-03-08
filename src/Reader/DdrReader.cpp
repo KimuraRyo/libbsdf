@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -181,8 +181,8 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             }
         }
         else if (isEqual(headStr, "sigmaT")) {
-            int numSpecThetaOffsets = inThetaDegrees.size();
-            for (int i = 0; i < numSpecThetaOffsets; ++i) {
+            size_t numSpecThetaOffsets = inThetaDegrees.size();
+            for (size_t i = 0; i < numSpecThetaOffsets; ++i) {
                 float angle;
                 ifs >> angle;
                 spThetaOffsetDegrees.push_back(angle - inThetaDegrees[i]);
@@ -231,14 +231,16 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
         inPhiDegrees.push_back(0.0f);
     }
 
-    int numSpecPhi = spPhiDegrees.size();
+    size_t numSpecPhi = spPhiDegrees.size();
     if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
         numSpecPhi = spPhiDegrees.size() + (spPhiDegrees.size() - 1);
     }
 
     // Initialize BRDF.
-    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(inThetaDegrees.size(), inPhiDegrees.size(),
-                                                                spThetaDegrees.size(), numSpecPhi,
+    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(static_cast<int>(inThetaDegrees.size()),
+                                                                static_cast<int>(inPhiDegrees.size()),
+                                                                static_cast<int>(spThetaDegrees.size()),
+                                                                static_cast<int>(numSpecPhi),
                                                                 colorModel,
                                                                 numWavelengths);
     brdf->setSourceType(sourceType);

@@ -305,7 +305,10 @@ inline void SpecularCoordinatesBrdf::setSpecularOffset(int index, float angle)
 inline Arrayf&       SpecularCoordinatesBrdf::getSpecularOffsets()       { return specularOffsets_; }
 inline const Arrayf& SpecularCoordinatesBrdf::getSpecularOffsets() const { return specularOffsets_; }
 
-inline int SpecularCoordinatesBrdf::getNumSpecularOffsets() const { return specularOffsets_.size(); }
+inline int SpecularCoordinatesBrdf::getNumSpecularOffsets() const
+{
+    return static_cast<int>(specularOffsets_.size());
+}
 
 inline float SpecularCoordinatesBrdf::getSpecularOffset(float inTheta) const
 {

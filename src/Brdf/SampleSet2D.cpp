@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -23,12 +23,9 @@ SampleSet2D::SampleSet2D(int        numTheta,
 {
     assert(numTheta > 0 && numPhi > 0);
 
-    numTheta_ = numTheta;
-    numPhi_ = numPhi;
-
     colorModel_ = colorModel;
 
-    int numSamples = numTheta * numPhi;
+    size_t numSamples = numTheta * numPhi;
     spectra_.resize(numSamples);
 
     if (equalIntervalAngles) {
@@ -50,7 +47,7 @@ SampleSet2D::SampleSet2D(int        numTheta,
 
     assert(numWavelengths > 0);
 
-    for (int i = 0; i < numSamples; ++i) {
+    for (size_t i = 0; i < numSamples; ++i) {
         Spectrum spectrum;
         spectrum.resize(numWavelengths);
         spectra_.at(i) = spectrum;
@@ -90,10 +87,7 @@ void SampleSet2D::resizeAngles(int numTheta, int numPhi)
 {
     assert(numTheta > 0 && numPhi > 0);
 
-    numTheta_ = numTheta;
-    numPhi_ = numPhi;
-
-    int numSamples = numTheta * numPhi;
+    size_t numSamples = numTheta * numPhi;
     spectra_.resize(numSamples);
 
     thetaAngles_.resize(numTheta);
@@ -104,9 +98,9 @@ void SampleSet2D::resizeWavelengths(int numWavelengths)
 {
     assert(numWavelengths > 0);
 
-    int numSamples = numTheta_ * numPhi_;
+    size_t numSamples = thetaAngles_.size() * phiAngles_.size();
 
-    for (int i = 0; i < numSamples; ++i) {
+    for (size_t i = 0; i < numSamples; ++i) {
         Spectrum sp;
         sp.resize(numWavelengths);
         spectra_.at(i) = sp;

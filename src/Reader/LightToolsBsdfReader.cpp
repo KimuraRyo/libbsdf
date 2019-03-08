@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2017 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -108,7 +108,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
         return 0;
     }
 
-    int numOutDirSamples = outThetaDegrees.size() * outPhiDegrees.size();
+    size_t numOutDirSamples = outThetaDegrees.size() * outPhiDegrees.size();
 
     ignoreCommentLines(ifs);
 
@@ -193,7 +193,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             ignoreCommentLines(ifs);
 
             data->samples.resize(numOutDirSamples);
-            for (int i = 0; i < numOutDirSamples; ++i) {
+            for (size_t i = 0; i < numOutDirSamples; ++i) {
                 std::string valueStr;
                 ifs >> valueStr;
                 data->samples[i] = static_cast<Arrayf::Scalar>(std::atof(valueStr.c_str()));
@@ -293,10 +293,12 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
         return 0;
     }
 
-    SphericalCoordinatesBrdf* brdf = new SphericalCoordinatesBrdf(inThetaDegrees.size(), 1,
-                                                                  outThetaDegrees.size(), outPhiDegrees.size(),
+    SphericalCoordinatesBrdf* brdf = new SphericalCoordinatesBrdf(static_cast<int>(inThetaDegrees.size()),
+                                                                  1,
+                                                                  static_cast<int>(outThetaDegrees.size()),
+                                                                  static_cast<int>(outPhiDegrees.size()),
                                                                   colorModel,
-                                                                  numChannels);    
+                                                                  numChannels);
     SampleSet* ss = brdf->getSampleSet();
 
     copyArray(inThetaDegrees,  &ss->getAngles0());

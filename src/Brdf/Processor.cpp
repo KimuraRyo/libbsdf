@@ -143,10 +143,11 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
 
     const SampleSet* ss = brdf->getSampleSet();
 
+    int numOutPhi = brdf->getNumOutPhi() + static_cast<int>(filledAngles.size());
     SphericalCoordinatesBrdf* filledBrdf = new SphericalCoordinatesBrdf(brdf->getNumInTheta(),
                                                                         brdf->getNumInPhi(),
                                                                         brdf->getNumOutTheta(),
-                                                                        brdf->getNumOutPhi() + filledAngles.size(),
+                                                                        numOutPhi,
                                                                         ss->getColorModel(),
                                                                         ss->getNumWavelengths());
     SampleSet* filledSs = filledBrdf->getSampleSet();

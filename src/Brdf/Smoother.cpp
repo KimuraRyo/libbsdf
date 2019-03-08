@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017 Kimura Ryo                                       //
+// Copyright (C) 2017-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -259,7 +259,10 @@ void Smoother::updateBrdf()
     Brdf* origBrdf = brdf_->clone();
 
     SampleSet* ss = brdf_->getSampleSet();
-    ss->resizeAngles(angles0_.size(), angles1_.size(), angles2_.size(), angles3_.size());
+    ss->resizeAngles(static_cast<int>(angles0_.size()),
+                     static_cast<int>(angles1_.size()),
+                     static_cast<int>(angles2_.size()),
+                     static_cast<int>(angles3_.size()));
 
     copyArray(angles0_, &ss->getAngles0());
     copyArray(angles1_, &ss->getAngles1());

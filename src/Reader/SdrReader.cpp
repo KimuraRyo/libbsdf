@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -109,8 +109,10 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
         return 0;
     }
 
+    int numInTheta = static_cast<int>(inThetaDegrees.size());
+
     // Initialize the array of reflectance.
-    SampleSet2D* ss2 = new SampleSet2D(inThetaDegrees.size(), 1, colorModel, numWavelengths);
+    SampleSet2D* ss2 = new SampleSet2D(numInTheta, 1, colorModel, numWavelengths);
 
     ss2->setSourceType(sourceType);
 
@@ -144,7 +146,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
             std::string defStr;
             ifs >> defStr;
 
-            for (int inThIndex = 0; inThIndex < static_cast<int>(inThetaDegrees.size()); ++inThIndex) {
+            for (int inThIndex = 0; inThIndex < numInTheta; ++inThIndex) {
                 std::string srValueStr;
                 ifs >> srValueStr;
 

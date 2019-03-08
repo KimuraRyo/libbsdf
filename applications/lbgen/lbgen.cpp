@@ -65,10 +65,10 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
     }
 
     std::cout.setstate(std::ios_base::failbit);
-    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(inThetaAngles.size(),
-                                                                inPhiAngles.size(),
-                                                                specThetaAngles.size(),
-                                                                specPhiAngles.size(),
+    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(static_cast<int>(inThetaAngles.size()),
+                                                                static_cast<int>(inPhiAngles.size()),
+                                                                static_cast<int>(specThetaAngles.size()),
+                                                                static_cast<int>(specPhiAngles.size()),
                                                                 MONOCHROMATIC_MODEL, 1, false);
     std::cout.clear();
 
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const std::string version("1.0.6");
+    const std::string version("1.0.7");
 
     if (ap.read("-v") || ap.read("--version")) {
         std::cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << std::endl;
