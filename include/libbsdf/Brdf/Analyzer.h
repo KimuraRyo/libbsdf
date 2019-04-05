@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018 Kimura Ryo                                       //
+// Copyright (C) 2018-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -15,6 +15,7 @@
 #define LIBBSDF_ANALYZER_H
 
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 
@@ -23,6 +24,16 @@ class SampleSet;
 class SampleSet2D;
 class SpecularCoordinatesBrdf;
 class SphericalCoordinatesBrdf;
+
+/*!
+ * \brief Computes a reflectance of BRDF with a spherical coordinate system.
+ */
+Spectrum computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
+
+/*!
+ * \brief Computes a reflectance of BRDF with a specular coordinate system.
+ */
+Spectrum computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
 
 /*!
  * \brief Computes reflectances at each incoming direction.

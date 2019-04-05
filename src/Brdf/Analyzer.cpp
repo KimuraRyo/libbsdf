@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018 Kimura Ryo                                       //
+// Copyright (C) 2018-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -12,15 +12,83 @@
 
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/Integrator.h>
+#include <libbsdf/Brdf/SampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
 #include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
+#include <libbsdf/Common/SolidAngle.h>
 
 #include <libbsdf/ReflectanceModel/Fresnel.h>
 
 using namespace lb;
+
+// Private functions.
+namespace {
+
+Arrayd computeReflectanceOfRectangle(const SphericalCoordinatesBrdf& brdf,
+                                     int inThIndex, int inPhIndex, int outThIndex, int outPhIndex)
+{
+    Spectrum sp = brdf.getSpectrum(inThIndex, inPhIndex, outThIndex,     outPhIndex)
+                + brdf.getSpectrum(inThIndex, inPhIndex, outThIndex + 1, outPhIndex)
+                + brdf.getSpectrum(inThIndex, inPhIndex, outThIndex,     outPhIndex + 1)
+                + brdf.getSpectrum(inThIndex, inPhIndex, outThIndex + 1, outPhIndex + 1);
+    sp /= 4.0f;
+
+    double theta     = brdf.getOutTheta(outThIndex);
+    double nextTheta = brdf.getOutTheta(outThIndex + 1);
+    double phi       = brdf.getOutPhi(outPhIndex);
+    double nextPhi   = brdf.getOutPhi(outPhIndex + 1);
+
+    using std::cos;
+
+    double midCosTheta = (cos(theta) + cos(nextTheta)) * 0.5;
+    double solidAngle = SolidAngle::fromRectangle(theta, nextTheta, phi, nextPhi);
+    return sp.cast<Arrayd::Scalar>() * midCosTheta * solidAngle;
+}
+
+}
+
+Spectrum lb::computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIndex, int inPhIndex)
+{
+    Arrayd sumSpectrum;
+    sumSpectrum.resize(brdf.getSampleSet()->getNumWavelengths());
+    sumSpectrum.setZero();
+
+    for (int thIndex = 0; thIndex < brdf.getNumOutTheta() - 1; ++thIndex) {
+    for (int phIndex = 0; phIndex < brdf.getNumOutPhi()   - 1; ++phIndex) {
+        sumSpectrum += computeReflectanceOfRectangle(brdf, inThIndex, inPhIndex, thIndex, phIndex);
+    }}
+
+    return sumSpectrum.cast<Spectrum::Scalar>();
+}
+
+Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, int inPhIndex)
+{
+    Arrayd sumSpectrum;
+    sumSpectrum.resize(brdf.getSampleSet()->getNumWavelengths());
+    sumSpectrum.setZero();
+
+    for (int thIndex = 0; thIndex < brdf.getNumSpecTheta() - 1; ++thIndex) {
+    for (int phIndex = 0; phIndex < brdf.getNumSpecPhi()   - 1; ++phIndex) {
+        Vec3 inDir, outDir0, outDir1, outDir2, outDir3;
+        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex,     phIndex,     &inDir, &outDir0);
+        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex,     phIndex + 1, &inDir, &outDir1);
+        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex + 1, &inDir, &outDir2);
+        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex,     &inDir, &outDir3);
+
+        Vec3 centroid;
+        double solidAngle = SolidAngle::fromRectangleOnHemisphere(outDir0, outDir1, outDir2, outDir3, &centroid);
+
+        if (solidAngle <= 0.0) continue;
+
+        Spectrum sp = brdf.getSpectrum(inDir, centroid);
+        sumSpectrum += sp.cast<Arrayd::Scalar>() * centroid.z() * solidAngle;
+    }}
+
+    return sumSpectrum.cast<Spectrum::Scalar>();
+}
 
 SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
 {
@@ -150,20 +218,19 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
     return ss2;
 }
 
-
 Spectrum lb::findDiffuseThresholds(const lb::Brdf&  brdf,
                                    float            maxTheta)
 {
-    const lb::SampleSet* ss = brdf.getSampleSet();
+    const SampleSet* ss = brdf.getSampleSet();
 
-    lb::Spectrum thresholds(ss->getNumWavelengths());
-    thresholds.fill(std::numeric_limits<lb::Spectrum::Scalar>::max());
+    Spectrum thresholds(ss->getNumWavelengths());
+    thresholds.fill(std::numeric_limits<Spectrum::Scalar>::max());
 
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
-        lb::Vec3 inDir, outDir;
+        Vec3 inDir, outDir;
         brdf.getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
         float inTheta = std::acos(inDir[2]);
