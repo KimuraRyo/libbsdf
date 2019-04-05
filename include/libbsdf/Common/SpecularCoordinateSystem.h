@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -107,10 +107,12 @@ inline Vec3 SpecularCoordinateSystem::toOutDirXyz(float inTheta, float inPhi,
                                                   float specTheta, float specPhi)
 {
     Vec3 outDir = SphericalCoordinateSystem::toXyz(specTheta, specPhi);
-    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(inTheta) * Vec2f(outDir[0], outDir[2]);
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(inPhi) * Vec2f(rotThVec[0], outDir[1]);
+    Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(inTheta) * Vec2(outDir[0], outDir[2]);
+    Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(inPhi) * Vec2(rotThVec[0], outDir[1]);
 
-    return Vec3(rotPhVec[0], rotPhVec[1], rotThVec[1]);
+    return Vec3(static_cast<Vec3::Scalar>(rotPhVec[0]),
+                static_cast<Vec3::Scalar>(rotPhVec[1]),
+                static_cast<Vec3::Scalar>(rotThVec[1]));
 }
 
 inline void SpecularCoordinateSystem::fromOutDirXyz(const Vec3& outDir, float inTheta, float inPhi,
@@ -118,10 +120,13 @@ inline void SpecularCoordinateSystem::fromOutDirXyz(const Vec3& outDir, float in
 {
     assert(inTheta >= 0.0f && inTheta <= PI_2_F);
 
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-inPhi) * Vec2f(outDir[0], outDir[1]);
-    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(-inTheta) * Vec2f(rotPhVec[0], outDir[2]);
-    rotThVec[1] = clamp(rotThVec[1], -1.0f, 1.0f);
-    Vec3 rotDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
+    Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-inPhi) * Vec2(outDir[0], outDir[1]);
+    Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(-inTheta) * Vec2(rotPhVec[0], outDir[2]);
+    rotThVec[1] = clamp(rotThVec[1], -1.0, 1.0);
+    Vec3 rotDir(static_cast<Vec3::Scalar>(rotThVec[0]),
+                static_cast<Vec3::Scalar>(rotPhVec[1]),
+                static_cast<Vec3::Scalar>(rotThVec[1]));
+
     SphericalCoordinateSystem::fromXyz(rotDir, specTheta, specPhi);
 }
 

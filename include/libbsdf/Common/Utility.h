@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -32,9 +32,8 @@ template <typename T>
 bool isEqual(T lhs, T rhs);
 
 /*! \brief Returns -1 for a negative number, +1 for a positive number, and 0 for 0. */
-template <typename T> int sign(T val) {
-    return (T(0) < val) - (val < T(0));
-}
+template <typename T>
+int sign(T val);
 
 /*! \brief Computes linearly-interpolated values. */
 template <typename T>
@@ -109,10 +108,6 @@ void fixDownwardDir(Vec3T* dir);
 /*! \brief Returns true if a direction faces the back of a surface. */
 bool isDownwardDir(const Vec3& dir);
 
-/*! \brief Fits the angle with about the same value. */
-template <typename T>
-T fitAngle(T angle, T value);
-
 /*
  * Implementation
  */
@@ -123,6 +118,11 @@ inline T clamp(T value, T minValue, T maxValue)
     using std::min;
     using std::max;
     return max(minValue, min(maxValue, value));
+}
+
+template <typename T>
+inline int sign(T val) {
+    return (T(0) < val) - (val < T(0));
 }
 
 template <typename T>
@@ -295,17 +295,6 @@ inline bool isDownwardDir(const Vec3& dir)
     return (dir.z() < -0.00001);
 }
 
-template <typename T>
-inline T fitAngle(T angle, T value)
-{
-    if (isEqual(angle, value)) {
-        return value;
-    }
-    else {
-        return angle;
-    }
-}
-
-}  // namespace lb
+} // namespace lb
 
 #endif // LIBBSDF_UTILITY_H
