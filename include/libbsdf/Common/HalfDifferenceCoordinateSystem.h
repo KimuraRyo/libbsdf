@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -80,7 +80,7 @@ inline void HalfDifferenceCoordinateSystem::toXyz(float halfTheta, float halfPhi
     Vec3 diffDir = SphericalCoordinateSystem::toXyz(diffTheta, diffPhi);
 
     Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(-halfTheta) * Vec2f(diffDir[0], diffDir[2]);
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-halfPhi) * Vec2f(rotThVec[0], diffDir[1]);
+    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(halfPhi) * Vec2f(rotThVec[0], diffDir[1]);
     *inDir = Vec3(rotPhVec[0], rotPhVec[1], rotThVec[1]);
 
     *outDir = reflect(*inDir, halfDir);
@@ -93,7 +93,7 @@ inline void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir, const Vec
     Vec3 halfDir = (inDir + outDir).normalized();
     SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, halfPhi);
 
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfPhi) * Vec2f(inDir[0], inDir[1]);
+    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-*halfPhi) * Vec2f(inDir[0], inDir[1]);
     Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfTheta) * Vec2f(rotPhVec[0], inDir[2]);
     Vec3 diffDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
     diffDir.normalize();
