@@ -319,7 +319,7 @@ void LinearInterpolator::findBounds(const Arrayf&   angles,
     int backIndex = static_cast<int>(angles.size() - 1);
     if (equalIntervalAngles) {
         // Calculate lower and upper indices.
-        *lowerIndex = static_cast<int>(backIndex * angle / (angles[backIndex]));
+        *lowerIndex = static_cast<int>(backIndex * (angle / angles[backIndex]));
         *lowerIndex = std::min(*lowerIndex, backIndex - 1);
         *upperIndex = *lowerIndex + 1;
     }

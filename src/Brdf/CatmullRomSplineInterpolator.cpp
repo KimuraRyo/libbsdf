@@ -586,7 +586,7 @@ void CatmullRomSplineInterpolator::findBounds(const Arrayf& positions,
     int backIndex = static_cast<int>(positions.size() - 1);
     if (equalIntervalPositions) {
         // Calculate lower and upper indices.
-        *pos1Index = static_cast<int>(backIndex * posAngle / (positions[backIndex]));
+        *pos1Index = static_cast<int>(backIndex * (posAngle / positions[backIndex]));
         *pos1Index = min(*pos1Index, backIndex - 1);
         *pos2Index = *pos1Index + 1;
     }

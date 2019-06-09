@@ -48,44 +48,14 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     int                     numSpecularAzimuthalAngles,
                                     DataType                dataType)
 {
-    Arrayf inThetaAngles    = Arrayf::LinSpaced(numIncomingPolarAngles + 1,     0.0,
-                                                SpecularCoordinateSystem::MAX_ANGLE0);
-    Arrayf inPhiAngles      = Arrayf::LinSpaced(1,                              0.0,
-                                                SpecularCoordinateSystem::MAX_ANGLE1);
-    Arrayf specThetaAngles  = Arrayf::LinSpaced(numSpecularPolarAngles + 1,     0.0,
-                                                SpecularCoordinateSystem::MAX_ANGLE2);
-    Arrayf specPhiAngles    = Arrayf::LinSpaced(numSpecularAzimuthalAngles + 1, 0.0,
-                                                SpecularCoordinateSystem::MAX_ANGLE3);
-
-    // Create narrow intervals near specular directions.
-    for (int i = 1; i < specThetaAngles.size() - 1; ++i) {
-        Arrayf::Scalar ratio = specThetaAngles[i] / SpecularCoordinateSystem::MAX_ANGLE2;
-        ratio = std::pow(ratio, static_cast<Arrayf::Scalar>(2.0));
-        specThetaAngles[i] = ratio * SpecularCoordinateSystem::MAX_ANGLE2;
-    }
-
     std::cout.setstate(std::ios_base::failbit);
-    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(static_cast<int>(inThetaAngles.size()),
-                                                                static_cast<int>(inPhiAngles.size()),
-                                                                static_cast<int>(specThetaAngles.size()),
-                                                                static_cast<int>(specPhiAngles.size()),
-                                                                MONOCHROMATIC_MODEL, 1, false);
+    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(numIncomingPolarAngles,
+                                                                1,
+                                                                numSpecularPolarAngles,
+                                                                numSpecularAzimuthalAngles,
+                                                                2.0f,
+                                                                MONOCHROMATIC_MODEL, 1, n);
     std::cout.clear();
-
-    SampleSet* ss = brdf->getSampleSet();
-    ss->getAngles0() = inThetaAngles;
-    ss->getAngles1() = inPhiAngles;
-    ss->getAngles2() = specThetaAngles;
-    ss->getAngles3() = specPhiAngles;
-
-    if (dataType == BTDF_DATA && n != 1.0f) {
-        for (int i = 0; i < brdf->getNumInTheta(); ++i) {
-            float inTheta = brdf->getInTheta(i);
-            float sinT = std::min(std::sin(inTheta) / n, 1.0f);
-            float refractedTheta = std::asin(sinT);
-            brdf->setSpecularOffset(i, refractedTheta - inTheta);
-        }
-    }
 
     reflectance_model_utility::setupTabularBrdf(model, brdf, dataType);
     brdf->setSourceType(GENERATED_SOURCE);
@@ -166,7 +136,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numIncomingPolarAngles = clampParameter("numIncomingPolarAngles", numIncomingPolarAngles, 2, 3600);
+        numIncomingPolarAngles = clampParameter("numIncomingPolarAngles",
+                                                numIncomingPolarAngles + 1, 2, 3600);
     }
 
     int numSpecularPolarAngles = 90;
@@ -174,7 +145,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numSpecularPolarAngles = clampParameter("numSpecularPolarAngles", numSpecularPolarAngles, 2, 3600);
+        numSpecularPolarAngles = clampParameter("numSpecularPolarAngles",
+                                                numSpecularPolarAngles + 1, 2, 3600);
     }
 
     int numSpecularAzimuthalAngles = 72;
@@ -182,7 +154,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numSpecularAzimuthalAngles = clampParameter("numSpecularAzimuthalAngles", numSpecularAzimuthalAngles, 2, 3600);
+        numSpecularAzimuthalAngles = clampParameter("numSpecularAzimuthalAngles",
+                                                    numSpecularAzimuthalAngles + 1, 2, 3600);
     }
 
     bool conservationOfEnergyUsed = false;
@@ -271,7 +244,7 @@ int main(int argc, char** argv)
 
         if (reader_utility::hasSuffix(fileName, ".ddr")) {
             SpecularCoordinatesBrdf* brdf = createBrdf(*model,
-                                                       n,
+                                                       1.0f,
                                                        numIncomingPolarAngles,
                                                        numSpecularPolarAngles,
                                                        numSpecularAzimuthalAngles,
@@ -309,7 +282,7 @@ int main(int argc, char** argv)
         }
         else {
             SpecularCoordinatesBrdf* brdf = createBrdf(*model,
-                                                       n,
+                                                       1.0f,
                                                        numIncomingPolarAngles,
                                                        numSpecularPolarAngles,
                                                        numSpecularAzimuthalAngles,

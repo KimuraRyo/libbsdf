@@ -51,6 +51,19 @@ public:
                             int         numSpecTheta,
                             int         numSpecPhi);
 
+    /*! 
+     * Constructs a BRDF with narrow intervals near specular directions.
+     * \a refractiveIndex is used for the specular offset of BTDF.
+     */
+    SpecularCoordinatesBrdf(int         numInTheta,
+                            int         numInPhi,
+                            int         numSpecTheta,
+                            int         numSpecPhi,
+                            float       specThetaExponent,
+                            ColorModel  colorModel = RGB_MODEL,
+                            int         numWavelengths = 3,
+                            float       refractiveIndex = 1.0f);
+
     /*! Copies and constructs a BRDF. */
     SpecularCoordinatesBrdf(const SpecularCoordinatesBrdf& brdf);
 
@@ -58,7 +71,7 @@ public:
 
     /*! Virtual copy constructor. */
     virtual SpecularCoordinatesBrdf* clone() const;
-    
+
     using BaseBrdf::getSpectrum;
 
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
