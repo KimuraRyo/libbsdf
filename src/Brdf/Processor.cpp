@@ -407,7 +407,7 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
     for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
     for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
         bool spPhBoundaryFound = false;
-        int boundary0;
+        int boundary0 = 0;
 
         if (brdf->getInTheta(inThIndex) > 0.0f) {
             // Search the boundary of specular azimuthal angles.
@@ -433,7 +433,7 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
         }
 
         if (spPhBoundaryFound) {
-            int boundary1;
+            int boundary1 = 0;
 
             // Search another boundary from the opposite direction.
             bool upwardDirFound = false;
@@ -603,7 +603,7 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
 
     const SampleSet* ss = brdf->getSampleSet();
 
-    int spThBoundary;
+    int spThBoundary = 0;
 
     // Extrapolate values in specular directions and search the index of boundaries.
     for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();       ++inThIndex) {

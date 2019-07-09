@@ -134,9 +134,9 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
                                        ss->getNumAngles1(),
                                        ss->getColorModel(),
                                        ss->getNumWavelengths());
-    ss2->getThetaArray() = ss->getAngles0();
-    ss2->getPhiArray() = ss->getAngles1();
-    ss2->getWavelengths() = ss->getWavelengths();
+    ss2->getThetaArray()    = ss->getAngles0();
+    ss2->getPhiArray()      = ss->getAngles1();
+    ss2->getWavelengths()   = ss->getWavelengths();
 
     for (int thIndex = 0; thIndex < ss2->getNumTheta(); ++thIndex) {
     for (int phIndex = 0; phIndex < ss2->getNumPhi();   ++phIndex) {
@@ -193,13 +193,18 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
         Spectrum brdfSp = brdf.getSpectrum(inDir, specularDir);
 
         for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
-        for (int spPhIndex = 0; spPhIndex < brdf.getNumSpecPhi();   ++spPhIndex) {
-            const Spectrum& sp = brdf.getSpectrum(thIndex, phIndex, spThIndex, spPhIndex);
-
-            if (brdfSp.sum() < sp.sum()) {
-                brdfSp = sp;
+            if (brdf.getSpecTheta(spThIndex) > maxSpecularTheta) {
+                continue;
             }
-        }}
+
+            for (int spPhIndex = 0; spPhIndex < brdf.getNumSpecPhi(); ++spPhIndex) {
+                const Spectrum& sp = brdf.getSpectrum(thIndex, phIndex, spThIndex, spPhIndex);
+
+                if (brdfSp.sum() < sp.sum()) {
+                    brdfSp = sp;
+                }
+            }
+        }
 
         Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
 

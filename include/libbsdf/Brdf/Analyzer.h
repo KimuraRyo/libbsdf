@@ -61,7 +61,7 @@ SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
 SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                          const Brdf&                    standardBrdf,
                                          float                          ior,
-                                         float                          maxSpecularTheta);
+                                         float                          maxSpecularTheta = lb::PI_2_F);
 
 /*!
  * \brief Finds thresholds to separate the diffuse component from a BRDF.

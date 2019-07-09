@@ -34,14 +34,11 @@ bool DdrWriter::write(const std::string&                fileName,
 
 void DdrWriter::write(const std::string&    fileName,
                       const Brdf&           brdf,
-                      bool                  inDirDependentCoordSysUsed,
                       DataType              dataType,
                       const std::string&    comments)
 {
     typedef SpecularCoordinatesBrdf SpecBrdf;
     typedef SpecularCoordinateSystem SpecCoordSys;
-
-    const SampleSet* ss = brdf.getSampleSet();
 
     SpecBrdf* exportedBrdf;
     if (dynamic_cast<const SpecBrdf*>(&brdf)) {
@@ -49,6 +46,8 @@ void DdrWriter::write(const std::string&    fileName,
     }
     else if (dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf)) {
         using std::max;
+
+        const SampleSet* ss = brdf.getSampleSet();
 
         Arrayf::Index numOutThetaAngles = max(ss->getNumAngles2(), 181);
         Arrayf::Index numOutPhiAngles   = max(ss->getNumAngles3(), 37);
@@ -65,6 +64,8 @@ void DdrWriter::write(const std::string&    fileName,
         exportedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, outThetaAngles, outPhiAngles);
     }
     else {
+        const SampleSet* ss = brdf.getSampleSet();
+
         exportedBrdf = new SpecBrdf(brdf, 10, ss->getNumAngles1(), 181, 37);
     }
 

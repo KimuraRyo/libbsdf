@@ -110,7 +110,11 @@ void fillBackSide(SpecularCoordinatesBrdf* brdf);
 /*! \brief Averages samples with overlapping angles. */
 void equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf);
 
-/*! \brief Removes specular peaks and interpolates using surrounding values. */
+/*!
+ * \brief Removes specular peaks and interpolates removed areas using surrounding values.
+ *
+ * \param maxSpecularTheta  The maximum angle of removed areas around specular directions.
+ */
 void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta);
 
 /*!

@@ -554,15 +554,15 @@ float MicrosurfaceSlopeBeckmann::projectedArea(const Vec3& wi) const
 
 Vec2f MicrosurfaceSlopeBeckmann::sampleP22_11(const float theta_i, const float U, const float U_2) const
 {
-    Vec2f slope;
+    Vec2f slope2D;
 
     if (theta_i < 0.0001f)
     {
         const float r = sqrtf(-logf(U));
         const float phi = 6.28318530718f * U_2;
-        slope.x() = r * cosf(phi);
-        slope.y() = r * sinf(phi);
-        return slope;
+        slope2D.x() = r * cosf(phi);
+        slope2D.y() = r * sinf(phi);
+        return slope2D;
     }
 
     // constant
@@ -594,7 +594,9 @@ Vec2f MicrosurfaceSlopeBeckmann::sampleP22_11(const float theta_i, const float U
         const float slope = erfinv(erf_current);
 
         // CDF
-        const float CDF = (slope >= slope_i) ? 1.0f : c * (INV_2_SQRT_M_PI*sin_theta_i*expf(-slope*slope) + cos_theta_i*(0.5f + 0.5f*(float)erfAs(slope)));
+        const float CDF = (slope >= slope_i)
+                        ? 1.0f
+                        : c * (INV_2_SQRT_M_PI * sin_theta_i * expf(-slope * slope) + cos_theta_i * (0.5f + 0.5f * (float)erfAs(slope)));
         const float diff = CDF - U;
 
         // test estimate
@@ -620,9 +622,9 @@ Vec2f MicrosurfaceSlopeBeckmann::sampleP22_11(const float theta_i, const float U
         erf_current -= diff / derivative;
     }
 
-    slope.x() = erfinv(std::min(erf_max, std::max(erf_min, erf_current)));
-    slope.y() = erfinv(2.0f*U_2 - 1.0f);
-    return slope;
+    slope2D.x() = erfinv(std::min(erf_max, std::max(erf_min, erf_current)));
+    slope2D.y() = erfinv(2.0f*U_2 - 1.0f);
+    return slope2D;
 }
 
 float MicrosurfaceSlopeGGX::P22(const float slope_x, const float slope_y) const
@@ -999,7 +1001,7 @@ Vec3 MicrosurfaceDielectric::samplePhaseFunction(const Vec3& wi, const bool wi_o
 
 float MicrosurfaceDielectric::evalSingleScattering(const Vec3& wi, const Vec3& wo) const
 {
-    bool wi_outside = true;
+    //bool wi_outside = true;
     bool wo_outside = wo.z() > 0;
 
     const float eta = m_eta;
@@ -1033,9 +1035,9 @@ float MicrosurfaceDielectric::evalSingleScattering(const Vec3& wi, const Vec3& w
         const float G2 = (float)beta(1.0f + Lambda_i, 1.0f + Lambda_o);
 
         // BSDF
-        const float value = std::max(0.0f, wi.dot(wh)) * std::max(0.0f, -wo.dot(wh)) *
-            1.0f / wi.z() * eta*eta * (1.0f - Fresnel(wi, wh, eta)) *
-            G2 * D / powf(wi.dot(wh) + eta * wo.dot(wh), 2.0f);
+        const float value = std::max(0.0f, wi.dot(wh)) * std::max(0.0f, -wo.dot(wh))
+                          * 1.0f / wi.z() * eta*eta * (1.0f - Fresnel(wi, wh, eta))
+                          * G2 * D / powf(wi.dot(wh) + eta * wo.dot(wh), 2.0f);
         return value;
     }
 }

@@ -33,7 +33,6 @@ public:
     /*! Converts and writes a DDR or DDT file. */
     static void write(const std::string&    fileName,
                       const Brdf&           brdf,
-                      bool                  inDirDependentCoordSysUsed,
                       DataType              dataType,
                       const std::string&    comments = "");
 

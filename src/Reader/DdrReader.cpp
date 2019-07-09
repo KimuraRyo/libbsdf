@@ -397,7 +397,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             int numInTh = brdf->getNumInTheta();
             int numInPh = brdf->getNumInPhi();
 
-            for (int wlIndex = 0; wlIndex < numWl; ++wlIndex) {
+            for (wlIndex = 0; wlIndex < numWl; ++wlIndex) {
                 for (int inThIndex = 0; inThIndex < numInTh; ++inThIndex) {
                 for (int inPhIndex = 0; inPhIndex < numInPh; ++inPhIndex) {
                     Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf->getInTheta(inThIndex),

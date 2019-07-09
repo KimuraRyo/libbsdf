@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2016 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -75,7 +75,7 @@ const Spectrum& RandomSampleSet<CoordSysT>::findSpectrumOfNearestSample(const An
 {
     using std::acos;
 
-    const Spectrum* sp;
+    const Spectrum* sp = 0;
 
     Vec3 inDir, outDir;
     CoordSysT::toXyz(angles.at(0), angles.at(1), angles.at(2), angles.at(3),
@@ -130,7 +130,7 @@ const Spectrum& RandomSampleSet<CoordSysT>::estimateSpectrum(const AngleList&   
         angles.at(0), angles.at(1), angles.at(2), angles.at(3),
         &angle0, &angle1, &angle2, &angle3);
 
-    const Spectrum* sp;
+    const Spectrum* sp = 0;
     float minAngleDiff = std::numeric_limits<float>::max();
 
     for (auto it = sampleMap_.begin(); it != sampleMap_.end(); ++it) {

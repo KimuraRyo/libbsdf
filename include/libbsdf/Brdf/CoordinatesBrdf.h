@@ -361,25 +361,25 @@ void CoordinatesBrdf<CoordSysT>::clampAngles()
 }
 
 template <typename CoordSysT>
-inline void CoordinatesBrdf<CoordSysT>::setAngle0(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle0(int index, float angle)
 {
     samples_->setAngle0(index, clamp(angle, CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0));
 }
 
 template <typename CoordSysT>
-inline void CoordinatesBrdf<CoordSysT>::setAngle1(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle1(int index, float angle)
 {
     samples_->setAngle1(index, clamp(angle, CoordSysT::MIN_ANGLE1, CoordSysT::MAX_ANGLE1));
 }
 
 template <typename CoordSysT>
-inline void CoordinatesBrdf<CoordSysT>::setAngle2(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle2(int index, float angle)
 {
     samples_->setAngle2(index, clamp(angle, CoordSysT::MIN_ANGLE2, CoordSysT::MAX_ANGLE2));
 }
 
 template <typename CoordSysT>
-inline void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
 {
     samples_->setAngle3(index, clamp(angle, CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3));
 }

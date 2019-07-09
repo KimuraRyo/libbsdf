@@ -180,17 +180,17 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     // Modify data for the isotropic BRDF with the incoming azimuthal angle of non-zero radian.
     if (inPhiAngles.size() == 1 && *inPhiAngles.begin() != 0.0f) {
         // Rotate outgoing azimuthal angles using the incoming azimuthal angle.
-        SphericalCoordinatesRandomSampleSet::AngleList angles;
+        SphericalCoordinatesRandomSampleSet::AngleList rotatedAngles;
         for (auto it = outPhiAngles.begin(); it != outPhiAngles.end(); ++it) {
             float outPhi = *it - *inPhiAngles.begin();
             if (outPhi < 0.0f) {
                 outPhi += 2.0f * PI_F;
             }
 
-            angles.push_back(outPhi);
+            rotatedAngles.push_back(outPhi);
         }
         outPhiAngles.clear();
-        std::copy(angles.begin(), angles.end(), std::inserter(outPhiAngles, outPhiAngles.begin()));
+        std::copy(rotatedAngles.begin(), rotatedAngles.end(), std::inserter(outPhiAngles, outPhiAngles.begin()));
 
         // Rotate sample points using the incoming azimuthal angle.
         SphericalCoordinatesRandomSampleSet::SampleMap modifiedSamples;
