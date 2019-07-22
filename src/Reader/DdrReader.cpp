@@ -276,7 +276,6 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
     }
 
     std::vector<float> kbdfs;
-    kbdfs.reserve(inThetaDegrees.size() * inPhiDegrees.size() * numWavelengths);
 
     // Read data.
     int wlIndex = 0;
@@ -324,56 +323,65 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
 
             for (int inPhIndex = 0; inPhIndex < numInPhi;   ++inPhIndex) {
             for (int inThIndex = 0; inThIndex < numInTheta; ++inThIndex) {
-            for (int spPhIndex = 0; spPhIndex < numSpPhi;   ++spPhIndex) {
-                ddr_sdr_utility::ignoreCommentLines(ifs);
-            for (int spThIndex = 0; spThIndex < numSpTheta; ++spThIndex) {
-                std::string brdfValueStr;
-                ifs >> brdfValueStr;
-
-                char* end;
-                float brdfValue = static_cast<float>(std::strtod(brdfValueStr.c_str(), &end));
-                if (*end != '\0') {
-                    std::cerr << "[DdrReader::read] Invalid value: " << brdfValueStr << std::endl;
-                    delete brdf;
-                    return 0;
-                }
-
-                // Convert intensity to radiance.
-                if (unitType == ddr_sdr_utility::INTENSITY_ABSOLUTE ||
-                    unitType == ddr_sdr_utility::INTENSITY_RELATIVE) {
-                    Vec3 inDir, outDir;
-                    brdf->getInOutDirection(inThIndex, inPhIndex, spThIndex, spPhIndex, &inDir, &outDir);
-
-                    brdfValue /= std::max(outDir[2], EPSILON_F);
-                    brdfValue *=  PI_F;
-                }
-
+                float kbdf;
                 if (unitType == ddr_sdr_utility::LUMINANCE_ABSOLUTE ||
                     unitType == ddr_sdr_utility::INTENSITY_ABSOLUTE) {
                     if (!kbdfs.empty()) {
-                        brdfValue *= kbdfs.at(inThIndex +
-                                              numInTheta * inPhIndex +
-                                              numInTheta * numInPhi * wlIndex);
+                        kbdf = kbdfs.at(inThIndex + numInTheta * inPhIndex);
                     }
                 }
-
-                brdfValue /= PI_F;
-
-                Spectrum& sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
-                sp[wlIndex] = brdfValue;
-
-                if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
-                    int symmetryIndex = (brdf->getNumSpecPhi() - 1) - spPhIndex;
-                    Spectrum& symmetrySp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, symmetryIndex);
-                    symmetrySp[wlIndex] = brdfValue;
+                else {
+                    kbdf = 1.0f;
                 }
 
-                if (ifs.fail()) {
-                    std::cerr << "[DdrReader::read] Invalid format: " << brdfValue << std::endl;
-                    delete brdf;
-                    return 0;
-                }
-            }}}}
+                for (int spPhIndex = 0; spPhIndex < numSpPhi;   ++spPhIndex) {
+                    ddr_sdr_utility::ignoreCommentLines(ifs);
+                for (int spThIndex = 0; spThIndex < numSpTheta; ++spThIndex) {
+                    std::string brdfValueStr;
+                    ifs >> brdfValueStr;
+
+                    char* end;
+                    double brdfValue = std::strtod(brdfValueStr.c_str(), &end);
+                    if (*end != '\0') {
+                        std::cerr << "[DdrReader::read] Invalid value: " << brdfValueStr << std::endl;
+                        delete brdf;
+                        return 0;
+                    }
+
+                    // Convert intensity to radiance.
+                    if (unitType == ddr_sdr_utility::INTENSITY_ABSOLUTE ||
+                        unitType == ddr_sdr_utility::INTENSITY_RELATIVE) {
+                        Vec3 inDir, outDir;
+                        brdf->getInOutDirection(inThIndex, inPhIndex, spThIndex, spPhIndex, &inDir, &outDir);
+
+                        brdfValue /= std::max(outDir[2], Vec3::Scalar(EPSILON_F));
+                        brdfValue *= PI_D;
+                    }
+
+                    brdfValue *= kbdf;
+                    brdfValue /= PI_D;
+
+                    Spectrum& sp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
+                    sp[wlIndex] = static_cast<Spectrum::Scalar>(brdfValue);
+
+                    if (symmetryType == ddr_sdr_utility::PLANE_SYMMETRICAL) {
+                        int symmetryIndex = (brdf->getNumSpecPhi() - 1) - spPhIndex;
+                        Spectrum& symmetrySp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, symmetryIndex);
+                        symmetrySp[wlIndex] = static_cast<Spectrum::Scalar>(brdfValue);
+                    }
+
+                    if (ifs.fail()) {
+                        std::cerr << "[DdrReader::read] Invalid format: " << brdfValue << std::endl;
+                        delete brdf;
+                        return 0;
+                    }
+                }}
+            }}
+
+            if (unitType == ddr_sdr_utility::LUMINANCE_ABSOLUTE ||
+                unitType == ddr_sdr_utility::INTENSITY_ABSOLUTE) {
+                kbdfs.clear();
+            }
 
             ++wlIndex;
         }
