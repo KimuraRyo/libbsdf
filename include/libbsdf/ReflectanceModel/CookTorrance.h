@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2018 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -95,7 +95,7 @@ inline Vec3 CookTorrance::compute(const Vec3&   L,
 
     Vec3 H = (L + V).normalized();
     double dotHN = H.dot(N);
-    double dotVH = min(V.dot(H), 1.0f);
+    double dotVH = min(V.dot(H), Vec3::Scalar(1));
 
 #if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
     Vec3 F = fresnelSchlick(dotVH, color);

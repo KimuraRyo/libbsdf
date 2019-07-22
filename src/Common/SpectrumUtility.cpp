@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -37,7 +37,8 @@ Vec3 SpectrumUtility::computeNormalizingConstant_sRGB()
     }
     sumXyz /= 2.0;
 
-    return xyzToSrgb(sumXyz.cast<Vec3f::Scalar>());
+    Vec3f sRgb = xyzToSrgb<Vec3f>(sumXyz.cast<Vec3f::Scalar>());
+    return sRgb.cast<Vec3::Scalar>();
 }
 
 const Vec3 SpectrumUtility::NORMALIZING_CONSTANT_SRGB(10566.4f, 10567.4f, 10568.8f);

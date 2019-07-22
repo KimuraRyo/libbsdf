@@ -103,7 +103,7 @@ bool SdrWriter::output(const SampleSet2D&   samples2D,
             sp = sp.cwiseMax(0.0);
 
             if (samples2D.getColorModel() == XYZ_MODEL) {
-                Spectrum rgb = xyzToSrgb(sp);
+                Spectrum rgb = xyzToSrgb<Vec3f>(sp);
                 stream << " " << rgb[wlIndex];
             }
             else {

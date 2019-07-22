@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -28,16 +28,16 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
 
     int lIdx0, lIdx1, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx1, uIdx2, uIdx3; // index of the upper bound sample point
-    Vec4 lowerAngles, upperAngles;
+    Vec4f lowerAngles, upperAngles;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles1, angle1, samples.isEqualIntervalAngles1(), &lIdx1, &uIdx1, &lowerAngles[1], &upperAngles[1]);
     findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
     findBounds(angles3, angle3, samples.isEqualIntervalAngles3(), &lIdx3, &uIdx3, &lowerAngles[3], &upperAngles[3]);
 
-    Vec4 angles(angle0, angle1, angle2, angle3);
-    Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
-    Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
+    Vec4f angles(angle0, angle1, angle2, angle3);
+    Vec4f intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
+    Vec4f weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
     const Spectrum& sp0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3);
     const Spectrum& sp0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3);
@@ -93,15 +93,15 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
 
     int lIdx0, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx2, uIdx3; // index of the upper bound sample point
-    Vec4 lowerAngles, upperAngles;
+    Vec4f lowerAngles, upperAngles;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
     findBounds(angles3, angle3, samples.isEqualIntervalAngles3(), &lIdx3, &uIdx3, &lowerAngles[3], &upperAngles[3]);
 
-    Vec4 angles(angle0, 0.0, angle2, angle3);
-    Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
-    Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
+    Vec4f angles(angle0, 0.0, angle2, angle3);
+    Vec4f intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
+    Vec4f weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
     const Spectrum& sp0000 = samples.getSpectrum(lIdx0, lIdx2, lIdx3);
     const Spectrum& sp0001 = samples.getSpectrum(lIdx0, lIdx2, uIdx3);
@@ -140,16 +140,16 @@ float LinearInterpolator::getValue(const SampleSet& samples,
 
     int lIdx0, lIdx1, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx1, uIdx2, uIdx3; // index of the upper bound sample point
-    Vec4 lowerAngles, upperAngles;
+    Vec4f lowerAngles, upperAngles;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles1, angle1, samples.isEqualIntervalAngles1(), &lIdx1, &uIdx1, &lowerAngles[1], &upperAngles[1]);
     findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
     findBounds(angles3, angle3, samples.isEqualIntervalAngles3(), &lIdx3, &uIdx3, &lowerAngles[3], &upperAngles[3]);
 
-    Vec4 angles(angle0, angle1, angle2, angle3);
-    Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
-    Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
+    Vec4f angles(angle0, angle1, angle2, angle3);
+    Vec4f intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
+    Vec4f weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
     float val0000 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, lIdx3)[wavelengthIndex];
     float val0001 = samples.getSpectrum(lIdx0, lIdx1, lIdx2, uIdx3)[wavelengthIndex];
@@ -206,15 +206,15 @@ float LinearInterpolator::getValue(const SampleSet& samples,
 
     int lIdx0, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx2, uIdx3; // index of the upper bound sample point
-    Vec4 lowerAngles, upperAngles;
+    Vec4f lowerAngles, upperAngles;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
     findBounds(angles3, angle3, samples.isEqualIntervalAngles3(), &lIdx3, &uIdx3, &lowerAngles[3], &upperAngles[3]);
 
-    Vec4 angles(angle0, 0.0, angle2, angle3);
-    Vec4 intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
-    Vec4 weights = (angles - lowerAngles).cwiseQuotient(intervals);
+    Vec4f angles(angle0, 0.0, angle2, angle3);
+    Vec4f intervals = (upperAngles - lowerAngles).cwiseMax(EPSILON_F);
+    Vec4f weights = (angles - lowerAngles).cwiseQuotient(intervals);
 
     float val0000 = samples.getSpectrum(lIdx0, lIdx2, lIdx3)[wavelengthIndex];
     float val0001 = samples.getSpectrum(lIdx0, lIdx2, uIdx3)[wavelengthIndex];
@@ -304,8 +304,8 @@ void LinearInterpolator::findBounds(const Arrayf&   angles,
                                     bool            equalIntervalAngles,
                                     int*            lowerIndex,
                                     int*            upperIndex,
-                                    Vec4::Scalar*   lowerAngle,
-                                    Vec4::Scalar*   upperAngle)
+                                    float*          lowerAngle,
+                                    float*          upperAngle)
 {
     if (angles.size() == 1) {
         *lowerIndex = 0;

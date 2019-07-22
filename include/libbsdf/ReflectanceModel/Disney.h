@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018 Kimura Ryo                                       //
+// Copyright (C) 2018-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -102,7 +102,7 @@ inline Vec3 Disney::compute(const Vec3& L,
     double dotHN = H.dot(N);
     double dotHT = H.dot(T);
     double dotHB = H.dot(B);
-    double dotVH = min(V.dot(H), 1.0f);
+    double dotVH = min(V.dot(H), Vec3::Scalar(1));
 
     Vec3 F = fresnelSchlick(dotVH, specularColor);
 

@@ -224,7 +224,7 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
 }
 
 Spectrum lb::findDiffuseThresholds(const lb::Brdf&  brdf,
-                                   float            maxTheta)
+                                   const double&    maxTheta)
 {
     const SampleSet* ss = brdf.getSampleSet();
 
@@ -238,8 +238,8 @@ Spectrum lb::findDiffuseThresholds(const lb::Brdf&  brdf,
         Vec3 inDir, outDir;
         brdf.getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-        float inTheta = std::acos(inDir[2]);
-        float outTheta = std::acos(outDir[2]);
+        double inTheta = std::acos(inDir[2]);
+        double outTheta = std::acos(outDir[2]);
 
         if (inTheta <= maxTheta && outTheta <= maxTheta) {
             thresholds = thresholds.cwiseMin(ss->getSpectrum(i0, i1, i2, i3));

@@ -49,14 +49,14 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
                 continue;
             }
 
-            const float minZ = 0.001f;
+            const Vec3::Scalar minZ = Vec3::Scalar(0.001);
             inDir.z() = max(inDir.z(), minZ);
             outDir.z() = max(outDir.z(), minZ);
 
             if (abs(outDir.x()) <= minZ &&
                 abs(outDir.y()) <= minZ &&
                 outDir.z() <= minZ) {
-                outDir.x() = 1.0f;
+                outDir.x() = Vec3::Scalar(1);
             }
 
             inDir.normalize();
@@ -70,12 +70,12 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
             assert(values.allFinite());
 
             if (cm == RGB_MODEL) {
-                sp = values.asVector3f();
+                sp = values.cast<Spectrum::Scalar>();
                 sp = sp.cwiseMin(maxValue);
             }
             else { // MONOCHROMATIC_MODEL
                 sp.resize(1);
-                sp[0] = min(values.sum() / 3.0f, maxValue);
+                sp[0] = min(static_cast<float>(values.sum()) / 3.0f, maxValue);
             }
             ss->setSpectrum(i0, i1, i2, i3, sp);
         }}}

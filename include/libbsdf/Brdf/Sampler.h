@@ -169,7 +169,7 @@ inline void Sampler::getSpectrum(const SampleSet2D& ss2,
 {
     float inTheta, inPhi;
     if (isIsotropic(ss2)) {
-        inTheta = std::acos(inDir[2]);
+        inTheta = static_cast<float>(std::acos(inDir[2]));
         InterpolatorT::getSpectrum(ss2, inTheta, spectrum);
     }
     else {

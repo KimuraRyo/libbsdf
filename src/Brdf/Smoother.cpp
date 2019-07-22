@@ -95,15 +95,15 @@ bool Smoother::insertAngle0()
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         for (int i0 = 1; i0 < ss->getNumAngles0() - 2; ++i0) {
-            Vec4 angles(ss->getAngle0(i0),
-                        ss->getAngle1(i1),
-                        ss->getAngle2(i2),
-                        ss->getAngle3(i3));
+            Vec4f angles(ss->getAngle0(i0),
+                         ss->getAngle1(i1),
+                         ss->getAngle2(i2),
+                         ss->getAngle3(i3));
 
-            Vec4 nextAngles(ss->getAngle0(i0 + 1),
-                            ss->getAngle1(i1),
-                            ss->getAngle2(i2),
-                            ss->getAngle3(i3));
+            Vec4f nextAngles(ss->getAngle0(i0 + 1),
+                             ss->getAngle1(i1),
+                             ss->getAngle2(i2),
+                             ss->getAngle3(i3));
 
             if (insertAngle(angles0_, 0, angles, nextAngles)) {
                 inserted = true;
@@ -128,15 +128,15 @@ bool Smoother::insertAngle1()
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         for (int i1 = 0; i1 < ss->getNumAngles1() - 1; ++i1) {
-            Vec4 angles(ss->getAngle0(i0),
-                        ss->getAngle1(i1),
-                        ss->getAngle2(i2),
-                        ss->getAngle3(i3));
+            Vec4f angles(ss->getAngle0(i0),
+                         ss->getAngle1(i1),
+                         ss->getAngle2(i2),
+                         ss->getAngle3(i3));
 
-            Vec4 nextAngles(ss->getAngle0(i0),
-                            ss->getAngle1(i1 + 1),
-                            ss->getAngle2(i2),
-                            ss->getAngle3(i3));
+            Vec4f nextAngles(ss->getAngle0(i0),
+                             ss->getAngle1(i1 + 1),
+                             ss->getAngle2(i2),
+                             ss->getAngle3(i3));
 
             if (insertAngle(angles1_, 1, angles, nextAngles)) {
                 inserted = true;
@@ -161,15 +161,15 @@ bool Smoother::insertAngle2()
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         for (int i2 = 1; i2 < ss->getNumAngles2() - 2; ++i2) {
-            Vec4 angles(ss->getAngle0(i0),
-                        ss->getAngle1(i1),
-                        ss->getAngle2(i2),
-                        ss->getAngle3(i3));
+            Vec4f angles(ss->getAngle0(i0),
+                         ss->getAngle1(i1),
+                         ss->getAngle2(i2),
+                         ss->getAngle3(i3));
 
-            Vec4 nextAngles(ss->getAngle0(i0),
-                            ss->getAngle1(i1),
-                            ss->getAngle2(i2 + 1),
-                            ss->getAngle3(i3));
+            Vec4f nextAngles(ss->getAngle0(i0),
+                             ss->getAngle1(i1),
+                             ss->getAngle2(i2 + 1),
+                             ss->getAngle3(i3));
 
             if (dynamic_cast<SpecularCoordinatesBrdf*>(brdf_) &&
                 angles[2] <= specularPolarRegion_) {
@@ -200,15 +200,15 @@ bool Smoother::insertAngle3()
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
         for (int i3 = 0; i3 < ss->getNumAngles3() - 1; ++i3) {
-            Vec4 angles(ss->getAngle0(i0),
-                        ss->getAngle1(i1),
-                        ss->getAngle2(i2),
-                        ss->getAngle3(i3));
+            Vec4f angles(ss->getAngle0(i0),
+                         ss->getAngle1(i1),
+                         ss->getAngle2(i2),
+                         ss->getAngle3(i3));
 
-            Vec4 nextAngles(ss->getAngle0(i0),
-                            ss->getAngle1(i1),
-                            ss->getAngle2(i2),
-                            ss->getAngle3(i3 + 1));
+            Vec4f nextAngles(ss->getAngle0(i0),
+                             ss->getAngle1(i1),
+                             ss->getAngle2(i2),
+                             ss->getAngle3(i3 + 1));
 
             if (insertAngle(angles3_, 3, angles, nextAngles)) {
                 inserted = true;
@@ -221,14 +221,14 @@ bool Smoother::insertAngle3()
 
 bool Smoother::insertAngle(std::set<Arrayf::Scalar>&    angleSet,
                            int                          angleSuffix,
-                           const Vec4&                  angles,
-                           const Vec4&                  nextAngles)
+                           const Vec4f&                 angles,
+                           const Vec4f&                 nextAngles)
 {
     if (std::abs(angles[angleSuffix] - nextAngles[angleSuffix]) < minAngleInterval_) {
         return false;
     }
 
-    Vec4 midAngles = (angles + nextAngles) / 2.0f;
+    Vec4f midAngles = (angles + nextAngles) / 2.0f;
 
     lb::Vec3 inDir, outDir;
     brdf_->toXyz(midAngles[0], midAngles[1], midAngles[2], midAngles[3], &inDir, &outDir);

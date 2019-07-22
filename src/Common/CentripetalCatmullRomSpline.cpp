@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2017 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -78,11 +78,11 @@ Vec2::Scalar CentripetalCatmullRomSpline::interpolateY(const Vec2::Scalar& x)
                t != maxT) {
             if (currentPos.x() > x) {
                 maxT = t;
-                t = (minT + t) * 0.5;
+                t = (minT + t) * Vec2::Scalar(0.5);
             }
             else {
                 minT = t;
-                t = (t + maxT) * 0.5;
+                t = (t + maxT) * Vec2::Scalar(0.5);
             }
 
             currentPos = evaluate(t);
@@ -94,11 +94,11 @@ Vec2::Scalar CentripetalCatmullRomSpline::interpolateY(const Vec2::Scalar& x)
                t != maxT) {
             if (currentPos.x() < x) {
                 maxT = t;
-                t = (minT + t) * 0.5;
+                t = (minT + t) * Vec2::Scalar(0.5);
             }
             else {
                 minT = t;
-                t = (t + maxT) * 0.5;
+                t = (t + maxT) * Vec2::Scalar(0.5);
             }
 
             currentPos = evaluate(t);

@@ -111,19 +111,19 @@ void lb::divideByCosineOutTheta(Brdf* brdf)
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         Vec3 inDir, outDir;
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-        float cosOutTheta = outDir.dot(Vec3(0.0, 0.0, 1.0));
+        Vec3::Scalar cosOutTheta = outDir.dot(Vec3(0.0, 0.0, 1.0));
 
         Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
 
         // Copy the spectrum if the Z-component of the outgoing direction is zero or negative.
-        if (cosOutTheta <= 0.0f && i2 > 0) {
+        if (cosOutTheta <= 0.0 && i2 > 0) {
             // Assume i2 is the index of the polar angle related to outgoing directions.
             brdf->getInOutDirection(i0, i1, i2 - 1, i3, &inDir, &outDir);
             sp = ss->getSpectrum(i0, i1, i2 - 1, i3);
             cosOutTheta = outDir.dot(Vec3(0.0, 0.0, 1.0));
         }
 
-        sp /= cosOutTheta;
+        sp /= static_cast<Spectrum::Scalar>(cosOutTheta);
     }}}}
 }
 
@@ -333,7 +333,7 @@ void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
         sp += specRefSp;
 
         maxReflectance = 0;
-        int maxIndex;
+        int maxIndex = 0;
         for (int i = 0; i < sp.size(); ++i) {
             if (sp[i] > maxReflectance) {
                 maxReflectance = sp[i];
@@ -935,7 +935,7 @@ void lb::xyzToSrgb(SampleSet* samples)
     for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < samples->getNumAngles3(); ++i3) {
         const Spectrum& xyz = samples->getSpectrum(i0, i1, i2, i3);
-        Spectrum rgb = xyzToSrgb(xyz);
+        Spectrum rgb = xyzToSrgb<Vec3f>(xyz);
         samples->setSpectrum(i0, i1, i2, i3, rgb);
     }}}}
 

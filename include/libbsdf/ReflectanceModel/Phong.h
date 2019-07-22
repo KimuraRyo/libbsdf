@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2018 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -80,7 +80,7 @@ inline Vec3 Phong::compute(const Vec3&  L,
     using std::pow;
 
     Vec3 R = reflect(L, N);
-    return color * pow(max(R.dot(V), 0.0f), shininess);
+    return color * pow(max(R.dot(V), Vec3::Scalar(0)), shininess);
 }
 
 } // namespace lb

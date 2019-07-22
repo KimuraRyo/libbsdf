@@ -36,25 +36,36 @@ struct HalfDifferenceCoordinateSystem
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.
      */
-    static void toXyz(float halfTheta, float halfPhi,
-                      float diffTheta, float diffPhi,
-                      Vec3* inDir, Vec3* outDir);
+    template <typename ScalarT>
+    static void toXyz(ScalarT   halfTheta,
+                      ScalarT   halfPhi,
+                      ScalarT   diffTheta,
+                      ScalarT   diffPhi,
+                      Vec3*     inDir,
+                      Vec3*     outDir);
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
      * assigns them to \a halfTheta, \a halfPhi, \a diffTheta, and \a diffPhi.
      */
-    static void fromXyz(const Vec3& inDir, const Vec3& outDir,
-                        float* halfTheta, float* halfPhi,
-                        float* diffTheta, float* diffPhi);
+    template <typename ScalarT>
+    static void fromXyz(const Vec3& inDir,
+                        const Vec3& outDir,
+                        ScalarT*    halfTheta,
+                        ScalarT*    halfPhi,
+                        ScalarT*    diffTheta,
+                        ScalarT*    diffPhi);
 
     /*!
      * Converts from incoming and outgoing directions to three angles for isotropic data and
      * assigns them to \a halfTheta, \a diffTheta, and \a diffPhi.
      */
-    static void fromXyz(const Vec3& inDir, const Vec3& outDir,
-                        float* halfTheta,
-                        float* diffTheta, float* diffPhi);
+    template <typename ScalarT>
+    static void fromXyz(const Vec3& inDir,
+                        const Vec3& outDir,
+                        ScalarT*    halfTheta,
+                        ScalarT*    diffTheta,
+                        ScalarT*    diffPhi);
 
     static const std::string ANGLE0_NAME; /*!< This attribute holds the name of halfTheta. */
     static const std::string ANGLE1_NAME; /*!< This attribute holds the name of halfPhi. */
@@ -72,45 +83,63 @@ struct HalfDifferenceCoordinateSystem
     static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of diffPhi. */
 };
 
-inline void HalfDifferenceCoordinateSystem::toXyz(float halfTheta, float halfPhi,
-                                                  float diffTheta, float diffPhi,
-                                                  Vec3* inDir, Vec3* outDir)
+template <typename ScalarT>
+void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
+                                           ScalarT  halfPhi,
+                                           ScalarT  diffTheta,
+                                           ScalarT  diffPhi,
+                                           Vec3*    inDir,
+                                           Vec3*    outDir)
 {
     Vec3 halfDir = SphericalCoordinateSystem::toXyz(halfTheta, halfPhi);
     Vec3 diffDir = SphericalCoordinateSystem::toXyz(diffTheta, diffPhi);
 
-    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(-halfTheta) * Vec2f(diffDir[0], diffDir[2]);
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(halfPhi) * Vec2f(rotThVec[0], diffDir[1]);
-    *inDir = Vec3(rotPhVec[0], rotPhVec[1], rotThVec[1]);
+    Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(-halfTheta) * Vec2(diffDir[0], diffDir[2]);
+    Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(halfPhi) * Vec2(rotThVec[0], diffDir[1]);
+    *inDir = Vec3(static_cast<Vec3::Scalar>(rotPhVec[0]),
+                  static_cast<Vec3::Scalar>(rotPhVec[1]),
+                  static_cast<Vec3::Scalar>(rotThVec[1]));
 
     *outDir = reflect(*inDir, halfDir);
 }
 
-inline void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& outDir,
-                                                    float* halfTheta, float* halfPhi,
-                                                    float* diffTheta, float* diffPhi)
+template <typename ScalarT>
+void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
+                                             const Vec3&    outDir,
+                                             ScalarT*       halfTheta,
+                                             ScalarT*       halfPhi,
+                                             ScalarT*       diffTheta,
+                                             ScalarT*       diffPhi)
 {
     Vec3 halfDir = (inDir + outDir).normalized();
     SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, halfPhi);
 
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-*halfPhi) * Vec2f(inDir[0], inDir[1]);
-    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfTheta) * Vec2f(rotPhVec[0], inDir[2]);
-    Vec3 diffDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
+    Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-*halfPhi) * Vec2(inDir[0], inDir[1]);
+    Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(*halfTheta) * Vec2(rotPhVec[0], inDir[2]);
+    Vec3 diffDir(static_cast<Vec3::Scalar>(rotThVec[0]),
+                 static_cast<Vec3::Scalar>(rotPhVec[1]),
+                 static_cast<Vec3::Scalar>(rotThVec[1]));
     diffDir.normalize();
     SphericalCoordinateSystem::fromXyz(diffDir, diffTheta, diffPhi);
 }
 
-inline void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir, const Vec3& outDir,
-                                                    float* halfTheta,
-                                                    float* diffTheta, float* diffPhi)
+template <typename ScalarT>
+void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
+                                             const Vec3&    outDir,
+                                             ScalarT*       halfTheta,
+                                             ScalarT*       diffTheta,
+                                             ScalarT*       diffPhi)
 {
     Vec3 halfDir = (inDir + outDir).normalized();
-    float halfPhi; // halfPhi is 0 for isotorpic data.
+    ScalarT halfPhi; // halfPhi is 0 for isotorpic data.
     SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, &halfPhi);
 
-    Vec2f rotPhVec = Eigen::Rotation2D<Vec2f::Scalar>(-halfPhi) * Vec2f(inDir[0], inDir[1]);
-    Vec2f rotThVec = Eigen::Rotation2D<Vec2f::Scalar>(*halfTheta) * Vec2f(rotPhVec[0], inDir[2]);
-    Vec3 diffDir(rotThVec[0], rotPhVec[1], rotThVec[1]);
+    Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-halfPhi)
+                  * Vec2(static_cast<Vec2::Scalar>(inDir[0]), static_cast<Vec2::Scalar>(inDir[1]));
+    Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(*halfTheta) * Vec2(rotPhVec[0], inDir[2]);
+    Vec3 diffDir(static_cast<Vec3::Scalar>(rotThVec[0]),
+                 static_cast<Vec3::Scalar>(rotPhVec[1]),
+                 static_cast<Vec3::Scalar>(rotThVec[1]));
     diffDir.normalize();
     SphericalCoordinateSystem::fromXyz(diffDir, diffTheta, diffPhi);
 }

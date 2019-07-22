@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -30,15 +30,15 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir)
     Spectrum sp;
     #pragma omp parallel for private(outDir, sp)
     for (int i = 0; i < numSampling_; ++i) {
-        outDir = outDirs_.col(i);
+        outDir = outDirs_.col(i).cast<Vec3::Scalar>();
         sp = brdf.getSpectrum(inDir, outDir);
-        sp *= outDir.z();
+        sp *= static_cast<Spectrum::Scalar>(outDir.z());
 
         #pragma omp critical
         sumSpectrum += sp.cast<Arrayd::Scalar>();
     }
 
-    sumSpectrum *= 2.0 * M_PI / numSampling_;
+    sumSpectrum *= 2.0 * PI_D / numSampling_;
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
@@ -54,13 +54,13 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir, int
     for (int i = 0; i < numSampling; ++i) {
         outDir = Xorshift::randomOnHemisphere<Vec3>();
         sp = brdf.getSpectrum(inDir, outDir);
-        sp *= outDir.z();
+        sp *= static_cast<Spectrum::Scalar>(outDir.z());
 
         #pragma omp critical
         sumSpectrum += sp.cast<Arrayd::Scalar>();
     }
 
-    sumSpectrum *= 2.0 * M_PI / numSampling;
+    sumSpectrum *= 2.0 * PI_D / numSampling;
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 

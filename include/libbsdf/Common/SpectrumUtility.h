@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -52,10 +52,10 @@ private:
 };
 
 template <typename T>
-inline Vec3 SpectrumUtility::spectrumToSrgb(const T& spectrum, const T& wavelengths)
+Vec3 SpectrumUtility::spectrumToSrgb(const T& spectrum, const T& wavelengths)
 {
     Vec3 xyz = spectrumToXyz(spectrum, wavelengths);
-    Vec3 rgb = xyzToSrgb(xyz.asVector3f());
+    Vec3 rgb = xyzToSrgb(xyz);
     rgb = rgb.cwiseMax(0.0);
     return rgb.cwiseQuotient(NORMALIZING_CONSTANT_SRGB);
 }
@@ -124,18 +124,19 @@ Vec3 SpectrumUtility::spectrumToXyz(const T& spectrum, const T& wavelengths)
     }
     sumXyz /= 2.0;
 
-    return Vec3f(sumXyz.cast<Vec3f::Scalar>());
+    return Vec3(sumXyz.cast<Vec3::Scalar>());
 }
 
 inline Vec3 SpectrumUtility::wavelengthToSrgb(float wavelength)
 {
     int index = findNearestIndex(wavelength);
-    Vec3 rgb = xyzToSrgb(Vec3f(CieData::XYZ[index * 3],
-                               CieData::XYZ[index * 3 + 1],
-                               CieData::XYZ[index * 3 + 2]));
+    Vec3 xyz = Vec3f(CieData::XYZ[index * 3],
+                     CieData::XYZ[index * 3 + 1],
+                     CieData::XYZ[index * 3 + 2]).cast<Vec3::Scalar>();
+    Vec3 rgb = xyzToSrgb(xyz);
     rgb = rgb.cwiseMin(1.0);
     rgb = rgb.cwiseMax(0.0);
-    rgb /= std::max(rgb.maxCoeff(), 0.001f);
+    rgb /= std::max(rgb.maxCoeff(), Vec3::Scalar(0.001));
     return rgb;
 }
 

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -57,7 +57,7 @@ bool isEqualInterval(const T& array);
  */
 
 template <typename SrcT, typename DestT>
-inline void copyArray(const SrcT& srcArray, DestT* destArray)
+void copyArray(const SrcT& srcArray, DestT* destArray)
 {
     int i = 0;
     for (auto it = srcArray.begin(); it != srcArray.end(); ++it, ++i) {
@@ -66,7 +66,7 @@ inline void copyArray(const SrcT& srcArray, DestT* destArray)
 }
 
 template <typename ArrayT, typename ScalarT>
-inline void appendElement(ArrayT* arrayf, ScalarT value)
+void appendElement(ArrayT* arrayf, ScalarT value)
 {
     ArrayT& a = *arrayf;
     std::vector<ScalarT> orig(a.data(), a.data() + a.size());
@@ -106,14 +106,14 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
 }
 
 template <typename T>
-inline T toRadians(const T& degrees)
+T toRadians(const T& degrees)
 {
     typedef typename T::Scalar ScalarType;
-    return degrees / static_cast<ScalarType>(180.0) * static_cast<ScalarType>(PI_F);
+    return degrees / ScalarType(180) * ScalarType(PI_D);
 }
 
 template <typename T>
-inline bool isEqualInterval(const T& array)
+bool isEqualInterval(const T& array)
 {
     if (array.size() <= 2) return false;
 

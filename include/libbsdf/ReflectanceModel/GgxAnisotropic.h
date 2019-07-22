@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2018 Kimura Ryo                                  //
+// Copyright (C) 2017-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -164,7 +164,7 @@ inline Vec3 GgxAnisotropic::compute(const Vec3& L,
     double denominatorD = dotHT * dotHT / (alphaX * alphaX)
                         + dotHB * dotHB / (alphaY * alphaY)
                         + dotHN * dotHN;
-    double D = 1.0 / (PI_F * sqAlpha * denominatorD * denominatorD);
+    double D = 1.0 / (PI_D * sqAlpha * denominatorD * denominatorD);
 
 #if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
     return F * G * D / (4.0 * dotLN * dotVN);

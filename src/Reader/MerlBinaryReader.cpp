@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -60,7 +60,7 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
         brdf->setHalfTheta(i, toRadian(halfThetaDegree));
     }
 
-    const Vec3 rgbScaleCoeff(1.0f / 1500.0f, 1.15f / 1500.0f, 1.66f / 1500.0f);
+    const Vec3f rgbScaleCoeff(1.0f / 1500.0f, 1.15f / 1500.0f, 1.66f / 1500.0f);
 
     for (int halfThIndex = 0; halfThIndex < brdf->getNumHalfTheta(); ++halfThIndex) {
     for (int diffThIndex = 0; diffThIndex < brdf->getNumDiffTheta(); ++diffThIndex) {
@@ -74,13 +74,13 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
                         + numDiffPhi / 2 * sampleDiffThIndex
                         + numDiffPhi / 2 * numDiffTheta * sampleHalfThIndex;
 
-        Vec3 rgb(static_cast<float>(samples[sampleIndex]),
-                 static_cast<float>(samples[sampleIndex + numSamples]),
-                 static_cast<float>(samples[sampleIndex + numSamples * 2]));
+        Vec3f rgb(static_cast<float>(samples[sampleIndex]),
+                  static_cast<float>(samples[sampleIndex + numSamples]),
+                  static_cast<float>(samples[sampleIndex + numSamples * 2]));
         rgb = rgb.cwiseMax(0.0f);
 
         rgb = rgb.cwiseProduct(rgbScaleCoeff);
-        brdf->setSpectrum(halfThIndex, 0, diffThIndex, diffPhIndex, rgb.asVector3f());
+        brdf->setSpectrum(halfThIndex, 0, diffThIndex, diffPhIndex, rgb);
     }}}
 
     delete[] samples;

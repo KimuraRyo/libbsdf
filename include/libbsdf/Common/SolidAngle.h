@@ -73,7 +73,7 @@ inline double SolidAngle::fromTriangle(const Vec3& v0, const Vec3& v1, const Vec
     using std::abs;
     using std::atan;
 
-    return abs(atan(v0.dot(v1.cross3(v2)) / (1.0 + v0.dot(v1) + v1.dot(v2) + v2.dot(v0)))) * 2.0;
+    return abs(atan(v0.dot(v1.cross(v2)) / (1.0 + v0.dot(v1) + v1.dot(v2) + v2.dot(v0)))) * 2.0;
 }
 
 inline Vec3 SolidAngle::computeCentroid(const Vec3& v0, const Vec3& v1, const Vec3& v2)

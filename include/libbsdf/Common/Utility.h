@@ -96,10 +96,12 @@ template <typename T>
 bool hasSameColor(const T& ss0, const T& ss1);
 
 /*! \brief Converts from CIE-XYZ to sRGB. */
-Vec3f xyzToSrgb(const Vec3f& xyz);
+template <typename Vec3T>
+Vec3T xyzToSrgb(const Vec3T& xyz);
 
 /*! \brief Converts from sRGB to CIE-XYZ. */
-Vec3f srgbToXyz(const Vec3f& rgb);
+template <typename Vec3T>
+Vec3T srgbToXyz(const Vec3T& rgb);
 
 /*! \brief Fixes a direction if the Z-component is negative. */
 template <typename Vec3T>
@@ -113,7 +115,7 @@ bool isDownwardDir(const Vec3& dir);
  */
 
 template <typename T>
-inline T clamp(T value, T minValue, T maxValue)
+T clamp(T value, T minValue, T maxValue)
 {
     using std::min;
     using std::max;
@@ -121,58 +123,58 @@ inline T clamp(T value, T minValue, T maxValue)
 }
 
 template <typename T>
-inline int sign(T val) {
+int sign(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
 template <typename T>
-inline bool isEqual(T lhs, T rhs)
+bool isEqual(T lhs, T rhs)
 {
     using std::abs;
     using std::max;
 
     T tolerance = std::numeric_limits<T>::epsilon()
-                * max(max(abs(lhs), abs(rhs)), static_cast<T>(1.0))
-                * static_cast<T>(2.0);
+                * max(max(abs(lhs), abs(rhs)), T(1))
+                * T(2);
     return (abs(lhs - rhs) <= tolerance);
 }
 
 template <typename T>
-inline T lerp(const T& v0, const T& v1, float t)
+T lerp(const T& v0, const T& v1, float t)
 {
     return v0 + (v1 - v0) * t;
 }
 
 template <typename T>
-inline T smoothstep(const T& v0, const T& v1, const T& t)
+T smoothstep(const T& v0, const T& v1, const T& t)
 {
     T coeff = clamp((t - v0) / (v1 - v0), 0.0f, 1.0f);
     return coeff * coeff * (3.0f - 2.0f * coeff);
 }
 
 template <typename T>
-inline T smootherstep(const T& v0, const T& v1, const T& t)
+T smootherstep(const T& v0, const T& v1, const T& t)
 {
     T coeff = clamp((t - v0) / (v1 - v0), 0.0f, 1.0f);
     return coeff * coeff * coeff * (coeff * (coeff * 6.0f - 15.0f) + 10.0f);
 }
 
 template <typename T>
-inline T hermiteInterpolation3(const T& v0, const T& v1, float t)
+T hermiteInterpolation3(const T& v0, const T& v1, float t)
 {
     float coeff = smoothstep(0.0f, 1.0f, t);
     return lerp(v0, v1, coeff);
 }
 
 template <typename T>
-inline T hermiteInterpolation5(const T& v0, const T& v1, float t)
+T hermiteInterpolation5(const T& v0, const T& v1, float t)
 {
     float coeff = smootherstep(0.0f, 1.0f, t);
     return lerp(v0, v1, coeff);
 }
 
 template <typename T>
-inline T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t)
+T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t)
 {
     float t2 = t * t;
     float t3 = t2 * t;
@@ -184,9 +186,9 @@ inline T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, fl
 }
 
 template <typename T>
-inline T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
-                          const T& val0, const T& val1, const T& val2, const T& val3,
-                          const T& pos)
+T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
+                   const T& val0, const T& val1, const T& val2, const T& val3,
+                   const T& pos)
 {
     Vec2 v0(pos0, val0);
     Vec2 v1(pos1, val1);
@@ -198,7 +200,7 @@ inline T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& 
 }
 
 template <typename T>
-inline bool hasSameColor(const T& ss0, const T& ss1)
+bool hasSameColor(const T& ss0, const T& ss1)
 {
     if (ss0.getColorModel() != ss1.getColorModel()) {
         std::cout
@@ -221,26 +223,26 @@ inline bool hasSameColor(const T& ss0, const T& ss1)
 }
 
 template <typename Vec3T>
-inline Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir)
+Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir)
 {
     typedef typename Vec3T::Scalar ScalarType;
-    return static_cast<ScalarType>(2.0) * normalDir.dot(dir) * normalDir - dir;
+    return ScalarType(2) * normalDir.dot(dir) * normalDir - dir;
 }
 
 template <typename T>
-inline T toDegree(T radian)
+T toDegree(T radian)
 {
-    return radian / static_cast<T>(PI_F) * static_cast<T>(180.0);
+    return radian / T(PI_F) * T(180);
 }
 
 template <typename T>
-inline T toRadian(T degree)
+T toRadian(T degree)
 {
-    return degree / static_cast<T>(180.0) * static_cast<T>(PI_F);
+    return degree / T(180) * T(PI_F);
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
-inline void convertCoordinateSystem(float   srcAngle0,
+void convertCoordinateSystem(float   srcAngle0,
                                     float   srcAngle1,
                                     float   srcAngle2,
                                     float   srcAngle3,
@@ -257,18 +259,20 @@ inline void convertCoordinateSystem(float   srcAngle0,
                            destAngle0, destAngle1, destAngle2, destAngle3);
 }
 
-inline Vec3f xyzToSrgb(const Vec3f& xyz)
+template <typename Vec3T>
+Vec3T xyzToSrgb(const Vec3T& xyz)
 {
-    Eigen::Matrix3f mat;
+    Eigen::Matrix<Vec3T::Scalar, 3, 3> mat;
     mat << CieData::XYZ_sRGB[0], CieData::XYZ_sRGB[1], CieData::XYZ_sRGB[2],
            CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
            CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
     return mat * xyz;
 }
 
-inline Vec3f srgbToXyz(const Vec3f& rgb)
+template <typename Vec3T>
+Vec3T srgbToXyz(const Vec3T& rgb)
 {
-    Eigen::Matrix3f mat;
+    Eigen::Matrix<Vec3T::Scalar, 3, 3> mat;
     mat << CieData::sRGB_XYZ[0], CieData::sRGB_XYZ[1], CieData::sRGB_XYZ[2],
            CieData::sRGB_XYZ[3], CieData::sRGB_XYZ[4], CieData::sRGB_XYZ[5],
            CieData::sRGB_XYZ[6], CieData::sRGB_XYZ[7], CieData::sRGB_XYZ[8];
@@ -276,7 +280,7 @@ inline Vec3f srgbToXyz(const Vec3f& rgb)
 }
 
 template <typename Vec3T>
-inline void fixDownwardDir(Vec3T* dir)
+void fixDownwardDir(Vec3T* dir)
 {
     Vec3T& d = *dir;
     if (d[2] < 0.0) {

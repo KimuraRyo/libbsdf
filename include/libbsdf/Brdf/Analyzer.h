@@ -61,14 +61,14 @@ SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
 SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                          const Brdf&                    standardBrdf,
                                          float                          ior,
-                                         float                          maxSpecularTheta = lb::PI_2_F);
+                                         float                          maxSpecularTheta = PI_2_F);
 
 /*!
  * \brief Finds thresholds to separate the diffuse component from a BRDF.
  * \param maxTheta Maxmum incoming and outgoing polar angle to define the range of search.
  */
-Spectrum findDiffuseThresholds(const Brdf&  brdf,
-                               float        maxTheta = lb::PI_2_F);
+Spectrum findDiffuseThresholds(const Brdf&      brdf,
+                               const double&    maxTheta = PI_2_F);
 
 } // namespace lb
 
