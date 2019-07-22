@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -28,7 +28,10 @@ private:
 
 public:
     /*! Constructs a BRDF. */
-    SphericalCoordinatesBrdf(int numInTheta, int numInPhi, int numOutTheta, int numOutPhi,
+    SphericalCoordinatesBrdf(int        numInTheta,
+                             int        numInPhi,
+                             int        numOutTheta,
+                             int        numOutPhi,
                              ColorModel colorModel = RGB_MODEL,
                              int        numWavelengths = 3,
                              bool       equalIntervalAngles = false);
@@ -41,8 +44,11 @@ public:
                              const Arrayf&  outPhiAngles);
 
     /*! Constructs a BRDF from lb::Brdf and the numbers of angles. Angles are equally-spaced intervals. */
-    SphericalCoordinatesBrdf(const Brdf& brdf,
-                             int numInTheta, int numInPhi, int numOutTheta, int numOutPhi);
+    SphericalCoordinatesBrdf(const Brdf&    brdf,
+                             int            numInTheta,
+                             int            numInPhi,
+                             int            numOutTheta,
+                             int            numOutPhi);
 
     /*! Copies and constructs a BRDF. */
     SphericalCoordinatesBrdf(const SphericalCoordinatesBrdf& brdf);
@@ -55,33 +61,45 @@ public:
     using BaseBrdf::getSpectrum;
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
-    Spectrum getSpectrum(float inTheta, float inPhi,
-                         float outTheta, float outPhi);
+    Spectrum getSpectrum(float inTheta,
+                         float inPhi,
+                         float outTheta,
+                         float outPhi);
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
-    Spectrum getSpectrum(float inTheta, float inPhi,
-                         float outTheta, float outPhi) const;
+    Spectrum getSpectrum(float inTheta,
+                         float inPhi,
+                         float outTheta,
+                         float outPhi) const;
     
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
-    Spectrum& getSpectrum(int inThetaIndex, int inPhiIndex,
-                          int outThetaIndex, int outPhiIndex);
+    Spectrum& getSpectrum(int inThetaIndex,
+                          int inPhiIndex,
+                          int outThetaIndex,
+                          int outPhiIndex);
 
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
-    const Spectrum& getSpectrum(int inThetaIndex, int inPhiIndex,
-                                int outThetaIndex, int outPhiIndex) const;
+    const Spectrum& getSpectrum(int inThetaIndex,
+                                int inPhiIndex,
+                                int outThetaIndex,
+                                int outPhiIndex) const;
 
     /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int inThetaIndex,
-                          int outThetaIndex, int outPhiIndex);
+                          int outThetaIndex,
+                          int outPhiIndex);
 
     /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     const Spectrum& getSpectrum(int inThetaIndex,
-                                int outThetaIndex, int outPhiIndex) const;
+                                int outThetaIndex,
+                                int outPhiIndex) const;
 
     /*! Sets the spectrum of the BRDF at a set of angle indices. */
-    void setSpectrum(int inThetaIndex, int inPhiIndex,
-                     int outThetaIndex, int outPhiIndex,
-                     const Spectrum& spectrum);
+    void setSpectrum(int                inThetaIndex,
+                     int                inPhiIndex,
+                     int                outThetaIndex,
+                     int                outPhiIndex,
+                     const Spectrum&    spectrum);
 
     float getInTheta (int index) const; /*!< Gets the polar angle of an incoming direction. */
     float getInPhi   (int index) const; /*!< Gets the azimuthal angle of an incoming direction. */
@@ -93,59 +111,71 @@ public:
     void setOutTheta(int index, float angle); /*!< Sets the polar angle of an outgoing direction. */
     void setOutPhi  (int index, float angle); /*!< Sets the azimuthal angle of an outgoing direction. */
 
-    int getNumInTheta()  const; /*!< Gets the number of polar angles of an incoming direction. */
-    int getNumInPhi()    const; /*!< Gets the number of azimuthal angles of an incoming direction. */
+    int getNumInTheta () const; /*!< Gets the number of polar angles of an incoming direction. */
+    int getNumInPhi   () const; /*!< Gets the number of azimuthal angles of an incoming direction. */
     int getNumOutTheta() const; /*!< Gets the number of polar angles of an outgoing direction. */
-    int getNumOutPhi()   const; /*!< Gets the number of azimuthal angles of an outgoing direction. */
+    int getNumOutPhi  () const; /*!< Gets the number of azimuthal angles of an outgoing direction. */
 
 private:
     /*! Copy operator is disabled. */
     SphericalCoordinatesBrdf& operator=(const SphericalCoordinatesBrdf&);
 };
 
-inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
-                                                      float outTheta, float outPhi)
+inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta,
+                                                      float inPhi,
+                                                      float outTheta,
+                                                      float outPhi)
 {
     Spectrum sp;
     LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, outTheta, outPhi, &sp);
     return sp;
 }
 
-inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta, float inPhi,
-                                                      float outTheta, float outPhi) const
+inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta,
+                                                      float inPhi,
+                                                      float outTheta,
+                                                      float outPhi) const
 {
     Spectrum sp;
     LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, outTheta, outPhi, &sp);
     return sp;
 }
 
-inline Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex, int inPhiIndex,
-                                                       int outThetaIndex, int outPhiIndex)
+inline Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,
+                                                       int inPhiIndex,
+                                                       int outThetaIndex,
+                                                       int outPhiIndex)
 {
     return samples_->getSpectrum(inThetaIndex, inPhiIndex, outThetaIndex, outPhiIndex);
 }
 
-inline const Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex, int inPhiIndex,
-                                                             int outThetaIndex, int outPhiIndex) const
+inline const Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,
+                                                             int inPhiIndex,
+                                                             int outThetaIndex,
+                                                             int outPhiIndex) const
 {
     return samples_->getSpectrum(inThetaIndex, inPhiIndex, outThetaIndex, outPhiIndex);
 }
 
 inline Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,
-                                                       int outThetaIndex, int outPhiIndex)
+                                                       int outThetaIndex,
+                                                       int outPhiIndex)
 {
     return samples_->getSpectrum(inThetaIndex, outThetaIndex, outPhiIndex);
 }
 
 inline const Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,
-                                                             int outThetaIndex, int outPhiIndex) const
+                                                             int outThetaIndex,
+                                                             int outPhiIndex) const
 {
     return samples_->getSpectrum(inThetaIndex, outThetaIndex, outPhiIndex);
 }
 
-inline void SphericalCoordinatesBrdf::setSpectrum(int inThetaIndex, int inPhiIndex,
-                                                  int outThetaIndex, int outPhiIndex,
-                                                  const Spectrum& spectrum)
+inline void SphericalCoordinatesBrdf::setSpectrum(int               inThetaIndex,
+                                                  int               inPhiIndex,
+                                                  int               outThetaIndex,
+                                                  int               outPhiIndex,
+                                                  const Spectrum&   spectrum)
 {
     samples_->setSpectrum(inThetaIndex, inPhiIndex, outThetaIndex, outPhiIndex, spectrum);
 }
@@ -160,10 +190,10 @@ inline void SphericalCoordinatesBrdf::setInPhi   (int index, float angle) { setA
 inline void SphericalCoordinatesBrdf::setOutTheta(int index, float angle) { setAngle2(index, angle); }
 inline void SphericalCoordinatesBrdf::setOutPhi  (int index, float angle) { setAngle3(index, angle); }
 
-inline int SphericalCoordinatesBrdf::getNumInTheta()  const { return samples_->getNumAngles0(); }
-inline int SphericalCoordinatesBrdf::getNumInPhi()    const { return samples_->getNumAngles1(); }
+inline int SphericalCoordinatesBrdf::getNumInTheta () const { return samples_->getNumAngles0(); }
+inline int SphericalCoordinatesBrdf::getNumInPhi   () const { return samples_->getNumAngles1(); }
 inline int SphericalCoordinatesBrdf::getNumOutTheta() const { return samples_->getNumAngles2(); }
-inline int SphericalCoordinatesBrdf::getNumOutPhi()   const { return samples_->getNumAngles3(); }
+inline int SphericalCoordinatesBrdf::getNumOutPhi  () const { return samples_->getNumAngles3(); }
 
 } // namespace lb
 

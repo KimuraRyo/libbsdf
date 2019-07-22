@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -39,13 +39,17 @@ public:
      * Computes incoming and outgoing directions of a Cartesian coordinate system
      * using a set of angle indices.
      */
-    void getInOutDirection(int index0, int index1, int index2, int index3,
-                           Vec3* inDir, Vec3* outDir) const;
+    void getInOutDirection(int      index0,
+                           int      index1,
+                           int      index2,
+                           int      index3,
+                           Vec3*    inDir,
+                           Vec3*    outDir) const;
 
-    Brdf* getBrdf();             /*!< Gets the BRDF data. */
+    Brdf*       getBrdf();       /*!< Gets the BRDF data. */
     const Brdf* getBrdf() const; /*!< Gets the BRDF data. */
 
-    SampleSet* getSampleSet();             /*!< Gets sample points. */
+    SampleSet*       getSampleSet();       /*!< Gets sample points. */
     const SampleSet* getSampleSet() const; /*!< Gets sample points. */
 
 protected:

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -58,37 +58,49 @@ public:
 
     /*! Virtual copy constructor. */
     virtual HalfDifferenceCoordinatesBrdf* clone() const;
-    
+
     using BaseBrdf::getSpectrum;
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
-    Spectrum getSpectrum(float halfTheta, float halfPhi,
-                         float diffTheta, float diffPhi);
+    Spectrum getSpectrum(float halfTheta,
+                         float halfPhi,
+                         float diffTheta,
+                         float diffPhi);
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
-    Spectrum getSpectrum(float halfTheta, float halfPhi,
-                         float diffTheta, float diffPhi) const;
+    Spectrum getSpectrum(float halfTheta,
+                         float halfPhi,
+                         float diffTheta,
+                         float diffPhi) const;
 
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
-    Spectrum& getSpectrum(int halfThetaIndex, int halfPhiIndex,
-                          int diffThetaIndex, int diffPhiIndex);
+    Spectrum& getSpectrum(int halfThetaIndex,
+                          int halfPhiIndex,
+                          int diffThetaIndex,
+                          int diffPhiIndex);
 
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
-    const Spectrum& getSpectrum(int halfThetaIndex, int halfPhiIndex,
-                                int diffThetaIndex, int diffPhiIndex) const;
+    const Spectrum& getSpectrum(int halfThetaIndex,
+                                int halfPhiIndex,
+                                int diffThetaIndex,
+                                int diffPhiIndex) const;
 
     /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int halfThetaIndex,
-                          int diffThetaIndex, int diffPhiIndex);
+                          int diffThetaIndex,
+                          int diffPhiIndex);
 
     /*! Gets the spectrum of the isotropic BRDF at a set of angle indices. */
     const Spectrum& getSpectrum(int halfThetaIndex,
-                                int diffThetaIndex, int diffPhiIndex) const;
+                                int diffThetaIndex,
+                                int diffPhiIndex) const;
 
     /*! Sets the spectrum of the BRDF at a set of angle indices. */
-    void setSpectrum(int halfThetaIndex, int halfPhiIndex,
-                     int diffThetaIndex, int diffPhiIndex,
-                     const Spectrum& spectrum);
+    void setSpectrum(int                halfThetaIndex,
+                     int                halfPhiIndex,
+                     int                diffThetaIndex,
+                     int                diffPhiIndex,
+                     const Spectrum&    spectrum);
 
     float getHalfTheta(int index) const; /*!< Gets the polar angle of a halfway vector. */
     float getHalfPhi  (int index) const; /*!< Gets the azimuthal angle of a halfway vector. */
@@ -101,58 +113,70 @@ public:
     void setDiffPhi  (int index, float angle); /*!< Sets the azimuthal angle of a difference vector. */
 
     int getNumHalfTheta() const; /*!< Gets the number of polar angles of a halfway vector. */
-    int getNumHalfPhi()   const; /*!< Gets the number of azimuthal angles of a halfway vector. */
+    int getNumHalfPhi  () const; /*!< Gets the number of azimuthal angles of a halfway vector. */
     int getNumDiffTheta() const; /*!< Gets the number of polar angles of a difference vector. */
-    int getNumDiffPhi()   const; /*!< Gets the number of azimuthal angles of a difference vector. */
+    int getNumDiffPhi  () const; /*!< Gets the number of azimuthal angles of a difference vector. */
 
 private:
     /*! Copy operator is disabled. */
     HalfDifferenceCoordinatesBrdf& operator=(const HalfDifferenceCoordinatesBrdf&);
 };
 
-inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta, float halfPhi,
-                                                           float diffTheta, float diffPhi)
+inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta,
+                                                           float halfPhi,
+                                                           float diffTheta,
+                                                           float diffPhi)
 {
     Spectrum sp;
     LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi, &sp);
     return sp;
 }
 
-inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta, float halfPhi,
-                                                           float diffTheta, float diffPhi) const
+inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta,
+                                                           float halfPhi,
+                                                           float diffTheta,
+                                                           float diffPhi) const
 {
     Spectrum sp;
     LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi, &sp);
     return sp;
 }
 
-inline Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex, int halfPhiIndex,
-                                                            int diffThetaIndex, int diffPhiIndex)
+inline Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,
+                                                            int halfPhiIndex,
+                                                            int diffThetaIndex,
+                                                            int diffPhiIndex)
 {
     return samples_->getSpectrum(halfThetaIndex, halfPhiIndex, diffThetaIndex, diffPhiIndex);
 }
 
-inline const Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex, int halfPhiIndex,
-                                                                  int diffThetaIndex, int diffPhiIndex) const
+inline const Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,
+                                                                  int halfPhiIndex,
+                                                                  int diffThetaIndex,
+                                                                  int diffPhiIndex) const
 {
     return samples_->getSpectrum(halfThetaIndex, halfPhiIndex, diffThetaIndex, diffPhiIndex);
 }
 
 inline Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,
-                                                            int diffThetaIndex, int diffPhiIndex)
+                                                            int diffThetaIndex,
+                                                            int diffPhiIndex)
 {
     return samples_->getSpectrum(halfThetaIndex, diffThetaIndex, diffPhiIndex);
 }
 
 inline const Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,
-                                                                  int diffThetaIndex, int diffPhiIndex) const
+                                                                  int diffThetaIndex,
+                                                                  int diffPhiIndex) const
 {
     return samples_->getSpectrum(halfThetaIndex, diffThetaIndex, diffPhiIndex);
 }
 
-inline void HalfDifferenceCoordinatesBrdf::setSpectrum(int halfThetaIndex, int halfPhiIndex,
-                                                       int diffThetaIndex, int diffPhiIndex,
-                                                       const Spectrum& spectrum)
+inline void HalfDifferenceCoordinatesBrdf::setSpectrum(int              halfThetaIndex,
+                                                       int              halfPhiIndex,
+                                                       int              diffThetaIndex,
+                                                       int              diffPhiIndex,
+                                                       const Spectrum&  spectrum)
 {
     samples_->setSpectrum(halfThetaIndex, halfPhiIndex, diffThetaIndex, diffPhiIndex, spectrum);
 }
@@ -168,9 +192,9 @@ inline void HalfDifferenceCoordinatesBrdf::setDiffTheta(int index, float angle) 
 inline void HalfDifferenceCoordinatesBrdf::setDiffPhi  (int index, float angle) { setAngle3(index, angle); }
 
 inline int HalfDifferenceCoordinatesBrdf::getNumHalfTheta() const { return samples_->getNumAngles0(); }
-inline int HalfDifferenceCoordinatesBrdf::getNumHalfPhi()   const { return samples_->getNumAngles1(); }
+inline int HalfDifferenceCoordinatesBrdf::getNumHalfPhi  () const { return samples_->getNumAngles1(); }
 inline int HalfDifferenceCoordinatesBrdf::getNumDiffTheta() const { return samples_->getNumAngles2(); }
-inline int HalfDifferenceCoordinatesBrdf::getNumDiffPhi()   const { return samples_->getNumAngles3(); }
+inline int HalfDifferenceCoordinatesBrdf::getNumDiffPhi  () const { return samples_->getNumAngles3(); }
 
 } // namespace lb
 

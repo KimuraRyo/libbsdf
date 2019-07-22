@@ -93,7 +93,7 @@ inline const SampleSet2D* Material::getSpecularTransmittances() const { return s
 inline       SampleSet2D* Material::getReflectionTis()       { return reflectionTis_; }
 inline const SampleSet2D* Material::getReflectionTis() const { return reflectionTis_; }
 
-inline SampleSet2D*       Material::getTransmissionTis()       { return transmissionTis_; }
+inline       SampleSet2D* Material::getTransmissionTis()       { return transmissionTis_; }
 inline const SampleSet2D* Material::getTransmissionTis() const { return transmissionTis_; }
 
 } // namespace lb

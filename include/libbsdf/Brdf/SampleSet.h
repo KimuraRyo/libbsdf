@@ -47,16 +47,26 @@ public:
               int           numWavelengths = 3);
 
     /*! Gets the spectrum at a set of angle indices. */
-    Spectrum& getSpectrum(int index0, int index1, int index2, int index3);
+    Spectrum& getSpectrum(int index0,
+                          int index1,
+                          int index2,
+                          int index3);
 
     /*! Gets the spectrum at a set of angle indices of isotropic data. */
-    Spectrum& getSpectrum(int index0, int index2, int index3);
+    Spectrum& getSpectrum(int index0,
+                          int index2,
+                          int index3);
 
     /*! Gets the spectrum at a set of angle indices. */
-    const Spectrum& getSpectrum(int index0, int index1, int index2, int index3) const;
+    const Spectrum& getSpectrum(int index0,
+                                int index1,
+                                int index2,
+                                int index3) const;
 
     /*! Gets the spectrum at a set of angle indices of isotropic data. */
-    const Spectrum& getSpectrum(int index0, int index2, int index3) const;
+    const Spectrum& getSpectrum(int index0,
+                                int index2,
+                                int index3) const;
 
     /*! Gets the spectrum at an index. */
     Spectrum& getSpectrum(int index);
@@ -65,12 +75,17 @@ public:
     const Spectrum& getSpectrum(int index) const;
 
     /*! Sets the spectrum at a set of angle indices. */
-    void setSpectrum(int index0, int index1, int index2, int index3,
-                     const Spectrum& spectrum);
+    void setSpectrum(int                index0,
+                     int                index1,
+                     int                index2,
+                     int                index3,
+                     const Spectrum&    spectrum);
 
     /*! Sets the spectrum at a set of angle indices of isotropic data. */
-    void setSpectrum(int index0, int index2, int index3,
-                     const Spectrum& spectrum);
+    void setSpectrum(int                index0,
+                     int                index2,
+                     int                index3,
+                     const Spectrum&    spectrum);
 
     /*! Gets all spectra. */
     SpectrumList& getSpectra();
@@ -150,17 +165,25 @@ public:
     void updateAngleAttributes();
 
     /*! Resizes the number of angles. Angles and spectra must be initialized. */
-    void resizeAngles(int numAngles0, int numAngles1, int numAngles2, int numAngles3);
+    void resizeAngles(int numAngles0,
+                      int numAngles1,
+                      int numAngles2,
+                      int numAngles3);
 
     /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
     void resizeWavelengths(int numWavelengths);
 
 private:
     /*! Gets the index of the spectrum from a set of angle indices. */
-    size_t getIndex(int index0, int index1, int index2, int index3) const;
+    size_t getIndex(int index0,
+                    int index1,
+                    int index2,
+                    int index3) const;
 
     /*! Gets the index of the spectrum from a set of angle indices of isotropic data. */
-    size_t getIndex(int index0, int index2, int index3) const;
+    size_t getIndex(int index0,
+                    int index2,
+                    int index3) const;
 
     /*! Updates the attributes whether angles are set at equal intervals. */
     void updateEqualIntervalAngles();
@@ -188,22 +211,32 @@ private:
     bool oneSide_;
 };
 
-inline Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3)
+inline Spectrum& SampleSet::getSpectrum(int index0,
+                                        int index1,
+                                        int index2,
+                                        int index3)
 {
     return spectra_.at(getIndex(index0, index1, index2, index3));
 }
 
-inline Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3)
+inline Spectrum& SampleSet::getSpectrum(int index0,
+                                        int index2,
+                                        int index3)
 {
     return spectra_.at(getIndex(index0, index2, index3));
 }
 
-inline const Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3) const
+inline const Spectrum& SampleSet::getSpectrum(int index0,
+                                              int index1,
+                                              int index2,
+                                              int index3) const
 {
     return spectra_.at(getIndex(index0, index1, index2, index3));
 }
 
-inline const Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3) const
+inline const Spectrum& SampleSet::getSpectrum(int index0,
+                                              int index2,
+                                              int index3) const
 {
     return spectra_.at(getIndex(index0, index2, index3));
 }
@@ -211,14 +244,19 @@ inline const Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3
 inline       Spectrum& SampleSet::getSpectrum(int index)       { return spectra_.at(index); }
 inline const Spectrum& SampleSet::getSpectrum(int index) const { return spectra_.at(index); }
 
-inline void SampleSet::setSpectrum(int index0, int index1, int index2, int index3,
-                                   const Spectrum& spectrum)
+inline void SampleSet::setSpectrum(int              index0,
+                                   int              index1,
+                                   int              index2,
+                                   int              index3,
+                                   const Spectrum&  spectrum)
 {
     spectra_.at(getIndex(index0, index1, index2, index3)) = spectrum;
 }
 
-inline void SampleSet::setSpectrum(int index0, int index2, int index3,
-                                   const Spectrum& spectrum)
+inline void SampleSet::setSpectrum(int              index0,
+                                   int              index2,
+                                   int              index3,
+                                   const Spectrum&  spectrum)
 {
     spectra_.at(getIndex(index0, index2, index3)) = spectrum;
 }
@@ -301,7 +339,10 @@ inline bool SampleSet::isIsotropic() const { return (angles1_.size() == 1); }
 
 inline bool SampleSet::isOneSide() const { return oneSide_; }
 
-inline size_t SampleSet::getIndex(int index0, int index1, int index2, int index3) const
+inline size_t SampleSet::getIndex(int index0,
+                                  int index1,
+                                  int index2,
+                                  int index3) const
 {
     assert(index0 >= 0 && index1 >= 0 && index2 >= 0 && index3 >= 0);
     assert(index0 < angles0_.size() && index1 < angles1_.size() && index2 < angles2_.size() && index3 < angles3_.size());
@@ -313,7 +354,9 @@ inline size_t SampleSet::getIndex(int index0, int index1, int index2, int index3
     return index;
 }
 
-inline size_t SampleSet::getIndex(int index0, int index2, int index3) const
+inline size_t SampleSet::getIndex(int index0,
+                                  int index2,
+                                  int index3) const
 {
     assert(index0 >= 0 && index2 >= 0 && index3 >= 0);
     assert(index0 < angles0_.size() && index2 < angles2_.size() && index3 < angles3_.size());

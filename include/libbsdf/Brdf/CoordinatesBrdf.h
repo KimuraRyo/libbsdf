@@ -71,29 +71,44 @@ public:
      * Computes incoming and outgoing directions of a Cartesian coordinate system
      * using a set of angle indices.
      */
-    virtual void getInOutDirection(int index0, int index1, int index2, int index3,
-                                   Vec3* inDir, Vec3* outDir) const;
+    virtual void getInOutDirection(int      index0,
+                                   int      index1,
+                                   int      index2,
+                                   int      index3,
+                                   Vec3*    inDir,
+                                   Vec3*    outDir) const;
 
     /*!
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.
      */
-    virtual void toXyz(float angle0, float angle1, float angle2, float angle3,
-                       Vec3* inDir, Vec3* outDir) const;
+    virtual void toXyz(float angle0,
+                       float angle1,
+                       float angle2,
+                       float angle3,
+                       Vec3* inDir,
+                       Vec3* outDir) const;
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
      * assigns them to \a angle0, \a angle1, \a angle2, and \a angle3.
      */
-    virtual void fromXyz(const Vec3& inDir, const Vec3& outDir,
-                         float* angle0, float* angle1, float* angle2, float* angle3) const;
+    virtual void fromXyz(const Vec3&    inDir,
+                         const Vec3&    outDir,
+                         float*         angle0,
+                         float*         angle1,
+                         float*         angle2,
+                         float*         angle3) const;
 
     /*!
      * Converts from incoming and outgoing directions to three angles for an isotropic BRDF and
      * assigns them to \a angle0, \a angle2, and \a angle3.
      */
-    virtual void fromXyz(const Vec3& inDir, const Vec3& outDir,
-                         float* angle0, float* angle2, float* angle3) const;
+    virtual void fromXyz(const Vec3&    inDir,
+                         const Vec3&    outDir,
+                         float*         angle0,
+                         float*         angle2,
+                         float*         angle3) const;
 
     std::string getAngle0Name() const; /*!< Gets a name of angle0. */
     std::string getAngle1Name() const; /*!< Gets a name of angle1. */
@@ -222,8 +237,12 @@ float CoordinatesBrdf<CoordSysT>::getValue(const Vec3& inDir, const Vec3& outDir
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::getInOutDirection(int index0, int index1, int index2, int index3,
-                                                   Vec3* inDir, Vec3* outDir) const
+void CoordinatesBrdf<CoordSysT>::getInOutDirection(int      index0,
+                                                   int      index1,
+                                                   int      index2,
+                                                   int      index3,
+                                                   Vec3*    inDir,
+                                                   Vec3*    outDir) const
 {
     CoordSysT::toXyz(samples_->getAngle0(index0),
                      samples_->getAngle1(index1),
@@ -236,22 +255,33 @@ void CoordinatesBrdf<CoordSysT>::getInOutDirection(int index0, int index1, int i
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::toXyz(float angle0, float angle1, float angle2, float angle3,
-                                       Vec3* inDir, Vec3* outDir) const
+void CoordinatesBrdf<CoordSysT>::toXyz(float angle0,
+                                       float angle1,
+                                       float angle2,
+                                       float angle3,
+                                       Vec3* inDir,
+                                       Vec3* outDir) const
 {
     CoordSysT::toXyz(angle0, angle1, angle2, angle3, inDir, outDir);
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3& inDir, const Vec3& outDir,
-                                         float* angle0, float* angle1, float* angle2, float* angle3) const
+void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3&    inDir,
+                                         const Vec3&    outDir,
+                                         float*         angle0,
+                                         float*         angle1,
+                                         float*         angle2,
+                                         float*         angle3) const
 {
     CoordSysT::fromXyz(inDir, outDir, angle0, angle1, angle2, angle3);
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3& inDir, const Vec3& outDir,
-                                         float* angle0, float* angle2, float* angle3) const
+void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3&    inDir,
+                                         const Vec3&    outDir,
+                                         float*         angle0,
+                                         float*         angle2,
+                                         float*         angle3) const
 {
     CoordSysT::fromXyz(inDir, outDir, angle0, angle2, angle3);
 }

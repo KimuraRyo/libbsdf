@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -17,14 +17,6 @@
 #include <vector>
 
 #include <Eigen/Core>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // pi
-#endif
-
-#ifndef M_SQRT2
-#define M_SQRT2 1.41421356237309504880 // sqrt(2)
-#endif
 
 namespace lb {
 

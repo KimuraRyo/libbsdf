@@ -81,7 +81,7 @@ const Spectrum& RandomSampleSet<CoordSysT>::findSpectrumOfNearestSample(const An
     CoordSysT::toXyz(angles.at(0), angles.at(1), angles.at(2), angles.at(3),
                      &inDir, &outDir);
 
-    float minAngleDiff = std::numeric_limits<float>::max();
+    Vec3::Scalar minAngleDiff = std::numeric_limits<Vec3::Scalar>::max();
 
     for (auto it = sampleMap_.begin(); it != sampleMap_.end(); ++it) {
         const AngleList& sampleAngles = it->first;
@@ -89,21 +89,21 @@ const Spectrum& RandomSampleSet<CoordSysT>::findSpectrumOfNearestSample(const An
         CoordSysT::toXyz(sampleAngles.at(0), sampleAngles.at(1), sampleAngles.at(2), sampleAngles.at(3),
                          &sampleInDir, &sampleOutDir);
 
-        float inAngle = acos(inDir.dot(sampleInDir));
-        float outAngle = acos(outDir.dot(sampleOutDir));
-        float angleDiff = inAngle + outAngle;
+        Vec3::Scalar inAngle = acos(inDir.dot(sampleInDir));
+        Vec3::Scalar outAngle = acos(outDir.dot(sampleOutDir));
+        Vec3::Scalar angleDiff = inAngle + outAngle;
 
         if (reciprocity) {
-            float inOutAngle = acos(inDir.dot(sampleOutDir));
-            float outInAngle = acos(outDir.dot(sampleInDir));
-            float angleUsingReciprocity = inOutAngle + outInAngle;
+            Vec3::Scalar inOutAngle = acos(inDir.dot(sampleOutDir));
+            Vec3::Scalar outInAngle = acos(outDir.dot(sampleInDir));
+            Vec3::Scalar angleUsingReciprocity = inOutAngle + outInAngle;
 
             if (angleUsingReciprocity < angleDiff) {
                 angleDiff = angleUsingReciprocity;
             }
         }
 
-        if (angleDiff == 0.0f) {
+        if (angleDiff == Vec3::Scalar(0)) {
             return it->second;
         }
         else if (angleDiff < minAngleDiff) {
