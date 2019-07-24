@@ -11,13 +11,11 @@
 #include <iostream>
 
 #include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Brdf/Integrator.h>
 #include <libbsdf/Brdf/SampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
-#include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
 #include <libbsdf/Common/SolidAngle.h>
 
 #include <libbsdf/ReflectanceModel/Fresnel.h>
@@ -27,6 +25,7 @@ using namespace lb;
 // Private functions.
 namespace {
 
+// Compute the reflectance of a rectangle consisting of four outgoing directions.
 Arrayd computeReflectanceOfRectangle(const SphericalCoordinatesBrdf& brdf,
                                      int inThIndex, int inPhIndex, int outThIndex, int outPhIndex)
 {
@@ -94,8 +93,6 @@ SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
 {
     const SampleSet* ss = brdf.getSampleSet();
 
-    Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
-
     SampleSet2D* reflectances = new SampleSet2D(brdf.getNumInTheta(),
                                                 brdf.getNumInPhi(),
                                                 ss->getColorModel(),
@@ -104,11 +101,12 @@ SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
     reflectances->getPhiArray() = ss->getAngles1();
     reflectances->getWavelengths() = ss->getWavelengths();
 
+    Spectrum sp;
+    int inPhIndex;
+    #pragma omp parallel for private(sp, inPhIndex) schedule(dynamic)
     for (int inThIndex = 0; inThIndex < brdf.getNumInTheta(); ++inThIndex) {
-    for (int inPhIndex = 0; inPhIndex < brdf.getNumInPhi();   ++inPhIndex) {
-        Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf.getInTheta(inThIndex),
-                                                      brdf.getInPhi(inPhIndex));
-        Spectrum sp = integrator.computeReflectance(brdf, inDir);
+    for (    inPhIndex = 0; inPhIndex < brdf.getNumInPhi();   ++inPhIndex) {
+        sp = computeReflectance(brdf, inThIndex, inPhIndex);
         reflectances->setSpectrum(inThIndex, inPhIndex, sp);
     }}
 
@@ -192,6 +190,7 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
 
         Spectrum brdfSp = brdf.getSpectrum(inDir, specularDir);
 
+        // Find the maximum spectrum around the specular direction.
         for (int spThIndex = 0; spThIndex < brdf.getNumSpecTheta(); ++spThIndex) {
             if (brdf.getSpecTheta(spThIndex) > maxSpecularTheta) {
                 continue;
@@ -223,7 +222,7 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
     return ss2;
 }
 
-Spectrum lb::findDiffuseThresholds(const lb::Brdf&  brdf,
+Spectrum lb::findDiffuseThresholds(const Brdf&      brdf,
                                    const double&    maxTheta)
 {
     const SampleSet* ss = brdf.getSampleSet();

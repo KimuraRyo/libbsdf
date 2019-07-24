@@ -10,8 +10,7 @@
 
 #include <fstream>
 
-#include <libbsdf/Brdf/Integrator.h>
-#include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
+#include <libbsdf/Brdf/Analyzer.h>
 #include <libbsdf/Reader/DdrSdrUtility.h>
 
 using namespace lb;
@@ -323,15 +322,12 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
 
             for (int inPhIndex = 0; inPhIndex < numInPhi;   ++inPhIndex) {
             for (int inThIndex = 0; inThIndex < numInTheta; ++inThIndex) {
-                float kbdf;
+                float kbdf = 1.0f;
                 if (unitType == ddr_sdr_utility::LUMINANCE_ABSOLUTE ||
                     unitType == ddr_sdr_utility::INTENSITY_ABSOLUTE) {
                     if (!kbdfs.empty()) {
                         kbdf = kbdfs.at(inThIndex + numInTheta * inPhIndex);
                     }
-                }
-                else {
-                    kbdf = 1.0f;
                 }
 
                 for (int spPhIndex = 0; spPhIndex < numSpPhi;   ++spPhIndex) {
@@ -399,8 +395,6 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
     if (unitType == ddr_sdr_utility::LUMINANCE_RELATIVE ||
         unitType == ddr_sdr_utility::INTENSITY_RELATIVE) {
         if (!kbdfs.empty()) {
-            Integrator integrator(PoissonDiskDistributionOnSphere::NUM_SAMPLES_ON_HEMISPHERE, true);
-
             int numWl = brdf->getSampleSet()->getNumWavelengths();
             int numInTh = brdf->getNumInTheta();
             int numInPh = brdf->getNumInPhi();
@@ -408,18 +402,14 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             for (wlIndex = 0; wlIndex < numWl; ++wlIndex) {
                 for (int inThIndex = 0; inThIndex < numInTh; ++inThIndex) {
                 for (int inPhIndex = 0; inPhIndex < numInPh; ++inPhIndex) {
-                    Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf->getInTheta(inThIndex),
-                                                                  brdf->getInPhi(inPhIndex));
-                    Spectrum refSp = integrator.computeReflectance(*brdf, inDir);
+                    Spectrum refSp = computeReflectance(*brdf, inThIndex, inPhIndex);
 
                     // Edit samples with "kbdf".
                     float maxReflectance = refSp.maxCoeff();
                     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
                     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
                         Spectrum& sp = ss->getSpectrum(inThIndex, inPhIndex, i2, i3);
-
-                        const float coeff = 0.999546f; // Reflectance of Lambertian using lb::Integrator.
-                        sp /= maxReflectance / coeff;
+                        sp /= maxReflectance;
 
                         // A reflectance equals "kbdf".
                         float kbdf = kbdfs.at(inThIndex +
