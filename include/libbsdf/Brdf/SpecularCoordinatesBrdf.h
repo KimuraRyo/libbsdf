@@ -375,8 +375,8 @@ inline float SpecularCoordinatesBrdf::getSpecularOffset(float inTheta) const
     float lowerAngle0;
     float upperAngle0;
 
-    LinearInterpolator::findBounds(samples_->getAngles0(), inTheta, samples_->isEqualIntervalAngles0(),
-                                   &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
+    findBounds(samples_->getAngles0(), inTheta, samples_->isEqualIntervalAngles0(),
+               &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
 
     float interval = std::max(upperAngle0 - lowerAngle0, EPSILON_F);
     float weight = (inTheta - lowerAngle0) / interval;

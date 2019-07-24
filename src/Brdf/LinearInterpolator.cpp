@@ -298,38 +298,3 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
 
     assert(spectrum->allFinite());
 }
-
-void LinearInterpolator::findBounds(const Arrayf&   angles,
-                                    float           angle,
-                                    bool            equalIntervalAngles,
-                                    int*            lowerIndex,
-                                    int*            upperIndex,
-                                    float*          lowerAngle,
-                                    float*          upperAngle)
-{
-    if (angles.size() == 1) {
-        *lowerIndex = 0;
-        *upperIndex = 0;
-        *lowerAngle = angles[0];
-        *upperAngle = angles[0];
-
-        return;
-    }
-
-    int backIndex = static_cast<int>(angles.size() - 1);
-    if (equalIntervalAngles) {
-        // Calculate lower and upper indices.
-        *lowerIndex = static_cast<int>(backIndex * (angle / angles[backIndex]));
-        *lowerIndex = std::min(*lowerIndex, backIndex - 1);
-        *upperIndex = *lowerIndex + 1;
-    }
-    else {
-        // Find lower and upper indices.
-        const float* anglePtr = std::lower_bound(&angles[0], &angles[0] + angles.size(), angle);
-        *upperIndex = clamp(static_cast<int>(anglePtr - &angles[0]), 1, backIndex);
-        *lowerIndex = *upperIndex - 1;
-    }
-
-    *lowerAngle = angles[*lowerIndex];
-    *upperAngle = angles[*upperIndex];
-}

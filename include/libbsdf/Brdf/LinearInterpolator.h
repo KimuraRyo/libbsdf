@@ -66,22 +66,6 @@ public:
     static void getSpectrum(const SampleSet2D&  ss2,
                             float               theta,
                             Spectrum*           spectrum);
-
-    /*!
-     * Finds neighbor indices and angles.
-     *
-     * \param lowerIndex Found index of the sample point at the lower bound.
-     * \param upperIndex Found index of the sample point at the upper bound.
-     * \param lowerAngle Found angle of the sample point at the lower bound.
-     * \param upperAngle Found angle of the sample point at the upper bound.
-     */
-    static void findBounds(const Arrayf&    angles,
-                           float            angle,
-                           bool             equalIntervalAngles,
-                           int*             lowerIndex,
-                           int*             upperIndex,
-                           float*           lowerAngle,
-                           float*           upperAngle);
 };
 
 } // namespace lb

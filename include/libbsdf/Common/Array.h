@@ -52,6 +52,22 @@ T toRadians(const T& degrees);
 template <typename T>
 bool isEqualInterval(const T& array);
 
+/*!
+ * Finds neighbor indices and values.
+ *
+ * \param lowerIndex Found index of the sample point at the lower bound.
+ * \param upperIndex Found index of the sample point at the upper bound.
+ * \param lowerValue Found value of the sample point at the lower bound.
+ * \param upperValue Found value of the sample point at the upper bound.
+ */
+void findBounds(const Arrayf&   values,
+                float           value,
+                bool            equalIntervalValues,
+                int*            lowerIndex,
+                int*            upperIndex,
+                float*          lowerValue,
+                float*          upperValue);
+
 /*
  * Implementation
  */
