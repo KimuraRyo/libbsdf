@@ -1,0 +1,35 @@
+language: c++
+
+matrix:
+  allow_failures:
+    - os: osx
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      #language: c++
+      #before_install: sudo apt-get update
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++
+            - cmake
+            - libeigen3-dev
+    - os: osx
+      #osx_image: xcode11
+      sudo: required
+      #language: objective-c
+      addons:
+        homebrew:
+          packages:
+            - cmake
+            - eigen
+          update: true
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j4

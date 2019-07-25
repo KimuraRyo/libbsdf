@@ -30,10 +30,9 @@ endforeach()
 
 include_directories(include)
 
-if(NOT EIGEN3_INCLUDE_DIR)
-    message(FATAL_ERROR "Please set the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+if(EIGEN3_INCLUDE_DIR)
+    include_directories("${EIGEN3_INCLUDE_DIR}")
 endif()
-include_directories("${EIGEN3_INCLUDE_DIR}")
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
