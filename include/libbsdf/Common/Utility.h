@@ -242,14 +242,14 @@ T toRadian(T degree)
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
-void convertCoordinateSystem(float   srcAngle0,
-                                    float   srcAngle1,
-                                    float   srcAngle2,
-                                    float   srcAngle3,
-                                    float*  destAngle0,
-                                    float*  destAngle1,
-                                    float*  destAngle2,
-                                    float*  destAngle3)
+void convertCoordinateSystem(float  srcAngle0,
+                             float  srcAngle1,
+                             float  srcAngle2,
+                             float  srcAngle3,
+                             float* destAngle0,
+                             float* destAngle1,
+                             float* destAngle2,
+                             float* destAngle3)
 {
     Vec3 inDir, outDir;
     SrcCoordSysT::toXyz(srcAngle0, srcAngle1, srcAngle2, srcAngle3,
@@ -262,7 +262,8 @@ void convertCoordinateSystem(float   srcAngle0,
 template <typename Vec3T>
 Vec3T xyzToSrgb(const Vec3T& xyz)
 {
-    Eigen::Matrix<Vec3T::Scalar, 3, 3> mat;
+    typedef typename Vec3T::Scalar ScalarType;
+    Eigen::Matrix<ScalarType, 3, 3> mat;
     mat << CieData::XYZ_sRGB[0], CieData::XYZ_sRGB[1], CieData::XYZ_sRGB[2],
            CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
            CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
@@ -272,7 +273,8 @@ Vec3T xyzToSrgb(const Vec3T& xyz)
 template <typename Vec3T>
 Vec3T srgbToXyz(const Vec3T& rgb)
 {
-    Eigen::Matrix<Vec3T::Scalar, 3, 3> mat;
+    typedef typename Vec3T::Scalar ScalarType;
+    Eigen::Matrix<ScalarType, 3, 3> mat;
     mat << CieData::sRGB_XYZ[0], CieData::sRGB_XYZ[1], CieData::sRGB_XYZ[2],
            CieData::sRGB_XYZ[3], CieData::sRGB_XYZ[4], CieData::sRGB_XYZ[5],
            CieData::sRGB_XYZ[6], CieData::sRGB_XYZ[7], CieData::sRGB_XYZ[8];
