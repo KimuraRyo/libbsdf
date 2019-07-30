@@ -2,7 +2,7 @@ language: c++
 
 matrix:
   allow_failures:
-    - os: osx
+    - os: linux
   include:
     - os: linux
       dist: trusty

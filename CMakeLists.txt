@@ -6,7 +6,7 @@
 ## file, You can obtain one at http://mozilla.org/MPL/2.0/.            ##
 ## =================================================================== ##
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 
 project(libbsdf)
 
@@ -30,11 +30,12 @@ endforeach()
 
 include_directories(include)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-if(EIGEN3_INCLUDE_DIR)
-    include_directories("${EIGEN3_INCLUDE_DIR}")
+if(NOT EIGEN3_INCLUDE_DIR)
+    message(FATAL_ERROR "Please set the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
 endif()
+include_directories("${EIGEN3_INCLUDE_DIR}")
+
+set(CMAKE_CXX_STANDARD, 11)
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
