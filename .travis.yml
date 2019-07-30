@@ -17,6 +17,8 @@ matrix:
             - cmake
             - libeigen3-dev
           update: true
+      env:
+        - EIGEN3_INCLUDE_DIR="/usr/include/eigen3"
     - os: osx
       #osx_image: xcode11
       sudo: required
@@ -27,9 +29,11 @@ matrix:
             - cmake
             - eigen
           update: true
+      env:
+        - EIGEN3_INCLUDE_DIR="/usr/local/include/eigen3"
 
 script:
   - mkdir build
   - cd build
-  - cmake -DEIGEN3_INCLUDE_DIR=/usr/local/include/eigen3 ..
+  - cmake -DEIGEN3_INCLUDE_DIR=$EIGEN3_INCLUDE_DIR ..
   - make -j4
