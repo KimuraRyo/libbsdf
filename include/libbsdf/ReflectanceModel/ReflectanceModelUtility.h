@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2018 Kimura Ryo                                  //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -14,11 +14,7 @@
 #ifndef LIBBSDF_REFLECTANCE_MODEL_UTILITY_H
 #define LIBBSDF_REFLECTANCE_MODEL_UTILITY_H
 
-#include <cassert>
-#include <iostream>
-
 #include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Common/Vector.h>
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
 
 namespace lb {

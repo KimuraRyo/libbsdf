@@ -8,8 +8,10 @@
 
 #include <libbsdf/ReflectanceModel/ReflectanceModelUtility.h>
 
-#include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <cassert>
+#include <iostream>
+
+#include <libbsdf/Common/Vector.h>
 
 using namespace lb;
 
@@ -27,12 +29,9 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
     ColorModel cm = ss->getColorModel();
     if (cm != RGB_MODEL &&
         cm != MONOCHROMATIC_MODEL) {
-        std::cerr << "[setupTabularBrdf] Unsupported color model: " << cm << std::endl;
+        std::cerr << "[reflectance_model_utility::setupTabularBrdf] Unsupported color model: " << cm << std::endl;
         return false;
     }
-
-    SpecularCoordinatesBrdf* spBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
-    bool backSideFillable = (spBrdf != 0);
 
     Vec3 inDir, outDir;
     Vec3 values;
@@ -45,17 +44,15 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
         for (i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
             brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-            if (backSideFillable && isDownwardDir(outDir)) {
-                continue;
-            }
+            // Adjust horizontal and downward directions.
+            const Vec3::Scalar epsilon = Vec3::Scalar(0.001);
+            inDir.z() = max(inDir.z(), epsilon);
+            outDir.z() = max(outDir.z(), epsilon);
 
-            const Vec3::Scalar minZ = Vec3::Scalar(0.001);
-            inDir.z() = max(inDir.z(), minZ);
-            outDir.z() = max(outDir.z(), minZ);
-
-            if (abs(outDir.x()) <= minZ &&
-                abs(outDir.y()) <= minZ &&
-                outDir.z() <= minZ) {
+            // Adjust a downward outgoing direction along the Z-axis.
+            if (abs(outDir.x()) <= epsilon &&
+                abs(outDir.y()) <= epsilon &&
+                outDir.z() <= epsilon) {
                 outDir.x() = Vec3::Scalar(1);
             }
 
@@ -79,10 +76,6 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
             }
             ss->setSpectrum(i0, i1, i2, i3, sp);
         }}}
-    }
-
-    if (backSideFillable) {
-        fillBackSide(spBrdf);
     }
 
     return true;
