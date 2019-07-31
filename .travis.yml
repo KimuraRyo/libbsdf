@@ -20,7 +20,7 @@ matrix:
       env:
         - EIGEN3_INCLUDE_DIR="/usr/include/eigen3"
     - os: osx
-      #osx_image: xcode11
+      osx_image: xcode11
       sudo: false
       #language: objective-c
       addons:
