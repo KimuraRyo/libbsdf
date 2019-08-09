@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2018 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -118,15 +118,26 @@ void equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf);
 void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta);
 
 /*!
- * \brief Insert a BRDF in a base BRDF along incoming azimuthal angle.
+ * \brief Inserts a BRDF in a base BRDF along incoming azimuthal angle.
  *
  * Both BRDFs must have the same color model, wavelengths, and angles without incoming azimuth.
  *
- * \return A new BRDF with an inserted angle.
+ * \return A new BRDF with a specular coordinate system.
  */
-Brdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
-                           const SphericalCoordinatesBrdf&  insertedBrdf,
-                           float                            inPhi);
+SpecularCoordinatesBrdf* insertBrdfAlongInPhi(const SpecularCoordinatesBrdf&   baseBrdf,
+                                              const SpecularCoordinatesBrdf&   insertedBrdf,
+                                              float                            inPhi);
+
+/*!
+ * \brief Inserts a BRDF in a base BRDF along incoming azimuthal angle.
+ *
+ * Both BRDFs must have the same color model, wavelengths, and angles without incoming azimuth.
+ *
+ * \return A new BRDF with a spherical coordinate system.
+ */
+SphericalCoordinatesBrdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
+                                               const SphericalCoordinatesBrdf&  insertedBrdf,
+                                               float                            inPhi);
 
 /*!
  * \brief Recalculates a BRDF with linearly extrapolated reflectances.

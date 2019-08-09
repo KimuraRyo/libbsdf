@@ -670,66 +670,40 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
     }}}
 }
 
-Brdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
-                               const SphericalCoordinatesBrdf&  insertedBrdf,
-                               float                            inPhi)
+/* Insert a BRDF in a base BRDF along incoming azimuthal angle. */
+template <typename BrdfT>
+BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
+                                    const BrdfT&    insertedBrdf,
+                                    float           inPhi)
 {
-    //bool inPhiUsed = (dynamic_cast<const SphericalCoordinatesBrdf*>(&baseBrdf) &&
-    //                  dynamic_cast<const SphericalCoordinatesBrdf*>(&insertedBrdf)) ||
-    //                 (dynamic_cast<const SpecularCoordinatesBrdf*>(&baseBrdf) &&
-    //                  dynamic_cast<const SpecularCoordinatesBrdf*>(&insertedBrdf));
-
-    //if (!inPhiUsed) {
-    //    std::cerr
-    //        << "[lb::insertBrdfAlongInPhi] Invalid coordinate system is used."
-    //        << std::endl;
-    //    return 0;
-    //}
-
-    const SampleSet* baseSs = baseBrdf.getSampleSet();
+    const SampleSet* baseSs     = baseBrdf.getSampleSet();
     const SampleSet* insertedSs = insertedBrdf.getSampleSet();
 
-    //if (!hasSameColor(baseSs, insertedSs)) {
-    //    std::cerr
-    //        << "[lb::insertBrdfAlongInPhi] Color models or wavelengths do not match."
-    //        << std::endl;
-    //    return 0;
-    //}
-
-    if (baseSs->getColorModel() != insertedSs->getColorModel()) {
-        std::cerr
-            << "[Brdf::insertBrdfAlongInPhi] Color models do not match: "
-            << baseSs->getColorModel() << ", " << insertedSs->getColorModel()
-            << std::endl;
-        return 0;
-    }
-
-    if (baseSs->getNumWavelengths() != insertedSs->getNumWavelengths() ||
-        !baseSs->getWavelengths().isApprox(insertedSs->getWavelengths())) {
-        std::cerr
-            << "[lb::insertBrdfAlongInPhi] Wavelengths do not match: "
-            << baseSs->getWavelengths() << ", " << insertedSs->getWavelengths()
-            << std::endl;
+    if (!hasSameColor(*baseSs, *insertedSs)) {
         return 0;
     }
 
     if (insertedSs->getNumAngles1() != 1) {
         std::cerr
-            << "[lb::insertBrdfAlongInPhi] The number of incoming azimuthal angles must be 1. insertedSs->getNumAngles1(): "
+            << "[lb::insertBrdfAlongInPhi] The number of incoming azimuthal angles must be 1. The number of angles: "
             << insertedSs->getNumAngles1() << std::endl;
         return 0;
     }
 
-    if (inPhi < 0.0f || inPhi > 2.0 * PI_F) {
-        std::cerr << "[lb::insertBrdfAlongInPhi] inPhi is out of range: " << inPhi << std::endl;
+    if (inPhi < 0.0f || inPhi > 2.0f * PI_F) {
+        std::cerr
+            << "[lb::insertBrdfAlongInPhi] Specified incoming azimuthal angle is out of range: "
+            << inPhi << std::endl;
         return 0;
     }
 
     // Find the index of the inserted angle.
     int insertedIndex = baseSs->getNumAngles1();
     for (int i = 0; i < baseSs->getNumAngles1(); ++i) {
-        if (baseSs->getAngle1(i) == inPhi) {
-            std::cerr << "[lb::insertBrdfAlongInPhi] inPhi is already used: " << inPhi << std::endl;
+        if (isEqual(baseSs->getAngle1(i), inPhi)) {
+            std::cerr
+                << "[lb::insertBrdfAlongInPhi] Specified incoming azimuthal angle is already used: "
+                << inPhi << std::endl;
             return 0;
         }
 
@@ -739,7 +713,7 @@ Brdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
         }
     }
 
-    Brdf* brdf = baseBrdf.clone();
+    BrdfT* brdf = baseBrdf.clone();
     SampleSet* ss = brdf->getSampleSet();
 
     ss->resizeAngles(baseSs->getNumAngles0(),
@@ -784,6 +758,20 @@ Brdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
     }}}}
 
     return brdf;
+}
+
+SpecularCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SpecularCoordinatesBrdf&    baseBrdf,
+                                                  const SpecularCoordinatesBrdf&    insertedBrdf,
+                                                  float                             inPhi)
+{
+    return insertBrdfAlongInPhiTemplate(baseBrdf, insertedBrdf, inPhi);
+}
+
+SphericalCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
+                                                   const SphericalCoordinatesBrdf&  insertedBrdf,
+                                                   float                            inPhi)
+{
+    return insertBrdfAlongInPhiTemplate(baseBrdf, insertedBrdf, inPhi);
 }
 
 void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta)

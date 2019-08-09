@@ -63,13 +63,10 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
                                                             numWavelengths,
                                                             true)
 {
-    // Create narrow intervals near specular directions.
     Arrayf& specThetaAngles = samples_->getAngles2();
-    for (int i = 1; i < specThetaAngles.size() - 1; ++i) {
-        Arrayf::Scalar ratio = specThetaAngles[i] / SpecularCoordinateSystem::MAX_ANGLE2;
-        ratio = std::pow(ratio, static_cast<Arrayf::Scalar>(specThetaExponent));
-        specThetaAngles[i] = ratio * SpecularCoordinateSystem::MAX_ANGLE2;
-    }
+    specThetaAngles = createExponentialArray<Arrayf>(static_cast<int>(specThetaAngles.size()),
+                                                     CoordSys::MAX_ANGLE2,
+                                                     specThetaExponent);
 
     if (refractiveIndex != 1.0f) {
         for (int i = 0; i < getNumInTheta(); ++i) {
@@ -79,6 +76,41 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
             setSpecularOffset(i, refractedTheta - inTheta);
         }
     }
+}
+
+SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SphericalCoordinatesBrdf& brdf,
+                                                 int                             numSpecTheta,
+                                                 int                             numSpecPhi)
+                                                 : BaseBrdf()
+{
+    const SampleSet* ss = brdf.getSampleSet();
+
+    Arrayf inThetaAngles   = ss->getAngles0();
+    Arrayf inPhiAngles     = ss->getAngles1();
+
+    if (inPhiAngles.size() == 1) {
+        inPhiAngles[0] = 0.0f;
+    }
+
+    Arrayf specThetaAngles = createExponentialArray<Arrayf>(numSpecTheta, CoordSys::MAX_ANGLE2, 2.0f);
+    Arrayf specPhiAngles   = Arrayf::LinSpaced(numSpecPhi, 0.0, CoordSys::MAX_ANGLE3);
+
+    samples_ = new SampleSet(static_cast<int>(inThetaAngles.size()),
+                             static_cast<int>(inPhiAngles.size()),
+                             static_cast<int>(specThetaAngles.size()),
+                             static_cast<int>(specPhiAngles.size()),
+                             ss->getColorModel(),
+                             ss->getNumWavelengths());
+    samples_->getAngles0() = inThetaAngles;
+    samples_->getAngles1() = inPhiAngles;
+    samples_->getAngles2() = specThetaAngles;
+    samples_->getAngles3() = specPhiAngles;
+    samples_->getWavelengths() = ss->getWavelengths();
+
+    samples_->updateAngleAttributes();
+    initializeSpectra(brdf);
+
+    sourceType_ = brdf.getSourceType();
 }
 
 SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SpecularCoordinatesBrdf& brdf)

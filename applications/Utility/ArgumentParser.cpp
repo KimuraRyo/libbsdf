@@ -45,3 +45,15 @@ bool ArgumentParser::read(const std::string& option, std::string* value)
 
     return false;
 }
+
+bool ArgumentParser::validate(int numTokens)
+{
+    if (tokens_.size() == numTokens) return true;
+
+    std::cerr << "Invalid argument:" << std::endl;
+    for (std::string token : tokens_) {
+        std::cerr << "\t" << token << std::endl;
+    }
+
+    return false;
+}

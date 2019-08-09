@@ -38,7 +38,6 @@ void DdrWriter::write(const std::string&    fileName,
                       const std::string&    comments)
 {
     typedef SpecularCoordinatesBrdf SpecBrdf;
-    typedef SpecularCoordinateSystem SpecCoordSys;
 
     SpecBrdf* exportedBrdf;
     if (dynamic_cast<const SpecBrdf*>(&brdf)) {
@@ -49,19 +48,9 @@ void DdrWriter::write(const std::string&    fileName,
 
         const SampleSet* ss = brdf.getSampleSet();
 
-        Arrayf::Index numOutThetaAngles = max(ss->getNumAngles2(), 181);
-        Arrayf::Index numOutPhiAngles   = max(ss->getNumAngles3(), 37);
-
-        Arrayf inThetaAngles    = ss->getAngles0();
-        Arrayf inPhiAngles      = ss->getAngles1();
-        Arrayf outThetaAngles   = Arrayf::LinSpaced(numOutThetaAngles,  0.0, SpecCoordSys::MAX_ANGLE2);
-        Arrayf outPhiAngles     = Arrayf::LinSpaced(numOutPhiAngles,    0.0, SpecCoordSys::MAX_ANGLE3);
-
-        if (inPhiAngles.size() == 1) {
-            inPhiAngles[0] = 0.0f;
-        }
-
-        exportedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, outThetaAngles, outPhiAngles);
+        int numOutTheta = max(ss->getNumAngles2(), 181);
+        int numOutPhi   = max(ss->getNumAngles3(), 73);
+        exportedBrdf = new SpecBrdf(dynamic_cast<const SphericalCoordinatesBrdf&>(brdf), numOutTheta, numOutPhi);
     }
     else {
         const SampleSet* ss = brdf.getSampleSet();
@@ -77,7 +66,7 @@ void DdrWriter::write(const std::string&    fileName,
     if (exportedBrdf->getNumInTheta() == 1) {
         const SampleSet* ss = exportedBrdf->getSampleSet();
 
-        Arrayf inThetaAngles = Arrayf::LinSpaced(10, 0.0, SpecCoordSys::MAX_ANGLE0);
+        Arrayf inThetaAngles = Arrayf::LinSpaced(10, 0.0, SpecularCoordinateSystem::MAX_ANGLE0);
 
         SpecBrdf* filledBrdf = new SpecBrdf(*exportedBrdf,
                                             inThetaAngles,

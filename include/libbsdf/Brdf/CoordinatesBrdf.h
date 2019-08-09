@@ -53,6 +53,9 @@ public:
                     int         numAngles2,
                     int         numAngles3);
 
+    /*! Constructs an empty BRDF. Brdf::samples_ must be initialized in a derived class. */
+    CoordinatesBrdf();
+
     /*! Copies and constructs a BRDF. */
     CoordinatesBrdf(const CoordinatesBrdf& brdf);
 
@@ -131,15 +134,15 @@ protected:
     void setAngle2(int index, float angle); /*!< Sets the angle2 at the index. \sa setAngle0() */
     void setAngle3(int index, float angle); /*!< Sets the angle3 at the index. \sa setAngle0() */
 
+    /*! Initializes spectra using lb::Brdf. */
+    void initializeSpectra(const Brdf& brdf);
+
 private:
     /*! Copy operator is disabled. */
     CoordinatesBrdf& operator=(const CoordinatesBrdf&);
 
     /*! Initializes angle lists consisting of equal interval angles. */
     void initializeEqualIntervalAngles();
-
-    /*! Initializes spectra using lb::Brdf. */
-    void initializeSpectra(const Brdf& brdf);
 };
 
 template <typename CoordSysT>
@@ -209,6 +212,9 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf& brdf,
 
     sourceType_ = brdf.getSourceType();
 }
+
+template <typename CoordSysT>
+CoordinatesBrdf<CoordSysT>::CoordinatesBrdf() : Brdf() {}
 
 template <typename CoordSysT>
 CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const CoordinatesBrdf& brdf) : Brdf(brdf) {}
@@ -415,6 +421,12 @@ void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
 }
 
 template <typename CoordSysT>
+void CoordinatesBrdf<CoordSysT>::initializeSpectra(const Brdf& brdf)
+{
+    Brdf::initializeSpectra<LinearInterpolator>(brdf, this);
+}
+
+template <typename CoordSysT>
 void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
 {
     samples_->getAngles0() = Arrayf::LinSpaced(samples_->getNumAngles0(), CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0);
@@ -428,12 +440,6 @@ void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
     if (samples_->getNumAngles3() == 1) { setAngle3(0, 0.0f); }
 
     samples_->updateAngleAttributes();
-}
-
-template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::initializeSpectra(const Brdf& brdf)
-{
-    Brdf::initializeSpectra<LinearInterpolator>(brdf, this);
 }
 
 } // namespace lb

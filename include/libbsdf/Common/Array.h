@@ -32,8 +32,14 @@ template <typename SrcT, typename DestT>
 void copyArray(const SrcT& srcArray, DestT* destArray);
 
 /*! \brief Appends an element to the end of an array. */
-template <typename ArrayT, typename ScalarT>
-void appendElement(ArrayT* arrayf, ScalarT value);
+template <typename ArrayT>
+void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value);
+
+/*! \brief Creates a non-equal interval array from zero to \a maxValue with \a exponent. */
+template <typename ArrayT>
+ArrayT createExponentialArray(int                       numElements,
+                              typename ArrayT::Scalar   maxValue,
+                              typename ArrayT::Scalar   exponent);
 
 /*!
  * \brief Interpolates arrays using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
@@ -81,20 +87,38 @@ void copyArray(const SrcT& srcArray, DestT* destArray)
     }
 }
 
-template <typename ArrayT, typename ScalarT>
-void appendElement(ArrayT* arrayf, ScalarT value)
+template <typename ArrayT>
+void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
 {
+    typedef typename ArrayT::Scalar ScalarType;
+
     ArrayT& a = *arrayf;
-    std::vector<ScalarT> orig(a.data(), a.data() + a.size());
+    std::vector<ScalarType> orig(a.data(), a.data() + a.size());
     orig.push_back(value);
     a.resize(a.size() + 1);
 
 #if (_MSC_VER >= 1600) // Visual Studio 2010
     std::copy(orig.begin(), orig.end(),
-              stdext::checked_array_iterator<ArrayT::Scalar*>(a.data(), a.size()));
+              stdext::checked_array_iterator<ScalarType*>(a.data(), a.size()));
 #else
     std::copy(orig.begin(), orig.end(), a.data());
 #endif
+}
+
+template <typename ArrayT>
+ArrayT createExponentialArray(int                       numElements,
+                              typename ArrayT::Scalar   maxValue,
+                              typename ArrayT::Scalar   exponent)
+{
+    ArrayT arr = ArrayT::LinSpaced(numElements, 0.0, maxValue);
+
+    for (int i = 1; i < arr.size() - 1; ++i) {
+        typename ArrayT::Scalar ratio = arr[i] / maxValue;
+        ratio = std::pow(ratio, exponent);
+        arr[i] = ratio * maxValue;
+    }
+
+    return arr;
 }
 
 template <typename T>

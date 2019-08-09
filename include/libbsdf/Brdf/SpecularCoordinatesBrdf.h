@@ -10,6 +10,7 @@
 #define LIBBSDF_SPECULAR_COORDINATES_BRDF_H
 
 #include <libbsdf/Brdf/CoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Common/SpecularCoordinateSystem.h>
 
 namespace lb {
@@ -53,7 +54,8 @@ public:
 
     /*! 
      * Constructs a BRDF with narrow intervals near specular directions.
-     * \a refractiveIndex is used for the specular offset of BTDF.
+     *
+     * \param refractiveIndex   Refractive index used for the specular offset of BTDF.
      */
     SpecularCoordinatesBrdf(int         numInTheta,
                             int         numInPhi,
@@ -63,6 +65,13 @@ public:
                             ColorModel  colorModel = RGB_MODEL,
                             int         numWavelengths = 3,
                             float       refractiveIndex = 1.0f);
+
+    /*!
+     * Constructs a BRDF from lb::SphericalCoordinatesBrdf.
+     */
+    SpecularCoordinatesBrdf(const SphericalCoordinatesBrdf& brdf,
+                            int                             numSpecTheta = 181,
+                            int                             numSpecPhi = 73);
 
     /*! Copies and constructs a BRDF. */
     SpecularCoordinatesBrdf(const SpecularCoordinatesBrdf& brdf);

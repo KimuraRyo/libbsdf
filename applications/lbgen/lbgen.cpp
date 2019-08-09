@@ -93,7 +93,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const std::string version("1.0.7");
+    const std::string version("1.0.8");
 
     if (ap.read("-v") || ap.read("--version")) {
         std::cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << std::endl;
@@ -204,124 +204,114 @@ int main(int argc, char** argv)
         numIterations = clampParameter("numIterations", numIterations, 1, 10000);
     }
 
-    // Read the model name and file name.
-    if (ap.getTokens().size() == 2) {
-        std::string modelName = ap.getTokens().at(0);
-        std::string fileName = ap.getTokens().at(1);
+    if (!ap.validate(2)) return 1;
 
-        ReflectanceModel* model;
+    std::string modelName = ap.getTokens().at(0);
+    std::string fileName  = ap.getTokens().at(1);
 
-        if (modelName == GgxName) {
-            roughness = clampParameter("roughness", roughness, 0.01f, 1.0f);
-            model = new Ggx(Vec3(1.0, 1.0, 1.0), roughness, n, k);
-        }
-        else if (modelName == MultipleScatteringSmithName) {
-            roughness = clampParameter("roughness", roughness, 0.01f, 1.0f);
+    ReflectanceModel* model;
 
-            MultipleScatteringSmith::MaterialType matType = (k == 0.0f) ? MultipleScatteringSmith::DIELECTRIC_MATERIAL
-                                                                        : MultipleScatteringSmith::CONDUCTOR_MATERIAL;
+    // Create a BRDF/BTDF model.
+    if (modelName == GgxName) {
+        roughness = clampParameter("roughness", roughness, 0.01f, 1.0f);
+        model = new Ggx(Vec3(1.0, 1.0, 1.0), roughness, n, k);
+    }
+    else if (modelName == MultipleScatteringSmithName) {
+        roughness = clampParameter("roughness", roughness, 0.01f, 1.0f);
 
-            model = new MultipleScatteringSmith(Vec3(1.0, 1.0, 1.0), roughness, roughness, n,
-                                                static_cast<int>(matType),
-                                                static_cast<int>(MultipleScatteringSmith::GAUSSIAN_HEIGHT),
-                                                static_cast<int>(MultipleScatteringSmith::BECKMANN_SLOPE),
-                                                numIterations);
-        }
-        else if (modelName == LambertianName) {
-            n = 1.0f;
-            model = new Lambertian(Vec3(1.0, 1.0, 1.0));
-        }
-        else {
-            std::cerr << "Invalid model name: " << modelName << std::endl;
-            return 1;
-        }
+        MultipleScatteringSmith::MaterialType matType = (k == 0.0f) ? MultipleScatteringSmith::DIELECTRIC_MATERIAL
+                                                                    : MultipleScatteringSmith::CONDUCTOR_MATERIAL;
 
-        std::string comments("Software: lbgen-" + version);
-        comments += "\n;; Arguments:";
-        for (int i = 1; i < argc; ++i) {
-            comments += " " + std::string(argv[i]);
-        }
-
-        if (reader_utility::hasSuffix(fileName, ".ddr")) {
-            SpecularCoordinatesBrdf* brdf = createBrdf(*model,
-                                                       1.0f,
-                                                       numIncomingPolarAngles,
-                                                       numSpecularPolarAngles,
-                                                       numSpecularAzimuthalAngles,
-                                                       BRDF_DATA);
-
-            if (conservationOfEnergyUsed) {
-                fixEnergyConservation(brdf);
-            }
-
-            DdrWriter::write(fileName, *brdf, comments);
-
-            delete model;
-            delete brdf;
-
-            std::cout << "Generated: " << fileName << std::endl;
-        }
-        else if (reader_utility::hasSuffix(fileName, ".ddt")) {
-            SpecularCoordinatesBrdf* btdf = createBrdf(*model,
-                                                       n,
-                                                       numIncomingPolarAngles,
-                                                       numSpecularPolarAngles,
-                                                       numSpecularAzimuthalAngles,
-                                                       BTDF_DATA);
-
-            if (conservationOfEnergyUsed) {
-                fixEnergyConservation(btdf);
-            }
-
-            DdrWriter::write(fileName, *btdf, comments);
-
-            delete model;
-            delete btdf;
-
-            std::cout << "Generated: " << fileName << std::endl;
-        }
-        else {
-            SpecularCoordinatesBrdf* brdf = createBrdf(*model,
-                                                       1.0f,
-                                                       numIncomingPolarAngles,
-                                                       numSpecularPolarAngles,
-                                                       numSpecularAzimuthalAngles,
-                                                       BRDF_DATA);
-
-            SpecularCoordinatesBrdf* btdf = createBrdf(*model,
-                                                       n,
-                                                       numIncomingPolarAngles,
-                                                       numSpecularPolarAngles,
-                                                       numSpecularAzimuthalAngles,
-                                                       BTDF_DATA);
-
-            if (conservationOfEnergyUsed) {
-                std::cout.setstate(std::ios_base::failbit);
-                fixEnergyConservation(brdf, btdf);
-                std::cout.clear();
-            }
-
-            DdrWriter::write(fileName + ".ddr", *brdf, comments);
-            DdrWriter::write(fileName + ".ddt", *btdf, comments);
-
-            std::cout << "Generated: " << fileName + ".ddr" << std::endl;
-            std::cout << "Generated: " << fileName + ".ddt" << std::endl;
-
-            delete model;
-            delete brdf;
-            delete btdf;
-        }
+        model = new MultipleScatteringSmith(Vec3(1.0, 1.0, 1.0), roughness, roughness, n,
+                                            static_cast<int>(matType),
+                                            static_cast<int>(MultipleScatteringSmith::GAUSSIAN_HEIGHT),
+                                            static_cast<int>(MultipleScatteringSmith::BECKMANN_SLOPE),
+                                            numIterations);
+    }
+    else if (modelName == LambertianName) {
+        n = 1.0f;
+        model = new Lambertian(Vec3(1.0, 1.0, 1.0));
     }
     else {
-        std::cerr << "Invalid argument:" << std::endl;
-        for (auto it = ap.getTokens().begin();
-             it != ap.getTokens().end();
-             ++it) {
-            std::cerr << "\t" << *it << std::endl;
-        }
-
+        std::cerr << "Invalid model name: " << modelName << std::endl;
         return 1;
     }
+
+    std::string comments("Software: lbgen-" + version);
+    comments += "\n;; Arguments:";
+    for (int i = 1; i < argc; ++i) {
+        comments += " " + std::string(argv[i]);
+    }
+
+    // Create BRDF/BTDF and write file.
+    if (reader_utility::hasSuffix(fileName, ".ddr")) {
+        SpecularCoordinatesBrdf* brdf = createBrdf(*model,
+                                                   1.0f,
+                                                   numIncomingPolarAngles,
+                                                   numSpecularPolarAngles,
+                                                   numSpecularAzimuthalAngles,
+                                                   BRDF_DATA);
+
+        if (conservationOfEnergyUsed) {
+            fixEnergyConservation(brdf);
+        }
+
+        DdrWriter::write(fileName, *brdf, comments);
+
+        delete brdf;
+
+        std::cout << "Generated: " << fileName << std::endl;
+    }
+    else if (reader_utility::hasSuffix(fileName, ".ddt")) {
+        SpecularCoordinatesBrdf* btdf = createBrdf(*model,
+                                                   n,
+                                                   numIncomingPolarAngles,
+                                                   numSpecularPolarAngles,
+                                                   numSpecularAzimuthalAngles,
+                                                   BTDF_DATA);
+
+        if (conservationOfEnergyUsed) {
+            fixEnergyConservation(btdf);
+        }
+
+        DdrWriter::write(fileName, *btdf, comments);
+
+        delete btdf;
+
+        std::cout << "Generated: " << fileName << std::endl;
+    }
+    else {
+        SpecularCoordinatesBrdf* brdf = createBrdf(*model,
+                                                   1.0f,
+                                                   numIncomingPolarAngles,
+                                                   numSpecularPolarAngles,
+                                                   numSpecularAzimuthalAngles,
+                                                   BRDF_DATA);
+
+        SpecularCoordinatesBrdf* btdf = createBrdf(*model,
+                                                   n,
+                                                   numIncomingPolarAngles,
+                                                   numSpecularPolarAngles,
+                                                   numSpecularAzimuthalAngles,
+                                                   BTDF_DATA);
+
+        if (conservationOfEnergyUsed) {
+            std::cout.setstate(std::ios_base::failbit);
+            fixEnergyConservation(brdf, btdf);
+            std::cout.clear();
+        }
+
+        DdrWriter::write(fileName + ".ddr", *brdf, comments);
+        DdrWriter::write(fileName + ".ddt", *btdf, comments);
+
+        std::cout << "Generated: " << fileName + ".ddr" << std::endl;
+        std::cout << "Generated: " << fileName + ".ddt" << std::endl;
+
+        delete brdf;
+        delete btdf;
+    }
+
+    delete model;
 
     return 0;
 }

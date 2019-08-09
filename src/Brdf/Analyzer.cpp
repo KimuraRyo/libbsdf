@@ -249,3 +249,14 @@ Spectrum lb::findDiffuseThresholds(const Brdf&      brdf,
 
     return thresholds;
 }
+
+bool lb::isInDirDependentCoordinateSystem(const Brdf& brdf)
+{
+    if (dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf) ||
+        dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf)) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

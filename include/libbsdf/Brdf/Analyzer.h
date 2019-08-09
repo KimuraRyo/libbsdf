@@ -70,6 +70,9 @@ SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
 Spectrum findDiffuseThresholds(const Brdf&      brdf,
                                const double&    maxTheta = PI_2_F);
 
+/*! Returns true if a coordinate system has the angles of an incoming direction. */
+bool isInDirDependentCoordinateSystem(const Brdf& brdf);
+
 } // namespace lb
 
 #endif // LIBBSDF_ANALYZER_H
