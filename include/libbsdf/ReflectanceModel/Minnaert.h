@@ -23,7 +23,7 @@ public:
 
     Minnaert(const Vec3&    albedo,
              float          darkness)
-             : albedo_(albedo),
+             : albedo_  (albedo),
                darkness_(darkness)
     {
         parameters_.push_back(Parameter("Albedo",   &albedo_));

@@ -28,10 +28,10 @@ public:
                  float          roughness,
                  float          refractiveIndex = 0.96521f,
                  float          extinctionCoefficient = 6.3995f)
-                 : color_       (color),
-                   roughness_   (roughness),
-                   refractiveIndex_       (refractiveIndex),
-                   extinctionCoefficient_ (extinctionCoefficient)
+                 : color_                   (color),
+                   roughness_               (roughness),
+                   refractiveIndex_         (refractiveIndex),
+                   extinctionCoefficient_   (extinctionCoefficient)
     {
         parameters_.push_back(Parameter("Color",                    &color_));
         parameters_.push_back(Parameter("Roughness",                &roughness_, 0.01f, 1.0f));

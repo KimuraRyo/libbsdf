@@ -22,8 +22,8 @@ public:
 
     WardIsotropic(const Vec3&   color,
                   float         roughness)
-                  : color_(color),
-                    roughness_(roughness)
+                  : color_      (color),
+                    roughness_  (roughness)
     {
         parameters_.push_back(Parameter("Color",        &color_));
         parameters_.push_back(Parameter("Roughness",    &roughness_, 0.01f, 1.0f));

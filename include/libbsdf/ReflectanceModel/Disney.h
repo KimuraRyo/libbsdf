@@ -21,14 +21,14 @@ class Disney : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        Disney(const Vec3&  specularColor,
-               const Vec3&  diffuseColor,
-               float        roughnessX,
-               float        roughnessY)
-               : specularColor_ (specularColor),
-                 diffuseColor_  (diffuseColor),
-                 roughnessX_    (roughnessX),
-                 roughnessY_    (roughnessY)
+    Disney(const Vec3&  specularColor,
+           const Vec3&  diffuseColor,
+           float        roughnessX,
+           float        roughnessY)
+           : specularColor_ (specularColor),
+             diffuseColor_  (diffuseColor),
+             roughnessX_    (roughnessX),
+             roughnessY_    (roughnessY)
     {
         parameters_.push_back(Parameter("Specular color",   &specularColor_));
         parameters_.push_back(Parameter("Roughness X",      &roughnessX_, 0.01f, 1.0f));

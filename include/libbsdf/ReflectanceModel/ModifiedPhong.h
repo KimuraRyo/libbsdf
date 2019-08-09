@@ -23,8 +23,8 @@ public:
 
     ModifiedPhong(const Vec3&   color,
                   float         shininess)
-                  : color_(color),
-                    shininess_(shininess)
+                  : color_      (color),
+                    shininess_  (shininess)
     {
         parameters_.push_back(Parameter("Color",        &color_));
         parameters_.push_back(Parameter("Shininess",    &shininess_, 0.0f, 1000.0f));
