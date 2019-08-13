@@ -122,7 +122,10 @@ public:
      * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
      * and constructs the extrapolated sample set.
      */
-    bool expandAngles();
+    bool expandAngles(bool angle0Expanded = true,
+                      bool angle1Expanded = true,
+                      bool angle2Expanded = true,
+                      bool angle3Expanded = true);
 
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
     void clampAngles();
@@ -317,7 +320,10 @@ std::string CoordinatesBrdf<CoordSysT>::getAngle3Name() const
 }
 
 template <typename CoordSysT>
-bool CoordinatesBrdf<CoordSysT>::expandAngles()
+bool CoordinatesBrdf<CoordSysT>::expandAngles(bool angle0Expanded,
+                                              bool angle1Expanded,
+                                              bool angle2Expanded,
+                                              bool angle3Expanded)
 {
     bool expanded = false;
 
@@ -326,21 +332,22 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles()
     Arrayf angles2 = samples_->getAngles2();
     Arrayf angles3 = samples_->getAngles3();
 
-    if (!isEqual(angles0[0], CoordSysT::MIN_ANGLE0)) { appendElement(&angles0, CoordSysT::MIN_ANGLE0); }
-    if (!isEqual(angles1[0], CoordSysT::MIN_ANGLE1)) { appendElement(&angles1, CoordSysT::MIN_ANGLE1); }
-    if (!isEqual(angles2[0], CoordSysT::MIN_ANGLE2)) { appendElement(&angles2, CoordSysT::MIN_ANGLE2); }
-    if (!isEqual(angles3[0], CoordSysT::MIN_ANGLE3)) { appendElement(&angles3, CoordSysT::MIN_ANGLE3); }
+    if (angle0Expanded && !isEqual(angles0[0], CoordSysT::MIN_ANGLE0)) { appendElement(&angles0, CoordSysT::MIN_ANGLE0); }
+    if (angle1Expanded && !isEqual(angles1[0], CoordSysT::MIN_ANGLE1)) { appendElement(&angles1, CoordSysT::MIN_ANGLE1); }
+    if (angle2Expanded && !isEqual(angles2[0], CoordSysT::MIN_ANGLE2)) { appendElement(&angles2, CoordSysT::MIN_ANGLE2); }
+    if (angle3Expanded && !isEqual(angles3[0], CoordSysT::MIN_ANGLE3)) { appendElement(&angles3, CoordSysT::MIN_ANGLE3); }
 
     const float maxAngle0 = CoordSysT::MAX_ANGLE0;
     const float maxAngle1 = CoordSysT::MAX_ANGLE1;
     const float maxAngle2 = CoordSysT::MAX_ANGLE2;
     const float maxAngle3 = CoordSysT::MAX_ANGLE3;
 
-    if (!isEqual(angles0[angles0.size() - 1], maxAngle0)) { appendElement(&angles0, maxAngle0); }
-    if (!isEqual(angles2[angles2.size() - 1], maxAngle2)) { appendElement(&angles2, maxAngle2); }
-    if (!isEqual(angles3[angles3.size() - 1], maxAngle3)) { appendElement(&angles3, maxAngle3); }
+    if (angle0Expanded && !isEqual(angles0[angles0.size() - 1], maxAngle0)) { appendElement(&angles0, maxAngle0); }
+    if (angle2Expanded && !isEqual(angles2[angles2.size() - 1], maxAngle2)) { appendElement(&angles2, maxAngle2); }
+    if (angle3Expanded && !isEqual(angles3[angles3.size() - 1], maxAngle3)) { appendElement(&angles3, maxAngle3); }
 
-    if (!samples_->isIsotropic() &&
+    if (angle1Expanded &&
+        !samples_->isIsotropic() &&
         !isEqual(angles1[angles1.size() - 1], maxAngle1)) {
         appendElement(&angles1, maxAngle1);
     }

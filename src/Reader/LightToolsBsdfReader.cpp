@@ -49,7 +49,10 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             std::string typeStr;
             ifs >> typeStr;
 
-            if (typeStr == "Asymmetric") {
+            if (typeStr == "PlaneSymmetrical") {
+                symmetryType = PLANE_SYMMETRICAL;
+            }
+            else if (typeStr == "Asymmetric") {
                 symmetryType = ASYMMETRICAL;
             }
             else {
@@ -341,6 +344,16 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
     SphericalCoordinatesBrdf* rotatedBrdf = rotateOutPhi(*brdf, -PI_2_F);
     rotatedBrdf->clampAngles();
     brdf->setSourceType(MEASURED_SOURCE);
+
+    SampleSet* rotSs = rotatedBrdf->getSampleSet();
+    rotSs->updateAngleAttributes();
+    if (rotSs->isOneSide()) {
+        SphericalCoordinatesBrdf* filledBrdf = fillSymmetricBrdf(rotatedBrdf);
+        filledBrdf->expandAngles(false, false, false, true);
+
+        delete rotatedBrdf;
+        rotatedBrdf = filledBrdf;
+    }
 
     delete brdf;
     return rotatedBrdf;

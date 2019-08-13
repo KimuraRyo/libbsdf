@@ -118,7 +118,10 @@ public:
      * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
      * and constructs the extrapolated sample set.
      */
-    virtual bool expandAngles() = 0;
+    virtual bool expandAngles(bool angle0Expanded = true,
+                              bool angle1Expanded = true,
+                              bool angle2Expanded = true,
+                              bool angle3Expanded = true) = 0;
 
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
     virtual void clampAngles() = 0;

@@ -179,22 +179,24 @@ void SampleSet::updateEqualIntervalAngles()
 
 void SampleSet::updateOneSide()
 {
-    bool contain_0_PI = false;
-    bool contain_PI_2PI = false;
+    bool containing_0_PI = false;
+    bool containing_PI_2PI = false;
+
+    const float offset = EPSILON_F * 2.0f;
 
     for (int i = 0; i < angles3_.size(); ++i) {
         float angle = angles3_[i];
 
-        if (angle > 0.0f && angle < PI_F) {
-            contain_0_PI = true;
+        if (angle > offset && angle < PI_F - offset * PI_F) {
+            containing_0_PI = true;
         }
 
-        if (angle > PI_F && angle < 2.0f * PI_F) {
-            contain_PI_2PI = true;
+        if (angle > PI_F + offset * PI_F && angle < 2.0f * PI_F - offset * 2.0f * PI_F) {
+            containing_PI_2PI = true;
         }
     }
 
-    oneSide_ = (!contain_0_PI || !contain_PI_2PI);
+    oneSide_ = (!containing_0_PI || !containing_PI_2PI);
 
     std::cout << "[SampleSet::updateOneSide] " << oneSide_ << std::endl;
 }
