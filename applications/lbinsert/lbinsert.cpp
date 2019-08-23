@@ -89,6 +89,7 @@ int main(int argc, char** argv)
     std::unique_ptr<SpecularCoordinatesBrdf> partialBrdf;
 
     // Load a partial BRDF file.
+    std::cout.setstate(std::ios_base::failbit);
     switch (partialFileType) {
         case ASTM_FILE: {
             std::unique_ptr<SphericalCoordinatesBrdf> brdf(AstmReader::read(partialFileName));
@@ -107,11 +108,25 @@ int main(int argc, char** argv)
             std::cerr << "Invalid file type: " << partialFileName << std::endl;
             return 1;
     }
+    std::cout.clear();
 
     if (!partialBrdf) {
         std::cerr << "Failed to load: " << partialFileName << std::endl;
         return 1;
     }
+
+    SampleSet* baseSs    = baseBrdf->getSampleSet();
+    SampleSet* partialSs = partialBrdf->getSampleSet();
+
+    // If two monochromatic data sets have different color modes, partial data is adjusted.
+    std::cout.setstate(std::ios_base::failbit);
+    if (!hasSameColor(*baseSs, *partialSs) &&
+        partialSs->getColorModel() == SPECTRAL_MODEL &&
+        partialSs->getNumWavelengths() == 1) {
+        partialSs->setColorModel(MONOCHROMATIC_MODEL);
+        partialSs->setWavelength(0, 0.0f);
+    }
+    std::cout.clear();
 
     // Read an incoming azimuthal angle.
     char* end;
