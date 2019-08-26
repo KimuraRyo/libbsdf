@@ -30,8 +30,11 @@ public:
                       const SpecularCoordinatesBrdf&    brdf,
                       const std::string&                comments = "");
 
-    /*! Converts and writes a DDR or DDT file. */
-    static void write(const std::string&    fileName,
+    /*!
+     * Converts and writes a DDR or DDT file.
+     * Samples are extrapolated using \a dataType if it is possible.
+     */
+    static bool write(const std::string&    fileName,
                       const Brdf&           brdf,
                       DataType              dataType,
                       const std::string&    comments = "");
@@ -40,6 +43,18 @@ public:
     static bool output(const SpecularCoordinatesBrdf&   brdf,
                        std::ostream&                    stream,
                        const std::string&               comments = "");
+
+    /*! Converts lb::Brdf to lb::SpecularCoordinatesBrdf. */
+    static SpecularCoordinatesBrdf* convert(const Brdf& brdf);
+
+    /*!
+     * Arranges a BRDF.
+     * Minimum and maximum angles are added, and spectra are extrapolated.
+     * BRDF is fixed if the sum of reflectances and transmittances exceed one.
+     * Spectra of samples are filled if incoming polar angle is 90 degrees
+     */
+    static SpecularCoordinatesBrdf* arrange(const SpecularCoordinatesBrdf&  brdf,
+                                            DataType                        dataType);
 };
 
 } // namespace lb
