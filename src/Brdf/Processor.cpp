@@ -495,16 +495,43 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
 
     if (brdf->getNumInPhi() >= 2) {
         if (isEqual(brdf->getInTheta(0), 0.0f)) {
+            const SpecularCoordinatesBrdf origBrdf = *brdf;
+
             // Equalize samples for incoming azimuthal angles if an incoming polar angle is 0.
             for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
             for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
-                Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
                 for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi(); ++inPhIndex) {
-                    sumSp += brdf->getSpectrum(0, inPhIndex, spThIndex, spPhIndex);
-                }
+                    Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
 
-                Spectrum sp = sumSp / brdf->getNumInPhi();
-                for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi(); ++inPhIndex) {
+                    for (int sampledInPhIndex = 0;
+                         sampledInPhIndex < brdf->getNumInPhi();
+                         ++sampledInPhIndex) {
+                        // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
+                        float inTheta   = EPSILON_F;
+                        float inPhi     = brdf->getInPhi(sampledInPhIndex);
+                        float specTheta = brdf->getSpecTheta(spThIndex);
+                        float specPhi   = brdf->getSpecPhi(spPhIndex);
+
+                        float currInPhi = brdf->getInPhi(inPhIndex);
+                        if (currInPhi < PI_2_F - EPSILON_F ||
+                            currInPhi > PI_F + PI_2_F - EPSILON_F) {
+                            specPhi -= inPhi;
+                        }
+                        else {
+                            specPhi -= inPhi - PI_F;
+                        }
+
+                        if (specPhi < 0.0f) {
+                            specPhi += 2.0f * PI_F;
+                        }
+                        else if (specPhi > 2.0f * PI_F) {
+                            specPhi -= 2.0f * PI_F;
+                        }
+
+                        sumSp += origBrdf.getSpectrum(inTheta, inPhi, specTheta, specPhi).cast<Arrayd::Scalar>();
+                    }
+
+                    Spectrum sp = sumSp.cast<Spectrum::Scalar>() / brdf->getNumInPhi();
                     brdf->setSpectrum(0, inPhIndex, spThIndex, spPhIndex, sp);
                 }
             }}
@@ -533,12 +560,12 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
             // Equalize samples for specular azimuthal angles if a specular polar angle is 0.
             for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
             for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
-                Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+                Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
                 for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, 0, spPhIndex);
+                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, 0, spPhIndex).cast<Arrayd::Scalar>();
                 }
 
-                Spectrum sp = sumSp / brdf->getNumSpecPhi();
+                Spectrum sp = sumSp.cast<Spectrum::Scalar>() / brdf->getNumSpecPhi();
                 for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
                     brdf->setSpectrum(inThIndex, inPhIndex, 0, spPhIndex, sp);
                 }
@@ -549,12 +576,12 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
             // Equalize samples for specular azimuthal angles if a specular polar angle is 2PI.
             for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
             for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();   ++inPhIndex) {
-                Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+                Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
                 for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex);
+                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex).cast<Arrayd::Scalar>();
                 }
 
-                Spectrum sp = sumSp / brdf->getNumSpecPhi();
+                Spectrum sp = sumSp.cast<Spectrum::Scalar>() / brdf->getNumSpecPhi();
                 for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
                     brdf->setSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex, sp);
                 }
