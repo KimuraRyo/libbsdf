@@ -742,12 +742,17 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
             sp = baseSs->getSpectrum(i0, i1, i2, i3);
         }
         else if (i1 == insertedIndex) {
+            float inTheta = ss->getAngle0(i0);
+
+            // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
+            float offsetInTheta = std::max(inTheta, EPSILON_F);
+
             Vec3 inDir, outDir;
-            insertedBrdf.toXyz(insertedSs->getAngle0(i0),
-                               insertedSs->getAngle1(i1),
-                               insertedSs->getAngle2(i2),
-                               insertedSs->getAngle3(i3) - inPhi,
-                               &inDir, &outDir);
+            brdf->toXyz(offsetInTheta,
+                        ss->getAngle1(i1),
+                        ss->getAngle2(i2),
+                        ss->getAngle3(i3),
+                        &inDir, &outDir);
             sp = insertedBrdf.getSpectrum(inDir, outDir);
         }
         else {
