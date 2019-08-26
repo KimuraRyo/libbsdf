@@ -100,6 +100,15 @@ public:
                                    Vec3*    inDir,
                                    Vec3*    outDir) const;
 
+    /*!
+     * Computes outgoing directions of a Cartesian coordinate system
+     * using a set of angle indices.
+     */
+    Vec3 getOutDirection(int index0,
+                         int index1,
+                         int index2,
+                         int index3) const;
+
     /*! Gets the spectrum of the BRDF at a set of angles. */
     Spectrum getSpectrum(float inTheta,
                          float inPhi,
@@ -266,18 +275,32 @@ inline void SpecularCoordinatesBrdf::getInOutDirection(int      index0,
         return;
     }
 
-    float inTheta = samples_->getAngle0(index0);
+    float inTheta = getInTheta(index0);
+    float inPhi   = getInPhi(index1);
 
-    *inDir = SphericalCoordinateSystem::toXyz(inTheta,
-                                              samples_->getAngle1(index1));
-    inDir->normalize();
+    *inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
 
     float offset = getSpecularOffset(inTheta);
     *outDir = SpecularCoordinateSystem::toOutDirXyz(inTheta + offset,
-                                                    samples_->getAngle1(index1),
-                                                    samples_->getAngle2(index2),
-                                                    samples_->getAngle3(index3));
-    outDir->normalize();
+                                                    inPhi,
+                                                    getSpecTheta(index2),
+                                                    getSpecPhi(index3));
+}
+
+inline Vec3 SpecularCoordinatesBrdf::getOutDirection(int index0,
+                                                     int index1,
+                                                     int index2,
+                                                     int index3) const
+{
+    float inTheta = getInTheta(index0);
+    float inPhi   = getInPhi(index1);
+
+    float offset = getSpecularOffset(inTheta);
+    Vec3 outDir = SpecularCoordinateSystem::toOutDirXyz(inTheta + offset,
+                                                        inPhi,
+                                                        getSpecTheta(index2),
+                                                        getSpecPhi(index3));
+    return outDir;
 }
 
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta,

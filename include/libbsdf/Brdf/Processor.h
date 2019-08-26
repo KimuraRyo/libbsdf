@@ -107,7 +107,7 @@ void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
  */
 void fillBackSide(SpecularCoordinatesBrdf* brdf);
 
-/*! \brief Averages samples with overlapping angles. */
+/*! \brief Averages samples for overlapping angles. */
 void equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf);
 
 /*!
@@ -152,7 +152,7 @@ void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float inc
  *
  * Fixes values at the end of azimuthal angles if the start and end points have the same angle.
  */
-void copySpectraFromPhiOfZeroTo2PI(SampleSet* samples);
+void copySpectraFromPhiOf0To360(SampleSet* samples);
 
 /*! \brief Fills spectra of samples if incoming polar angle is 90 degrees. */
 bool fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value = 0.0);

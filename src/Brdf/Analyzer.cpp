@@ -69,13 +69,19 @@ Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThInd
     sumSpectrum.resize(brdf.getSampleSet()->getNumWavelengths());
     sumSpectrum.setZero();
 
+    float inTheta = brdf.getInTheta(inThIndex);
+    float inPhi   = brdf.getInPhi(inPhIndex);
+
+    // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
+    float offsetInTheta = std::max(inTheta, EPSILON_F);
+    Vec3 inDir = SphericalCoordinateSystem::toXyz(offsetInTheta, inPhi);
+
     for (int thIndex = 0; thIndex < brdf.getNumSpecTheta() - 1; ++thIndex) {
     for (int phIndex = 0; phIndex < brdf.getNumSpecPhi()   - 1; ++phIndex) {
-        Vec3 inDir, outDir0, outDir1, outDir2, outDir3;
-        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex,     phIndex,     &inDir, &outDir0);
-        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex,     phIndex + 1, &inDir, &outDir1);
-        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex + 1, &inDir, &outDir2);
-        brdf.getInOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex,     &inDir, &outDir3);
+        Vec3 outDir0 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex,     phIndex);
+        Vec3 outDir1 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex,     phIndex + 1);
+        Vec3 outDir2 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex + 1);
+        Vec3 outDir3 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex);
 
         Vec3 centroid;
         double solidAngle = SolidAngle::fromRectangleOnHemisphere(outDir0, outDir1, outDir2, outDir3, &centroid);

@@ -258,9 +258,6 @@ void CoordinatesBrdf<CoordSysT>::getInOutDirection(int      index0,
                      samples_->getAngle2(index2),
                      samples_->getAngle3(index3),
                      inDir, outDir);
-
-    inDir->normalize();
-    outDir->normalize();
 }
 
 template <typename CoordSysT>

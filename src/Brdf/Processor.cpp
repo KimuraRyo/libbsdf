@@ -878,7 +878,7 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
     delete gRefs;
 }
 
-void lb::copySpectraFromPhiOfZeroTo2PI(SampleSet* samples)
+void lb::copySpectraFromPhiOf0To360(SampleSet* samples)
 {
     if (samples->getNumAngles1() >= 2 &&
         samples->getAngle1(0) == 0.0f &&
