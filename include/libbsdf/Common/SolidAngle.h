@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#ifndef SOLID_ANGLE_UTILITY_H
-#define SOLID_ANGLE_UTILITY_H
+#ifndef LIBBSDF_SOLID_ANGLE_UTILITY_H
+#define LIBBSDF_SOLID_ANGLE_UTILITY_H
 
 #include <cmath>
 
@@ -88,4 +88,4 @@ inline Vec3 SolidAngle::computeBound(const Vec3& v0, const Vec3& v1)
 
 } // namespace lb
 
-#endif // SOLID_ANGLE_UTILITY_H
+#endif // LIBBSDF_SOLID_ANGLE_UTILITY_H
