@@ -9,13 +9,13 @@
 #include <libbsdf/Reader/AstmReader.h>
 
 #include <fstream>
-#include <iostream>
 #include <iterator>
 #include <set>
 #include <sstream>
 
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Brdf/SphericalCoordinatesRandomSampleSet.h>
+#include <libbsdf/Common/Log.h>
 
 using namespace lb;
 
@@ -24,7 +24,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     // std::ios_base::binary is used to read line endings of CR+LF and LF.
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[AstmReader::read] Could not open: " << fileName << std::endl;
+        lbError << "[AstmReader::read] Could not open: " << fileName;
         return 0;
     }
 
@@ -42,7 +42,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         else if (headStr == "NUM_POINTS") {
             int numPoints;
             ifs >> numPoints;
-            std::cout << "[AstmReader::read] NUM_POINTS: " << numPoints << std::endl;
+            lbInfo << "[AstmReader::read] NUM_POINTS: " << numPoints;
         }
         else if (headStr == "VARS") {
             ifs.ignore(1);
@@ -167,10 +167,9 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
         auto it = samples.find(angles);
         if (it != samples.end()) {
-            std::cout
+            lbWarn
                 << "[AstmReader::read] Already defined: "
-                << angles.at(0) << ", " << angles.at(1) << ", " << angles.at(2) << ", " << angles.at(3)
-                << std::endl;
+                << angles.at(0) << ", " << angles.at(1) << ", " << angles.at(2) << ", " << angles.at(3);
             continue;
         }
         
@@ -236,7 +235,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
     rss.setupBrdf(brdf);
 
-    std::cout << "[AstmReader::read] One side of the plane of incidence: " << ss->isOneSide() << std::endl;
+    lbInfo << "[AstmReader::read] One side of the plane of incidence: " << ss->isOneSide();
 
     if (ss->isOneSide()) {
         SphericalCoordinatesBrdf* filledBrdf = fillSymmetricBrdf(brdf);
@@ -244,7 +243,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         brdf = filledBrdf;
     }
 
-    std::cout << "[AstmReader::read] The number of sample points: " << samples.size() << std::endl;
+    lbInfo << "[AstmReader::read] The number of sample points: " << samples.size();
 
     brdf->clampAngles();
     brdf->setSourceType(MEASURED_SOURCE);

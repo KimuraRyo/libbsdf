@@ -8,7 +8,7 @@
 
 #include <libbsdf/Common/SolidAngle.h>
 
-#include <iostream>
+#include <libbsdf/Common/Log.h>
 
 using namespace lb;
 
@@ -204,7 +204,7 @@ double SolidAngle::fromRectangleOnHemisphere(const Vec3&    v0,
     }
 
     else {
-        std::cerr << "[SolidAngle::fromRectangleOnHemisphere] Failed to compute a solid angle." << std::endl;
+        lbError << "[SolidAngle::fromRectangleOnHemisphere] Failed to compute a solid angle.";
         return 0.0;
     }
 }

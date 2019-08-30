@@ -8,14 +8,13 @@
 
 #include <libbsdf/Brdf/Analyzer.h>
 
-#include <iostream>
-
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/SampleSet.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/SolidAngle.h>
 
 #include <libbsdf/ReflectanceModel/Fresnel.h>
@@ -126,11 +125,8 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
     const SampleSet* ss = brdf.getSampleSet();
     const SampleSet* standardSs = standardBrdf.getSampleSet();
 
-    if (ss->getNumWavelengths() != standardSs->getNumWavelengths() ||
-        !ss->getWavelengths().isApprox(standardSs->getWavelengths())) {
-        std::cerr
-            << "[lb::computeSpecularReflectances] Wavelengths do not match."
-            << std::endl;
+    if (!hasSameColor(*ss, *standardSs)) {
+        lbError << "[lb::computeSpecularReflectances] Color models or wavelengths do not match.";
         return 0;
     }
 
@@ -173,11 +169,8 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
     const SampleSet* ss = brdf.getSampleSet();
     const SampleSet* standardSs = standardBrdf.getSampleSet();
 
-    if (ss->getNumWavelengths() != standardSs->getNumWavelengths() ||
-        !ss->getWavelengths().isApprox(standardSs->getWavelengths())) {
-        std::cerr
-            << "[lb::computeSpecularReflectances] Wavelengths do not match."
-            << std::endl;
+    if (!hasSameColor(*ss, *standardSs)) {
+        lbError << "[lb::computeSpecularReflectances] Color models or wavelengths do not match.";
         return 0;
     }
 

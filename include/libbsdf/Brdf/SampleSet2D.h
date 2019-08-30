@@ -9,10 +9,9 @@
 #ifndef LIBBSDF_SAMPLE_SET_2D_H
 #define LIBBSDF_SAMPLE_SET_2D_H
 
-#include <iostream>
-
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 #include <libbsdf/Common/Vector.h>
 
@@ -287,40 +286,18 @@ inline bool SampleSet2D::isIsotropic() const { return (phiAngles_.size() == 1); 
 template <typename InterpolatorT>
 bool SampleSet2D::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples)
 {
-    std::cout << "[SampleSet2D::initializeSpectra]" << std::endl;
+    lbTrace << "[SampleSet2D::initializeSpectra]";
 
-    bool same = true;
-
-    if (baseSamples.getColorModel() != samples->getColorModel()) {
-        same = false;
-        std::cerr
-            << "[SampleSet2D::initializeSpectra] Color models do not match: "
-            << baseSamples.getColorModel() << ", " << samples->getColorModel()
-            << std::endl;
+    if (!hasSameColor(baseSamples, *samples)) {
+        lbError << "[SampleSet2D::initializeSpectra] Color models or wavelengths do not match.";
+        return false;
     }
-
-    if (!baseSamples.getWavelengths().isApprox(samples->getWavelengths())) {
-        same = false;
-        std::cerr
-            << "[SampleSet2D::initializeSpectra] Wavelengths do not match: "
-            << baseSamples.getWavelengths() << ", " << samples->getWavelengths()
-            << std::endl;
-    }
-
-    if (!same) return false;
-
-    //if (!hasSameColor(baseSamples, *samples)) {
-    //    std::cerr
-    //        << "[lb::initializeSpectra] Color models or wavelengths do not match."
-    //        << std::endl;
-    //    return false;
-    //}
 
     for (int i0 = 0; i0 < samples->getNumTheta(); ++i0) {
     for (int i1 = 0; i1 < samples->getNumPhi();   ++i1) {
         Spectrum sp;
         float theta = samples->getTheta(i0);
-        float phi = samples->getPhi(i1);
+        float phi   = samples->getPhi(i1);
         InterpolatorT::getSpectrum(baseSamples, theta, phi, &sp);
 
         samples->setSpectrum(i0, i1, sp);

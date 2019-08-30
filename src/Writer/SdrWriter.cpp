@@ -9,9 +9,9 @@
 #include <libbsdf/Writer/SdrWriter.h>
 
 #include <fstream>
-#include <iostream>
 
 #include <libbsdf/Brdf/SampleSet2D.h>
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Version.h>
 
@@ -23,7 +23,7 @@ bool SdrWriter::write(const std::string& fileName,
 {
     std::ofstream fout(fileName.c_str());
     if (fout.fail()) {
-        std::cerr << "[SdrReader::write] Could not open: " << fileName << std::endl;
+        lbError << "[SdrReader::write] Could not open: " << fileName;
         return false;
     }
 

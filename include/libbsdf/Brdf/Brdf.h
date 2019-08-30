@@ -9,12 +9,12 @@
 #ifndef LIBBSDF_BRDF_H
 #define LIBBSDF_BRDF_H
 
-#include <iostream>
-
 #include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Brdf/SampleSet.h>
 
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Utility.h>
+#include <libbsdf/Common/Log.h>
 
 namespace lb {
 
@@ -155,30 +155,15 @@ inline void Brdf::setSourceType(SourceType type) { sourceType_ = type; }
 template <typename InterpolatorT>
 bool Brdf::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
 {
-    std::cout << "[Brdf::initializeSpectra]" << std::endl;
+    lbTrace << "[Brdf::initializeSpectra]";
 
     const SampleSet* baseSs = baseBrdf.getSampleSet();
     SampleSet* ss = brdf->getSampleSet();
 
-    bool same = true;
-
-    if (baseSs->getColorModel() != ss->getColorModel()) {
-        same = false;
-        std::cerr
-            << "[Brdf::initializeSpectra] Color models do not match: "
-            << baseSs->getColorModel() << ", " << ss->getColorModel()
-            << std::endl;
+    if (!hasSameColor(*baseSs, *ss)) {
+        lbError << "[Brdf::initializeSpectra] Color models or wavelengths do not match.";
+        return false;
     }
-
-    if (!baseSs->getWavelengths().isApprox(ss->getWavelengths())) {
-        same = false;
-        std::cerr
-            << "[Brdf::initializeSpectra] Wavelengths do not match: "
-            << baseSs->getWavelengths() << ", " << ss->getWavelengths()
-            << std::endl;
-    }
-
-    if (!same) return false;
 
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {

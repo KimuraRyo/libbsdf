@@ -11,6 +11,7 @@
 #include <fstream>
 
 #include <libbsdf/Brdf/Analyzer.h>
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Reader/DdrSdrUtility.h>
 
 using namespace lb;
@@ -20,7 +21,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
     // std::ios_base::binary is used to read line endings of CR+LF and LF.
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[DdrReader::read] Could not open: " << fileName << std::endl;
+        lbError << "[DdrReader::read] Could not open: " << fileName;
         return 0;
     }
 
@@ -222,7 +223,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
     if (inThetaDegrees.empty() ||
         spThetaDegrees.empty() ||
         spPhiDegrees.empty()) {
-        std::cerr << "[DdrReader::read] Invalid format." << std::endl;
+        lbError << "[DdrReader::read] Invalid format.";
         return 0;
     }
 
@@ -339,7 +340,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                     char* end;
                     double brdfValue = std::strtod(brdfValueStr.c_str(), &end);
                     if (*end != '\0') {
-                        std::cerr << "[DdrReader::read] Invalid value: " << brdfValueStr << std::endl;
+                        lbError << "[DdrReader::read] Invalid value: " << brdfValueStr;
                         delete brdf;
                         return 0;
                     }
@@ -367,7 +368,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                     }
 
                     if (ifs.fail()) {
-                        std::cerr << "[DdrReader::read] Invalid format: " << brdfValue << std::endl;
+                        lbError << "[DdrReader::read] Invalid format: " << brdfValue;
                         delete brdf;
                         return 0;
                     }
@@ -383,7 +384,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
         }
 
         if (ifs.fail()) {
-            std::cerr << "[DdrReader::read] Invalid format. Head of line: " << dataStr << std::endl;
+            lbError << "[DdrReader::read] Invalid format. Head of line: " << dataStr;
             delete brdf;
             return 0;
         }

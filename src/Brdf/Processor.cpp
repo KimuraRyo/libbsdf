@@ -8,8 +8,6 @@
 
 #include <libbsdf/Brdf/Processor.h>
 
-#include <iostream>
-
 #include <libbsdf/Brdf/Analyzer.h>
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/RandomSampleSet.h>
@@ -18,6 +16,7 @@
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
 #include <libbsdf/Common/Array.h>
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 using namespace lb;
@@ -711,16 +710,16 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
     }
 
     if (insertedSs->getNumAngles1() != 1) {
-        std::cerr
+        lbError
             << "[lb::insertBrdfAlongInPhi] The number of incoming azimuthal angles must be 1. The number of angles: "
-            << insertedSs->getNumAngles1() << std::endl;
+            << insertedSs->getNumAngles1();
         return 0;
     }
 
     if (inPhi < 0.0f || inPhi > 2.0f * PI_F) {
-        std::cerr
+        lbError
             << "[lb::insertBrdfAlongInPhi] Specified incoming azimuthal angle is out of range: "
-            << inPhi << std::endl;
+            << inPhi;
         return 0;
     }
 
@@ -728,9 +727,9 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
     int insertedIndex = baseSs->getNumAngles1();
     for (int i = 0; i < baseSs->getNumAngles1(); ++i) {
         if (isEqual(baseSs->getAngle1(i), inPhi)) {
-            std::cerr
+            lbError
                 << "[lb::insertBrdfAlongInPhi] Specified incoming azimuthal angle is already used: "
-                << inPhi << std::endl;
+                << inPhi;
             return 0;
         }
 
@@ -907,7 +906,7 @@ bool lb::fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value)
 {
     if (!dynamic_cast<SpecularCoordinatesBrdf*>(brdf) &&
         !dynamic_cast<SphericalCoordinatesBrdf*>(brdf)) {
-        std::cerr << "[fillSpectraAtInThetaOf90] Unsupported type of BRDF" << std::endl;
+        lbError << "[fillSpectraAtInThetaOf90] Unsupported type of BRDF";
         return false;
     }
 
@@ -932,7 +931,7 @@ void lb::xyzToSrgb(SampleSet* samples)
 {
     ColorModel cm = samples->getColorModel();
     if (cm != XYZ_MODEL) {
-        std::cerr << "[xyzToSrgb] Not CIE-XYZ model: " << cm << std::endl;
+        lbError << "[xyzToSrgb] Not CIE-XYZ model: " << cm;
         return;
     }
 
@@ -968,7 +967,7 @@ bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
 
     if (ss0->getColorModel() != ss1->getColorModel() ||
         ss0->getColorModel() != ss->getColorModel()) {
-        std::cerr << "[subtract] Color models are not identical." << std::endl;
+        lbError << "[subtract] Color models are not identical.";
         return false;
     }
 
@@ -977,7 +976,7 @@ bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
     const Arrayf& wls = ss->getWavelengths();
     if (!wls0.isApprox(wls1) ||
         !wls0.isApprox(wls)) {
-        std::cerr << "[subtract] Wavelengths are not identical." << std::endl;
+        lbError << "[subtract] Wavelengths are not identical.";
         return false;
     }
 

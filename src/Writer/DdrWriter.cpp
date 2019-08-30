@@ -9,12 +9,12 @@
 #include <libbsdf/Writer/DdrWriter.h>
 
 #include <fstream>
-#include <iostream>
 #include <memory>
 
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Version.h>
 
@@ -26,7 +26,7 @@ bool DdrWriter::write(const std::string&                fileName,
 {
     std::ofstream fout(fileName.c_str());
     if (fout.fail()) {
-        std::cerr << "[DdrReader::write] Could not open: " << fileName << std::endl;
+        lbError << "[DdrReader::write] Could not open: " << fileName;
         return false;
     }
 
@@ -39,7 +39,7 @@ bool DdrWriter::write(const std::string&    fileName,
                       const std::string&    comments)
 {
     if (!brdf.getSampleSet()->validate()) {
-        std::cerr << "[DdrReader::write] BRDF data is invalid." << std::endl;
+        lbError << "[DdrReader::write] BRDF data is invalid.";
         return false;
     }
 
@@ -54,7 +54,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf&   brdf,
                        const std::string&               comments)
 {
     if (!brdf.getSampleSet()->validate()) {
-        std::cerr << "[DdrReader::write] BRDF data is invalid." << std::endl;
+        lbError << "[DdrReader::write] BRDF data is invalid.";
         return false;
     }
 

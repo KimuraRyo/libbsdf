@@ -9,10 +9,10 @@
 #include <libbsdf/Reader/LightToolsBsdfReader.h>
 
 #include <fstream>
-#include <iostream>
 #include <set>
 
 #include <libbsdf/Brdf/Processor.h>
+#include <libbsdf/Common/Log.h>
 
 using namespace lb;
 
@@ -21,7 +21,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
     // std::ios_base::binary is used to read line endings of CR+LF and LF.
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[LightToolsBsdfReader::read] Could not open: " << fileName << std::endl;
+        lbError << "[LightToolsBsdfReader::read] Could not open: " << fileName;
         return 0;
     }
 
@@ -107,7 +107,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
 
     if (outThetaDegrees.empty() ||
         outPhiDegrees.empty()) {
-        std::cerr << "[LightToolsBsdfReader::read] Invalid format." << std::endl;
+        lbError << "[LightToolsBsdfReader::read] Invalid format.";
         return 0;
     }
 
@@ -292,7 +292,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
     }
 
     if (brdfData.size() != inThetaDegrees.size() * numChannels) {
-        std::cerr << "[LightToolsBsdfReader::createBrdf] Invalid format." << std::endl;
+        lbError << "[LightToolsBsdfReader::createBrdf] Invalid format.";
         return 0;
     }
 
@@ -337,7 +337,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
             sp[channelIndex] = data->samples[index];
         }}
 
-        std::cout << "[LightToolsBsdfReader::read] TIS(inThIndex: " << inThIndex << "): " << data->tis << std::endl;
+        lbInfo << "[LightToolsBsdfReader::read] TIS(inThIndex: " << inThIndex << "): " << data->tis;
     }
 
     // An incoming azimuthal angle of an isotropic LightTools BSDF is 90 degrees.

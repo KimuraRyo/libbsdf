@@ -13,6 +13,7 @@
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Version.h>
 
 #include <libbsdf/Reader/AstmReader.h>
@@ -32,35 +33,41 @@ using namespace lb;
 
 int main(int argc, char** argv)
 {
+    Log::setNotificationLevel(Log::Level::ERROR_MSG);
+
     ArgumentParser ap(argc, argv);
 
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
-        std::cout << "Usage: lbconv [options ...] in_file out_file" << std::endl;
-        std::cout << std::endl;
-        std::cout << "lbconv converts a BRDF/BTDF file to an Integra BRDF/BTDF file." << std::endl;
-        std::cout << std::endl;
-        std::cout << "Positional Arguments:" << std::endl;
-        std::cout << "  in_file     Name of an input BRDF/BTDF file." << std::endl;
-        std::cout << "              Valid formats:" << std::endl;
-        std::cout << "                  Integra Diffuse Distribution (\".ddr, .ddt\")" << std::endl;
-        std::cout << "                  Zemax BSDF (\".bsdf\")" << std::endl;
-        std::cout << "                  ASTM E1392-96(2002) (\".astm\")" << std::endl;
-        std::cout << "  out_file    Name of an output BRDF/BTDF file." << std::endl;
-        std::cout << "              \".ddr\" for BRDF or \".ddt\" for BTDF is acceptable as a suffix." << std::endl;
-        std::cout << "              If an appropriate suffix is not obtained, \".ddr\" or \".ddt\" is appended." << std::endl;
-        std::cout << std::endl;
-        std::cout << "Options:" << std::endl;
-        std::cout << "  -h, --help      show this help message and exit" << std::endl;
-        std::cout << "  -v, --version   show program's version number and exit" << std::endl;
-        std::cout << "  -scatterType    set either BRDF or BTDF for the input ASTM file (default: BRDF)" << std::endl;
-        std::cout << "  -arrangement    arrange BRDF/BTDF with extrapolate and conservation of energy." << std::endl;
+        cout << "Usage: lbconv [options ...] in_file out_file" << endl;
+        cout << endl;
+        cout << "lbconv converts a BRDF/BTDF file to an Integra BRDF/BTDF file." << endl;
+        cout << endl;
+        cout << "Positional Arguments:" << endl;
+        cout << "  in_file  Name of an input BRDF/BTDF file." << endl;
+        cout << "           Valid formats:" << endl;
+        cout << "               Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
+        cout << "               Zemax BSDF (\".bsdf\")" << endl;
+        cout << "               ASTM E1392-96(2002) (\".astm\")" << endl;
+        cout << "  out_file Name of an output BRDF/BTDF file." << endl;
+        cout << "           \".ddr\" for BRDF or \".ddt\" for BTDF is acceptable as a suffix." << endl;
+        cout << "           If an appropriate suffix is not obtained, \".ddr\" or \".ddt\" is appended." << endl;
+        cout << endl;
+        cout << "Options:" << endl;
+        cout << "  -h, --help       show this help message and exit" << endl;
+        cout << "  -v, --version    show program's version number and exit" << endl;
+        cout << "  -scatterType     set either BRDF or BTDF for the input ASTM file (default: BRDF)" << endl;
+        cout << "  -arrangement     arrange BRDF/BTDF with extrapolate and conservation of energy." << endl;
         return 0;
     }
 
     const std::string version("1.0.0");
 
     if (ap.read("-v") || ap.read("--version")) {
-        std::cout << "Version: lbconv " << version << " (libbsdf-" << getVersion() << ")" << std::endl;
+        cout << "Version: lbconv " << version << " (libbsdf-" << getVersion() << ")" << endl;
         return 0;
     }
 
@@ -74,7 +81,7 @@ int main(int argc, char** argv)
             dataType = BTDF_DATA;
         }
         else {
-            std::cerr << "Invalid scatter type: " << dataTypeStr << std::endl;
+            cerr << "Invalid scatter type: " << dataTypeStr << endl;
             return 1;
         }
     }
@@ -93,8 +100,6 @@ int main(int argc, char** argv)
 
     std::unique_ptr<Brdf> inBrdf;
 
-    std::cout.setstate(std::ios_base::failbit);
-
     // Load a BRDF/BTDF file.
     switch (inFileType) {
         case ASTM_FILE:
@@ -112,12 +117,12 @@ int main(int argc, char** argv)
             inBrdf.reset(ZemaxBsdfReader::read(inFileName, &dataType));
             break;
         default:
-            std::cerr << "Invalid file type: " << inFileName << std::endl;
+            cerr << "Invalid file type: " << inFileName << endl;
             return 1;
     }
 
     if (!inBrdf) {
-        std::cerr << "Failed to load: " << inFileName << std::endl;
+        cerr << "Failed to load: " << inFileName << endl;
         return 1;
     }
 
@@ -142,12 +147,11 @@ int main(int argc, char** argv)
 
     // Save a DDR or DDT file.
     if (DdrWriter::write(outFileName, *outBrdf, comments)) {
+        cout << "Converted: " << outFileName << endl;
         return 0;
     }
     else {
-        std::cerr << "Failed to save: " << outFileName << std::endl;
+        cerr << "Failed to save: " << outFileName << endl;
         return 1;
     }
-
-    std::cout.clear();
 }

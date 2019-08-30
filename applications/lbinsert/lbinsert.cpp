@@ -13,6 +13,7 @@
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Version.h>
 
 #include <libbsdf/Reader/AstmReader.h>
@@ -31,32 +32,38 @@ using namespace lb;
 
 int main(int argc, char** argv)
 {
+    Log::setNotificationLevel(Log::Level::ERROR_MSG);
+
     ArgumentParser ap(argc, argv);
 
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
-        std::cout << "Usage: lbinsert [options ...] partial_file angle base_file" << std::endl;
-        std::cout << std::endl;
-        std::cout << "lbinsert inserts a BRDF with an incoming azimuthal angle into a base BRDF." << std::endl;
-        std::cout << "Two files must have the same type of color." << std::endl;
-        std::cout << std::endl;
-        std::cout << "Positional Arguments:" << std::endl;
-        std::cout << "  partial_file    Name of a BRDF file inserted into a base BRDF." << std::endl;
-        std::cout << "                  This BRDF must have an incoming azimuthal angle." << std::endl;
-        std::cout << "                  \".ddr\" or \".astm\" is acceptable as a suffix." << std::endl;
-        std::cout << "  angle           Incoming azimuthal angle in degrees" << std::endl;
-        std::cout << "  base_file       Name of a base BRDF file." << std::endl;
-        std::cout << "                  \".ddr\" is acceptable as a suffix." << std::endl;
-        std::cout << std::endl;
-        std::cout << "Options:" << std::endl;
-        std::cout << "  -h, --help      show this help message and exit" << std::endl;
-        std::cout << "  -v, --version   show program's version number and exit" << std::endl;
+        cout << "Usage: lbinsert [options ...] partial_file angle base_file" << endl;
+        cout << endl;
+        cout << "lbinsert inserts a BRDF with an incoming azimuthal angle into a base BRDF." << endl;
+        cout << "Two files must have the same type of color." << endl;
+        cout << endl;
+        cout << "Positional Arguments:" << endl;
+        cout << "  partial_file Name of a BRDF file inserted into a base BRDF." << endl;
+        cout << "               This BRDF must have an incoming azimuthal angle." << endl;
+        cout << "               \".ddr\" or \".astm\" is acceptable as a suffix." << endl;
+        cout << "  angle        Incoming azimuthal angle in degrees" << endl;
+        cout << "  base_file    Name of a base BRDF file." << endl;
+        cout << "               \".ddr\" is acceptable as a suffix." << endl;
+        cout << endl;
+        cout << "Options:" << endl;
+        cout << "  -h, --help       show this help message and exit" << endl;
+        cout << "  -v, --version    show program's version number and exit" << endl;
         return 0;
     }
 
     const std::string version("1.0.0");
 
     if (ap.read("-v") || ap.read("--version")) {
-        std::cout << "Version: lbinsert " << version << " (libbsdf-" << getVersion() << ")" << std::endl;
+        cout << "Version: lbinsert " << version << " (libbsdf-" << getVersion() << ")" << endl;
         return 0;
     }
 
@@ -77,24 +84,23 @@ int main(int argc, char** argv)
             baseBrdf.reset(DdrReader::read(baseFileName));
             break;
         default:
-            std::cerr << "Invalid file type: " << baseFileName << std::endl;
+            cerr << "Invalid file type: " << baseFileName << endl;
             return 1;
     }
 
     if (!baseBrdf) {
-        std::cerr << "Failed to load: " << baseFileName << std::endl;
+        cerr << "Failed to load: " << baseFileName << endl;
         return 1;
     }
 
     std::unique_ptr<SpecularCoordinatesBrdf> partialBrdf;
 
     // Load a partial BRDF file.
-    std::cout.setstate(std::ios_base::failbit);
     switch (partialFileType) {
         case ASTM_FILE: {
             std::unique_ptr<SphericalCoordinatesBrdf> brdf(AstmReader::read(partialFileName));
             if (!brdf) {
-                std::cerr << "Failed to load: " << partialFileName << std::endl;
+                cerr << "Failed to load: " << partialFileName << endl;
                 return 1;
             }
 
@@ -105,13 +111,12 @@ int main(int argc, char** argv)
             partialBrdf.reset(DdrReader::read(partialFileName));
             break;
         default:
-            std::cerr << "Invalid file type: " << partialFileName << std::endl;
+            cerr << "Invalid file type: " << partialFileName << endl;
             return 1;
     }
-    std::cout.clear();
 
     if (!partialBrdf) {
-        std::cerr << "Failed to load: " << partialFileName << std::endl;
+        cerr << "Failed to load: " << partialFileName << endl;
         return 1;
     }
 
@@ -119,20 +124,18 @@ int main(int argc, char** argv)
     SampleSet* partialSs = partialBrdf->getSampleSet();
 
     // If two monochromatic data sets have different color modes, partial data is adjusted.
-    std::cout.setstate(std::ios_base::failbit);
     if (!hasSameColor(*baseSs, *partialSs) &&
         partialSs->getColorModel() == SPECTRAL_MODEL &&
         partialSs->getNumWavelengths() == 1) {
         partialSs->setColorModel(MONOCHROMATIC_MODEL);
         partialSs->setWavelength(0, 0.0f);
     }
-    std::cout.clear();
 
     // Read an incoming azimuthal angle.
     char* end;
     double inPhiDegree = std::strtod(angleStr.c_str(), &end);
     if (*end != '\0') {
-        std::cerr << "Invalid value: " << angleStr << std::endl;
+        cerr << "Invalid value: " << angleStr << endl;
         return 1;
     }
 

@@ -10,6 +10,8 @@
 
 #include <fstream>
 
+#include <libbsdf/Common/Log.h>
+
 using namespace lb;
 
 void reader_utility::ignoreCommentLines(std::istream& stream, const std::string& lineHead)
@@ -80,7 +82,7 @@ FileType reader_utility::classifyFile(const std::string& fileName)
     // std::ios_base::binary is used to read line endings of CR+LF and LF.
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[reader_utility::classifyFile] Could not open: " << fileName << std::endl;
+        lbError << "[reader_utility::classifyFile] Could not open: " << fileName;
         return UNKNOWN_FILE;
     }
 

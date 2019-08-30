@@ -14,11 +14,10 @@
 #ifndef LIBBSDF_UTILITY_H
 #define LIBBSDF_UTILITY_H
 
-#include <iostream>
-
 #include <libbsdf/Common/CentripetalCatmullRomSpline.h>
 #include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Vector.h>
 
 namespace lb {
@@ -202,24 +201,24 @@ T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
 template <typename T>
 bool hasSameColor(const T& ss0, const T& ss1)
 {
+    bool same = true;
+
     if (ss0.getColorModel() != ss1.getColorModel()) {
-        std::cout
+        lbInfo
             << "[lb::hasSameColor] Color models do not match: "
-            << ss0.getColorModel() << ", " << ss1.getColorModel()
-            << std::endl;
-        return false;
+            << ss0.getColorModel() << ", " << ss1.getColorModel();
+        same = false;
     }
 
     if (ss0.getNumWavelengths() != ss1.getNumWavelengths() ||
         !ss0.getWavelengths().isApprox(ss1.getWavelengths())) {
-        std::cout
+        lbInfo
             << "[lb::hasSameColor] Wavelengths do not match: "
-            << ss0.getWavelengths() << ", " << ss1.getWavelengths()
-            << std::endl;
-        return false;
+            << ss0.getWavelengths() << ", " << ss1.getWavelengths();
+        same = false;
     }
 
-    return true;
+    return same;
 }
 
 template <typename Vec3T>

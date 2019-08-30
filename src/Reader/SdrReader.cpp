@@ -9,8 +9,8 @@
 #include <libbsdf/Reader/SdrReader.h>
 
 #include <fstream>
-#include <iostream>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Reader/DdrSdrUtility.h>
 
 using namespace lb;
@@ -20,7 +20,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
     // std::ios_base::binary is used to read line endings of CR+LF and LF.
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[SdrReader::read] Could not open: " << fileName << std::endl;
+        lbError << "[SdrReader::read] Could not open: " << fileName;
         return 0;
     }
 
@@ -105,7 +105,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
     }
 
     if (inThetaDegrees.empty()) {
-        std::cerr << "[SdrReader::read] Invalid format." << std::endl;
+        lbError << "[SdrReader::read] Invalid format.";
         return 0;
     }
 
@@ -153,7 +153,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
                 char* end;
                 float srValue = static_cast<float>(std::strtod(srValueStr.c_str(), &end));
                 if (*end != '\0') {
-                    std::cerr << "[SdrReader::read] Invalid value: " << srValueStr << std::endl;
+                    lbError << "[SdrReader::read] Invalid value: " << srValueStr;
                     delete ss2;
                     return 0;
                 }
@@ -161,7 +161,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
                 ss2->getSpectrum(inThIndex)[wlIndex] = srValue;
 
                 if (ifs.fail()) {
-                    std::cerr << "[SdrReader::read] Invalid format: " << srValue << std::endl;
+                    lbError << "[SdrReader::read] Invalid format: " << srValue;
                     delete ss2;
                     return 0;
                 }
@@ -171,7 +171,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
         }
 
         if (ifs.fail()) {
-            std::cerr << "[SdrReader::read] Invalid format. Head of line: " << dataStr << std::endl;
+            lbError << "[SdrReader::read] Invalid format. Head of line: " << dataStr;
             delete ss2;
             return 0;
         }

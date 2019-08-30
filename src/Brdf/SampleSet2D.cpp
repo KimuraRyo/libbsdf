@@ -73,14 +73,12 @@ void SampleSet2D::updateAngleAttributes()
     equalIntervalTheta_ = isEqualInterval(thetaAngles_);
     equalIntervalPhi_   = isEqualInterval(phiAngles_);
 
-    std::cout
+    lbInfo
         << "[SampleSet2D::updateAngleAttributes] equalIntervalTheta_: "
-        << equalIntervalTheta_
-        << std::endl;
-    std::cout
+        << equalIntervalTheta_;
+    lbInfo
         << "[SampleSet2D::updateAngleAttributes] equalIntervalPhi_: "
-        << equalIntervalPhi_
-        << std::endl;
+        << equalIntervalPhi_;
 }
 
 void SampleSet2D::resizeAngles(int numTheta, int numPhi)

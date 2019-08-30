@@ -9,8 +9,9 @@
 #include <libbsdf/Reader/ZemaxBsdfReader.h>
 
 #include <fstream>
-#include <iostream>
 #include <set>
+
+#include <libbsdf/Common/Log.h>
 
 using namespace lb;
 
@@ -19,7 +20,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
     // std::ios_base::binary is used to read line endings of CR+LF and LF.
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[ZemaxBsdfReader::read] Could not open: " << fileName << std::endl;
+        lbError << "[ZemaxBsdfReader::read] Could not open: " << fileName;
         return 0;
     }
 
@@ -146,7 +147,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
     if (inThetaDegrees.empty() ||
         spThetaDegrees.empty() ||
         spPhiDegrees.empty()) {
-        std::cerr << "[ZemaxBsdfReader::read] Invalid format." << std::endl;
+        lbError << "[ZemaxBsdfReader::read] Invalid format.";
         return 0;
     }
 
@@ -238,7 +239,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         }
 
         if (ifs.fail()) {
-            std::cerr << "[ZemaxBsdfReader::read] Invalid format. Head of line: " << dataStr << std::endl;
+            lbError << "[ZemaxBsdfReader::read] Invalid format. Head of line: " << dataStr;
             delete brdf;
             return 0;
         }

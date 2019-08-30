@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,11 +16,11 @@
 
 #include <string>
 #include <istream>
-#include <iostream>
 #include <limits>
 #include <algorithm>
 
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Log.h>
 
 namespace lb {
 namespace reader_utility {
@@ -60,7 +60,7 @@ FileType classifyFile(const std::string& fileName);
 
 inline void reader_utility::logNotImplementedKeyword(const std::string& keyword)
 {
-    std::cerr << "Not implemented: " << "\"" << keyword << "\"" << std::endl;
+    lbError << "Not implemented: " << "\"" << keyword << "\"";
 }
 
 inline void reader_utility::ignoreLine(std::istream& stream)

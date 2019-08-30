@@ -9,8 +9,8 @@
 #include <libbsdf/Reader/MerlBinaryReader.h>
 
 #include <fstream>
-#include <iostream>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Vector.h>
 
 using namespace lb;
@@ -19,7 +19,7 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
 {
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
-        std::cerr << "[MerlBinaryReader::read] Could not open: " << fileName << std::endl;
+        lbError << "[MerlBinaryReader::read] Could not open: " << fileName;
         return 0;
     }
 
@@ -36,9 +36,7 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
 
     int numSamplesInFile = dims[0] * dims[1] * dims[2];
     if (numSamplesInFile != numSamples) {
-        std::cerr
-            << "[MerlBinaryReader::read] Dimensions do not match: " << numSamplesInFile << ", " << numSamples
-            << std::endl;
+        lbError << "[MerlBinaryReader::read] Dimensions do not match: " << numSamplesInFile << ", " << numSamples;
         return 0;
     }
 
@@ -46,7 +44,7 @@ HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileNam
     double* samples = new double[numSamples * 3];
     ifs.read(reinterpret_cast<char*>(samples), sizeof(double) * numSamples * 3);
     if (ifs.fail()) {
-        std::cerr << "[MerlBinaryReader::read] Invalid format." << std::endl;
+        lbError << "[MerlBinaryReader::read] Invalid format.";
         delete[] samples;
     }
 

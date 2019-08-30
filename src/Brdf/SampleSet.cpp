@@ -9,8 +9,8 @@
 #include <libbsdf/Brdf/SampleSet.h>
 
 #include <algorithm>
-#include <iostream>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Utility.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 
@@ -62,68 +62,66 @@ bool SampleSet::validate() const
         if (!sp.allFinite()) {
             spectraValid = false;
             if (sp.hasNaN()) {
-                std::cout
+                lbWarn
                     << "[SampleSet::validate] The spectrum contains NaN values at ("
-                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ")."
-                    << std::endl;
+                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ").";
             }
             else {
-                std::cout
-                << "[SampleSet::validate] The spectrum contains +/-INF values at ("
-                << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ")."
-                << std::endl;
+                lbWarn
+                    << "[SampleSet::validate] The spectrum contains +/-INF values at ("
+                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ").";
             }
         }
     }}}}
 
     if (spectraValid) {
-        std::cout << "[SampleSet::validate] Spectra are valid." << std::endl;
+        lbInfo << "[SampleSet::validate] Spectra are valid.";
     }
     else {
         valid = false;
-        std::cout << "[SampleSet::validate] Invalid spectra are found." << std::endl;
+        lbWarn << "[SampleSet::validate] Invalid spectra are found.";
     }
     
     // Angles
     if (angles0_.allFinite()) {
-        std::cout << "[SampleSet::validate] The array of angle0 is valid." << std::endl;
+        lbInfo << "[SampleSet::validate] The array of angle0 is valid.";
     }
     else {
         valid = false;
-        std::cout << "[SampleSet::validate] The invalid angle0(s) is found." << std::endl;
+        lbWarn << "[SampleSet::validate] The invalid angle0(s) is found.";
     }
 
     if (angles1_.allFinite()) {
-        std::cout << "[SampleSet::validate] The array of angle1 is valid." << std::endl;
+        lbInfo << "[SampleSet::validate] The array of angle1 is valid.";
     }
     else {
         valid = false;
-        std::cout << "[SampleSet::validate] The invalid angle1(s) is found." << std::endl;
+        lbWarn << "[SampleSet::validate] The invalid angle1(s) is found.";
     }
 
     if (angles2_.allFinite()) {
-        std::cout << "[SampleSet::validate] The array of angle2 is valid." << std::endl;
+        lbInfo << "[SampleSet::validate] The array of angle2 is valid.";
     }
     else {
         valid = false;
-        std::cout << "[SampleSet::validate] The invalid angle2(s) is found." << std::endl;
+        lbWarn << "[SampleSet::validate] The invalid angle2(s) is found.";
     }
 
     if (angles3_.allFinite()) {
-        std::cout << "[SampleSet::validate] The array of angle3 is valid." << std::endl;
+        lbInfo << "[SampleSet::validate] The array of angle3 is valid.";
     }
     else {
         valid = false;
-        std::cout << "[SampleSet::validate] The invalid angle3(s) is found." << std::endl;
+        lbWarn << "[SampleSet::validate] The invalid angle3(s) is found.";
     }
 
     // Wavelengths
     if (wavelengths_.allFinite()) {
-        std::cout << "[SampleSet::validate] Wavelengths are valid." << std::endl;
+        lbInfo << "[SampleSet::validate] Wavelengths are valid.";
     }
     else {
         valid = false;
-        std::cout << "[SampleSet::validate] The invalid wavelength(s) is found." << std::endl;
+        lbWarn << "[SampleSet::validate] The invalid wavelength(s) is found.";
     }
 
     return valid;
@@ -171,10 +169,10 @@ void SampleSet::updateEqualIntervalAngles()
     equalIntervalAngles2_ = isEqualInterval(angles2_);
     equalIntervalAngles3_ = isEqualInterval(angles3_);
 
-    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle0: " << equalIntervalAngles0_ << std::endl;
-    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle1: " << equalIntervalAngles1_ << std::endl;
-    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle2: " << equalIntervalAngles2_ << std::endl;
-    std::cout << "[SampleSet::updateEqualIntervalAngles] Angle3: " << equalIntervalAngles3_ << std::endl;
+    lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle0: " << equalIntervalAngles0_;
+    lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle1: " << equalIntervalAngles1_;
+    lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle2: " << equalIntervalAngles2_;
+    lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle3: " << equalIntervalAngles3_;
 }
 
 void SampleSet::updateOneSide()
@@ -198,5 +196,5 @@ void SampleSet::updateOneSide()
 
     oneSide_ = (!containing_0_PI || !containing_PI_2PI);
 
-    std::cout << "[SampleSet::updateOneSide] " << oneSide_ << std::endl;
+    lbInfo << "[SampleSet::updateOneSide] " << oneSide_;
 }

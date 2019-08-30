@@ -8,8 +8,7 @@
 
 #include <libbsdf/Brdf/Integrator.h>
 
-#include <iostream>
-
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Xorshift.h>
 #include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
 
@@ -88,7 +87,7 @@ void Integrator::initializeOutDirs(bool poissonDiskDistributionUsed)
             outDirs_.col(i) = dirsOnHemisphere.at(i);
         }
 
-        std::cout << "[Integrator::Integrator] numSampling_: " << numSampling_ << std::endl;
+        lbInfo << "[Integrator::Integrator] numSampling_: " << numSampling_;
     }
     else {
         outDirs_.resize(Eigen::NoChange, numSampling_);

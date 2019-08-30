@@ -11,6 +11,7 @@
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Version.h>
 
 #include <libbsdf/Reader/ReaderUtility.h>
@@ -48,14 +49,12 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     int                     numSpecularAzimuthalAngles,
                                     DataType                dataType)
 {
-    std::cout.setstate(std::ios_base::failbit);
     SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(numIncomingPolarAngles,
                                                                 1,
                                                                 numSpecularPolarAngles,
                                                                 numSpecularAzimuthalAngles,
                                                                 2.0f,
                                                                 MONOCHROMATIC_MODEL, 1, n);
-    std::cout.clear();
 
     reflectance_model_utility::setupTabularBrdf(model, brdf, dataType);
     brdf->setSourceType(GENERATED_SOURCE);
@@ -65,30 +64,36 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
 
 int main(int argc, char** argv)
 {
+    Log::setNotificationLevel(Log::Level::ERROR_MSG);
+
     ArgumentParser ap(argc, argv);
 
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
-        std::cout << "Usage: lbgen [options ...] bsdf_model out_file" << std::endl;
-        std::cout << std::endl;
-        std::cout << "lbgen generates BRDF/BTDF data and save an Integra BSDF file." << std::endl;
-        std::cout << std::endl;
-        std::cout << "Positional Arguments:" << std::endl;
-        std::cout << "  bsdf_model  Analytic BSDF model" << std::endl;
-        std::cout << "  out_file    Name of generated file";
-        std::cout << " (\".ddr\" or \".ddt\" is acceptable as a suffix for BRDF or BTDF.";
-        std::cout << " Otherwise, \".ddr\" and \".ddt\" files are generated.)" << std::endl;
-        std::cout << std::endl;
-        std::cout << "Options:" << std::endl;
-        std::cout << "  -h, --help                  show this help message and exit" << std::endl;
-        std::cout << "  -v, --version               show program's version number and exit" << std::endl;
-        std::cout << "  -l, --list                  show acceptable models and parameters of BSDF and exit" << std::endl;
-        std::cout << "  -r, --reference             show the references of BSDF models and exit" << std::endl;
-        std::cout << "  -numIncomingPolarAngles     set the division number of incoming polar angles (default: 90)" << std::endl;
-        std::cout << "  -numSpecularPolarAngles     set the division number of specular polar angles (default: 90)" << std::endl;
-        std::cout << "  -numSpecularAzimuthalAngles set the division number of specular azimuthal angles (default: 72)" << std::endl;
-        std::cout << "  -conservationOfEnergy       fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << std::endl;
+        cout << "Usage: lbgen [options ...] bsdf_model out_file" << endl;
+        cout << endl;
+        cout << "lbgen generates BRDF/BTDF data and save an Integra BSDF file." << endl;
+        cout << endl;
+        cout << "Positional Arguments:" << endl;
+        cout << "  bsdf_model  Analytic BSDF model" << endl;
+        cout << "  out_file    Name of generated file";
+        cout << " (\".ddr\" or \".ddt\" is acceptable as a suffix for BRDF or BTDF.";
+        cout << " Otherwise, \".ddr\" and \".ddt\" files are generated.)" << endl;
+        cout << endl;
+        cout << "Options:" << endl;
+        cout << "  -h, --help                   show this help message and exit" << endl;
+        cout << "  -v, --version                show program's version number and exit" << endl;
+        cout << "  -l, --list                   show acceptable models and parameters of BSDF and exit" << endl;
+        cout << "  -r, --reference              show the references of BSDF models and exit" << endl;
+        cout << "  -numIncomingPolarAngles      set the division number of incoming polar angles (default: 90)" << endl;
+        cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 90)" << endl;
+        cout << "  -numSpecularAzimuthalAngles  set the division number of specular azimuthal angles (default: 72)" << endl;
+        cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << endl;
 #ifdef _OPENMP
-        std::cout << "  -numThreads                 set the number of threads used by parallel processing" << std::endl;
+        cout << "  -numThreads                  set the number of threads used by parallel processing" << endl;
 #endif
         return 0;
     }
@@ -96,7 +101,7 @@ int main(int argc, char** argv)
     const std::string version("1.0.8");
 
     if (ap.read("-v") || ap.read("--version")) {
-        std::cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << std::endl;
+        cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << endl;
         return 0;
     }
 
@@ -105,29 +110,25 @@ int main(int argc, char** argv)
     const std::string LambertianName                = "lambertian";
 
     if (ap.read("-l") || ap.read("--list")) {
-        std::cout << "Acceptable models:" << std::endl;
-        std::cout << "  " << GgxName << std::endl;
-        std::cout << "      Valid options:" << std::endl;
-        std::cout << "          -roughness  set roughness of surface (default: 0.3, range: [0.01, 1.0])" << std::endl;
-        std::cout << "          -n          set refractive index (default: 1.5)" << std::endl;
-        std::cout << "          -k          set extinction coefficient (default: 0.0)" << std::endl;
-        std::cout << "  " << MultipleScatteringSmithName << std::endl;
-        std::cout << "      Valid options:" << std::endl;
-        std::cout << "          -roughness      set roughness of surface (default: 0.3, range: [0.01, 1.0])" << std::endl;
-        std::cout << "          -n              set refractive index (default: 1.5)" << std::endl;
-        std::cout << "          -numIterations  set the number of sampling iterations (default: 10)" << std::endl;
-        std::cout << "  " << LambertianName << std::endl;
-        std::cout << "      Valid options: none" << std::endl;
+        cout << "Acceptable models:" << endl;
+        cout << "  " << GgxName << endl;
+        cout << "      Valid options:" << endl;
+        cout << "          -roughness  set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
+        cout << "          -n          set refractive index (default: 1.5)" << endl;
+        cout << "          -k          set extinction coefficient (default: 0.0)" << endl;
+        cout << "  " << MultipleScatteringSmithName << endl;
+        cout << "      Valid options:" << endl;
+        cout << "          -roughness      set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
+        cout << "          -n              set refractive index (default: 1.5)" << endl;
+        cout << "          -numIterations  set the number of sampling iterations (default: 10)" << endl;
+        cout << "  " << LambertianName << endl;
+        cout << "      Valid options: none" << endl;
         return 0;
     }
 
     if (ap.read("-r") || ap.read("--reference")) {
-        std::cout
-            << "  " << GgxName << ": "
-            << Ggx::getReference() << std::endl;
-        std::cout
-            << "  " << MultipleScatteringSmithName << ": "
-            << MultipleScatteringSmith::getReference() << std::endl;
+        cout << "  " << GgxName << ": " << Ggx::getReference() << endl;
+        cout << "  " << MultipleScatteringSmithName << ": " << MultipleScatteringSmith::getReference() << endl;
         return 0;
     }
 
@@ -183,7 +184,7 @@ int main(int argc, char** argv)
         return 1;
     }
     else if (n <= 0.0f) {
-        std::cerr << "Invalid value (n): " << n << std::endl;
+        cerr << "Invalid value (n): " << n << endl;
         return 1;
     }
 
@@ -192,7 +193,7 @@ int main(int argc, char** argv)
         return 1;
     }
     else if (k < 0.0f) {
-        std::cerr << "Invalid value (k): " << k << std::endl;
+        cerr << "Invalid value (k): " << k << endl;
         return 1;
     }
 
@@ -233,7 +234,7 @@ int main(int argc, char** argv)
         model = new Lambertian(Vec3(1.0, 1.0, 1.0));
     }
     else {
-        std::cerr << "Invalid model name: " << modelName << std::endl;
+        cerr << "Invalid model name: " << modelName << endl;
         return 1;
     }
 
@@ -260,7 +261,7 @@ int main(int argc, char** argv)
 
         delete brdf;
 
-        std::cout << "Generated: " << fileName << std::endl;
+        cout << "Generated: " << fileName << endl;
     }
     else if (reader_utility::hasSuffix(fileName, ".ddt")) {
         SpecularCoordinatesBrdf* btdf = createBrdf(*model,
@@ -278,7 +279,7 @@ int main(int argc, char** argv)
 
         delete btdf;
 
-        std::cout << "Generated: " << fileName << std::endl;
+        cout << "Generated: " << fileName << endl;
     }
     else {
         SpecularCoordinatesBrdf* brdf = createBrdf(*model,
@@ -296,16 +297,14 @@ int main(int argc, char** argv)
                                                    BTDF_DATA);
 
         if (conservationOfEnergyUsed) {
-            std::cout.setstate(std::ios_base::failbit);
             fixEnergyConservation(brdf, btdf);
-            std::cout.clear();
         }
 
         DdrWriter::write(fileName + ".ddr", *brdf, comments);
         DdrWriter::write(fileName + ".ddt", *btdf, comments);
 
-        std::cout << "Generated: " << fileName + ".ddr" << std::endl;
-        std::cout << "Generated: " << fileName + ".ddt" << std::endl;
+        cout << "Generated: " << fileName + ".ddr" << endl;
+        cout << "Generated: " << fileName + ".ddt" << endl;
 
         delete brdf;
         delete btdf;

@@ -9,8 +9,8 @@
 #include <libbsdf/ReflectanceModel/ReflectanceModelUtility.h>
 
 #include <cassert>
-#include <iostream>
 
+#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Vector.h>
 
 using namespace lb;
@@ -29,7 +29,7 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
     ColorModel cm = ss->getColorModel();
     if (cm != RGB_MODEL &&
         cm != MONOCHROMATIC_MODEL) {
-        std::cerr << "[reflectance_model_utility::setupTabularBrdf] Unsupported color model: " << cm << std::endl;
+        lbError << "[reflectance_model_utility::setupTabularBrdf] Unsupported color model: " << cm;
         return false;
     }
 
@@ -46,7 +46,7 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
 
             // Adjust horizontal and downward directions.
             const Vec3::Scalar epsilon = Vec3::Scalar(0.001);
-            inDir.z() = max(inDir.z(), epsilon);
+            inDir.z()  = max(inDir.z(),  epsilon);
             outDir.z() = max(outDir.z(), epsilon);
 
             // Adjust a downward outgoing direction along the Z-axis.
