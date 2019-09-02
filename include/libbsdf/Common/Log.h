@@ -11,13 +11,13 @@
 
 #include <iostream>
 
-namespace lb {
+#define lbTrace lb::Log(lb::Log::Level::TRACE_MSG)
+#define lbDebug lb::Log(lb::Log::Level::DEBUG_MSG)
+#define lbInfo  lb::Log(lb::Log::Level::INFO_MSG)
+#define lbWarn  lb::Log(lb::Log::Level::WARN_MSG)
+#define lbError lb::Log(lb::Log::Level::ERROR_MSG)
 
-#define lbTrace Log(Log::Level::TRACE_MSG)
-#define lbDebug Log(Log::Level::DEBUG_MSG)
-#define lbInfo  Log(Log::Level::INFO_MSG)
-#define lbWarn  Log(Log::Level::WARN_MSG)
-#define lbError Log(Log::Level::ERROR_MSG)
+namespace lb {
 
 /*!
  * \class   Log
