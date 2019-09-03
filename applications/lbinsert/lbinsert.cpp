@@ -23,6 +23,7 @@
 #include <libbsdf/Writer/DdrWriter.h>
 
 #include <ArgumentParser.h>
+#include <Utility.h>
 
 using namespace lb;
 
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
         cout << "  partial_file Name of a BRDF file inserted into a base BRDF." << endl;
         cout << "               This BRDF must have an incoming azimuthal angle." << endl;
         cout << "               \".ddr\" or \".astm\" is acceptable as a suffix." << endl;
-        cout << "  angle        Incoming azimuthal angle in degrees" << endl;
+        cout << "  angle        Incoming azimuthal angle in degrees (range: [0, 360])" << endl;
         cout << "  base_file    Name of a base BRDF file." << endl;
         cout << "               \".ddr\" is acceptable as a suffix." << endl;
         cout << endl;
@@ -138,6 +139,8 @@ int main(int argc, char** argv)
         cerr << "Invalid value: " << angleStr << endl;
         return 1;
     }
+
+    inPhiDegree = utility::clampParameter("angle", inPhiDegree, 0.0, 360.0);
 
     float inPhi = static_cast<float>(lb::toRadian(inPhiDegree));
     std::unique_ptr<SpecularCoordinatesBrdf> brdf(insertBrdfAlongInPhi(*baseBrdf, *partialBrdf, inPhi));

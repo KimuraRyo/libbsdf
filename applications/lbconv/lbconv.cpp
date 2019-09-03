@@ -60,7 +60,7 @@ int main(int argc, char** argv)
         cout << "  -h, --help       show this help message and exit" << endl;
         cout << "  -v, --version    show program's version number and exit" << endl;
         cout << "  -scatterType     set either BRDF or BTDF for the input ASTM file (default: BRDF)" << endl;
-        cout << "  -arrangement     arrange BRDF/BTDF with extrapolate and conservation of energy." << endl;
+        cout << "  -arrangement     arrange BRDF/BTDF with extrapolation and conservation of energy." << endl;
         return 0;
     }
 

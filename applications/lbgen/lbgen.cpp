@@ -24,23 +24,13 @@
 #include <libbsdf/Writer/DdrWriter.h>
 
 #include <ArgumentParser.h>
+#include <Utility.h>
 
 using namespace lb;
 
 /*
  * BRDF/BTDF generator
  */
-
-template <typename T>
-T clampParameter(const std::string& name, T val, T minVal, T maxVal)
-{
-    if (val < minVal || val > maxVal) {
-        val = clamp(val, minVal, maxVal);
-        std::cout << "Warning: \"" + name + "\" is clamped to " << val << "." << std::endl;
-    }
-
-    return val;
-}
 
 SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     float                   n,
@@ -137,8 +127,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numIncomingPolarAngles = clampParameter("numIncomingPolarAngles",
-                                                numIncomingPolarAngles + 1, 2, 3600);
+        numIncomingPolarAngles = utility::clampParameter("numIncomingPolarAngles",
+                                                         numIncomingPolarAngles + 1, 2, 3600);
     }
 
     int numSpecularPolarAngles = 90;
@@ -146,8 +136,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numSpecularPolarAngles = clampParameter("numSpecularPolarAngles",
-                                                numSpecularPolarAngles + 1, 2, 3600);
+        numSpecularPolarAngles = utility::clampParameter("numSpecularPolarAngles",
+                                                         numSpecularPolarAngles + 1, 2, 3600);
     }
 
     int numSpecularAzimuthalAngles = 72;
@@ -155,8 +145,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numSpecularAzimuthalAngles = clampParameter("numSpecularAzimuthalAngles",
-                                                    numSpecularAzimuthalAngles + 1, 2, 3600);
+        numSpecularAzimuthalAngles = utility::clampParameter("numSpecularAzimuthalAngles",
+                                                             numSpecularAzimuthalAngles + 1, 2, 3600);
     }
 
     bool conservationOfEnergyUsed = false;
@@ -202,7 +192,7 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numIterations = clampParameter("numIterations", numIterations, 1, 10000);
+        numIterations = utility::clampParameter("numIterations", numIterations, 1, 10000);
     }
 
     if (!ap.validate(2)) return 1;
@@ -214,11 +204,11 @@ int main(int argc, char** argv)
 
     // Create a BRDF/BTDF model.
     if (modelName == GgxName) {
-        roughness = clampParameter("roughness", roughness, 0.01f, 1.0f);
+        roughness = utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
         model = new Ggx(Vec3(1.0, 1.0, 1.0), roughness, n, k);
     }
     else if (modelName == MultipleScatteringSmithName) {
-        roughness = clampParameter("roughness", roughness, 0.01f, 1.0f);
+        roughness = utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
 
         MultipleScatteringSmith::MaterialType matType = (k == 0.0f) ? MultipleScatteringSmith::DIELECTRIC_MATERIAL
                                                                     : MultipleScatteringSmith::CONDUCTOR_MATERIAL;
