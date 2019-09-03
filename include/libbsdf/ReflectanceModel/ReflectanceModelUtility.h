@@ -26,7 +26,7 @@ bool setupTabularBrdf(const ReflectanceModel&   model,
                       DataType                  dataType = BRDF_DATA,
                       float                     maxValue = 10000000000.0f);
 
-} // namespace lb
 } // namespace reflectance_model_utility
+} // namespace lb
 
 #endif // LIBBSDF_REFLECTANCE_MODEL_UTILITY_H

@@ -14,18 +14,21 @@
 
 #include <libbsdf/Common/Utility.h>
 
+namespace lb {
 namespace utility {
 
 /*! Clamps the value of a parameter. */
 template <typename T>
 T clampParameter(const std::string& name, T val, T minVal, T maxVal);
 
+} // namespace utility
+
 /*
  * Implementation
  */
 
 template <typename T>
-T clampParameter(const std::string& name, T val, T minVal, T maxVal)
+T utility::clampParameter(const std::string& name, T val, T minVal, T maxVal)
 {
     if (val < minVal || val > maxVal) {
         val = clamp(val, minVal, maxVal);
@@ -35,6 +38,6 @@ T clampParameter(const std::string& name, T val, T minVal, T maxVal)
     return val;
 }
 
-} // namespace utility
+} // namespace lb
 
 #endif // LIBBSDF_APPLICATIONS_UTILITY_H
