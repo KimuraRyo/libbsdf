@@ -437,7 +437,8 @@ inline void SpecularCoordinatesBrdf::fromXyz(const Vec3&    inDir,
     SphericalCoordinateSystem::fromXyz(inDir, inTheta, inPhi);
 
     float offset = getSpecularOffset(*inTheta);
-    SpecularCoordinateSystem::fromOutDirXyz(outDir, *inTheta + offset, *inPhi, specTheta, specPhi);
+    float offsetInTheta = clamp(*inTheta + offset, 0.0f, SpecularCoordinateSystem::MAX_ANGLE0);
+    SpecularCoordinateSystem::fromOutDirXyz(outDir, offsetInTheta, *inPhi, specTheta, specPhi);
 }
 
 inline void SpecularCoordinatesBrdf::fromXyz(const Vec3&    inDir,
@@ -450,7 +451,8 @@ inline void SpecularCoordinatesBrdf::fromXyz(const Vec3&    inDir,
     SphericalCoordinateSystem::fromXyz(inDir, inTheta, &inPhi);
 
     float offset = getSpecularOffset(*inTheta);
-    SpecularCoordinateSystem::fromOutDirXyz(outDir, *inTheta + offset, inPhi, specTheta, specPhi);
+    float offsetInTheta = clamp(*inTheta + offset, 0.0f, SpecularCoordinateSystem::MAX_ANGLE0);
+    SpecularCoordinateSystem::fromOutDirXyz(outDir, offsetInTheta, inPhi, specTheta, specPhi);
 }
 
 } // namespace lb
