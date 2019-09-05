@@ -39,6 +39,8 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     int                     numSpecularAzimuthalAngles,
                                     DataType                dataType)
 {
+    n = std::max(n, 1.0f);
+
     SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(numIncomingPolarAngles,
                                                                 1,
                                                                 numSpecularPolarAngles,
