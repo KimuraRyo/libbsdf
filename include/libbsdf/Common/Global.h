@@ -33,6 +33,9 @@ typedef Eigen::ArrayXf Spectrum;
 /*! \brief The data type of spectra. */
 typedef std::vector<Spectrum, Eigen::aligned_allocator<Spectrum> > SpectrumList;
 
+/*! \brief The output format of arrays and vectors. */
+const Eigen::IOFormat EIGEN_IO_FMT(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ");
+
 /*! \brief The color models and spaces of the data in spectra. */
 enum ColorModel {
     UNKNOWN_MODEL = 0,
