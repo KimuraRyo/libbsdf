@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include <libbsdf/Brdf/SampleSet2D.h>
+#include <libbsdf/Common/Array.h>
 
 using namespace lb;
 
@@ -583,23 +584,9 @@ void CatmullRomSplineInterpolator::findBounds(const Arrayf& positions,
         return;
     }
 
+    lb::findBounds(positions, posAngle, equalIntervalPositions, pos1Index, pos2Index, pos1Angle, pos2Angle);
+
     int backIndex = static_cast<int>(positions.size() - 1);
-    if (equalIntervalPositions) {
-        // Calculate lower and upper indices.
-        *pos1Index = static_cast<int>(backIndex * (posAngle / positions[backIndex]));
-        *pos1Index = min(*pos1Index, backIndex - 1);
-        *pos2Index = *pos1Index + 1;
-    }
-    else {
-        // Find lower and upper indices.
-        const float* anglePtr = std::lower_bound(&positions[0], &positions[0] + positions.size(), posAngle);
-        *pos2Index = clamp(static_cast<int>(anglePtr - &positions[0]), 1, backIndex);
-        *pos1Index = *pos2Index - 1;
-    }
-
-    *pos1Angle = positions[*pos1Index];
-    *pos2Angle = positions[*pos2Index];
-
     if (repeatBounds) {
         if (*pos1Index == 0) {
             *pos0Index = backIndex - 1;
@@ -625,7 +612,7 @@ void CatmullRomSplineInterpolator::findBounds(const Arrayf& positions,
 
         *pos0Angle = positions[*pos0Index];
         *pos3Angle = positions[*pos3Index];
-    }   
+    }
 }
 
 Spectrum CatmullRomSplineInterpolator::interpolate2D(const SampleSet&   samples,

@@ -60,6 +60,7 @@ bool isEqualInterval(const T& array);
 
 /*!
  * Finds neighbor indices and values.
+ * If \a value is out of bounds, two nearest bounds are returned for extrapolation.
  *
  * \param lowerIndex Found index of the sample point at the lower bound.
  * \param upperIndex Found index of the sample point at the upper bound.
