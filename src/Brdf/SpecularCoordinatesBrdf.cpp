@@ -68,6 +68,8 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
                                                      CoordSys::MAX_ANGLE2,
                                                      specThetaExponent);
 
+    samples_->updateAngleAttributes();
+
     if (refractiveIndex != 1.0f) {
         for (int i = 0; i < getNumInTheta(); ++i) {
             float inTheta = getInTheta(i);
