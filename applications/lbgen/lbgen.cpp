@@ -158,11 +158,12 @@ int main(int argc, char** argv)
 
 #ifdef _OPENMP
     int numThreads;
-    if (ap.read("-numThreads", &numThreads) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else {
+    ArgumentParser::ResultType result_numThreads = ap.read("-numThreads", &numThreads);
+    if (result_numThreads == ArgumentParser::OK) {
         omp_set_num_threads(numThreads);
+    }
+    else if (result_numThreads == ArgumentParser::ERROR) {
+        return 1;
     }
 #endif
 
