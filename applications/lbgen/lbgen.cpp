@@ -80,8 +80,8 @@ int main(int argc, char** argv)
         cout << "  -v, --version                show program's version number and exit" << endl;
         cout << "  -l, --list                   show acceptable models and parameters of BSDF and exit" << endl;
         cout << "  -r, --reference              show the references of BSDF models and exit" << endl;
-        cout << "  -numIncomingPolarAngles      set the division number of incoming polar angles (default: 90)" << endl;
-        cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 90)" << endl;
+        cout << "  -numIncomingPolarAngles      set the division number of incoming polar angles (default: 18)" << endl;
+        cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 360)" << endl;
         cout << "  -numSpecularAzimuthalAngles  set the division number of specular azimuthal angles (default: 72)" << endl;
         cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << endl;
 #ifdef _OPENMP
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const std::string version("1.0.8");
+    const std::string version("1.0.9");
 
     if (ap.read("-v") || ap.read("--version")) {
         cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << endl;
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    int numIncomingPolarAngles = 90;
+    int numIncomingPolarAngles = 18;
     if (ap.read("-numIncomingPolarAngles", &numIncomingPolarAngles) == ArgumentParser::ERROR) {
         return 1;
     }
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
                                                          numIncomingPolarAngles + 1, 2, 3600);
     }
 
-    int numSpecularPolarAngles = 90;
+    int numSpecularPolarAngles = 360;
     if (ap.read("-numSpecularPolarAngles", &numSpecularPolarAngles) == ArgumentParser::ERROR) {
         return 1;
     }
