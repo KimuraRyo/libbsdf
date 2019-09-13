@@ -145,10 +145,15 @@ public:
     int getNumWavelengths() const;
 
     /*!
-     * Validates spectra, angles, and wavelengths.
-     * Returns false if the data contains positive or negative infinity, or NaN.
+     * Validates spectra, angles, wavelengths, and other attributes.
+     * False is returned if the data contains one of the following:
+     *   - Infinite or NaN spectrum
+     *   - Infinite or NaN angle
+     *   - Negative, infinite, or NaN wavelength
+     *
+     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
      */
-    bool validate() const;
+    bool validate(bool verbose = false) const;
 
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
@@ -187,6 +192,9 @@ private:
 
     /*! Updates the attributes whether angles are set at equal intervals. */
     void updateEqualIntervalAngles();
+
+    /*! Distinguishes the attributes whether sample points are containd in one side of the plane of incidence. */
+    bool distinguishOneSide() const;
 
     /*! Updates the attributes whether sample points are containd in one side of the plane of incidence. */
     void updateOneSide();

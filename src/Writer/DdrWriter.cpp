@@ -38,7 +38,7 @@ bool DdrWriter::write(const std::string&    fileName,
                       DataType              dataType,
                       const std::string&    comments)
 {
-    if (!brdf.getSampleSet()->validate()) {
+    if (!brdf.validate()) {
         lbError << "[DdrReader::write] BRDF data is invalid.";
         return false;
     }
@@ -53,7 +53,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf&   brdf,
                        std::ostream&                    stream,
                        const std::string&               comments)
 {
-    if (!brdf.getSampleSet()->validate()) {
+    if (!brdf.validate()) {
         lbError << "[DdrReader::write] BRDF data is invalid.";
         return false;
     }
@@ -204,8 +204,10 @@ SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
 {
     typedef SpecularCoordinatesBrdf SpecBrdf;
 
+    SpecBrdf* convertedBrdf;
+
     if (const SpecBrdf* specBrdf = dynamic_cast<const SpecBrdf*>(&brdf)) {
-        return new SpecBrdf(*specBrdf);
+        convertedBrdf = new SpecBrdf(*specBrdf);
     }
     else if (const SphericalCoordinatesBrdf* spheBrdf = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf)) {
         using std::max;
@@ -214,7 +216,7 @@ SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
 
         int numSpecTheta = max(ss->getNumAngles2(), 181);
         int numSpecPhi   = max(ss->getNumAngles3(), 73);
-        return new SpecBrdf(*spheBrdf, numSpecTheta, numSpecPhi);
+        convertedBrdf = new SpecBrdf(*spheBrdf, numSpecTheta, numSpecPhi);
     }
     else {
         const SampleSet* ss = brdf.getSampleSet();
@@ -229,8 +231,10 @@ SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
                                                                 SpecularCoordinateSystem::MAX_ANGLE2,
                                                                 2.0f);
 
-        return new SpecBrdf(brdf, inThetaAngles, inPhiAngles, specThetaAngles, specPhiAngles);
+        convertedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, specThetaAngles, specPhiAngles);
     }
+
+    return convertedBrdf;
 }
 
 SpecularCoordinatesBrdf* DdrWriter::arrange(const SpecularCoordinatesBrdf&  brdf,

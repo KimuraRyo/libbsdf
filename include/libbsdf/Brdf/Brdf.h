@@ -115,6 +115,18 @@ public:
     virtual std::string getAngle3Name() const = 0; /*!< Gets the name of angle3. */
 
     /*!
+     * Validates spectra, angles, wavelengths, and other attributes.
+     * False is returned if the data contains one of the following:
+     *   - Infinite or NaN spectrum
+     *   - Negative spectrum on a visible hemisphere
+     *   - Outside, infinite, or NaN angle
+     *   - Negative, infinite, or NaN wavelength
+     *
+     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
+     */
+    virtual bool validate(bool verbose = false) const = 0;
+
+    /*!
      * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
      * and constructs the extrapolated sample set.
      */

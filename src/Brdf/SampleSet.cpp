@@ -47,30 +47,38 @@ SampleSet::SampleSet(int        numAngles0,
     }
 }
 
-bool SampleSet::validate() const
+bool SampleSet::validate(bool verbose) const
 {
     bool valid = true;
+    bool spectraValid = true;
 
     // Spectra
-    bool spectraValid = true;
     for (int i0 = 0; i0 < angles0_.size(); ++i0) {
+        if (!spectraValid && !verbose) break;
     for (int i1 = 0; i1 < angles1_.size(); ++i1) {
+        if (!spectraValid && !verbose) break;
     for (int i2 = 0; i2 < angles2_.size(); ++i2) {
+        if (!spectraValid && !verbose) break;
     for (int i3 = 0; i3 < angles3_.size(); ++i3) {
         const Spectrum& sp = getSpectrum(i0, i1, i2, i3);
-        
+
         if (!sp.allFinite()) {
             spectraValid = false;
+
             if (sp.hasNaN()) {
                 lbWarn
-                    << "[SampleSet::validate] The spectrum contains NaN values at ("
-                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ").";
+                    << "[SampleSet::validate] The spectrum contains NaN value(s) at ("
+                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << "):\n\t"
+                    << sp.format(LB_EIGEN_IO_FMT);
             }
             else {
                 lbWarn
-                    << "[SampleSet::validate] The spectrum contains +/-INF values at ("
-                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << ").";
+                    << "[SampleSet::validate] The spectrum contains +/-INF value(s) at ("
+                    << i0 << ", " << i1 << ", " << i2 << ", " << i3 << "):\n\t"
+                    << sp.format(LB_EIGEN_IO_FMT);
             }
+
+            if (!verbose) break;
         }
     }}}}
 
@@ -81,14 +89,14 @@ bool SampleSet::validate() const
         valid = false;
         lbWarn << "[SampleSet::validate] Invalid spectra are found.";
     }
-    
-    // Angles
+
+    // Angle arrays
     if (angles0_.allFinite()) {
         lbInfo << "[SampleSet::validate] The array of angle0 is valid.";
     }
     else {
         valid = false;
-        lbWarn << "[SampleSet::validate] The invalid angle0(s) is found.";
+        lbWarn << "[SampleSet::validate] The invalid angle(s) in angles0 is found.";
     }
 
     if (angles1_.allFinite()) {
@@ -96,7 +104,7 @@ bool SampleSet::validate() const
     }
     else {
         valid = false;
-        lbWarn << "[SampleSet::validate] The invalid angle1(s) is found.";
+        lbWarn << "[SampleSet::validate] The invalid angle(s) in angles1 is found.";
     }
 
     if (angles2_.allFinite()) {
@@ -104,7 +112,7 @@ bool SampleSet::validate() const
     }
     else {
         valid = false;
-        lbWarn << "[SampleSet::validate] The invalid angle2(s) is found.";
+        lbWarn << "[SampleSet::validate] The invalid angle(s) in angles2 is found.";
     }
 
     if (angles3_.allFinite()) {
@@ -112,16 +120,51 @@ bool SampleSet::validate() const
     }
     else {
         valid = false;
-        lbWarn << "[SampleSet::validate] The invalid angle3(s) is found.";
+        lbWarn << "[SampleSet::validate] The invalid angle(s) in angles3 is found.";
+    }
+
+    // Angle attributes
+    if (equalIntervalAngles0_ && !isEqualInterval(angles0_)) {
+        valid = false;
+        lbWarn << "[SampleSet::validate] equalIntervalAngles0 attribute is not updated.";
+    }
+
+    if (equalIntervalAngles1_ && !isEqualInterval(angles1_)) {
+        valid = false;
+        lbWarn << "[SampleSet::validate] equalIntervalAngles1 attribute is not updated.";
+    }
+
+    if (equalIntervalAngles2_ && !isEqualInterval(angles2_)) {
+        valid = false;
+        lbWarn << "[SampleSet::validate] equalIntervalAngles2 attribute is not updated.";
+    }
+
+    if (equalIntervalAngles3_ && !isEqualInterval(angles3_)) {
+        valid = false;
+        lbWarn << "[SampleSet::validate] equalIntervalAngles3 attribute is not updated.";
+    }
+
+    if (oneSide_ && !distinguishOneSide()) {
+        valid = false;
+        lbWarn << "[SampleSet::validate] oneSide attribute is not updated.";
     }
 
     // Wavelengths
     if (wavelengths_.allFinite()) {
-        lbInfo << "[SampleSet::validate] Wavelengths are valid.";
+        if (wavelengths_.minCoeff() < 0.0f) {
+            lbWarn
+                << "[SampleSet::validate] The negative wavelength(s) is found:\n\t"
+                << wavelengths_.format(LB_EIGEN_IO_FMT);
+        }
+        else {
+            lbInfo << "[SampleSet::validate] Wavelengths are valid.";
+        }
     }
     else {
         valid = false;
-        lbWarn << "[SampleSet::validate] The invalid wavelength(s) is found.";
+        lbWarn
+            << "[SampleSet::validate] The invalid wavelength(s) is found:\n\t"
+            << wavelengths_.format(LB_EIGEN_IO_FMT);
     }
 
     return valid;
@@ -175,7 +218,7 @@ void SampleSet::updateEqualIntervalAngles()
     lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle3: " << equalIntervalAngles3_;
 }
 
-void SampleSet::updateOneSide()
+bool SampleSet::distinguishOneSide() const
 {
     bool containing_0_PI = false;
     bool containing_PI_2PI = false;
@@ -194,7 +237,12 @@ void SampleSet::updateOneSide()
         }
     }
 
-    oneSide_ = (!containing_0_PI || !containing_PI_2PI);
+    return (!containing_0_PI || !containing_PI_2PI);
+}
+
+void SampleSet::updateOneSide()
+{
+    oneSide_ = distinguishOneSide();
 
     lbInfo << "[SampleSet::updateOneSide] " << oneSide_;
 }

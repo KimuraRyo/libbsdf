@@ -12,6 +12,7 @@
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Brdf/Sampler.h>
+#include <libbsdf/Common/Log.h>
 
 namespace lb {
 
@@ -117,6 +118,18 @@ public:
     std::string getAngle1Name() const; /*!< Gets a name of angle1. */
     std::string getAngle2Name() const; /*!< Gets a name of angle2. */
     std::string getAngle3Name() const; /*!< Gets a name of angle3. */
+
+    /*!
+     * Validates spectra, angles, wavelengths, and other attributes.
+     * False is returned if the data contains one of the following:
+     *   - Infinite or NaN spectrum
+     *   - Negative spectrum on a visible hemisphere
+     *   - Outside, infinite, or NaN angle
+     *   - Negative, infinite, or NaN wavelength
+     *
+     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
+     */
+    virtual bool validate(bool verbose = false) const;
 
     /*!
      * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
@@ -314,6 +327,79 @@ template <typename CoordSysT>
 std::string CoordinatesBrdf<CoordSysT>::getAngle3Name() const
 {
     return CoordSysT::ANGLE3_NAME;
+}
+
+template <typename CoordSysT>
+bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
+{
+    bool valid = samples_->validate(verbose);
+    bool spectraValid = true;
+
+    // Spectra
+    for (int i0 = 0; i0 < samples_->getNumAngles0(); ++i0) {
+        if (!spectraValid && !verbose) break;
+    for (int i1 = 0; i1 < samples_->getNumAngles1(); ++i1) {
+        if (!spectraValid && !verbose) break;
+    for (int i2 = 0; i2 < samples_->getNumAngles2(); ++i2) {
+        if (!spectraValid && !verbose) break;
+    for (int i3 = 0; i3 < samples_->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        if (outDir.z() < Vec3::Scalar(0)) continue;
+
+        const Spectrum& sp = samples_->getSpectrum(i0, i1, i2, i3);
+
+        if (sp.allFinite() && sp.minCoeff() < 0.0f) {
+            spectraValid = false;
+            lbWarn
+                << "[CoordinatesBrdf::validate] The spectrum contains negative value(s) at ("
+                << i0 << ", " << i1 << ", " << i2 << ", " << i3 << "):\n\t"
+                << sp.format(LB_EIGEN_IO_FMT);
+
+            if (!verbose) break;
+        }
+    }}}}
+
+    Arrayf angles0 = samples_->getAngles0();
+    Arrayf angles1 = samples_->getAngles1();
+    Arrayf angles2 = samples_->getAngles2();
+    Arrayf angles3 = samples_->getAngles3();
+
+    // Angle arrays
+    if (angles0.minCoeff() < CoordSysT::MIN_ANGLE0 || angles0.maxCoeff() > CoordSysT::MAX_ANGLE0) {
+        valid = false;
+        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles0 is outside of range.";
+    }
+    else {
+        lbInfo << "[CoordinatesBrdf::validate] The array of angle0 is valid.";
+    }
+
+    if (angles1.minCoeff() < CoordSysT::MIN_ANGLE1 || angles1.maxCoeff() > CoordSysT::MAX_ANGLE1) {
+        valid = false;
+        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles1 is outside of range.";
+    }
+    else {
+        lbInfo << "[CoordinatesBrdf::validate] The array of angle1 is valid.";
+    }
+
+    if (angles2.minCoeff() < CoordSysT::MIN_ANGLE2 || angles2.maxCoeff() > CoordSysT::MAX_ANGLE2) {
+        valid = false;
+        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles2 is outside of range.";
+    }
+    else {
+        lbInfo << "[CoordinatesBrdf::validate] The array of angle2 is valid.";
+    }
+
+    if (angles3.minCoeff() < CoordSysT::MIN_ANGLE3 || angles3.maxCoeff() > CoordSysT::MAX_ANGLE3) {
+        valid = false;
+        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles3 is outside of range.";
+    }
+    else {
+        lbInfo << "[CoordinatesBrdf::validate] The array of angle3 is valid.";
+    }
+
+    return valid;
 }
 
 template <typename CoordSysT>

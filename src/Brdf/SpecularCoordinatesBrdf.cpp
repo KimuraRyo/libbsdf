@@ -8,6 +8,8 @@
 
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
+#include <libbsdf/Common/Log.h>
+
 using namespace lb;
 
 SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
@@ -124,4 +126,33 @@ SpecularCoordinatesBrdf::~SpecularCoordinatesBrdf() {}
 SpecularCoordinatesBrdf* SpecularCoordinatesBrdf::clone() const
 {
     return new SpecularCoordinatesBrdf(*this);
+}
+
+bool SpecularCoordinatesBrdf::validate(bool verbose) const
+{
+    bool valid = BaseBrdf::validate(verbose);
+
+    if (specularOffsets_.size() == 0) return valid;
+
+    if (specularOffsets_.size() != getNumInTheta()) {
+        valid = false;
+        lbWarn
+            << "[SpecularCoordinatesBrdf::validate] The number of specular offsets is invalid."
+            << "\n\tSpecular offsets: " << specularOffsets_.size()
+            << "\n\tIncoming polar angles: " << getNumInTheta();
+    }
+    else if (!specularOffsets_.allFinite()) {
+        valid = false;
+        lbWarn << "[SpecularCoordinatesBrdf::validate] The array of specular offset is invalid.";
+    }
+    else if (specularOffsets_.minCoeff() < -CoordSys::MAX_ANGLE0 ||
+             specularOffsets_.maxCoeff() >  CoordSys::MAX_ANGLE0) {
+        valid = false;
+        lbWarn << "[SpecularCoordinatesBrdf::validate] The angle(s) in specular offsets is outside of range.";
+    }
+    else {
+        lbInfo << "[SpecularCoordinatesBrdf::validate] The array of specular offset is valid.";
+    }
+
+    return valid;
 }
