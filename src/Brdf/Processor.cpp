@@ -759,6 +759,8 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
     angles1[angles1.size() - 1] = inPhi;
     std::sort(angles1.data(), angles1.data() + angles1.size());
 
+    ss->updateAngleAttributes();
+
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
