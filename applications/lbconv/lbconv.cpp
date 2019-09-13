@@ -33,7 +33,7 @@ using namespace lb;
 
 int main(int argc, char** argv)
 {
-    Log::setNotificationLevel(Log::Level::ERROR_MSG);
+    Log::setNotificationLevel(Log::Level::WARN_MSG);
 
     ArgumentParser ap(argc, argv);
 
