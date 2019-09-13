@@ -497,43 +497,41 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
             const SpecularCoordinatesBrdf origBrdf = *brdf;
 
             // Equalize samples for incoming azimuthal angles if an incoming polar angle is 0.
+            for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
             for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
             for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
-                for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi(); ++inPhIndex) {
-                    Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
+                Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
 
-                    for (int sampledInPhIndex = 0;
-                         sampledInPhIndex < brdf->getNumInPhi();
-                         ++sampledInPhIndex) {
-                        // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
-                        float inTheta   = EPSILON_F;
-                        float inPhi     = brdf->getInPhi(sampledInPhIndex);
-                        float specTheta = brdf->getSpecTheta(spThIndex);
-                        float specPhi   = brdf->getSpecPhi(spPhIndex);
+                Vec3 outDir = brdf->getOutDirection(0, inPhIndex, spThIndex, spPhIndex);
+                for (int sampledInPhIndex = 0;
+                     sampledInPhIndex < brdf->getNumInPhi();
+                     ++sampledInPhIndex) {
 
-                        float currInPhi = brdf->getInPhi(inPhIndex);
-                        if (currInPhi < PI_2_F - EPSILON_F ||
-                            currInPhi > PI_F + PI_2_F - EPSILON_F) {
-                            specPhi -= inPhi;
-                        }
-                        else {
-                            specPhi -= inPhi - PI_F;
-                        }
+                    // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
+                    const float inTheta = EPSILON_F;
+                    float inPhi = brdf->getInPhi(sampledInPhIndex);
 
-                        if (specPhi < 0.0f) {
-                            specPhi += 2.0f * PI_F;
-                        }
-                        else if (specPhi > 2.0f * PI_F) {
-                            specPhi -= 2.0f * PI_F;
-                        }
-
-                        sumSp += origBrdf.getSpectrum(inTheta, inPhi, specTheta, specPhi).cast<Arrayd::Scalar>();
+                    // Ignore an overlapping angle.
+                    if (isEqual(inPhi, 2.0f * PI_F) &&
+                        isEqual(brdf->getInPhi(0), 0.0f)) {
+                        continue;
                     }
 
-                    Spectrum sp = sumSp.cast<Spectrum::Scalar>() / brdf->getNumInPhi();
-                    brdf->setSpectrum(0, inPhIndex, spThIndex, spPhIndex, sp);
+                    Vec3 inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
+                    sumSp += origBrdf.getSpectrum(inDir, outDir).cast<Arrayd::Scalar>();
                 }
-            }}
+
+                int numInPhi = brdf->getNumInPhi();
+
+                // Ignore an overlapping angle.
+                if (isEqual(brdf->getInPhi(0), 0.0f) &&
+                    isEqual(brdf->getInPhi(brdf->getNumInPhi() - 1), 2.0f * PI_F)) {
+                    --numInPhi;
+                }
+
+                Spectrum sp = sumSp.cast<Spectrum::Scalar>() / numInPhi;
+                brdf->setSpectrum(0, inPhIndex, spThIndex, spPhIndex, sp);
+            }}}
         }
 
         int minInPhiIndex = 0;
@@ -544,8 +542,8 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
             for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
             for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
             for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi();   ++spPhIndex) {
-                Spectrum minSp = brdf->getSpectrum(inThIndex, minInPhiIndex, spThIndex, spPhIndex);
-                Spectrum maxSp = brdf->getSpectrum(inThIndex, maxInPhiIndex, spThIndex, spPhIndex);
+                const Spectrum& minSp = brdf->getSpectrum(inThIndex, minInPhiIndex, spThIndex, spPhIndex);
+                const Spectrum& maxSp = brdf->getSpectrum(inThIndex, maxInPhiIndex, spThIndex, spPhIndex);
                 Spectrum sp = (minSp + maxSp) / 2.0;
 
                 brdf->setSpectrum(inThIndex, minInPhiIndex, spThIndex, spPhIndex, sp);
@@ -595,8 +593,8 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
             for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
             for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
             for (int spThIndex = 0; spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
-                Spectrum minSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, minSpPhiIndex);
-                Spectrum maxSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, maxSpPhiIndex);
+                const Spectrum& minSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, minSpPhiIndex);
+                const Spectrum& maxSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, maxSpPhiIndex);
                 Spectrum sp = (minSp + maxSp) / 2.0;
 
                 brdf->setSpectrum(inThIndex, inPhIndex, spThIndex, minSpPhiIndex, sp);
