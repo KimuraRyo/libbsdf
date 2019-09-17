@@ -367,33 +367,45 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
     Arrayf angles3 = samples_->getAngles3();
 
     // Angle arrays
-    if (angles0.minCoeff() < CoordSysT::MIN_ANGLE0 || angles0.maxCoeff() > CoordSysT::MAX_ANGLE0) {
+    if (angles0.minCoeff() < CoordSysT::MIN_ANGLE0 ||
+        angles0.maxCoeff() > CoordSysT::MAX_ANGLE0 + EPSILON_F * CoordSysT::MAX_ANGLE0) {
         valid = false;
-        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles0 is outside of range.";
+        lbWarn
+            << "[CoordinatesBrdf::validate] The angle(s) in angles0 is outside of range:\n\t"
+            << angles0.format(LB_EIGEN_IO_FMT);
     }
     else {
         lbInfo << "[CoordinatesBrdf::validate] The array of angle0 is valid.";
     }
 
-    if (angles1.minCoeff() < CoordSysT::MIN_ANGLE1 || angles1.maxCoeff() > CoordSysT::MAX_ANGLE1) {
+    if (angles1.minCoeff() < CoordSysT::MIN_ANGLE1 ||
+        angles1.maxCoeff() > CoordSysT::MAX_ANGLE1 + EPSILON_F * CoordSysT::MAX_ANGLE1) {
         valid = false;
-        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles1 is outside of range.";
+        lbWarn
+            << "[CoordinatesBrdf::validate] The angle(s) in angles1 is outside of range:\n\t"
+            << angles1.format(LB_EIGEN_IO_FMT);
     }
     else {
         lbInfo << "[CoordinatesBrdf::validate] The array of angle1 is valid.";
     }
 
-    if (angles2.minCoeff() < CoordSysT::MIN_ANGLE2 || angles2.maxCoeff() > CoordSysT::MAX_ANGLE2) {
+    if (angles2.minCoeff() < CoordSysT::MIN_ANGLE2 ||
+        angles2.maxCoeff() > CoordSysT::MAX_ANGLE2 + EPSILON_F * CoordSysT::MAX_ANGLE2) {
         valid = false;
-        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles2 is outside of range.";
+        lbWarn
+            << "[CoordinatesBrdf::validate] The angle(s) in angles2 is outside of range:\n\t"
+            << angles2.format(LB_EIGEN_IO_FMT);
     }
     else {
         lbInfo << "[CoordinatesBrdf::validate] The array of angle2 is valid.";
     }
 
-    if (angles3.minCoeff() < CoordSysT::MIN_ANGLE3 || angles3.maxCoeff() > CoordSysT::MAX_ANGLE3) {
+    if (angles3.minCoeff() < CoordSysT::MIN_ANGLE3 ||
+        angles3.maxCoeff() > CoordSysT::MAX_ANGLE3 + EPSILON_F * CoordSysT::MAX_ANGLE3) {
         valid = false;
-        lbWarn << "[CoordinatesBrdf::validate] The angle(s) in angles3 is outside of range.";
+        lbWarn
+            << "[CoordinatesBrdf::validate] The angle(s) in angles3 is outside of range:\n\t"
+            << angles3.format(LB_EIGEN_IO_FMT);
     }
     else {
         lbInfo << "[CoordinatesBrdf::validate] The array of angle3 is valid.";
