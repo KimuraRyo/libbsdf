@@ -21,7 +21,7 @@ public:
 
     // height CDF
     virtual float C1(float h) const = 0;
- 
+
     // inverse of the height CDF
     virtual float invC1(float U) const = 0;
 };
@@ -192,13 +192,13 @@ public:
     // sample height in outgoing direction
     float sampleHeight(const Vec3f& wo, float h0, float U) const;
 
-    // evaluate local phase function 
+    // evaluate local phase function
     virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const = 0;
 
     // sample local phase function
     virtual Vec3f samplePhaseFunction(const Vec3f& wi) const = 0;
 
-    // evaluate BSDF limited to single scattering 
+    // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
     virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const = 0;
 };
@@ -215,13 +215,13 @@ public:
 
     virtual ~MicrosurfaceConductor() {}
 
-    // evaluate local phase function 
+    // evaluate local phase function
     virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const;
 
     // sample local phase function
     virtual Vec3f samplePhaseFunction(const Vec3f& wi) const;
 
-    // evaluate BSDF limited to single scattering 
+    // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
     virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const;
 };
@@ -250,7 +250,7 @@ public:
     // scatteringOrder is set to the number of bounces computed for this sample
     virtual Vec3f sample(const Vec3f& wi, int& scatteringOrder) const;
 
-    // evaluate local phase function 
+    // evaluate local phase function
     virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const;
     float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo, bool wi_outside, bool wo_outside) const;
 
@@ -258,7 +258,7 @@ public:
     virtual Vec3f samplePhaseFunction(const Vec3f& wi) const;
     Vec3f samplePhaseFunction(const Vec3f& wi, bool wi_outside, bool& wo_outside) const;
 
-    // evaluate BSDF limited to single scattering 
+    // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
     virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const;
 
@@ -281,13 +281,13 @@ public:
 
     virtual ~MicrosurfaceDiffuse() {}
 
-    // evaluate local phase function 
+    // evaluate local phase function
     virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const;
 
     // sample local phase function
     virtual Vec3f samplePhaseFunction(const Vec3f& wi) const;
 
-    // evaluate BSDF limited to single scattering 
+    // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
     virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const;
 };
@@ -420,7 +420,7 @@ static double beta(double m, double n)
 }
 
 /*
- * Implementation of MicrosurfaceHeightUniform 
+ * Implementation of MicrosurfaceHeightUniform
  */
 
 float MicrosurfaceHeightUniform::P1(float h) const
@@ -597,7 +597,7 @@ Vec2f MicrosurfaceSlopeBeckmann::sampleP22_11(float theta_i, float U, float U_2)
     // VNDF normalization factor
     float c = 1.0f / projectedarea;
 
-    // search 
+    // search
     float erf_min = -0.9999f;
     float erf_max = max(erf_min, static_cast<float>(erfAs(slope_i)));
     float erf_current = 0.5f * (erf_min + erf_max);
@@ -868,7 +868,7 @@ float Microsurface::eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder) 
 
 float MicrosurfaceConductor::evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const
 {
-    // half vector 
+    // half vector
     Vec3f wh = (wi + wo).normalized();
     if (wh.z() < 0.0f) return 0.0f;
 
@@ -894,7 +894,7 @@ float MicrosurfaceConductor::evalSingleScattering(const Vec3f& wi, const Vec3f& 
     Vec3f wh = (wi + wo).normalized();
     float D = m_microsurfaceslope->D(wh);
 
-    // masking-shadowing 
+    // masking-shadowing
     float G2 = 1.0f / (1.0f + m_microsurfaceslope->Lambda(wi) + m_microsurfaceslope->Lambda(wo));
 
     // BRDF * cos
@@ -917,7 +917,7 @@ float MicrosurfaceDielectric::Fresnel(const Vec3f& wi, const Vec3f& wm, float et
     float cos_theta_i = wi.dot(wm);
     float cos_theta_t2 = 1.0f - (1.0f - cos_theta_i * cos_theta_i) / (eta * eta);
 
-    // total internal reflection 
+    // total internal reflection
     if (cos_theta_t2 <= 0.0f) return 1.0f;
 
     float cos_theta_t = sqrtf(cos_theta_t2);
@@ -1188,7 +1188,7 @@ Vec3f MicrosurfaceDiffuse::samplePhaseFunction(const Vec3f& wi) const
     return wo;
 }
 
-// stochastic evaluation  
+// stochastic evaluation
 // Heitz and Dupuy 2015
 // Implementing a Simple Anisotropic Rough Diffuse Material with Stochastic Evaluation
 float MicrosurfaceDiffuse::evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const

@@ -95,7 +95,7 @@ inline Vec3 SimplifiedOrenNayar::compute(const Vec3&    L,
     float beta = min(inTheta, outTheta);
 
     float sqR = roughness * roughness;
-    
+
     float A = 1.0f - 0.5f * sqR / (sqR + 0.33f);
     float B = 0.45f * sqR / (sqR + 0.09f);
 

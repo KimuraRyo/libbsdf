@@ -676,7 +676,7 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
         }
 
         Spectrum specularSp = brdf->getSpectrum(inThIndex, inPhIndex, 0, 0);
-        
+
         for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
             Spectrum boundarySp = brdf->getSpectrum(inThIndex, inPhIndex, spThBoundary, spPhIndex);
             float boundarySpTh = brdf->getSpecTheta(spThBoundary);

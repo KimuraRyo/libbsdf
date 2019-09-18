@@ -20,7 +20,7 @@ namespace lb {
 struct CieData
 {
     static const int numWavelengths; /*!< The number of wavelengths: 95 samples. */
-    
+
     static const float minWavelength; /*!< The minimum value of wavelength: 360nm. */
     static const float maxWavelength; /*!< The maximum value of wavelength: 830nm. */
 

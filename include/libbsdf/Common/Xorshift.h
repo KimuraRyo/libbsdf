@@ -58,7 +58,7 @@ public:
     /*! Generates a random point on the surface of a unit hemisphere. Z-up coordinate system is used. */
     template <typename Vec3T>
     static Vec3T randomOnHemisphere();
-    
+
 private:
     uint32_t x_, y_, z_, w_;
 };

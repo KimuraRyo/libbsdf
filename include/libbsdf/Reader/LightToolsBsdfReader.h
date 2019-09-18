@@ -61,7 +61,7 @@ private:
         SideType                sideType;
         DataType                dataType;
         TristimulusValueType    tristimulusValueType;
-        
+
         Arrayf samples;
 
         static bool cmp(DataBlock* lhs, DataBlock* rhs);

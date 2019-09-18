@@ -120,7 +120,7 @@ inline Vec3 OrenNayar::compute(const Vec3& L,
     Vec3 L2 = 0.17f * albedo.cwiseProduct(albedo) / PI_F
             * sqR / (sqR + 0.13f)
             * (1.0f - cosPhiDiff * betaPi_L2 * betaPi_L2);
-    
+
     return L1 + L2;
 }
 

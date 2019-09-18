@@ -142,7 +142,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
         else if (dataStr == "Side") {
             std::string sideStr;
             ifs >> sideStr;
-            
+
             if (sideStr == "Front") {
                 data->sideType = FRONT_SIDE;
             }
@@ -160,7 +160,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
         else if (dataStr == "ScatterType") {
             std::string scatterStr;
             ifs >> scatterStr;
-            
+
             if (scatterStr == "BRDF") {
                 data->dataType = BRDF_DATA;
             }
@@ -175,7 +175,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
         else if (dataStr == "TristimulusValue") {
             std::string trisStr;
             ifs >> trisStr;
-            
+
             if (trisStr == "TrisX") {
                 data->tristimulusValueType = TRIS_X;
             }

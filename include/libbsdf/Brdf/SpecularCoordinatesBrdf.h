@@ -52,7 +52,7 @@ public:
                             int         numSpecTheta,
                             int         numSpecPhi);
 
-    /*! 
+    /*!
      * Constructs a BRDF with narrow intervals near specular directions.
      *
      * \param refractiveIndex   Refractive index used for the specular offset of BTDF.

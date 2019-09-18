@@ -172,7 +172,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 << angles.at(0) << ", " << angles.at(1) << ", " << angles.at(2) << ", " << angles.at(3);
             continue;
         }
-        
+
         samples[angles] = values;
     }
 

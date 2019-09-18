@@ -48,7 +48,7 @@ public:
 
     /*! Gets the maximum number of iterations of the division of angle1. */
     int getMaxIteration1() const;
-    
+
     /*! Sets the maximum number of iterations of the division of angle1. */
     void setMaxIteration1(int maxIteration);
 

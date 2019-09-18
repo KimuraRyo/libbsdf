@@ -20,7 +20,7 @@ namespace lb {
  * \brief The AstmReader class provides the reader for an ASTM E1392-96(2002) file.
  *
  * lb::SphericalCoordinatesBrdf is created from loaded data.
- * 
+ *
  * File format:
  * http://www.astm.org/Standards/E1392.htm
  */

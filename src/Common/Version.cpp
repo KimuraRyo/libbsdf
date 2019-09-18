@@ -25,6 +25,6 @@ const char* lb::getVersion()
         sprintf(version, "%d.%d.%d", LIBBSDF_MAJOR_VERSION, LIBBSDF_MINOR_VERSION, LIBBSDF_PATCH_VERSION);
         initialized = true;
     }
-    
+
     return version;
 }

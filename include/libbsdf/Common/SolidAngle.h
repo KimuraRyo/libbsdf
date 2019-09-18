@@ -26,14 +26,14 @@ public:
     template <typename T>
     static T fromRectangle(const T& theta0, const T& theta1, const T& phi0, const T& phi1);
 
-    /*! 
+    /*!
      * Computes the solid angle of a rectangle specified by four unit vectors.
      * If the part of a rectangle is below the plane (z=0), the upper region is validated.
      * Vertices of a rectangle:
      *   v0--v1
      *   |   |
      *   v3--v2
-     * 
+     *
      * \param   The assigned centroid of a rectangle.
      *          If the part of a rectangle is below the plane, the upper part is taken into account.
      *          If all vectors are below the plane, result is not defined.

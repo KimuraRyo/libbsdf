@@ -57,7 +57,7 @@ public:
 
     /*! Virtual copy constructor. */
     virtual SphericalCoordinatesBrdf* clone() const;
-    
+
     using BaseBrdf::getSpectrum;
 
     /*! Gets the spectrum of the BRDF at a set of angles. */
@@ -71,7 +71,7 @@ public:
                          float inPhi,
                          float outTheta,
                          float outPhi) const;
-    
+
     /*! Gets the spectrum of the BRDF at a set of angle indices. */
     Spectrum& getSpectrum(int inThetaIndex,
                           int inPhiIndex,

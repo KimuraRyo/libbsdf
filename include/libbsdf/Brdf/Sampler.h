@@ -66,17 +66,17 @@ public:
     static void getSpectrum(const SampleSet2D&  ss2,
                             const Vec3&         inDir,
                             Spectrum*           spectrum);
-    
+
 private:
     static bool isIsotropic(const SampleSet& samples);
     static bool isIsotropic(const SampleSet2D& ss2);
-    
+
     static const SampleSet* getSampleSet(const Brdf& brdf);
-    
+
     static void fromXyz(const Brdf& brdf,
                         const Vec3& inDir, const Vec3& outDir,
                         float* angle0, float* angle2, float* angle3);
-    
+
     static void fromXyz(const Brdf& brdf,
                         const Vec3& inDir, const Vec3& outDir,
                         float* angle0, float* angle1, float* angle2, float* angle3);

@@ -130,7 +130,7 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
     assert(array0.size() == array1.size() &&
            array1.size() == array2.size() &&
            array2.size() == array3.size());
-    
+
     array->resize(array0.size());
 
     CentripetalCatmullRomSpline ccrs;

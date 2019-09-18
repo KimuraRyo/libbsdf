@@ -19,7 +19,7 @@ namespace lb {
  * \class DdrReader
  * \brief The DdrReader class provides the reader for a DDR and DDT file.
  *
- * A DDR (Diffuse Distribution Reflection) file includes a BRDF, 
+ * A DDR (Diffuse Distribution Reflection) file includes a BRDF,
  * and a DDT (Diffuse Distribution Transparent) file includes a BTDF.
  * lb::SpecularCoordinatesBrdf is created from loaded data.
  */

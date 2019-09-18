@@ -285,7 +285,7 @@ inline void SampleSet::setAngle0(int index, float angle)
 
 inline void SampleSet::setAngle1(int index, float angle)
 {
-    angles1_[index] = angle;        
+    angles1_[index] = angle;
     equalIntervalAngles1_ = isEqualInterval(angles1_);
 }
 

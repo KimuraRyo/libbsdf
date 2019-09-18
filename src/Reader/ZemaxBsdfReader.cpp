@@ -218,7 +218,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
 
             int inPhIndex = cntTis / static_cast<int>(inThetaDegrees.size());
             int inThIndex = cntTis - static_cast<int>(inThetaDegrees.size()) * inPhIndex;
-            
+
             for (int spPhIndex = 0; spPhIndex < static_cast<int>(spPhiDegrees.size());   ++spPhIndex) {
             for (int spThIndex = 0; spThIndex < static_cast<int>(spThetaDegrees.size()); ++spThIndex) {
                 std::string brdfValueStr;
@@ -247,6 +247,6 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
 
     brdf->clampAngles();
     brdf->setSourceType(MEASURED_SOURCE);
-    
+
     return brdf;
 }
