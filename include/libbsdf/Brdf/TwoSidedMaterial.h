@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -8,6 +8,8 @@
 
 #ifndef LIBBSDF_TWO_SIDED_MATERIAL_H
 #define LIBBSDF_TWO_SIDED_MATERIAL_H
+
+#include <memory>
 
 #include <libbsdf/Brdf/Material.h>
 
@@ -25,30 +27,31 @@ public:
      *
      * \warning \a frontMaterial and \a backMaterial are deleted in destructor.
      */
-    TwoSidedMaterial(Material* frontMaterial, Material* backMaterial);
+    TwoSidedMaterial(std::shared_ptr<Material> frontMaterial,
+                     std::shared_ptr<Material> backMaterial);
 
     virtual ~TwoSidedMaterial();
 
-    Material* getFrontMaterial(); /*!< Gets a front side material. */
-    Material* getBackMaterial();  /*!< Gets a back side material. */
+    std::shared_ptr<Material> getFrontMaterial(); /*!< Gets a front side material. */
+    std::shared_ptr<Material> getBackMaterial();  /*!< Gets a back side material. */
 
-    const Material* getFrontMaterial() const; /*!< Gets a front side material. */
-    const Material* getBackMaterial()  const; /*!< Gets a back side material. */
+    const std::shared_ptr<Material> getFrontMaterial() const; /*!< Gets a front side material. */
+    const std::shared_ptr<Material> getBackMaterial()  const; /*!< Gets a back side material. */
 
 protected:
-    Material* frontMaterial_; /*!< This attribute holds a front side material. */
-    Material* backMaterial_;  /*!< This attribute holds a back side material. */
+    std::shared_ptr<Material> frontMaterial_; /*!< This attribute holds a front side material. */
+    std::shared_ptr<Material> backMaterial_;  /*!< This attribute holds a back side material. */
 
 private:
     /*! Copy operator is disabled. */
     TwoSidedMaterial& operator=(const TwoSidedMaterial&);
 };
 
-inline Material* TwoSidedMaterial::getFrontMaterial() { return frontMaterial_; }
-inline Material* TwoSidedMaterial::getBackMaterial()  { return backMaterial_; }
+inline std::shared_ptr<Material> TwoSidedMaterial::getFrontMaterial() { return frontMaterial_; }
+inline std::shared_ptr<Material> TwoSidedMaterial::getBackMaterial()  { return backMaterial_; }
 
-inline const Material* TwoSidedMaterial::getFrontMaterial() const { return frontMaterial_; }
-inline const Material* TwoSidedMaterial::getBackMaterial()  const { return backMaterial_; }
+inline const std::shared_ptr<Material> TwoSidedMaterial::getFrontMaterial() const { return frontMaterial_; }
+inline const std::shared_ptr<Material> TwoSidedMaterial::getBackMaterial()  const { return backMaterial_; }
 
 } // namespace lb
 

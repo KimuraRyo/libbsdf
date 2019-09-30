@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,13 +10,9 @@
 
 using namespace lb;
 
-TwoSidedMaterial::TwoSidedMaterial(Material* frontMaterial,
-                                   Material* backMaterial)
+TwoSidedMaterial::TwoSidedMaterial(std::shared_ptr<Material> frontMaterial,
+                                   std::shared_ptr<Material> backMaterial)
                                    : frontMaterial_(frontMaterial),
                                      backMaterial_(backMaterial) {}
 
-TwoSidedMaterial::~TwoSidedMaterial()
-{
-    delete frontMaterial_;
-    delete backMaterial_;
-}
+TwoSidedMaterial::~TwoSidedMaterial() {}

@@ -226,10 +226,10 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
         }
     }
 
-    SphericalCoordinatesBrdf* frontBrdf = createBrdf(frontBrdfData, outThetaDegrees, outPhiDegrees, colorModel);
-    SphericalCoordinatesBrdf* frontBtdf = createBrdf(frontBtdfData, outThetaDegrees, outPhiDegrees, colorModel);
-    SphericalCoordinatesBrdf* backBrdf  = createBrdf(backBrdfData,  outThetaDegrees, outPhiDegrees, colorModel);
-    SphericalCoordinatesBrdf* backBtdf  = createBrdf(backBtdfData,  outThetaDegrees, outPhiDegrees, colorModel);
+    std::shared_ptr<Brdf> frontBrdf(createBrdf(frontBrdfData, outThetaDegrees, outPhiDegrees, colorModel));
+    std::shared_ptr<Brdf> frontBtdf(createBrdf(frontBtdfData, outThetaDegrees, outPhiDegrees, colorModel));
+    std::shared_ptr<Brdf> backBrdf (createBrdf(backBrdfData,  outThetaDegrees, outPhiDegrees, colorModel));
+    std::shared_ptr<Brdf> backBtdf (createBrdf(backBtdfData,  outThetaDegrees, outPhiDegrees, colorModel));
 
     for (auto it = frontBrdfData.begin(); it != frontBrdfData.end(); ++it) { delete *it; }
     for (auto it = frontBtdfData.begin(); it != frontBtdfData.end(); ++it) { delete *it; }
@@ -238,12 +238,15 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
 
     if (!frontBrdf && !frontBtdf && !backBrdf && !backBtdf) return 0;
 
-    Btdf* fBtdf = frontBtdf ? new Btdf(frontBtdf) : 0;
-    Btdf* bBtdf = backBtdf  ? new Btdf(backBtdf)  : 0;
-    Bsdf* frontBsdf = new Bsdf(frontBrdf, fBtdf);
-    Bsdf* backBsdf  = new Bsdf(backBrdf,  bBtdf);
-    Material* frontMaterial = new Material(frontBsdf, 0, 0);
-    Material* backMaterial  = new Material(backBsdf,  0, 0);
+    std::shared_ptr<Btdf> fBtdf = frontBtdf ? std::make_shared<Btdf>(frontBtdf) : 0;
+    std::shared_ptr<Btdf> bBtdf = backBtdf  ? std::make_shared<Btdf>(backBtdf)  : 0;
+
+    std::shared_ptr<Bsdf> frontBsdf = std::make_shared<Bsdf>(frontBrdf, fBtdf);
+    std::shared_ptr<Bsdf> backBsdf  = std::make_shared<Bsdf>(backBrdf,  bBtdf);
+
+    std::shared_ptr<Material> frontMaterial = std::make_shared<Material>(frontBsdf, nullptr, nullptr);
+    std::shared_ptr<Material> backMaterial  = std::make_shared<Material>(backBsdf, nullptr, nullptr);
+
     TwoSidedMaterial* material = new TwoSidedMaterial(frontMaterial, backMaterial);
 
     return material;

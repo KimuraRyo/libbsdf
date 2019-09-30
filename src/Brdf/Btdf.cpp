@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,9 +10,6 @@
 
 using namespace lb;
 
-Btdf::Btdf(Brdf* brdf) : brdf_(brdf) {}
+Btdf::Btdf(std::shared_ptr<Brdf> brdf) : brdf_(brdf) {}
 
-Btdf::~Btdf()
-{
-    delete brdf_;
-}
+Btdf::~Btdf() {}

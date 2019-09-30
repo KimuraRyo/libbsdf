@@ -9,6 +9,8 @@
 #ifndef LIBBSDF_BTDF_H
 #define LIBBSDF_BTDF_H
 
+#include <memory>
+
 #include <libbsdf/Brdf/Brdf.h>
 
 namespace lb {
@@ -28,7 +30,7 @@ public:
      *
      * \warning \a brdf is deleted in destructor.
      */
-    explicit Btdf(Brdf* brdf);
+    explicit Btdf(std::shared_ptr<Brdf> brdf);
 
     virtual ~Btdf();
 
@@ -46,15 +48,15 @@ public:
                            Vec3*    inDir,
                            Vec3*    outDir) const;
 
-    Brdf*       getBrdf();       /*!< Gets the BRDF data. */
-    const Brdf* getBrdf() const; /*!< Gets the BRDF data. */
+    std::shared_ptr<Brdf>       getBrdf();       /*!< Gets the BRDF data. */
+    const std::shared_ptr<Brdf> getBrdf() const; /*!< Gets the BRDF data. */
 
     SampleSet*       getSampleSet();       /*!< Gets sample points. */
     const SampleSet* getSampleSet() const; /*!< Gets sample points. */
 
 protected:
     /*! This attribute holds the BRDF data including angles, wavelengths, and spectra. */
-    Brdf* brdf_;
+    std::shared_ptr<Brdf> brdf_;
 
 private:
     /*! Copy operator is disabled. */
@@ -63,7 +65,7 @@ private:
 
 inline Spectrum Btdf::getSpectrum(const Vec3& inDir, const Vec3& outDir) const
 {
-    Spectrum sp = brdf_->getSpectrum(Vec3(inDir[0], inDir[1], std::abs(inDir[2])),
+    Spectrum sp = brdf_->getSpectrum(Vec3(inDir[0],  inDir[1],  std::abs(inDir[2])),
                                      Vec3(outDir[0], outDir[1], std::abs(outDir[2])));
     return sp;
 }
@@ -76,8 +78,8 @@ inline void Btdf::getInOutDirection(int index0, int index1, int index2, int inde
     outDir->z() = -outDir->z();
 }
 
-inline       Brdf* Btdf::getBrdf()       { return brdf_; }
-inline const Brdf* Btdf::getBrdf() const { return brdf_; }
+inline       std::shared_ptr<Brdf> Btdf::getBrdf()       { return brdf_; }
+inline const std::shared_ptr<Brdf> Btdf::getBrdf() const { return brdf_; }
 
 inline       SampleSet* Btdf::getSampleSet()       { return brdf_->getSampleSet(); }
 inline const SampleSet* Btdf::getSampleSet() const { return brdf_->getSampleSet(); }

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015 Kimura Ryo                                       //
+// Copyright (C) 2015-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,22 +10,15 @@
 
 using namespace lb;
 
-Material::Material(Bsdf*        bsdf,
-                   SampleSet2D* specularReflectances,
-                   SampleSet2D* specularTransmittances,
-                   SampleSet2D* reflectionTis,
-                   SampleSet2D* transmissionTis)
+Material::Material(std::shared_ptr<Bsdf>        bsdf,
+                   std::shared_ptr<SampleSet2D> specularReflectances,
+                   std::shared_ptr<SampleSet2D> specularTransmittances,
+                   std::shared_ptr<SampleSet2D> reflectionTis,
+                   std::shared_ptr<SampleSet2D> transmissionTis)
                    : bsdf_(bsdf),
                      specularReflectances_(specularReflectances),
                      specularTransmittances_(specularTransmittances),
                      reflectionTis_(reflectionTis),
                      transmissionTis_(transmissionTis) {}
 
-Material::~Material()
-{
-    delete bsdf_;
-    delete specularReflectances_;
-    delete specularTransmittances_;
-    delete reflectionTis_;
-    delete transmissionTis_;
-}
+Material::~Material() {}
