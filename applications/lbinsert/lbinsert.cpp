@@ -85,8 +85,8 @@ int main(int argc, char** argv)
             baseBrdf.reset(DdrReader::read(baseFileName));
             break;
         default:
-            cerr << "Invalid file type: " << baseFileName << endl;
-            return 1;
+            cerr << "Unsupported file type: " << baseFileType << endl;
+            break;
     }
 
     if (!baseBrdf) {
@@ -112,8 +112,8 @@ int main(int argc, char** argv)
             partialBrdf.reset(DdrReader::read(partialFileName));
             break;
         default:
-            cerr << "Invalid file type: " << partialFileName << endl;
-            return 1;
+            cerr << "Unsupported file type: " << partialFileType << endl;
+            break;
     }
 
     if (!partialBrdf) {

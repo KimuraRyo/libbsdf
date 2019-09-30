@@ -60,7 +60,7 @@ int main(int argc, char** argv)
         cout << "  -h, --help       show this help message and exit" << endl;
         cout << "  -v, --version    show program's version number and exit" << endl;
         cout << "  -scatterType     set either BRDF or BTDF for the input ASTM file (default: BRDF)" << endl;
-        cout << "  -arrangement     arrange BRDF/BTDF with extrapolation and conservation of energy." << endl;
+        cout << "  -arrangement     arrange BRDF/BTDF with extrapolation and conservation of energy" << endl;
         return 0;
     }
 
@@ -117,8 +117,8 @@ int main(int argc, char** argv)
             inBrdf.reset(ZemaxBsdfReader::read(inFileName, &dataType));
             break;
         default:
-            cerr << "Invalid file type: " << inFileName << endl;
-            return 1;
+            cerr << "Unsupported file type: " << inFileType << endl;
+            break;
     }
 
     if (!inBrdf) {
