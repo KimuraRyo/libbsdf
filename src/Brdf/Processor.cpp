@@ -70,12 +70,13 @@ void lb::editComponents(int                 i0,
         float specThWeight = specTh / SpecularCoordinateSystem::MAX_ANGLE2;
         specThWeight = pow(specThWeight, 1.0f / max(glossyShininess, EPSILON_F));
         float newSpecTh = specThWeight * SpecularCoordinateSystem::MAX_ANGLE2;
-        SpecularCoordinateSystem::toXyz(inTh, inPh, newSpecTh, specPh, &inDir, &outDir);
 
-        if (outDir[2] <= 0.0) {
-            outDir[2] = 0.0;
-        }
-        outDir.normalize();
+        inTh        = clamp(inTh,       SpecularCoordinateSystem::MIN_ANGLE0, SpecularCoordinateSystem::MAX_ANGLE0);
+        inPh        = clamp(inPh,       SpecularCoordinateSystem::MIN_ANGLE1, SpecularCoordinateSystem::MAX_ANGLE1);
+        newSpecTh   = clamp(newSpecTh,  SpecularCoordinateSystem::MIN_ANGLE2, SpecularCoordinateSystem::MAX_ANGLE2);
+        specPh      = clamp(specPh,     SpecularCoordinateSystem::MIN_ANGLE3, SpecularCoordinateSystem::MAX_ANGLE3);
+
+        SpecularCoordinateSystem::toXyz(inTh, inPh, newSpecTh, specPh, &inDir, &outDir);
     }
 
     Spectrum origSp = origBrdf.getSpectrum(inDir, outDir);

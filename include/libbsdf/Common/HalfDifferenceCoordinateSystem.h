@@ -100,6 +100,9 @@ void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
                   static_cast<Vec3::Scalar>(rotPhVec[1]),
                   static_cast<Vec3::Scalar>(rotThVec[1]));
 
+    (*inDir)[2] = std::max((*inDir)[2], Vec3::Scalar(0));
+    inDir->normalize();
+
     *outDir = reflect(*inDir, halfDir);
 }
 

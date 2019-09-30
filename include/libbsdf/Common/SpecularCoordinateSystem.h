@@ -104,6 +104,8 @@ void SpecularCoordinateSystem::toXyz(ScalarT    inTheta,
                                      Vec3*      inDir,
                                      Vec3*      outDir)
 {
+    assert(inTheta >= 0.0 && inTheta <= PI_2_D);
+
     *inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
     *outDir = toOutDirXyz(inTheta, inPhi, specTheta, specPhi);
 }
@@ -154,7 +156,7 @@ void SpecularCoordinateSystem::fromOutDirXyz(const Vec3&    outDir,
                                              ScalarT*       specTheta,
                                              ScalarT*       specPhi)
 {
-    assert(inTheta >= 0.0 && inTheta <= PI_2_D);
+    assert(inTheta >= 0.0 && inTheta <= PI_2_D + EPSILON_F);
 
     Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-inPhi) * Vec2(outDir[0], outDir[1]);
     Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(-inTheta) * Vec2(rotPhVec[0], outDir[2]);
