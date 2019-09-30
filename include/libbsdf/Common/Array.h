@@ -54,6 +54,10 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
 template <typename T>
 T toRadians(const T& degrees);
 
+/*! \brief Converts an array from radians to degrees. */
+template <typename T>
+T toDegrees(const T& radians);
+
 /*! \brief Returns true if the elements of an array are equally-spaced intervals. */
 template <typename T>
 bool isEqualInterval(const T& array);
@@ -151,6 +155,13 @@ T toRadians(const T& degrees)
 {
     typedef typename T::Scalar ScalarType;
     return degrees / ScalarType(180) * ScalarType(PI_D);
+}
+
+template <typename T>
+T toDegrees(const T& radians)
+{
+    typedef typename T::Scalar ScalarType;
+    return radians * ScalarType(180) / ScalarType(PI_D);
 }
 
 template <typename T>

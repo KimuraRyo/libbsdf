@@ -27,4 +27,5 @@ set_target_properties(${UTILITY_LIB_NAME} PROPERTIES FOLDER ${LIBBSDF_APPLICATIO
 
 add_subdirectory(lbconv)
 add_subdirectory(lbgen)
+add_subdirectory(lbidentify)
 add_subdirectory(lbinsert)
