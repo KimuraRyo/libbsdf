@@ -37,6 +37,8 @@ public:
                 int         numWavelengths = 3,
                 bool        equalIntervalAngles = false);
 
+    ~SampleSet2D();
+
     /*! Gets the spectrum at a direction. */
     Spectrum getSpectrum(const Vec3& dir) const;
 

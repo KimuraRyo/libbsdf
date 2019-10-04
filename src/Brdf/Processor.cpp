@@ -705,6 +705,7 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
     const SampleSet* insertedSs = insertedBrdf.getSampleSet();
 
     if (!hasSameColor(*baseSs, *insertedSs)) {
+        lbError << "[lb::insertBrdfAlongInPhiTemplate] Color models or wavelengths do not match.";
         return 0;
     }
 

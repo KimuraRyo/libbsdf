@@ -11,8 +11,6 @@
 
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
-#include <libbsdf/Brdf/Sampler.h>
-#include <libbsdf/Common/Log.h>
 
 namespace lb {
 
@@ -241,6 +239,7 @@ CoordinatesBrdf<CoordSysT>::~CoordinatesBrdf() {}
 template <typename CoordSysT>
 CoordinatesBrdf<CoordSysT>* CoordinatesBrdf<CoordSysT>::clone() const
 {
+    lbTrace << "[CoordinatesBrdf::clone]";
     return new CoordinatesBrdf<CoordSysT>(*this);
 }
 

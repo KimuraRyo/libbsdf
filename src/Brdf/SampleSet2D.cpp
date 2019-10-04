@@ -21,6 +21,8 @@ SampleSet2D::SampleSet2D(int        numTheta,
                            equalIntervalPhi_(false),
                            sourceType_(UNKNOWN_SOURCE)
 {
+    lbTrace << "[SampleSet2D::SampleSet2D]";
+
     assert(numTheta > 0 && numPhi > 0);
 
     colorModel_ = colorModel;
@@ -59,6 +61,11 @@ SampleSet2D::SampleSet2D(int        numTheta,
         colorModel != SPECTRAL_MODEL) {
         wavelengths_ = Arrayf::Zero(numWavelengths);
     }
+}
+
+SampleSet2D::~SampleSet2D()
+{
+    lbTrace << "[SampleSet2D::~SampleSet2D]";
 }
 
 Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
