@@ -7,12 +7,12 @@
 // =================================================================== //
 
 #include <iostream>
+#include <memory>
 
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
 #include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Version.h>
 
 #include <libbsdf/Reader/ReaderUtility.h>
 
@@ -31,6 +31,71 @@ using namespace lb;
 /*
  * BRDF/BTDF generator
  */
+
+const std::string APP_NAME("lbgen");
+const std::string APP_VERSION("1.0.10");
+
+const std::string GgxName                       = "ggx";
+const std::string MultipleScatteringSmithName   = "multiple-scattering-smith";
+const std::string LambertianName                = "lambertian";
+
+void showHelp()
+{
+    using std::cout;
+    using std::endl;
+
+    cout << "Usage: lbgen [options ...] bsdf_model out_file" << endl;
+    cout << endl;
+    cout << "lbgen generates BRDF/BTDF data and saves an Integra BSDF file." << endl;
+    cout << endl;
+    cout << "Positional Arguments:" << endl;
+    cout << "  bsdf_model  Analytic BSDF model" << endl;
+    cout << "  out_file    Name of generated file";
+    cout << " (\".ddr\" or \".ddt\" is acceptable as a suffix for BRDF or BTDF.";
+    cout << " Otherwise, \".ddr\" and \".ddt\" files are generated.)" << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << "  -h, --help                   show this help message and exit" << endl;
+    cout << "  -v, --version                show program's version number and exit" << endl;
+    cout << "  -l, --list                   show acceptable models and parameters of BSDF and exit" << endl;
+    cout << "  -r, --reference              show the references of BSDF models and exit" << endl;
+    cout << "  -numIncomingPolarAngles      set the division number of incoming polar angles (default: 18)" << endl;
+    cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 360)" << endl;
+    cout << "  -numSpecularAzimuthalAngles  set the division number of specular azimuthal angles (default: 72)" << endl;
+    cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << endl;
+#ifdef _OPENMP
+    cout << "  -numThreads                  set the number of threads used by parallel processing" << endl;
+#endif
+}
+
+void showList()
+{
+    using std::cout;
+    using std::endl;
+
+    cout << "Acceptable models:" << endl;
+    cout << "  " << GgxName << endl;
+    cout << "      Valid options:" << endl;
+    cout << "          -roughness  set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
+    cout << "          -n          set refractive index (default: 1.5)" << endl;
+    cout << "          -k          set extinction coefficient (default: 0.0)" << endl;
+    cout << "  " << MultipleScatteringSmithName << endl;
+    cout << "      Valid options:" << endl;
+    cout << "          -roughness      set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
+    cout << "          -n              set refractive index (default: 1.5)" << endl;
+    cout << "          -numIterations  set the number of sampling iterations (default: 10)" << endl;
+    cout << "  " << LambertianName << endl;
+    cout << "      Valid options: none" << endl;
+}
+
+void showReference()
+{
+    using std::cout;
+    using std::endl;
+
+    cout << "  " << GgxName << ": " << Ggx::getReference() << endl;
+    cout << "  " << MultipleScatteringSmithName << ": " << MultipleScatteringSmith::getReference() << endl;
+}
 
 SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     float                   n,
@@ -60,67 +125,23 @@ int main(int argc, char** argv)
 
     ArgumentParser ap(argc, argv);
 
-    using std::cout;
-    using std::cerr;
-    using std::endl;
-
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
-        cout << "Usage: lbgen [options ...] bsdf_model out_file" << endl;
-        cout << endl;
-        cout << "lbgen generates BRDF/BTDF data and save an Integra BSDF file." << endl;
-        cout << endl;
-        cout << "Positional Arguments:" << endl;
-        cout << "  bsdf_model  Analytic BSDF model" << endl;
-        cout << "  out_file    Name of generated file";
-        cout << " (\".ddr\" or \".ddt\" is acceptable as a suffix for BRDF or BTDF.";
-        cout << " Otherwise, \".ddr\" and \".ddt\" files are generated.)" << endl;
-        cout << endl;
-        cout << "Options:" << endl;
-        cout << "  -h, --help                   show this help message and exit" << endl;
-        cout << "  -v, --version                show program's version number and exit" << endl;
-        cout << "  -l, --list                   show acceptable models and parameters of BSDF and exit" << endl;
-        cout << "  -r, --reference              show the references of BSDF models and exit" << endl;
-        cout << "  -numIncomingPolarAngles      set the division number of incoming polar angles (default: 18)" << endl;
-        cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 360)" << endl;
-        cout << "  -numSpecularAzimuthalAngles  set the division number of specular azimuthal angles (default: 72)" << endl;
-        cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << endl;
-#ifdef _OPENMP
-        cout << "  -numThreads                  set the number of threads used by parallel processing" << endl;
-#endif
+        showHelp();
         return 0;
     }
-
-    const std::string version("1.0.9");
 
     if (ap.read("-v") || ap.read("--version")) {
-        cout << "Version: lbgen " << version << " (libbsdf-" << getVersion() << ")" << endl;
+        app_utility::showAppVersion(APP_NAME, APP_VERSION);
         return 0;
     }
 
-    const std::string GgxName                       = "ggx";
-    const std::string MultipleScatteringSmithName   = "multiple-scattering-smith";
-    const std::string LambertianName                = "lambertian";
-
     if (ap.read("-l") || ap.read("--list")) {
-        cout << "Acceptable models:" << endl;
-        cout << "  " << GgxName << endl;
-        cout << "      Valid options:" << endl;
-        cout << "          -roughness  set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
-        cout << "          -n          set refractive index (default: 1.5)" << endl;
-        cout << "          -k          set extinction coefficient (default: 0.0)" << endl;
-        cout << "  " << MultipleScatteringSmithName << endl;
-        cout << "      Valid options:" << endl;
-        cout << "          -roughness      set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
-        cout << "          -n              set refractive index (default: 1.5)" << endl;
-        cout << "          -numIterations  set the number of sampling iterations (default: 10)" << endl;
-        cout << "  " << LambertianName << endl;
-        cout << "      Valid options: none" << endl;
+        showList();
         return 0;
     }
 
     if (ap.read("-r") || ap.read("--reference")) {
-        cout << "  " << GgxName << ": " << Ggx::getReference() << endl;
-        cout << "  " << MultipleScatteringSmithName << ": " << MultipleScatteringSmith::getReference() << endl;
+        showReference();
         return 0;
     }
 
@@ -129,8 +150,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numIncomingPolarAngles = utility::clampParameter("numIncomingPolarAngles",
-                                                         numIncomingPolarAngles + 1, 2, 3600);
+        numIncomingPolarAngles = app_utility::clampParameter("numIncomingPolarAngles",
+                                                             numIncomingPolarAngles + 1, 2, 3600);
     }
 
     int numSpecularPolarAngles = 360;
@@ -138,8 +159,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numSpecularPolarAngles = utility::clampParameter("numSpecularPolarAngles",
-                                                         numSpecularPolarAngles + 1, 2, 3600);
+        numSpecularPolarAngles = app_utility::clampParameter("numSpecularPolarAngles",
+                                                             numSpecularPolarAngles + 1, 2, 3600);
     }
 
     int numSpecularAzimuthalAngles = 72;
@@ -147,8 +168,8 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numSpecularAzimuthalAngles = utility::clampParameter("numSpecularAzimuthalAngles",
-                                                             numSpecularAzimuthalAngles + 1, 2, 3600);
+        numSpecularAzimuthalAngles = app_utility::clampParameter("numSpecularAzimuthalAngles",
+                                                                 numSpecularAzimuthalAngles + 1, 2, 3600);
     }
 
     bool conservationOfEnergyUsed = false;
@@ -177,7 +198,7 @@ int main(int argc, char** argv)
         return 1;
     }
     else if (n <= 0.0f) {
-        cerr << "Invalid value (n): " << n << endl;
+        std::cerr << "Invalid value (n): " << n << std::endl;
         return 1;
     }
 
@@ -186,7 +207,7 @@ int main(int argc, char** argv)
         return 1;
     }
     else if (k < 0.0f) {
-        cerr << "Invalid value (k): " << k << endl;
+        std::cerr << "Invalid value (k): " << k << std::endl;
         return 1;
     }
 
@@ -195,115 +216,103 @@ int main(int argc, char** argv)
         return 1;
     }
     else {
-        numIterations = utility::clampParameter("numIterations", numIterations, 1, 10000);
+        numIterations = app_utility::clampParameter("numIterations", numIterations, 1, 10000);
     }
 
-    if (!ap.validate(2)) return 1;
+    if (!ap.validateNumTokens(2)) return 1;
 
     std::string modelName = ap.getTokens().at(0);
     std::string fileName  = ap.getTokens().at(1);
 
-    ReflectanceModel* model;
-
     // Create a BRDF/BTDF model.
+    std::unique_ptr<ReflectanceModel> model;
+    const Vec3 white(1.0, 1.0, 1.0);
     if (modelName == GgxName) {
-        roughness = utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
-        model = new Ggx(Vec3(1.0, 1.0, 1.0), roughness, n, k);
+        roughness = app_utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
+        model.reset(new Ggx(white, roughness, n, k));
     }
     else if (modelName == MultipleScatteringSmithName) {
-        roughness = utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
+        roughness = app_utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
 
         MultipleScatteringSmith::MaterialType matType = (k == 0.0f) ? MultipleScatteringSmith::DIELECTRIC_MATERIAL
                                                                     : MultipleScatteringSmith::CONDUCTOR_MATERIAL;
 
-        model = new MultipleScatteringSmith(Vec3(1.0, 1.0, 1.0), roughness, roughness, n,
-                                            static_cast<int>(matType),
-                                            static_cast<int>(MultipleScatteringSmith::GAUSSIAN_HEIGHT),
-                                            static_cast<int>(MultipleScatteringSmith::BECKMANN_SLOPE),
-                                            numIterations);
+        model.reset(new MultipleScatteringSmith(white, roughness, roughness, n,
+                                                static_cast<int>(matType),
+                                                static_cast<int>(MultipleScatteringSmith::GAUSSIAN_HEIGHT),
+                                                static_cast<int>(MultipleScatteringSmith::BECKMANN_SLOPE),
+                                                numIterations));
     }
     else if (modelName == LambertianName) {
         n = 1.0f;
-        model = new Lambertian(Vec3(1.0, 1.0, 1.0));
+        model.reset(new Lambertian(white));
     }
     else {
-        cerr << "Invalid model name: " << modelName << endl;
+        std::cerr << "Invalid model name: " << modelName << std::endl;
         return 1;
     }
 
-    std::string comments("Software: lbgen-" + version);
-    comments += "\n;; Arguments:";
-    for (int i = 1; i < argc; ++i) {
-        comments += " " + std::string(argv[i]);
-    }
-
-    // Create BRDF/BTDF and write file.
+    // Create BRDFs/BTDFs and save files.
+    std::string comments = app_utility::createComments(argc, argv, APP_NAME, APP_VERSION);
     if (reader_utility::hasSuffix(fileName, ".ddr")) {
-        SpecularCoordinatesBrdf* brdf = createBrdf(*model,
-                                                   1.0f,
-                                                   numIncomingPolarAngles,
-                                                   numSpecularPolarAngles,
-                                                   numSpecularAzimuthalAngles,
-                                                   BRDF_DATA);
+        std::unique_ptr<SpecularCoordinatesBrdf> brdf(createBrdf(*model,
+                                                                 1.0f,
+                                                                 numIncomingPolarAngles,
+                                                                 numSpecularPolarAngles,
+                                                                 numSpecularAzimuthalAngles,
+                                                                 BRDF_DATA));
 
         if (conservationOfEnergyUsed) {
-            fixEnergyConservation(brdf);
+            fixEnergyConservation(brdf.get());
         }
 
-        DdrWriter::write(fileName, *brdf, comments);
-
-        delete brdf;
-
-        cout << "Generated: " << fileName << endl;
+        if (DdrWriter::write(fileName, *brdf, comments)) {
+            std::cout << "Saved: " << fileName << std::endl;
+        }
     }
     else if (reader_utility::hasSuffix(fileName, ".ddt")) {
-        SpecularCoordinatesBrdf* btdf = createBrdf(*model,
-                                                   n,
-                                                   numIncomingPolarAngles,
-                                                   numSpecularPolarAngles,
-                                                   numSpecularAzimuthalAngles,
-                                                   BTDF_DATA);
+        std::unique_ptr<SpecularCoordinatesBrdf> btdf(createBrdf(*model,
+                                                                 n,
+                                                                 numIncomingPolarAngles,
+                                                                 numSpecularPolarAngles,
+                                                                 numSpecularAzimuthalAngles,
+                                                                 BTDF_DATA));
 
         if (conservationOfEnergyUsed) {
-            fixEnergyConservation(btdf);
+            fixEnergyConservation(btdf.get());
         }
 
-        DdrWriter::write(fileName, *btdf, comments);
-
-        delete btdf;
-
-        cout << "Generated: " << fileName << endl;
+        if (DdrWriter::write(fileName, *btdf, comments)) {
+            std::cout << "Saved: " << fileName << std::endl;
+        }
     }
     else {
-        SpecularCoordinatesBrdf* brdf = createBrdf(*model,
-                                                   1.0f,
-                                                   numIncomingPolarAngles,
-                                                   numSpecularPolarAngles,
-                                                   numSpecularAzimuthalAngles,
-                                                   BRDF_DATA);
+        std::unique_ptr<SpecularCoordinatesBrdf> brdf(createBrdf(*model,
+                                                                 1.0f,
+                                                                 numIncomingPolarAngles,
+                                                                 numSpecularPolarAngles,
+                                                                 numSpecularAzimuthalAngles,
+                                                                 BRDF_DATA));
 
-        SpecularCoordinatesBrdf* btdf = createBrdf(*model,
-                                                   n,
-                                                   numIncomingPolarAngles,
-                                                   numSpecularPolarAngles,
-                                                   numSpecularAzimuthalAngles,
-                                                   BTDF_DATA);
+        std::unique_ptr<SpecularCoordinatesBrdf> btdf(createBrdf(*model,
+                                                                 n,
+                                                                 numIncomingPolarAngles,
+                                                                 numSpecularPolarAngles,
+                                                                 numSpecularAzimuthalAngles,
+                                                                 BTDF_DATA));
 
         if (conservationOfEnergyUsed) {
-            fixEnergyConservation(brdf, btdf);
+            fixEnergyConservation(brdf.get(), btdf.get());
         }
 
-        DdrWriter::write(fileName + ".ddr", *brdf, comments);
-        DdrWriter::write(fileName + ".ddt", *btdf, comments);
+        if (DdrWriter::write(fileName + ".ddr", *brdf, comments)) {
+            std::cout << "Saved: " << fileName + ".ddr" << std::endl;
+        }
 
-        cout << "Generated: " << fileName + ".ddr" << endl;
-        cout << "Generated: " << fileName + ".ddt" << endl;
-
-        delete brdf;
-        delete btdf;
+        if (DdrWriter::write(fileName + ".ddt", *btdf, comments)) {
+            std::cout << "Saved: " << fileName + ".ddt" << std::endl;
+        }
     }
-
-    delete model;
 
     return 0;
 }

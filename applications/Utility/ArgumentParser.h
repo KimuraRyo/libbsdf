@@ -52,8 +52,8 @@ public:
     /*! Gets the list of tokens. */
     std::vector<std::string>& getTokens() { return tokens_; }
 
-    /*! Validates the number of tokens. If it is invalid, tokens are outputted to std::cerr. */
-    bool validate(int numTokens);
+    /*! Validates the number of tokens. If it is invalid, tokens are output to std::cerr. */
+    bool validateNumTokens(int numTokens);
 
 private:
     std::vector<std::string> tokens_;

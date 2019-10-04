@@ -15,7 +15,6 @@
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
 #include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Version.h>
 
 #include <libbsdf/Reader/AstmReader.h>
 #include <libbsdf/Reader/DdrReader.h>
@@ -25,6 +24,7 @@
 #include <libbsdf/Reader/ZemaxBsdfReader.h>
 
 #include <ArgumentParser.h>
+#include <Utility.h>
 
 using namespace lb;
 using std::cout;
@@ -34,6 +34,27 @@ using std::endl;
 /*
  * BRDF/BTDF identifier
  */
+
+const std::string APP_NAME("lbidentify");
+const std::string APP_VERSION("1.0.1");
+
+void showHelp()
+{
+    cout << "Usage: lbidentify [options ...] file" << endl;
+    cout << endl;
+    cout << "lbidentify identifies a BRDF/BTDF file." << endl;
+    cout << endl;
+    cout << "Positional Arguments:" << endl;
+    cout << "  file     Name of an input BRDF/BTDF file." << endl;
+    cout << "           Valid formats:" << endl;
+    cout << "               Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
+    cout << "               Zemax BSDF (\".bsdf\")" << endl;
+    cout << "               ASTM E1392-96(2002) (\".astm\")" << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << "  -h, --help       show this help message and exit" << endl;
+    cout << "  -v, --version    show program's version number and exit" << endl;
+}
 
 void showFileType(FileType fileType)
 {
@@ -174,41 +195,25 @@ int main(int argc, char** argv)
     ArgumentParser ap(argc, argv);
 
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
-        cout << "Usage: lbidentify [options ...] file" << endl;
-        cout << endl;
-        cout << "lbidentify identifies a BRDF/BTDF file." << endl;
-        cout << endl;
-        cout << "Positional Arguments:" << endl;
-        cout << "  file     Name of an input BRDF/BTDF file." << endl;
-        cout << "           Valid formats:" << endl;
-        cout << "               Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
-        cout << "               Zemax BSDF (\".bsdf\")" << endl;
-        cout << "               ASTM E1392-96(2002) (\".astm\")" << endl;
-        cout << endl;
-        cout << "Options:" << endl;
-        cout << "  -h, --help       show this help message and exit" << endl;
-        cout << "  -v, --version    show program's version number and exit" << endl;
+        showHelp();
         return 0;
     }
-
-    const std::string version("1.0.0");
 
     if (ap.read("-v") || ap.read("--version")) {
-        cout << "Version: lbidentify " << version << " (libbsdf-" << getVersion() << ")" << endl;
+        app_utility::showAppVersion(APP_NAME, APP_VERSION);
         return 0;
     }
 
-    if (!ap.validate(1)) return 1;
+    if (!ap.validateNumTokens(1)) return 1;
 
     std::string fileName = ap.getTokens().at(0);
 
     FileType fileType = reader_utility::classifyFile(fileName);
 
+    // Load a BRDF/BTDF file.
     std::shared_ptr<Brdf> brdf;
     std::unique_ptr<TwoSidedMaterial> material;
     DataType dataType = UNKNOWN_DATA;
-
-    // Load a BRDF/BTDF file.
     switch (fileType) {
         case ASTM_FILE:
             brdf.reset(AstmReader::read(fileName));
@@ -243,7 +248,7 @@ int main(int argc, char** argv)
             break;
         default:
             cerr << "Unsupported file type: " << fileType << endl;
-            break;
+            return 1;
     }
 
     if (brdf) {

@@ -32,6 +32,9 @@ include_directories(include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# Enable all warnings
+#add_definitions(-Wall)
+
 if(EIGEN3_INCLUDE_DIR)
     include_directories("${EIGEN3_INCLUDE_DIR}")
 endif()

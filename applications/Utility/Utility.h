@@ -15,7 +15,16 @@
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {
-namespace utility {
+namespace app_utility {
+
+/*! Shows the name and version of application. */
+void showAppVersion(const std::string& name, const std::string& version);
+
+/*! Creates comments written in an output file. */
+std::string createComments(int                  argc,
+                           char**               argv,
+                           const std::string&   name,
+                           const std::string&   version);
 
 /*! Clamps the value of a parameter. */
 template <typename T>
@@ -28,7 +37,7 @@ T clampParameter(const std::string& name, T val, T minVal, T maxVal);
  */
 
 template <typename T>
-T utility::clampParameter(const std::string& name, T val, T minVal, T maxVal)
+T app_utility::clampParameter(const std::string& name, T val, T minVal, T maxVal)
 {
     if (val < minVal || val > maxVal) {
         val = clamp(val, minVal, maxVal);

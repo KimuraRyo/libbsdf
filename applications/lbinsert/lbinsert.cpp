@@ -14,7 +14,6 @@
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
 #include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Version.h>
 
 #include <libbsdf/Reader/AstmReader.h>
 #include <libbsdf/Reader/DdrReader.h>
@@ -31,127 +30,138 @@ using namespace lb;
  * BRDF inserter
  */
 
+const std::string APP_NAME("lbinsert");
+const std::string APP_VERSION("1.0.1");
+
+void showHelp()
+{
+    using std::cout;
+    using std::endl;
+
+    cout << "Usage: lbinsert [options ...] partial_file angle base_file" << endl;
+    cout << endl;
+    cout << "lbinsert inserts a BRDF with an incoming azimuthal angle into a base BRDF." << endl;
+    cout << "Two files must have the same type of color." << endl;
+    cout << endl;
+    cout << "Positional Arguments:" << endl;
+    cout << "  partial_file     Name of a BRDF file inserted into a base BRDF." << endl;
+    cout << "                   This BRDF must have an incoming azimuthal angle." << endl;
+    cout << "                   \".ddr\" or \".astm\" is acceptable as a suffix." << endl;
+    cout << "  angle            Incoming azimuthal angle in degrees (range: [0, 360])" << endl;
+    cout << "  base_file        Name of a base BRDF file." << endl;
+    cout << "                   \".ddr\" is acceptable as a suffix." << endl;
+    cout << endl;
+    cout << "Options:" << endl;
+    cout << "  -h, --help       show this help message and exit" << endl;
+    cout << "  -v, --version    show program's version number and exit" << endl;
+}
+
 int main(int argc, char** argv)
 {
     Log::setNotificationLevel(Log::Level::WARN_MSG);
 
     ArgumentParser ap(argc, argv);
 
-    using std::cout;
-    using std::cerr;
-    using std::endl;
-
     if (ap.read("-h") || ap.read("--help") || ap.getTokens().empty()) {
-        cout << "Usage: lbinsert [options ...] partial_file angle base_file" << endl;
-        cout << endl;
-        cout << "lbinsert inserts a BRDF with an incoming azimuthal angle into a base BRDF." << endl;
-        cout << "Two files must have the same type of color." << endl;
-        cout << endl;
-        cout << "Positional Arguments:" << endl;
-        cout << "  partial_file Name of a BRDF file inserted into a base BRDF." << endl;
-        cout << "               This BRDF must have an incoming azimuthal angle." << endl;
-        cout << "               \".ddr\" or \".astm\" is acceptable as a suffix." << endl;
-        cout << "  angle        Incoming azimuthal angle in degrees (range: [0, 360])" << endl;
-        cout << "  base_file    Name of a base BRDF file." << endl;
-        cout << "               \".ddr\" is acceptable as a suffix." << endl;
-        cout << endl;
-        cout << "Options:" << endl;
-        cout << "  -h, --help       show this help message and exit" << endl;
-        cout << "  -v, --version    show program's version number and exit" << endl;
+        showHelp();
         return 0;
     }
-
-    const std::string version("1.0.0");
 
     if (ap.read("-v") || ap.read("--version")) {
-        cout << "Version: lbinsert " << version << " (libbsdf-" << getVersion() << ")" << endl;
+        app_utility::showAppVersion(APP_NAME, APP_VERSION);
         return 0;
     }
 
-    if (!ap.validate(3)) return 1;
+    if (!ap.validateNumTokens(3)) return 1;
 
-    std::string partialFileName = ap.getTokens().at(0);
+    std::string partFileName    = ap.getTokens().at(0);
     std::string angleStr        = ap.getTokens().at(1);
     std::string baseFileName    = ap.getTokens().at(2);
 
-    FileType partialFileType = reader_utility::classifyFile(partialFileName);
-    FileType baseFileType    = reader_utility::classifyFile(baseFileName);
-
-    std::unique_ptr<SpecularCoordinatesBrdf> baseBrdf;
+    FileType partFileType = reader_utility::classifyFile(partFileName);
+    FileType baseFileType = reader_utility::classifyFile(baseFileName);
 
     // Load a base BRDF file.
-    switch (baseFileType) {
-        case INTEGRA_DDR_FILE:
-            baseBrdf.reset(DdrReader::read(baseFileName));
-            break;
-        default:
-            cerr << "Unsupported file type: " << baseFileType << endl;
-            break;
-    }
+    std::unique_ptr<SpecularCoordinatesBrdf> baseBrdf;
+    if (baseFileType == INTEGRA_DDR_FILE) {
+        baseBrdf.reset(DdrReader::read(baseFileName));
 
-    if (!baseBrdf) {
-        cerr << "Failed to load: " << baseFileName << endl;
+        if (!baseBrdf) {
+            std::cerr << "Failed to load: " << baseFileName << std::endl;
+            return 1;
+        }
+    }
+    else {
+        std::cerr << "Unsupported file type: " << baseFileType << std::endl;
         return 1;
     }
 
-    std::unique_ptr<SpecularCoordinatesBrdf> partialBrdf;
-
     // Load a partial BRDF file.
-    switch (partialFileType) {
+    std::unique_ptr<SpecularCoordinatesBrdf> partBrdf;
+    switch (partFileType) {
         case ASTM_FILE: {
-            std::unique_ptr<SphericalCoordinatesBrdf> brdf(AstmReader::read(partialFileName));
+            std::unique_ptr<SphericalCoordinatesBrdf> brdf(AstmReader::read(partFileName));
             if (!brdf) {
-                cerr << "Failed to load: " << partialFileName << endl;
+                std::cerr << "Failed to load: " << partFileName << std::endl;
                 return 1;
             }
 
-            partialBrdf.reset(new SpecularCoordinatesBrdf(*brdf, baseBrdf->getNumSpecTheta(), baseBrdf->getNumSpecPhi()));
+            int numPolarAngles      = baseBrdf->getNumSpecTheta();
+            int numAzimuthalAngles  = baseBrdf->getNumSpecPhi();
+            partBrdf.reset(new SpecularCoordinatesBrdf(*brdf, numPolarAngles, numAzimuthalAngles));
             break;
         }
         case INTEGRA_DDR_FILE:
-            partialBrdf.reset(DdrReader::read(partialFileName));
+            partBrdf.reset(DdrReader::read(partFileName));
             break;
         default:
-            cerr << "Unsupported file type: " << partialFileType << endl;
-            break;
+            std::cerr << "Unsupported file type: " << partFileType << std::endl;
+            return 1;
     }
 
-    if (!partialBrdf) {
-        cerr << "Failed to load: " << partialFileName << endl;
+    if (!partBrdf) {
+        std::cerr << "Failed to load: " << partFileName << std::endl;
         return 1;
     }
 
-    SampleSet* baseSs    = baseBrdf->getSampleSet();
-    SampleSet* partialSs = partialBrdf->getSampleSet();
-
-    // If two monochromatic data sets have different color modes, partial data is adjusted.
-    if (!hasSameColor(*baseSs, *partialSs) &&
-        partialSs->getColorModel() == SPECTRAL_MODEL &&
-        partialSs->getNumWavelengths() == 1) {
-        partialSs->setColorModel(MONOCHROMATIC_MODEL);
-        partialSs->setWavelength(0, 0.0f);
+    // Validate color models.
+    const SampleSet* baseSs = baseBrdf->getSampleSet();
+    SampleSet* partSs       = partBrdf->getSampleSet();
+    if (!hasSameColor(*baseSs, *partSs)) {
+        if (partSs->getColorModel()      == SPECTRAL_MODEL &&
+            partSs->getNumWavelengths()  == 1) {
+            // If two monochromatic data sets have different color models, partial data is adjusted.
+            partSs->setColorModel(MONOCHROMATIC_MODEL);
+            partSs->setWavelength(0, 0.0f);
+        }
+        else {
+            std::cerr << "Color models or wavelengths do not match." << std::endl;
+            return 1;
+        }
     }
 
     // Read an incoming azimuthal angle.
     char* end;
-    double inPhiDegree = std::strtod(angleStr.c_str(), &end);
+    double inAzimuthalDegree = std::strtod(angleStr.c_str(), &end);
     if (*end != '\0') {
-        cerr << "Invalid value: " << angleStr << endl;
+        std::cerr << "Invalid value: " << angleStr << std::endl;
         return 1;
     }
+    inAzimuthalDegree = app_utility::clampParameter("angle", inAzimuthalDegree, 0.0, 360.0);
 
-    inPhiDegree = utility::clampParameter("angle", inPhiDegree, 0.0, 360.0);
+    // Insert the partial BRDF to the base BRDF.
+    float inAzimuthalAngle = static_cast<float>(lb::toRadian(inAzimuthalDegree));
+    std::unique_ptr<SpecularCoordinatesBrdf> brdf(insertBrdfAlongInPhi(*baseBrdf, *partBrdf, inAzimuthalAngle));
 
-    float inPhi = static_cast<float>(lb::toRadian(inPhiDegree));
-    std::unique_ptr<SpecularCoordinatesBrdf> brdf(insertBrdfAlongInPhi(*baseBrdf, *partialBrdf, inPhi));
-
-    std::string comments("Software: lbinsert-" + version);
-    comments += "\n;; Arguments:";
-    for (int i = 1; i < argc; ++i) {
-        comments += " " + std::string(argv[i]);
+    if (!brdf) {
+        std::cerr << "Failed to insert a BRDF." << std::endl;
     }
 
-    DdrWriter::write(baseFileName, *brdf, comments);
+    // Save a DDR file.
+    std::string comments = app_utility::createComments(argc, argv, APP_NAME, APP_VERSION);
+    if (DdrWriter::write(baseFileName, *brdf, comments)) {
+        std::cout << "Saved: " << baseFileName << std::endl;
+    }
 
     return 0;
 }
