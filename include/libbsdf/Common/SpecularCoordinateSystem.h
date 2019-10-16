@@ -141,9 +141,11 @@ Vec3 SpecularCoordinateSystem::toOutDirXyz(ScalarT  inTheta,
     Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(inTheta) * Vec2(outDir[0], outDir[2]);
     Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(inPhi) * Vec2(rotThVec[0], outDir[1]);
 
-    return Vec3(static_cast<Vec3::Scalar>(rotPhVec[0]),
-                static_cast<Vec3::Scalar>(rotPhVec[1]),
-                static_cast<Vec3::Scalar>(rotThVec[1]));
+    Vec3 rotDir = Vec3(static_cast<Vec3::Scalar>(rotPhVec[0]),
+                       static_cast<Vec3::Scalar>(rotPhVec[1]),
+                       static_cast<Vec3::Scalar>(rotThVec[1]));
+
+    return rotDir.normalized();
 }
 
 template <typename ScalarT>
@@ -162,6 +164,7 @@ void SpecularCoordinateSystem::fromOutDirXyz(const Vec3&    outDir,
     Vec3 rotDir(static_cast<Vec3::Scalar>(rotThVec[0]),
                 static_cast<Vec3::Scalar>(rotPhVec[1]),
                 static_cast<Vec3::Scalar>(rotThVec[1]));
+    rotDir.normalize();
 
     SphericalCoordinateSystem::fromXyz(rotDir, specTheta, specPhi);
 }

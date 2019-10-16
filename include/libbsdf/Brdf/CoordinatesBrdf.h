@@ -347,7 +347,7 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
 
         const Spectrum& sp = samples_->getSpectrum(i0, i1, i2, i3);
 
-        if (sp.allFinite() && sp.minCoeff() < 0.0f) {
+        if (sp.allFinite() && sp.minCoeff() < -EPSILON_F * 10) {
             spectraValid = false;
             lbWarn
                 << "[CoordinatesBrdf::validate] The spectrum contains negative value(s) at ("

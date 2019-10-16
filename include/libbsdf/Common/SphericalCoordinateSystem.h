@@ -103,8 +103,8 @@ void SphericalCoordinateSystem::toXyz(ScalarT   inTheta,
     Vec4 rhs(cosArray[1], sinArray[1], cosArray[3], sinArray[3]);
     Vec4 productArray = lhs.cwiseProduct(rhs);
 
-    *inDir  = Vec3(productArray[0], productArray[1], cosArray[0]);
-    *outDir = Vec3(productArray[2], productArray[3], cosArray[2]);
+    *inDir  = Vec3(productArray[0], productArray[1], cosArray[0]).normalized();
+    *outDir = Vec3(productArray[2], productArray[3], cosArray[2]).normalized();
 }
 
 template <typename ScalarT>
@@ -144,9 +144,9 @@ Vec3 SphericalCoordinateSystem::toXyz(ScalarT theta, ScalarT phi)
     Vec2f cosArray = thetaPhi.array().cos();
 
     Vec3 lhs(sinArray[0], sinArray[0], cosArray[0]);
-    Vec3 rhs(cosArray[1], sinArray[1], Vec3::Scalar(1));
+    Vec3 rhs(cosArray[1], sinArray[1], 1);
 
-    return lhs.cwiseProduct(rhs);
+    return lhs.cwiseProduct(rhs).normalized();
 }
 
 template <typename ScalarT>

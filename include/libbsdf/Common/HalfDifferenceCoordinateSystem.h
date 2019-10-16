@@ -101,6 +101,7 @@ void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
     inDir->normalize();
 
     *outDir = reflect(*inDir, halfDir);
+    outDir->normalize();
 }
 
 template <typename ScalarT>
