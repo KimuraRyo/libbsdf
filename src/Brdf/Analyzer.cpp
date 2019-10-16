@@ -8,15 +8,7 @@
 
 #include <libbsdf/Brdf/Analyzer.h>
 
-#include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Brdf/SampleSet.h>
-#include <libbsdf/Brdf/SampleSet2D.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-
-#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/SolidAngle.h>
-
 #include <libbsdf/ReflectanceModel/Fresnel.h>
 
 using namespace lb;
@@ -43,7 +35,7 @@ Arrayd computeReflectanceOfRectangle(const SphericalCoordinatesBrdf& brdf,
 
     double midCosTheta = (cos(theta) + cos(nextTheta)) * 0.5;
     double solidAngle = SolidAngle::fromRectangle(theta, nextTheta, phi, nextPhi);
-    return sp.cast<Arrayd::Scalar>() * midCosTheta * solidAngle;
+    return std::move(sp.cast<Arrayd::Scalar>() * midCosTheta * solidAngle);
 }
 
 }

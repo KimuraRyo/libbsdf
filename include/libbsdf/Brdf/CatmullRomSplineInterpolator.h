@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,12 +10,9 @@
 #define LIBBSDF_CATMULL_ROM_SPLINE_INTERPOLATOR_H
 
 #include <libbsdf/Brdf/SampleSet.h>
-#include <libbsdf/Common/Vector.h>
-#include <libbsdf/Common/Utility.h>
+#include <libbsdf/Brdf/SampleSet2D.h>
 
 namespace lb {
-
-class SampleSet2D;
 
 /*!
  * \class   CatmullRomSplineInterpolator

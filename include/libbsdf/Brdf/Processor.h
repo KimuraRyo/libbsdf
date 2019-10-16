@@ -14,15 +14,13 @@
 #ifndef LIBBSDF_PROCESSOR_H
 #define LIBBSDF_PROCESSOR_H
 
-#include <libbsdf/Common/Global.h>
+#include <functional>
+
+#include <libbsdf/Brdf/SampleSet2D.h>
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
 namespace lb {
-
-class Brdf;
-class SampleSet;
-class SampleSet2D;
-class SpecularCoordinatesBrdf;
-class SphericalCoordinatesBrdf;
 
 /*!
  * \brief Edits diffuse and glossy components of a BRDF.

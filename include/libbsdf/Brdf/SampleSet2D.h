@@ -10,10 +10,8 @@
 #define LIBBSDF_SAMPLE_SET_2D_H
 
 #include <libbsdf/Brdf/LinearInterpolator.h>
-#include <libbsdf/Common/Global.h>
-#include <libbsdf/Common/Log.h>
+
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
-#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 
@@ -143,14 +141,6 @@ public:
 
     /*! Clamps all angles to minimum and maximum values. */
     void clampAngles();
-
-    /*!
-     * \brief Initializes all spectra of samples using another samples.
-     *
-     * Both samples must have the same wavelengths.
-     */
-    template <typename InterpolatorT>
-    static bool initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples);
 
 private:
     SpectrumList spectra_; /*!< The list of spectrum for each direction. */
@@ -284,29 +274,6 @@ inline SourceType SampleSet2D::getSourceType() const { return sourceType_; }
 inline void SampleSet2D::setSourceType(SourceType type) { sourceType_ = type; }
 
 inline bool SampleSet2D::isIsotropic() const { return (phiAngles_.size() == 1); }
-
-template <typename InterpolatorT>
-bool SampleSet2D::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples)
-{
-    lbTrace << "[SampleSet2D::initializeSpectra]";
-
-    if (!hasSameColor(baseSamples, *samples)) {
-        lbError << "[SampleSet2D::initializeSpectra] Color models or wavelengths do not match.";
-        return false;
-    }
-
-    for (int i0 = 0; i0 < samples->getNumTheta(); ++i0) {
-    for (int i1 = 0; i1 < samples->getNumPhi();   ++i1) {
-        Spectrum sp;
-        float theta = samples->getTheta(i0);
-        float phi   = samples->getPhi(i1);
-        InterpolatorT::getSpectrum(baseSamples, theta, phi, &sp);
-
-        samples->setSpectrum(i0, i1, sp);
-    }}
-
-    return true;
-}
 
 } // namespace lb
 

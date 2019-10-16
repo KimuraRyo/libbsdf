@@ -11,8 +11,6 @@
 #include <fstream>
 #include <set>
 
-#include <libbsdf/Common/Log.h>
-
 using namespace lb;
 
 SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, DataType* dataType)

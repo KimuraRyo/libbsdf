@@ -10,8 +10,6 @@
 #define LIBBSDF_LINEAR_INTERPOLATOR_H
 
 #include <libbsdf/Brdf/SampleSet.h>
-#include <libbsdf/Common/Vector.h>
-#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 

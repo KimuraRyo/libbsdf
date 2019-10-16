@@ -15,7 +15,6 @@
 
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Brdf/SphericalCoordinatesRandomSampleSet.h>
-#include <libbsdf/Common/Log.h>
 
 using namespace lb;
 

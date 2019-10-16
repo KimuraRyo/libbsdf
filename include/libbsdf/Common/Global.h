@@ -28,10 +28,10 @@ const double PI_D = 3.14159265358979323846;
 const double PI_2_D = 1.57079632679489661923;
 
 /*! \brief The data type of a spectrum. */
-typedef Eigen::ArrayXf Spectrum;
+using Spectrum = Eigen::ArrayXf;
 
 /*! \brief The data type of spectra. */
-typedef std::vector<Spectrum, Eigen::aligned_allocator<Spectrum> > SpectrumList;
+using SpectrumList = std::vector<Spectrum, Eigen::aligned_allocator<Spectrum>>;
 
 /*! \brief The output format of arrays and vectors. */
 const Eigen::IOFormat LB_EIGEN_IO_FMT(Eigen::StreamPrecision, Eigen::DontAlignCols, " ", " ");

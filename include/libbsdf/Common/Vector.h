@@ -19,26 +19,26 @@
 
 namespace lb {
 
-typedef Eigen::Vector2f Vec2f;
-typedef Eigen::Vector2d Vec2d;
-typedef Eigen::Vector2i Vec2i;
+using Vec2f = Eigen::Vector2f;
+using Vec2d = Eigen::Vector2d;
+using Vec2i = Eigen::Vector2i;
 
-typedef Eigen::Vector3f Vec3f;
-typedef Eigen::Vector3d Vec3d;
-typedef Eigen::Vector3i Vec3i;
+using Vec3f = Eigen::Vector3f;
+using Vec3d = Eigen::Vector3d;
+using Vec3i = Eigen::Vector3i;
 
-typedef Eigen::Vector4f Vec4f;
-typedef Eigen::Vector4d Vec4d;
-typedef Eigen::Vector4i Vec4i;
+using Vec4f = Eigen::Vector4f;
+using Vec4d = Eigen::Vector4d;
+using Vec4i = Eigen::Vector4i;
 
 #if defined(LIBBSDF_DOUBLE_PRECISION_VECTOR)
-typedef Vec2d Vec2;
-typedef Vec3d Vec3;
-typedef Vec4d Vec4;
+using Vec2 = Vec2d;
+using Vec3 = Vec3d;
+using Vec4 = Vec4d;
 #else
-typedef Vec2f Vec2;
-typedef Vec3f Vec3;
-typedef Vec4f Vec4;
+using Vec2 = Vec2f;
+using Vec3 = Vec3f;
+using Vec4 = Vec4f;
 #endif
 
 /*! \brief Converts from a vector to lb::Vec3. */

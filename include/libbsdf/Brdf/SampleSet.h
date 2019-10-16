@@ -12,8 +12,6 @@
 #include <cassert>
 
 #include <libbsdf/Common/Array.h>
-#include <libbsdf/Common/Global.h>
-#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 

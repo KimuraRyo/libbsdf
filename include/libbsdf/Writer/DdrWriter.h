@@ -11,12 +11,9 @@
 
 #include <string>
 
-#include <libbsdf/Common/Global.h>
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
 namespace lb {
-
-class Brdf;
-class SpecularCoordinatesBrdf;
 
 /*!
  * \class DdrWriter

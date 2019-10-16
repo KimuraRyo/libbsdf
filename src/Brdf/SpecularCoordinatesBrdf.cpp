@@ -8,8 +8,6 @@
 
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
-#include <libbsdf/Common/Log.h>
-
 using namespace lb;
 
 SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,

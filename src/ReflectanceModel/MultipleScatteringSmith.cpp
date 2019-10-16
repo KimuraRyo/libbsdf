@@ -318,7 +318,6 @@ using namespace std;
 #define INV_SQRT_2_M_PI 0.3989422804014326779f  /* 1/sqrt(2*pi) */
 #define INV_SQRT_2      0.7071067811865475244f  /* 1/sqrt(2) */
 
-#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Utility.h>
 
 static bool IsFiniteNumber(float x)

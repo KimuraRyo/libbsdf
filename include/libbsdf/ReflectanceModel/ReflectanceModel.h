@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2018 Kimura Ryo                                  //
+// Copyright (C) 2016-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -98,7 +98,7 @@ public:
         std::string     description_;
     };
 
-    typedef std::vector<Parameter> Parameters;
+    using Parameters = std::vector<Parameter>;
 
     virtual ~ReflectanceModel();
 

@@ -10,6 +10,7 @@
 #define LIBBSDF_COORDINATES_BRDF_H
 
 #include <libbsdf/Brdf/Brdf.h>
+#include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
 
 namespace lb {
@@ -148,9 +149,6 @@ protected:
     void setAngle2(int index, float angle); /*!< Sets the angle2 at the index. \sa setAngle0() */
     void setAngle3(int index, float angle); /*!< Sets the angle3 at the index. \sa setAngle0() */
 
-    /*! Initializes spectra using lb::Brdf. */
-    void initializeSpectra(const Brdf& brdf);
-
 private:
     /*! Copy operator is disabled. */
     CoordinatesBrdf& operator=(const CoordinatesBrdf&);
@@ -265,11 +263,11 @@ void CoordinatesBrdf<CoordSysT>::getInOutDirection(int      index0,
                                                    Vec3*    inDir,
                                                    Vec3*    outDir) const
 {
-    CoordSysT::toXyz(samples_->getAngle0(index0),
-                     samples_->getAngle1(index1),
-                     samples_->getAngle2(index2),
-                     samples_->getAngle3(index3),
-                     inDir, outDir);
+    toXyz(samples_->getAngle0(index0),
+          samples_->getAngle1(index1),
+          samples_->getAngle2(index2),
+          samples_->getAngle3(index3),
+          inDir, outDir);
 }
 
 template <typename CoordSysT>
@@ -345,7 +343,7 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
         Vec3 inDir, outDir;
         getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-        if (outDir.z() < Vec3::Scalar(0)) continue;
+        if (outDir.z() < 0) continue;
 
         const Spectrum& sp = samples_->getSpectrum(i0, i1, i2, i3);
 
@@ -519,12 +517,6 @@ template <typename CoordSysT>
 void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
 {
     samples_->setAngle3(index, clamp(angle, CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3));
-}
-
-template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::initializeSpectra(const Brdf& brdf)
-{
-    Brdf::initializeSpectra<LinearInterpolator>(brdf, this);
 }
 
 template <typename CoordSysT>

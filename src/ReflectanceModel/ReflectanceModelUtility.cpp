@@ -10,9 +10,6 @@
 
 #include <cassert>
 
-#include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Vector.h>
-
 using namespace lb;
 
 bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    model,
@@ -53,7 +50,7 @@ bool reflectance_model_utility::setupTabularBrdf(const ReflectanceModel&    mode
             if (abs(outDir.x()) <= epsilon &&
                 abs(outDir.y()) <= epsilon &&
                 outDir.z() <= epsilon) {
-                outDir.x() = Vec3::Scalar(1);
+                outDir.x() = 1;
             }
 
             inDir.normalize();

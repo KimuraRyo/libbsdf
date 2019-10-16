@@ -12,9 +12,7 @@
 #include <map>
 #include <vector>
 
-#include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Utility.h>
-#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 
@@ -29,9 +27,9 @@ template <typename CoordSysT>
 class RandomSampleSet
 {
 public:
-    typedef std::vector<float> AngleList;
-    typedef std::map<AngleList, Spectrum, std::less<AngleList>,
-                     Eigen::aligned_allocator<std::pair<const AngleList, Spectrum> > > SampleMap;
+    using AngleList = std::vector<float>;
+    using SampleMap = std::map<AngleList, Spectrum, std::less<AngleList>,
+                               Eigen::aligned_allocator<std::pair<const AngleList, Spectrum>>>;
 
     virtual ~RandomSampleSet() {}
 
@@ -103,7 +101,7 @@ const Spectrum& RandomSampleSet<CoordSysT>::findSpectrumOfNearestSample(const An
             }
         }
 
-        if (angleDiff == Vec3::Scalar(0)) {
+        if (angleDiff == 0) {
             return it->second;
         }
         else if (angleDiff < minAngleDiff) {

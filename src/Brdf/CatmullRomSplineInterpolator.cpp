@@ -8,11 +8,6 @@
 
 #include <libbsdf/Brdf/CatmullRomSplineInterpolator.h>
 
-#include <algorithm>
-
-#include <libbsdf/Brdf/SampleSet2D.h>
-#include <libbsdf/Common/Array.h>
-
 using namespace lb;
 
 void CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,

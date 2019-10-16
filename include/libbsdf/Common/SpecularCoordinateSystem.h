@@ -9,10 +9,7 @@
 #ifndef LIBBSDF_SPECULAR_COORDINATE_SYSTEM_H
 #define LIBBSDF_SPECULAR_COORDINATE_SYSTEM_H
 
-#include <Eigen/Geometry>
-
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
-#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
@@ -161,6 +158,7 @@ void SpecularCoordinateSystem::fromOutDirXyz(const Vec3&    outDir,
     Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-inPhi) * Vec2(outDir[0], outDir[1]);
     Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(-inTheta) * Vec2(rotPhVec[0], outDir[2]);
     rotThVec[1] = clamp(rotThVec[1], Vec2::Scalar(-1), Vec2::Scalar(1));
+
     Vec3 rotDir(static_cast<Vec3::Scalar>(rotThVec[0]),
                 static_cast<Vec3::Scalar>(rotPhVec[1]),
                 static_cast<Vec3::Scalar>(rotThVec[1]));

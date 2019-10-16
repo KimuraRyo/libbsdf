@@ -9,6 +9,7 @@
 #include <libbsdf/Brdf/Smoother2D.h>
 
 #include <libbsdf/Brdf/CatmullRomSplineInterpolator.h>
+#include <libbsdf/Brdf/Initializer.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Brdf/Sampler.h>
 
@@ -140,7 +141,7 @@ void Smoother2D::updateSamples()
     copyArray(angles1_, &samples_->getPhiArray());
     samples_->updateAngleAttributes();
 
-    SampleSet2D::initializeSpectra<CatmullRomSplineInterpolator>(*origSs2, samples_);
+    lb::initializeSpectra<CatmullRomSplineInterpolator>(*origSs2, samples_);
 
     delete origSs2;
 }

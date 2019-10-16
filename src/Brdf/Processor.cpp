@@ -9,15 +9,7 @@
 #include <libbsdf/Brdf/Processor.h>
 
 #include <libbsdf/Brdf/Analyzer.h>
-#include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Brdf/RandomSampleSet.h>
-#include <libbsdf/Brdf/SampleSet2D.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-
-#include <libbsdf/Common/Array.h>
-#include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 using namespace lb;
 
@@ -956,8 +948,8 @@ void lb::fillSpectra(SampleSet* samples, Spectrum::Scalar value)
 
 void lb::fillSpectra(SpectrumList& spectra, Spectrum::Scalar value)
 {
-    for (auto it = spectra.begin(); it != spectra.end(); ++it) {
-        it->fill(value);
+    for (auto& sp : spectra) {
+        sp.fill(value);
     }
 }
 
@@ -1000,9 +992,8 @@ bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
 
 void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
 {
-    SpectrumList& spectra = samples->getSpectra();
-    for (auto it = spectra.begin(); it != spectra.end(); ++it) {
-        *it *= value;
+    for (auto& sp : samples->getSpectra()) {
+        sp *= value;
     }
 }
 
@@ -1013,7 +1004,7 @@ void lb::fixNegativeSpectra(SampleSet* samples)
 
 void lb::fixNegativeSpectra(SpectrumList& spectra)
 {
-    for (auto it = spectra.begin(); it != spectra.end(); ++it) {
-        *it = it->cwiseMax(0.0f);
+    for (auto& sp : spectra) {
+        sp = sp.cwiseMax(0);
     }
 }

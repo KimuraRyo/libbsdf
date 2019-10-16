@@ -9,10 +9,7 @@
 #ifndef LIBBSDF_HALF_DIFFERENCE_COORDINATE_SYSTEM_H
 #define LIBBSDF_HALF_DIFFERENCE_COORDINATE_SYSTEM_H
 
-#include <Eigen/Geometry>
-
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
-#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
@@ -123,6 +120,7 @@ void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
                  static_cast<Vec3::Scalar>(rotPhVec[1]),
                  static_cast<Vec3::Scalar>(rotThVec[1]));
     diffDir.normalize();
+
     SphericalCoordinateSystem::fromXyz(diffDir, diffTheta, diffPhi);
 }
 
@@ -144,6 +142,7 @@ void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
                  static_cast<Vec3::Scalar>(rotPhVec[1]),
                  static_cast<Vec3::Scalar>(rotThVec[1]));
     diffDir.normalize();
+
     SphericalCoordinateSystem::fromXyz(diffDir, diffTheta, diffPhi);
 }
 

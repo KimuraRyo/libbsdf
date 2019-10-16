@@ -12,7 +12,6 @@
 #include <set>
 
 #include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Common/Log.h>
 
 using namespace lb;
 

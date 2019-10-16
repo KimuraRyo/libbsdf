@@ -10,8 +10,6 @@
 
 #include <fstream>
 
-#include <libbsdf/Common/Log.h>
-
 using namespace lb;
 
 void reader_utility::ignoreCommentLines(std::istream& stream, const std::string& lineHead)

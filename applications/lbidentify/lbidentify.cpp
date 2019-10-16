@@ -9,18 +9,10 @@
 #include <iostream>
 #include <memory>
 
-#include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-
-#include <libbsdf/Common/Log.h>
-
 #include <libbsdf/Reader/AstmReader.h>
 #include <libbsdf/Reader/DdrReader.h>
 #include <libbsdf/Reader/LightToolsBsdfReader.h>
 #include <libbsdf/Reader/MerlBinaryReader.h>
-#include <libbsdf/Reader/ReaderUtility.h>
 #include <libbsdf/Reader/ZemaxBsdfReader.h>
 
 #include <ArgumentParser.h>

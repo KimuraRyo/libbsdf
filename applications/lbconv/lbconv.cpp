@@ -9,15 +9,8 @@
 #include <iostream>
 #include <memory>
 
-#include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-
-#include <libbsdf/Common/Log.h>
-
 #include <libbsdf/Reader/AstmReader.h>
 #include <libbsdf/Reader/DdrReader.h>
-#include <libbsdf/Reader/ReaderUtility.h>
 #include <libbsdf/Reader/ZemaxBsdfReader.h>
 
 #include <libbsdf/Writer/DdrWriter.h>

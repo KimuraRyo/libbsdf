@@ -18,7 +18,6 @@
 #include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 
@@ -147,15 +146,15 @@ T lerp(const T& v0, const T& v1, float t)
 template <typename T>
 T smoothstep(const T& v0, const T& v1, const T& t)
 {
-    T coeff = clamp((t - v0) / (v1 - v0), 0.0f, 1.0f);
-    return coeff * coeff * (3.0f - 2.0f * coeff);
+    T coeff = clamp((t - v0) / (v1 - v0), T(0), T(1));
+    return coeff * coeff * (T(3) - T(2) * coeff);
 }
 
 template <typename T>
 T smootherstep(const T& v0, const T& v1, const T& t)
 {
-    T coeff = clamp((t - v0) / (v1 - v0), 0.0f, 1.0f);
-    return coeff * coeff * coeff * (coeff * (coeff * 6.0f - 15.0f) + 10.0f);
+    T coeff = clamp((t - v0) / (v1 - v0), T(0), T(1));
+    return coeff * coeff * coeff * (coeff * (coeff * T(6) - T(15)) + T(10));
 }
 
 template <typename T>
@@ -224,20 +223,19 @@ bool hasSameColor(const T& ss0, const T& ss1)
 template <typename Vec3T>
 Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir)
 {
-    typedef typename Vec3T::Scalar ScalarType;
-    return ScalarType(2) * normalDir.dot(dir) * normalDir - dir;
+    return 2 * normalDir.dot(dir) * normalDir - dir;
 }
 
 template <typename T>
 T toDegree(T radian)
 {
-    return radian / T(PI_F) * T(180);
+    return radian / T(PI_D) * 180;
 }
 
 template <typename T>
 T toRadian(T degree)
 {
-    return degree / T(180) * T(PI_F);
+    return degree / 180 * T(PI_D);
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
@@ -261,22 +259,26 @@ void convertCoordinateSystem(float  srcAngle0,
 template <typename Vec3T>
 Vec3T xyzToSrgb(const Vec3T& xyz)
 {
-    typedef typename Vec3T::Scalar ScalarType;
+    using ScalarType = typename Vec3T::Scalar;
+
     Eigen::Matrix<ScalarType, 3, 3> mat;
     mat << CieData::XYZ_sRGB[0], CieData::XYZ_sRGB[1], CieData::XYZ_sRGB[2],
            CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
            CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
+
     return mat * xyz;
 }
 
 template <typename Vec3T>
 Vec3T srgbToXyz(const Vec3T& rgb)
 {
-    typedef typename Vec3T::Scalar ScalarType;
+    using ScalarType = typename Vec3T::Scalar;
+
     Eigen::Matrix<ScalarType, 3, 3> mat;
     mat << CieData::sRGB_XYZ[0], CieData::sRGB_XYZ[1], CieData::sRGB_XYZ[2],
            CieData::sRGB_XYZ[3], CieData::sRGB_XYZ[4], CieData::sRGB_XYZ[5],
            CieData::sRGB_XYZ[6], CieData::sRGB_XYZ[7], CieData::sRGB_XYZ[8];
+
     return mat * rgb;
 }
 
@@ -284,10 +286,10 @@ template <typename Vec3T>
 void fixDownwardDir(Vec3T* dir)
 {
     Vec3T& d = *dir;
-    if (d[2] < 0.0) {
-        d[2] = 0.0;
-        if (d[0] == 0.0 && d[1] == 0.0) {
-            d[0] = 1.0;
+    if (d[2] < 0) {
+        d[2] = 0;
+        if (d[0] == 0 && d[1] == 0) {
+            d[0] = 1;
         }
         else {
             d.normalize();

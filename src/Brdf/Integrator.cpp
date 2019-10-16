@@ -8,7 +8,6 @@
 
 #include <libbsdf/Brdf/Integrator.h>
 
-#include <libbsdf/Common/Log.h>
 #include <libbsdf/Common/Xorshift.h>
 #include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
 

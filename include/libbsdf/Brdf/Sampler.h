@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2016 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -11,14 +11,10 @@
 
 #include <cassert>
 
-#include <libbsdf/Common/Global.h>
-#include <libbsdf/Common/SphericalCoordinateSystem.h>
+#include <libbsdf/Brdf/Brdf.h>
+#include <libbsdf/Brdf/SampleSet2D.h>
 
 namespace lb {
-
-class Brdf;
-class SampleSet;
-class SampleSet2D;
 
 /*!
  * \class   Sampler

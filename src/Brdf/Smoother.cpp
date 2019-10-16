@@ -9,6 +9,7 @@
 #include <libbsdf/Brdf/Smoother.h>
 
 #include <libbsdf/Brdf/CatmullRomSplineInterpolator.h>
+#include <libbsdf/Brdf/Initializer.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
@@ -270,7 +271,7 @@ void Smoother::updateBrdf()
     copyArray(angles3_, &ss->getAngles3());
     ss->updateAngleAttributes();
 
-    Brdf::initializeSpectra<CatmullRomSplineInterpolator>(*origBrdf, brdf_);
+    initializeSpectra<CatmullRomSplineInterpolator>(*origBrdf, brdf_);
 
     delete origBrdf;
 }

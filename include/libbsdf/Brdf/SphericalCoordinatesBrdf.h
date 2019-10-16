@@ -23,8 +23,8 @@ namespace lb {
 class SphericalCoordinatesBrdf : public CoordinatesBrdf<SphericalCoordinateSystem>
 {
 private:
-    typedef SphericalCoordinateSystem CoordSys;
-    typedef CoordinatesBrdf<CoordSys> BaseBrdf;
+    using CoordSys = SphericalCoordinateSystem;
+    using BaseBrdf = CoordinatesBrdf<CoordSys>;
 
 public:
     /*! Constructs a BRDF. */

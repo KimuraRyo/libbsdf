@@ -10,9 +10,6 @@
 
 #include <fstream>
 
-#include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Vector.h>
-
 using namespace lb;
 
 HalfDifferenceCoordinatesBrdf* MerlBinaryReader::read(const std::string& fileName)

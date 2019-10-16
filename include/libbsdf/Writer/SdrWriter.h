@@ -11,9 +11,9 @@
 
 #include <string>
 
-namespace lb {
+#include <libbsdf/Brdf/SampleSet2D.h>
 
-class SampleSet2D;
+namespace lb {
 
 /*!
  * \class SdrWriter

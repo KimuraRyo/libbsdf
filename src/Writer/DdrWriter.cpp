@@ -12,10 +12,7 @@
 #include <memory>
 
 #include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
-#include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/SpectrumUtility.h>
+
 #include <libbsdf/Common/Version.h>
 
 using namespace lb;
@@ -202,7 +199,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf&   brdf,
 
 SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
 {
-    typedef SpecularCoordinatesBrdf SpecBrdf;
+    using SpecBrdf = SpecularCoordinatesBrdf;
 
     SpecBrdf* convertedBrdf;
 

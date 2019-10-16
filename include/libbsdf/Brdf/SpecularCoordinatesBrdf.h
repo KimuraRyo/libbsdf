@@ -25,8 +25,8 @@ namespace lb {
 class SpecularCoordinatesBrdf : public CoordinatesBrdf<SpecularCoordinateSystem>
 {
 private:
-    typedef SpecularCoordinateSystem CoordSys;
-    typedef CoordinatesBrdf<CoordSys> BaseBrdf;
+    using CoordSys = SpecularCoordinateSystem;
+    using BaseBrdf = CoordinatesBrdf<CoordSys>;
 
 public:
     /*! Constructs a spectral BRDF. */

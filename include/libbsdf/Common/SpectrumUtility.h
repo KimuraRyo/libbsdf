@@ -9,9 +9,7 @@
 #ifndef LIBBSDF_SPECTRUM_UTILITY_H
 #define LIBBSDF_SPECTRUM_UTILITY_H
 
-#include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Utility.h>
-#include <libbsdf/Common/Vector.h>
 
 namespace lb {
 

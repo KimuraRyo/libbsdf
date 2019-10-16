@@ -8,6 +8,8 @@
 
 #include <libbsdf/Brdf/Brdf.h>
 
+#include <libbsdf/Brdf/Initializer.h>
+
 using namespace lb;
 
 Brdf::Brdf(int          numAngles0,
@@ -43,4 +45,9 @@ Brdf::~Brdf()
 {
     lbTrace << "[Brdf::~Brdf]";
     delete samples_;
+}
+
+void Brdf::initializeSpectra(const Brdf& brdf)
+{
+    lb::initializeSpectra<LinearInterpolator>(brdf, this);
 }

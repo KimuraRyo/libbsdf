@@ -8,12 +8,6 @@
 
 #include <libbsdf/Brdf/SampleSet.h>
 
-#include <algorithm>
-
-#include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/Utility.h>
-#include <libbsdf/Common/SpectrumUtility.h>
-
 using namespace lb;
 
 SampleSet::SampleSet(int        numAngles0,

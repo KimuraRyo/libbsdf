@@ -10,9 +10,6 @@
 #include <memory>
 
 #include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-
-#include <libbsdf/Common/Log.h>
 
 #include <libbsdf/Reader/ReaderUtility.h>
 

@@ -24,8 +24,8 @@ namespace lb {
 class HalfDifferenceCoordinatesBrdf : public CoordinatesBrdf<HalfDifferenceCoordinateSystem>
 {
 private:
-    typedef HalfDifferenceCoordinateSystem CoordSys;
-    typedef CoordinatesBrdf<CoordSys> BaseBrdf;
+    using CoordSys = HalfDifferenceCoordinateSystem;
+    using BaseBrdf = CoordinatesBrdf<CoordSys>;
 
 public:
     /*! Constructs a BRDF. */

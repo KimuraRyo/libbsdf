@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2015 Kimura Ryo                                  //
+// Copyright (C) 2014-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -18,19 +18,9 @@ namespace lb {
     #include <stdint.h>
 #else
     #if defined(__GNUC__)
-        typedef short               int16_t;
-        typedef unsigned short      uint16_t;
-        typedef int                 int32_t;
-        typedef unsigned int        uint32_t;
-        typedef long long           int64_t;
-        typedef unsigned long long  uint64_t;
+        using uint32_t = unsigned int;
     #elif defined(_MSC_VER) || defined(__BORLANDC__)
-        typedef __int16             int16_t;
-        typedef unsigned __int16    uint16_t;
-        typedef __int32             int32_t;
-        typedef unsigned __int32    uint32_t;
-        typedef __int64             int64_t;
-        typedef unsigned __int64    uint64_t;
+        using uint32_t = unsigned __int32;
     #endif
 #endif
 

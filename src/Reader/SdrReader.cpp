@@ -10,7 +10,6 @@
 
 #include <fstream>
 
-#include <libbsdf/Common/Log.h>
 #include <libbsdf/Reader/DdrSdrUtility.h>
 
 using namespace lb;

@@ -10,9 +10,6 @@
 #include <memory>
 
 #include <libbsdf/Brdf/Processor.h>
-#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
-
-#include <libbsdf/Common/Log.h>
 
 #include <libbsdf/Reader/DdrReader.h>
 #include <libbsdf/Reader/ReaderUtility.h>
@@ -76,7 +73,7 @@ int main(int argc, char** argv)
     std::string inFileName2 = ap.getTokens().at(1);
     std::string outFileName = ap.getTokens().at(2);
 
-    // Validate file types.
+    // Set and validate file types.
     FileType inFileType = reader_utility::classifyFile(inFileName1);
     if (inFileType != reader_utility::classifyFile(inFileName2)) {
         std::cerr << "Input file types do not match." << std::endl;

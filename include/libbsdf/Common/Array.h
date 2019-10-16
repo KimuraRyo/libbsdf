@@ -17,15 +17,13 @@
 #include <iterator>
 #include <vector>
 
-#include <Eigen/Core>
-
 #include <libbsdf/Common/CentripetalCatmullRomSpline.h>
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
-typedef Eigen::ArrayXf Arrayf;
-typedef Eigen::ArrayXd Arrayd;
+using Arrayf = Eigen::ArrayXf;
+using Arrayd = Eigen::ArrayXd;
 
 /*! \brief Copies an array. */
 template <typename SrcT, typename DestT>
@@ -95,7 +93,7 @@ void copyArray(const SrcT& srcArray, DestT* destArray)
 template <typename ArrayT>
 void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
 {
-    typedef typename ArrayT::Scalar ScalarType;
+    using ScalarType = typename ArrayT::Scalar;
 
     ArrayT& a = *arrayf;
     std::vector<ScalarType> orig(a.data(), a.data() + a.size());
@@ -145,7 +143,7 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
                         Vec2(pos2, array2[i]),
                         Vec2(pos3, array3[i]));
 
-        typedef typename T::Scalar ScalarType;
+        using ScalarType = typename T::Scalar;
         (*array)[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));
     }
 }
@@ -153,15 +151,13 @@ void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
 template <typename T>
 T toRadians(const T& degrees)
 {
-    typedef typename T::Scalar ScalarType;
-    return degrees / ScalarType(180) * ScalarType(PI_D);
+    return degrees / 180 * PI_D;
 }
 
 template <typename T>
 T toDegrees(const T& radians)
 {
-    typedef typename T::Scalar ScalarType;
-    return radians * ScalarType(180) / ScalarType(PI_D);
+    return radians * 180 / PI_D;
 }
 
 template <typename T>

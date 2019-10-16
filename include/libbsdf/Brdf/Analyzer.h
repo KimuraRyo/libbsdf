@@ -14,16 +14,11 @@
 #ifndef LIBBSDF_ANALYZER_H
 #define LIBBSDF_ANALYZER_H
 
-#include <libbsdf/Common/Global.h>
-#include <libbsdf/Common/Vector.h>
+#include <libbsdf/Brdf/SampleSet2D.h>
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 
 namespace lb {
-
-class Brdf;
-class SampleSet;
-class SampleSet2D;
-class SpecularCoordinatesBrdf;
-class SphericalCoordinatesBrdf;
 
 /*!
  * \brief Computes a reflectance of BRDF with a spherical coordinate system.

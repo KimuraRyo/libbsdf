@@ -10,9 +10,6 @@
 
 #include <fstream>
 
-#include <libbsdf/Brdf/SampleSet2D.h>
-#include <libbsdf/Common/Log.h>
-#include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Version.h>
 
 using namespace lb;

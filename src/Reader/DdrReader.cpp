@@ -11,7 +11,6 @@
 #include <fstream>
 
 #include <libbsdf/Brdf/Analyzer.h>
-#include <libbsdf/Common/Log.h>
 #include <libbsdf/Reader/DdrSdrUtility.h>
 
 using namespace lb;
