@@ -166,7 +166,7 @@ double SolidAngle::fromRectangleOnHemisphere(const Vec3&    v0,
     }
 
     // Three vertices are below the plane.
-    else if (z0 > 0.0 && z1 < 0.0 && z2 < 0.0 && z3 < 0.0) {
+    else if (z0 > 0.0 && z1 <= 0.0 && z2 <= 0.0 && z3 <= 0.0) {
         Vec3 boundPos01 = computeBound(v0, v1);
         Vec3 boundPos03 = computeBound(v0, v3);
 
@@ -175,7 +175,7 @@ double SolidAngle::fromRectangleOnHemisphere(const Vec3&    v0,
 
         return fromTriangle(v0, boundPos01, boundPos03);
     }
-    else if (z0 < 0.0 && z1 > 0.0 && z2 < 0.0 && z3 < 0.0) {
+    else if (z0 <= 0.0 && z1 > 0.0 && z2 <= 0.0 && z3 <= 0.0) {
         Vec3 boundPos12 = computeBound(v1, v2);
         Vec3 boundPos10 = computeBound(v1, v0);
 
@@ -184,7 +184,7 @@ double SolidAngle::fromRectangleOnHemisphere(const Vec3&    v0,
 
         return fromTriangle(v1, boundPos12, boundPos10);
     }
-    else if (z0 < 0.0 && z1 < 0.0 && z2 > 0.0 && z3 < 0.0) {
+    else if (z0 <= 0.0 && z1 <= 0.0 && z2 > 0.0 && z3 <= 0.0) {
         Vec3 boundPos23 = computeBound(v2, v3);
         Vec3 boundPos21 = computeBound(v2, v1);
 
@@ -193,7 +193,7 @@ double SolidAngle::fromRectangleOnHemisphere(const Vec3&    v0,
 
         return fromTriangle(v2, boundPos23, boundPos21);
     }
-    else if (z0 < 0.0 && z1 < 0.0 && z2 < 0.0 && z3 > 0.0) {
+    else if (z0 <= 0.0 && z1 <= 0.0 && z2 <= 0.0 && z3 > 0.0) {
         Vec3 boundPos30 = computeBound(v3, v0);
         Vec3 boundPos32 = computeBound(v3, v2);
 
