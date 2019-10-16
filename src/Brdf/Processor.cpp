@@ -774,6 +774,7 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
                         ss->getAngle3(i3),
                         &inDir, &outDir);
             sp = insertedBrdf.getSpectrum(inDir, outDir);
+            sp = sp.cwiseMax(0);
         }
         else {
             sp = baseSs->getSpectrum(i0, i1 - 1, i2, i3);
