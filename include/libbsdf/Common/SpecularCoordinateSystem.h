@@ -10,6 +10,7 @@
 #define LIBBSDF_SPECULAR_COORDINATE_SYSTEM_H
 
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
+#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
