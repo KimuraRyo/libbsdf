@@ -954,24 +954,14 @@ void lb::fillSpectra(SpectrumList& spectra, Spectrum::Scalar value)
     }
 }
 
-bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
+bool lb::compute(const Brdf& src0, const Brdf& src1, Brdf* dest,
+                 std::function<Spectrum(const Spectrum&, const Spectrum&)> manipulator)
 {
-    const SampleSet* ss0 = src0.getSampleSet();
-    const SampleSet* ss1 = src1.getSampleSet();
     SampleSet* ss = dest->getSampleSet();
 
-    if (ss0->getColorModel() != ss1->getColorModel() ||
-        ss0->getColorModel() != ss->getColorModel()) {
-        lbError << "[subtract] Color models are not identical.";
-        return false;
-    }
-
-    const Arrayf& wls0 = ss0->getWavelengths();
-    const Arrayf& wls1 = ss1->getWavelengths();
-    const Arrayf& wls = ss->getWavelengths();
-    if (!wls0.isApprox(wls1) ||
-        !wls0.isApprox(wls)) {
-        lbError << "[subtract] Wavelengths are not identical.";
+    if (!hasSameColor(*src0.getSampleSet(), *ss) ||
+        !hasSameColor(*src1.getSampleSet(), *ss)) {
+        lbError << "[compute] Color models are not identical.";
         return false;
     }
 
@@ -984,11 +974,16 @@ bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
 
         const Spectrum& sp0 = src0.getSpectrum(inDir, outDir);
         const Spectrum& sp1 = src1.getSpectrum(inDir, outDir);
-
-        ss->setSpectrum(i0, i1, i2, i3, sp0 - sp1);
+        ss->setSpectrum(i0, i1, i2, i3, manipulator(sp0, sp1));
     }}}}
 
     return true;
+}
+
+bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
+{
+    auto sub = [](const Spectrum& sp0, const Spectrum& sp1) { return sp0 - sp1; };
+    return compute(src0, src1, dest, sub);
 }
 
 void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)

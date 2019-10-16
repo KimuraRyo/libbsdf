@@ -25,6 +25,7 @@ set(UTILITY_LIB_NAME AppUtility)
 add_library(${UTILITY_LIB_NAME} ${UTILITY_SOURCES})
 set_target_properties(${UTILITY_LIB_NAME} PROPERTIES FOLDER ${LIBBSDF_APPLICATION_FOLDER_NAME})
 
+add_subdirectory(lbaverage)
 add_subdirectory(lbcompare)
 add_subdirectory(lbconv)
 add_subdirectory(lbgen)

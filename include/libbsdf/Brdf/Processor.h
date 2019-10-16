@@ -164,6 +164,10 @@ void fillSpectra(SampleSet* samples, Spectrum::Scalar value);
 /*! \brief Fills spectra with a value. */
 void fillSpectra(SpectrumList& spectra, Spectrum::Scalar value);
 
+/*! \brief Computes spectra of a BRDF with two BRDFs. */
+bool compute(const Brdf& src0, const Brdf& src1, Brdf* dest,
+             std::function<Spectrum(const Spectrum&, const Spectrum&)> manipulator);
+
 /*! \brief Subtracts a BRDF from another. */
 bool subtract(const Brdf& src0, const Brdf& src1, Brdf* dest);
 

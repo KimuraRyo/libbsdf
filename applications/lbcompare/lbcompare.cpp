@@ -104,12 +104,12 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // Make a BRDF with the absolute difference between two inputs.
+    // Create an output BRDF with the same angle attributes as in_file1;
     std::unique_ptr<SpecularCoordinatesBrdf> outBrdf(inBrdf1->clone());
-    subtract(*inBrdf1, *inBrdf2, outBrdf.get());
-    for (Spectrum& sp : outBrdf->getSampleSet()->getSpectra()) {
-        sp = sp.cwiseAbs();
-    }
+
+    // Set the absolute difference between two inputs to the output.
+    auto diff = [](const Spectrum& sp1, const Spectrum& sp2) { return (sp1 - sp2).cwiseAbs(); };
+    compute(*inBrdf1, *inBrdf2, outBrdf.get(), diff);
 
     // Save a DDR/DDT file.
     std::string comments = app_utility::createComments(argc, argv, APP_NAME, APP_VERSION);
