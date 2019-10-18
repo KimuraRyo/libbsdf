@@ -50,13 +50,13 @@ void lb::editComponents(int                 i0,
     using std::pow;
     using std::max;
 
-    SampleSet* ss = brdf->getSampleSet();
-
-    Vec3 inDir, outDir;
-    brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+    Spectrum origSp;
 
     // Offset outgoing directions to edit a glossy component with shininess.
     if (glossyShininess != 1.0) {
+        Vec3 inDir, outDir;
+        brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
         float inTh, inPh, specTh, specPh;
         SpecularCoordinateSystem::fromXyz(inDir, outDir, &inTh, &inPh, &specTh, &specPh);
         float specThWeight = specTh / SpecularCoordinateSystem::MAX_ANGLE2;
@@ -69,9 +69,12 @@ void lb::editComponents(int                 i0,
         specPh      = clamp(specPh,     SpecularCoordinateSystem::MIN_ANGLE3, SpecularCoordinateSystem::MAX_ANGLE3);
 
         SpecularCoordinateSystem::toXyz(inTh, inPh, newSpecTh, specPh, &inDir, &outDir);
+        origSp = origBrdf.getSpectrum(inDir, outDir);
+    }
+    else {
+        origSp = origBrdf.getSampleSet()->getSpectrum(i0, i1, i2, i3);
     }
 
-    Spectrum origSp = origBrdf.getSpectrum(inDir, outDir);
     Spectrum sp(origSp.size());
 
     // Edit a BRDF with glossy and diffuse intensity.
@@ -87,7 +90,7 @@ void lb::editComponents(int                 i0,
         }
     }
 
-    ss->setSpectrum(i0, i1, i2, i3, sp);
+    brdf->getSampleSet()->setSpectrum(i0, i1, i2, i3, sp);
 }
 
 void lb::divideByCosineOutTheta(Brdf* brdf)
@@ -124,7 +127,7 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
         float outPhi = brdf->getOutPhi(i);
         bool angleOmitted = (outPhi != 0.0f &&
                              !isEqual(outPhi, PI_F) &&
-                             !isEqual(outPhi, 2.0f * PI_F));
+                             !isEqual(outPhi, TAU_F));
         if (angleOmitted) {
             filledAngles.push_back(SphericalCoordinateSystem::MAX_ANGLE3 - outPhi);
         }
@@ -223,10 +226,10 @@ void lb::fillSpectraAtInThetaOf0(Brdf* brdf)
 SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
                                            float                            rotationAngle)
 {
-    assert(rotationAngle > -2.0f * PI_F && rotationAngle < 2.0f * PI_F);
+    assert(rotationAngle > -TAU_F && rotationAngle < TAU_F);
 
     if (rotationAngle < 0.0f) {
-        rotationAngle += 2.0f * PI_F;
+        rotationAngle += TAU_F;
     }
 
     SphericalCoordinatesBrdf* rotatedBrdf = new SphericalCoordinatesBrdf(brdf);
@@ -236,8 +239,8 @@ SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf
     if (!ss->isEqualIntervalAngles3()) {
         for (int i = 0; i < rotatedBrdf->getNumOutPhi(); ++i) {
             float outPhi = rotatedBrdf->getOutPhi(i) + rotationAngle;
-            if (outPhi > 2.0f * PI_F) {
-                outPhi -= 2.0f * PI_F;
+            if (outPhi > TAU_F) {
+                outPhi -= TAU_F;
             }
 
             rotatedBrdf->setOutPhi(i, outPhi);
@@ -257,7 +260,7 @@ SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf
         float outPhi   = rotatedBrdf->getOutPhi(outPhIndex) - rotationAngle;
 
         if (outPhi < 0.0f) {
-            outPhi += 2.0f * PI_F;
+            outPhi += TAU_F;
         }
 
         Spectrum sp = brdf.getSpectrum(inTheta, inPhi, outTheta, outPhi);
@@ -505,7 +508,7 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
                     float inPhi = brdf->getInPhi(sampledInPhIndex);
 
                     // Ignore an overlapping angle.
-                    if (isEqual(inPhi, 2.0f * PI_F) &&
+                    if (isEqual(inPhi, TAU_F) &&
                         isEqual(brdf->getInPhi(0), 0.0f)) {
                         continue;
                     }
@@ -518,7 +521,7 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
 
                 // Ignore an overlapping angle.
                 if (isEqual(brdf->getInPhi(0), 0.0f) &&
-                    isEqual(brdf->getInPhi(brdf->getNumInPhi() - 1), 2.0f * PI_F)) {
+                    isEqual(brdf->getInPhi(brdf->getNumInPhi() - 1), TAU_F)) {
                     --numInPhi;
                 }
 
@@ -708,7 +711,7 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
         return 0;
     }
 
-    if (inPhi < 0.0f || inPhi > 2.0f * PI_F) {
+    if (inPhi < 0.0f || inPhi > TAU_F) {
         lbError
             << "[lb::insertBrdfAlongInPhi] Specified incoming azimuthal angle is out of range: "
             << inPhi;

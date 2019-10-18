@@ -10,6 +10,7 @@
 #define LIBBSDF_SPHERICAL_COORDINATE_SYSTEM_H
 
 #include <libbsdf/Common/Global.h>
+#include <libbsdf/Common/Utility.h>
 #include <libbsdf/Common/Vector.h>
 
 namespace lb {
@@ -63,20 +64,20 @@ struct SphericalCoordinateSystem
                         ScalarT*    outTheta,
                         ScalarT*    outPhi);
 
-    static const std::string ANGLE0_NAME; /*!< This attribute holds the name of inTheta. */
-    static const std::string ANGLE1_NAME; /*!< This attribute holds the name of inPhi. */
-    static const std::string ANGLE2_NAME; /*!< This attribute holds the name of outTheta. */
-    static const std::string ANGLE3_NAME; /*!< This attribute holds the name of outPhi. */
+    static constexpr char ANGLE0_NAME[] = "Incoming polar angle";     /*!< This attribute holds the name of inTheta. */
+    static constexpr char ANGLE1_NAME[] = "Incoming azimuthal angle"; /*!< This attribute holds the name of inPhi. */
+    static constexpr char ANGLE2_NAME[] = "Outgoing polar angle";     /*!< This attribute holds the name of outTheta. */
+    static constexpr char ANGLE3_NAME[] = "Outgoing azimuthal angle"; /*!< This attribute holds the name of outPhi. */
 
-    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of inTheta. */
-    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of inPhi. */
-    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of outTheta. */
-    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of outPhi. */
+    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of inTheta. */
+    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of inPhi. */
+    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of outTheta. */
+    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of outPhi. */
 
-    static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of inTheta. */
-    static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of inPhi. */
-    static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of outTheta. */
-    static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of outPhi. */
+    static constexpr float MAX_ANGLE0 = decrease(PI_2_F);   /*!< This attribute holds the maximum value of inTheta. */
+    static constexpr float MAX_ANGLE1 = decrease(TAU_F);    /*!< This attribute holds the maximum value of inPhi. */
+    static constexpr float MAX_ANGLE2 = decrease(PI_2_F);   /*!< This attribute holds the maximum value of outTheta. */
+    static constexpr float MAX_ANGLE3 = decrease(TAU_F);    /*!< This attribute holds the maximum value of outPhi. */
 
     /*! Converts from a spherical coordinate system to a Cartesian. */
     template <typename ScalarT>
@@ -132,7 +133,7 @@ void SphericalCoordinateSystem::fromXyz(const Vec3& inDir,
 
     *outPhi = *outPhi - inPhi;
     if (*outPhi < 0.0) {
-        *outPhi += ScalarT(2.0 * PI_D);
+        *outPhi += ScalarT(TAU_D);
     }
 }
 
@@ -155,7 +156,7 @@ void SphericalCoordinateSystem::fromXyz(const Vec3& dir, ScalarT* theta, ScalarT
     *theta = static_cast<ScalarT>(std::acos(dir[2]));
     *phi   = static_cast<ScalarT>(std::atan2(dir[1], dir[0]));
     if (*phi < 0.0) {
-        *phi += ScalarT(2.0 * PI_D);
+        *phi += ScalarT(TAU_D);
     }
 
     assert(!std::isnan(*theta) && !std::isnan(*phi) &&

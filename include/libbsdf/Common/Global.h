@@ -20,12 +20,15 @@
 
 namespace lb {
 
-const float PI_F = 3.14159265358979323846f;
-const float PI_2_F = 1.57079632679489661923f;
-const float EPSILON_F = std::numeric_limits<float>::epsilon();
+constexpr double PI_D   = 3.14159265358979323846;
+constexpr double PI_2_D = 1.57079632679489661923;
+constexpr double TAU_D  = 6.28318530717958647692;
 
-const double PI_D = 3.14159265358979323846;
-const double PI_2_D = 1.57079632679489661923;
+constexpr float PI_F    = static_cast<float>(PI_D);
+constexpr float PI_2_F  = static_cast<float>(PI_2_D);
+constexpr float TAU_F   = static_cast<float>(TAU_D);
+
+constexpr float EPSILON_F = std::numeric_limits<float>::epsilon();
 
 /*! \brief The data type of a spectrum. */
 using Spectrum = Eigen::ArrayXf;

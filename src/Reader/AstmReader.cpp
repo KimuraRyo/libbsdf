@@ -146,7 +146,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
             if (count <= 3) {
                 if (val < 0.0f) {
-                    val += 2.0f * PI_F;
+                    val += TAU_F;
                 }
 
                 val = std::min(val, SphericalCoordinateSystem::MAX_ANGLE3);
@@ -182,7 +182,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         for (auto it = outPhiAngles.begin(); it != outPhiAngles.end(); ++it) {
             float outPhi = *it - *inPhiAngles.begin();
             if (outPhi < 0.0f) {
-                outPhi += 2.0f * PI_F;
+                outPhi += TAU_F;
             }
 
             rotatedAngles.push_back(outPhi);
@@ -196,7 +196,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
             SphericalCoordinatesRandomSampleSet::AngleList angles = it->first;
             float outPhi = angles.at(3) - *inPhiAngles.begin();
             if (outPhi < 0.0f) {
-                outPhi += 2.0f * PI_F;
+                outPhi += TAU_F;
             }
             angles.at(1) = 0.0f;
             angles.at(3) = outPhi;

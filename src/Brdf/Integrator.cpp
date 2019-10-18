@@ -36,7 +36,7 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir)
         sumSpectrum += sp.cast<Arrayd::Scalar>();
     }
 
-    sumSpectrum *= 2.0 * PI_D / numSampling_;
+    sumSpectrum *= TAU_D / numSampling_;
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
@@ -58,7 +58,7 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir, int
         sumSpectrum += sp.cast<Arrayd::Scalar>();
     }
 
-    sumSpectrum *= 2.0 * PI_D / numSampling;
+    sumSpectrum *= TAU_D / numSampling;
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 

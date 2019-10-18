@@ -35,7 +35,7 @@ Arrayd computeReflectanceOfRectangle(const SphericalCoordinatesBrdf& brdf,
 
     double midCosTheta = (cos(theta) + cos(nextTheta)) * 0.5;
     double solidAngle = SolidAngle::fromRectangle(theta, nextTheta, phi, nextPhi);
-    return std::move(sp.cast<Arrayd::Scalar>() * midCosTheta * solidAngle);
+    return sp.cast<Arrayd::Scalar>() * midCosTheta * solidAngle;
 }
 
 }

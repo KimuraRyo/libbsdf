@@ -33,6 +33,14 @@ bool isEqual(T lhs, T rhs);
 template <typename T>
 int sign(T val);
 
+/*! \brief Returns a slightly smaller value. */
+template<typename T>
+constexpr T decrease(T val);
+
+/*! \brief Returns a slightly larger value. */
+template<typename T>
+constexpr T increase(T val);
+
 /*! \brief Computes linearly-interpolated values. */
 template <typename T>
 T lerp(const T& v0, const T& v1, float t);
@@ -123,6 +131,18 @@ T clamp(T value, T minValue, T maxValue)
 template <typename T>
 int sign(T val) {
     return (T(0) < val) - (val < T(0));
+}
+
+template<typename T>
+constexpr T decrease(T val)
+{
+    return val - std::numeric_limits<T>::epsilon() * val;
+}
+
+template<typename T>
+constexpr T increase(T val)
+{
+    return val + std::numeric_limits<T>::epsilon() * val;
 }
 
 template <typename T>

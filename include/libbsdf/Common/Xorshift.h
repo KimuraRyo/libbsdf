@@ -90,7 +90,7 @@ template <typename Vec3T>
 inline Vec3T Xorshift::randomOnHemisphere()
 {
     float z = Xorshift::random<float>();
-    float phi = Xorshift::random<float>() * 2.0f * PI_F;
+    float phi = Xorshift::random<float>() * TAU_F;
     float coeff = std::sqrt(1.0f - z * z);
 
     return Vec3T(coeff * std::cos(phi), coeff * std::sin(phi), z);

@@ -142,14 +142,14 @@ const Spectrum& RandomSampleSet<CoordSysT>::estimateSpectrum(const AngleList&   
 
         float angle1Diff = abs(angle1 - sampleAngle1);
         if (angle1Diff > PI_F) {
-            angle1Diff = 2.0f * PI_F - angle1Diff;
+            angle1Diff = TAU_F - angle1Diff;
         }
 
         float angle2Diff = abs(angle2 - sampleAngle2);
 
         float angle3Diff = abs(angle3 - sampleAngle3);
         if (angle3Diff > PI_F) {
-            angle3Diff = 2.0f * PI_F - angle3Diff;
+            angle3Diff = TAU_F - angle3Diff;
         }
 
         float angleDiff = weight0 * angle0Diff

@@ -226,7 +226,7 @@ bool SampleSet::distinguishOneSide() const
             containing_0_PI = true;
         }
 
-        if (angle > PI_F + offset * PI_F && angle < 2.0f * PI_F - offset * 2.0f * PI_F) {
+        if (angle > PI_F + offset * PI_F && angle < TAU_F - offset * TAU_F) {
             containing_PI_2PI = true;
         }
     }

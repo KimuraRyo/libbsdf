@@ -72,7 +72,7 @@ inline Vec3 ModifiedPhong::compute(const Vec3&  L,
 
     Vec3 R = reflect(L, N);
     float dotRV = R.dot(V);
-    return color * (shininess + 2.0f) / (2.0f * PI_F) * pow(max(dotRV, 0.0f), shininess);
+    return color * (shininess + 2.0f) / TAU_F * pow(max(dotRV, 0.0f), shininess);
 }
 
 } // namespace lb

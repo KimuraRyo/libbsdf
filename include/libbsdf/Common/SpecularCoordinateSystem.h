@@ -10,7 +10,6 @@
 #define LIBBSDF_SPECULAR_COORDINATE_SYSTEM_H
 
 #include <libbsdf/Common/SphericalCoordinateSystem.h>
-#include <libbsdf/Common/Utility.h>
 
 namespace lb {
 
@@ -63,20 +62,20 @@ struct SpecularCoordinateSystem
                         ScalarT*    specTheta,
                         ScalarT*    specPhi);
 
-    static const std::string ANGLE0_NAME; /*!< This attribute holds the name of inTheta. */
-    static const std::string ANGLE1_NAME; /*!< This attribute holds the name of inPhi. */
-    static const std::string ANGLE2_NAME; /*!< This attribute holds the name of specTheta. */
-    static const std::string ANGLE3_NAME; /*!< This attribute holds the name of specPhi. */
+    static constexpr char ANGLE0_NAME[] = "Incoming polar angle";     /*!< This attribute holds the name of inTheta. */
+    static constexpr char ANGLE1_NAME[] = "Incoming azimuthal angle"; /*!< This attribute holds the name of inPhi. */
+    static constexpr char ANGLE2_NAME[] = "Specular polar angle";     /*!< This attribute holds the name of specTheta. */
+    static constexpr char ANGLE3_NAME[] = "Specular azimuthal angle"; /*!< This attribute holds the name of specPhi. */
 
-    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of inTheta. */
-    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of inPhi. */
-    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of specTheta. */
-    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of specPhi. */
+    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of inTheta. */
+    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of inPhi. */
+    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of specTheta. */
+    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of specPhi. */
 
-    static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of inTheta. */
-    static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of inPhi. */
-    static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of specTheta. */
-    static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of specPhi. */
+    static constexpr float MAX_ANGLE0 = decrease(PI_2_F);   /*!< This attribute holds the maximum value of inTheta. */
+    static constexpr float MAX_ANGLE1 = decrease(TAU_F);    /*!< This attribute holds the maximum value of inPhi. */
+    static constexpr float MAX_ANGLE2 = decrease(PI_F);     /*!< This attribute holds the maximum value of specTheta. */
+    static constexpr float MAX_ANGLE3 = decrease(TAU_F);    /*!< This attribute holds the maximum value of specPhi. */
 
     /*! Converts an outgoing direction from a specular coordinate system to a Cartesian. */
     template <typename ScalarT>
