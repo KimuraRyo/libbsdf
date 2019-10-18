@@ -64,20 +64,20 @@ struct HalfDifferenceCoordinateSystem
                         ScalarT*    diffTheta,
                         ScalarT*    diffPhi);
 
-    static constexpr char ANGLE0_NAME[] = "Half polar angle";           /*!< This attribute holds the name of halfTheta. */
-    static constexpr char ANGLE1_NAME[] = "Half azimuthal angle";       /*!< This attribute holds the name of halfPhi. */
-    static constexpr char ANGLE2_NAME[] = "Difference polar angle";     /*!< This attribute holds the name of diffTheta. */
-    static constexpr char ANGLE3_NAME[] = "Difference azimuthal angle"; /*!< This attribute holds the name of diffPhi. */
+    static const char ANGLE0_NAME[]; /*!< This attribute holds the name of halfTheta. */
+    static const char ANGLE1_NAME[]; /*!< This attribute holds the name of halfPhi. */
+    static const char ANGLE2_NAME[]; /*!< This attribute holds the name of diffTheta. */
+    static const char ANGLE3_NAME[]; /*!< This attribute holds the name of diffPhi. */
 
-    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of halfTheta. */
-    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of halfPhi. */
-    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of diffTheta. */
-    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of diffPhi. */
+    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of halfTheta. */
+    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of halfPhi. */
+    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of diffTheta. */
+    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of diffPhi. */
 
-    static constexpr float MAX_ANGLE0 = decrease(PI_2_F);   /*!< This attribute holds the maximum value of halfTheta. */
-    static constexpr float MAX_ANGLE1 = decrease(TAU_F);    /*!< This attribute holds the maximum value of halfPhi. */
-    static constexpr float MAX_ANGLE2 = decrease(PI_2_F);   /*!< This attribute holds the maximum value of diffTheta. */
-    static constexpr float MAX_ANGLE3 = decrease(TAU_F);    /*!< This attribute holds the maximum value of diffPhi. */
+    static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of halfTheta. */
+    static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of halfPhi. */
+    static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of diffTheta. */
+    static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of diffPhi. */
 };
 
 template <typename ScalarT>
