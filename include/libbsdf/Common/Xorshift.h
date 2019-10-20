@@ -58,13 +58,20 @@ inline Xorshift::Xorshift(uint32_t seed) : x_(seed),
                                            z_(521288629),
                                            w_(88675123) {}
 
-inline void Xorshift::setSeed(uint32_t seed) { x_ = seed; }
+inline void Xorshift::setSeed(uint32_t seed)
+{
+    x_ = seed;
+}
 
 inline uint32_t Xorshift::next()
 {
     uint32_t t = x_ ^ (x_ << 11);
-    x_ = y_; y_ = z_; z_ = w_;
-    return w_ = (w_ ^ (w_ >> 19)) ^ (t ^ (t >> 8));
+    x_ = y_;
+    y_ = z_;
+    z_ = w_;
+    w_ = (w_ ^ (w_ >> 19)) ^ (t ^ (t >> 8));
+
+    return w_;
 }
 
 inline uint32_t Xorshift::random()
@@ -73,27 +80,34 @@ inline uint32_t Xorshift::random()
     static uint32_t y = 362436069;
     static uint32_t z = 521288629;
     static uint32_t w = 88675123;
-    uint32_t t;
 
-    t = x ^ (x << 11);
-    x = y; y = z; z = w;
-    return w = (w ^ (w >> 19)) ^ (t ^ (t >> 8));
+    uint32_t t = x ^ (x << 11);
+    x = y;
+    y = z;
+    z = w;
+    w = (w ^ (w >> 19)) ^ (t ^ (t >> 8));
+
+    return w;
 }
 
 template <typename T>
 inline T Xorshift::random()
 {
-    return static_cast<T>(random()) / static_cast<T>(std::numeric_limits<uint32_t>::max());
+    return static_cast<T>(random()) / std::numeric_limits<uint32_t>::max();
 }
 
 template <typename Vec3T>
 inline Vec3T Xorshift::randomOnHemisphere()
 {
-    float z = Xorshift::random<float>();
-    float phi = Xorshift::random<float>() * TAU_F;
-    float coeff = std::sqrt(1.0f - z * z);
+    using Scalar = typename Vec3T::Scalar;
 
-    return Vec3T(coeff * std::cos(phi), coeff * std::sin(phi), z);
+    Scalar z = random<Scalar>();
+    Scalar phi = random<Scalar>() * TAU_F;
+    Scalar coeff = std::sqrt(1 - z * z);
+    Scalar x = coeff * std::cos(phi);
+    Scalar y = coeff * std::sin(phi);
+
+    return Vec3T(x, y, z);
 }
 
 } // namespace lb
