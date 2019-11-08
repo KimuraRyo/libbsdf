@@ -206,7 +206,7 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
             standardRef = fresnel(ss2->getTheta(thIndex), ior);
         }
 
-        Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
+        Spectrum refSp = brdfSp / standardBrdfSp.cwiseMax(EPSILON_F) * standardRef;
         ss2->setSpectrum(thIndex, phIndex, refSp);
     }}
 

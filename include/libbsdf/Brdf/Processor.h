@@ -67,8 +67,8 @@ void divideByCosineOutTheta(Brdf* brdf);
  */
 SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
 
-/*! \brief Fills the samples at the incoming polar angle of 0 degrees using rotational symmetry. */
-void fillSpectraAtInThetaOf0(Brdf* brdf);
+/*! \brief Averages the samples at the incoming polar angle of 0 degrees using rotational symmetry. */
+void averageSpectraAtInThetaOf0(Brdf* brdf);
 
 /*!
  * \brief Rotates a BRDF using an outgoing azimuthal angle.
@@ -140,10 +140,11 @@ SphericalCoordinatesBrdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  
 /*!
  * \brief Recalculates a BRDF with linearly extrapolated reflectances.
  * \param incomingTheta Minimum incoming polar angle of extrapolated samples.
+ * \param diffuseTheta  Maxmum incoming and outgoing polar angle to define the range to search the diffuse component.
  *
  * When a BRDF is extrapolated, it is separated into glossy and diffuse components to improve calculation results.
  */
-void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta);
+void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta, float diffuseTheta);
 
 /*!
  * \brief Copies spectra from the azimuthal angle of 0 degrees to 360 degrees.
@@ -173,6 +174,9 @@ bool subtract(const Brdf& src0, const Brdf& src1, Brdf* dest);
 
 /*! \brief Multiplies spectra of samples by a value. */
 void multiplySpectra(SampleSet* samples, Spectrum::Scalar value);
+
+/*! \brief Fixes negative values of spectra to 0 on an upper hemisphere. */
+void fixNegativeSpectra(Brdf* brdf);
 
 /*! \brief Fixes negative values of spectra to 0. */
 void fixNegativeSpectra(SampleSet* samples);

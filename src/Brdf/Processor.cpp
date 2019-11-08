@@ -187,7 +187,7 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
     return filledBrdf;
 }
 
-void lb::fillSpectraAtInThetaOf0(Brdf* brdf)
+void lb::averageSpectraAtInThetaOf0(Brdf* brdf)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -803,7 +803,7 @@ SphericalCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrd
     return insertBrdfAlongInPhiTemplate(baseBrdf, insertedBrdf, inPhi);
 }
 
-void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta)
+void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta, float diffuseTheta)
 {
     if (brdf->getNumInTheta() < 3 ||
         brdf->getInTheta(1) > incomingTheta ||
@@ -811,7 +811,7 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
         return;
     }
 
-    Spectrum diffuseThresholds = findDiffuseThresholds(*brdf, incomingTheta);
+    Spectrum diffuseThresholds = findDiffuseThresholds(*brdf, diffuseTheta);
 
     SpecularCoordinatesBrdf* glossyBrdf = brdf->clone();
     SpecularCoordinatesBrdf* diffuseBrdf = brdf->clone();
@@ -994,6 +994,24 @@ void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
     for (auto& sp : samples->getSpectra()) {
         sp *= value;
     }
+}
+
+void lb::fixNegativeSpectra(Brdf* brdf)
+{
+    SampleSet* ss = brdf->getSampleSet();
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        if (isDownwardDir(outDir)) continue;
+
+        Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
+        sp = sp.cwiseMax(0);
+    }}}}
 }
 
 void lb::fixNegativeSpectra(SampleSet* samples)
