@@ -9,6 +9,8 @@
 #ifndef LIBBSDF_BRDF_H
 #define LIBBSDF_BRDF_H
 
+#include <string>
+
 #include <libbsdf/Brdf/SampleSet.h>
 
 namespace lb {
@@ -136,6 +138,15 @@ public:
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
     virtual void clampAngles() = 0;
 
+    /*! Gets the name of BRDF. */
+    std::string& getName();
+
+    /*! Gets the name of BRDF. */
+    const std::string& getName() const;
+
+    /*! Sets the name of BRDF. */
+    void setName(const std::string& name);
+
 protected:
     /*! This attribute holds the sample set including angles, wavelengths, and spectra. */
     SampleSet* samples_;
@@ -145,6 +156,8 @@ protected:
 private:
     /*! Copy operator is disabled. */
     Brdf& operator=(const Brdf&);
+
+    std::string name_; /*! The name of BRDF. */
 };
 
 inline       SampleSet* Brdf::getSampleSet()       { return samples_; }
@@ -153,6 +166,9 @@ inline const SampleSet* Brdf::getSampleSet() const { return samples_; }
 inline SourceType Brdf::getSourceType() const { return sourceType_; }
 
 inline void Brdf::setSourceType(SourceType type) { sourceType_ = type; }
+
+inline       std::string& Brdf::getName()       { return name_; }
+inline const std::string& Brdf::getName() const { return name_; }
 
 } // namespace lb
 

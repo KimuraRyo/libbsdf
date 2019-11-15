@@ -43,11 +43,17 @@ Brdf::Brdf(const Brdf& brdf) : samples_(new SampleSet(*brdf.getSampleSet())),
 
 Brdf::~Brdf()
 {
-    lbTrace << "[Brdf::~Brdf]";
+    lbTrace << "[Brdf::~Brdf] " << name_;
     delete samples_;
 }
 
 void Brdf::initializeSpectra(const Brdf& brdf)
 {
     lb::initializeSpectra<LinearInterpolator>(brdf, this);
+}
+
+void Brdf::setName(const std::string& name)
+{
+    lbTrace << "[Brdf::setName] " << name;
+    name_ = name;
 }
