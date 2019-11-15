@@ -10,6 +10,12 @@
 
 #include <fstream>
 
+#include <libbsdf/Reader/AstmReader.h>
+#include <libbsdf/Reader/DdrReader.h>
+#include <libbsdf/Reader/LightToolsBsdfReader.h>
+#include <libbsdf/Reader/MerlBinaryReader.h>
+#include <libbsdf/Reader/ZemaxBsdfReader.h>
+
 using namespace lb;
 
 void reader_utility::ignoreCommentLines(std::istream& stream, const std::string& lineHead)
@@ -128,4 +134,60 @@ FileType reader_utility::classifyFile(const std::string& fileName)
     }
 
     return UNKNOWN_FILE;
+}
+
+std::shared_ptr<Brdf> reader_utility::read(const std::string&   fileName,
+                                           FileType*            fileType,
+                                           DataType*            dataType)
+{
+    std::ifstream ifs(fileName.c_str());
+    if (ifs.fail()) {
+        lbError << "[reader_utility::read] Could not open: " << fileName;
+        return nullptr;
+    }
+
+    *fileType = reader_utility::classifyFile(fileName);
+    *dataType = UNKNOWN_DATA;
+
+    // Load a BRDF/BTDF.
+    std::shared_ptr<Brdf> brdf;
+    switch (*fileType) {
+        case ASTM_FILE:
+            brdf.reset(AstmReader::read(fileName));
+            break;
+        case INTEGRA_DDR_FILE:
+            brdf.reset(DdrReader::read(fileName));
+            *dataType = BRDF_DATA;
+            break;
+        case INTEGRA_DDT_FILE:
+            brdf.reset(DdrReader::read(fileName));
+            *dataType = BTDF_DATA;
+            break;
+        case lb::LIGHTTOOLS_FILE: {
+            std::unique_ptr<TwoSidedMaterial> material;
+            material.reset(LightToolsBsdfReader::read(fileName));
+            std::shared_ptr<Brdf> fBrdf = material->getFrontMaterial()->getBsdf()->getBrdf();
+            std::shared_ptr<Btdf> fBtdf = material->getFrontMaterial()->getBsdf()->getBtdf();
+            std::shared_ptr<Brdf> bBrdf = material->getBackMaterial()->getBsdf()->getBrdf();
+            std::shared_ptr<Btdf> bBtdf = material->getBackMaterial()->getBsdf()->getBtdf();
+
+            if      (fBrdf) { brdf = fBrdf;            *dataType = BRDF_DATA; }
+            else if (fBtdf) { brdf = fBtdf->getBrdf(); *dataType = BTDF_DATA; }
+            else if (bBrdf) { brdf = bBrdf;            *dataType = BRDF_DATA; }
+            else if (bBtdf) { brdf = bBtdf->getBrdf(); *dataType = BTDF_DATA; }
+            break;
+        }
+        case lb::MERL_BINARY_FILE:
+            brdf.reset(MerlBinaryReader::read(fileName));
+            *dataType = BRDF_DATA;
+            break;
+        case lb::ZEMAX_FILE:
+            brdf.reset(ZemaxBsdfReader::read(fileName, dataType));
+            break;
+        default:
+            lbError << "[reader_utility::read] Unsupported file type: " << fileType;
+            return nullptr;
+    }
+
+    return brdf;
 }

@@ -14,11 +14,13 @@
 #ifndef LIBBSDF_READER_UTILITY_H
 #define LIBBSDF_READER_UTILITY_H
 
-#include <string>
+#include <algorithm>
 #include <istream>
 #include <limits>
-#include <algorithm>
+#include <memory>
+#include <string>
 
+#include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Log.h>
 
@@ -51,6 +53,9 @@ bool hasSuffix(const std::string &fileName, const std::string &suffix);
 
 /*! \brief Classifies the type of a file. */
 FileType classifyFile(const std::string& fileName);
+
+/*! \brief Reads a BRDF/BTDF/BSDF/Material file and returns a lb::Brdf, file type, and data type. */
+std::shared_ptr<Brdf> read(const std::string& fileName, FileType* fileType, DataType* dataType);
 
 } // namespace reader_utility
 

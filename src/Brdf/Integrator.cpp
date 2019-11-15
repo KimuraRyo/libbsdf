@@ -9,13 +9,12 @@
 #include <libbsdf/Brdf/Integrator.h>
 
 #include <libbsdf/Common/Xorshift.h>
-#include <libbsdf/Common/PoissonDiskDistributionOnSphere.h>
 
 using namespace lb;
 
-Integrator::Integrator(int numSampling, bool poissonDiskDistributionUsed) : numSampling_(numSampling)
+Integrator::Integrator(int numSampling) : numSampling_(numSampling)
 {
-    initializeOutDirs(poissonDiskDistributionUsed);
+    initializeOutDirs();
 }
 
 Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir)
@@ -62,36 +61,10 @@ Spectrum Integrator::computeReflectance(const Brdf& brdf, const Vec3& inDir, int
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
-void Integrator::initializeOutDirs(bool poissonDiskDistributionUsed)
+void Integrator::initializeOutDirs()
 {
-    if (poissonDiskDistributionUsed) {
-        std::vector<Vec3f> dirsOnHemisphere;
-
-        int numPoissonDiskSampling = (sizeof(PoissonDiskDistributionOnSphere::data) / sizeof(float)) / 3;
-        for (int i = 0; i < numPoissonDiskSampling; ++i) {
-            const float* dirs = PoissonDiskDistributionOnSphere::data;
-            Vec3f dir(dirs[i * 3],
-                      dirs[i * 3 + 1],
-                      dirs[i * 3 + 2]);
-
-            if (dir.z() > 0.0f) {
-                dirsOnHemisphere.push_back(dir);
-            }
-        }
-
-        numSampling_ = std::min(numSampling_, static_cast<int>(dirsOnHemisphere.size()));
-
-        outDirs_.resize(Eigen::NoChange, numSampling_);
-        for (int i = 0; i < numSampling_; ++i) {
-            outDirs_.col(i) = dirsOnHemisphere.at(i);
-        }
-
-        lbInfo << "[Integrator::Integrator] numSampling_: " << numSampling_;
-    }
-    else {
-        outDirs_.resize(Eigen::NoChange, numSampling_);
-        for (int i = 0; i < numSampling_; ++i) {
-            outDirs_.col(i) = Xorshift::randomOnHemisphere<Vec3f>();
-        }
+    outDirs_.resize(Eigen::NoChange, numSampling_);
+    for (int i = 0; i < numSampling_; ++i) {
+        outDirs_.col(i) = Xorshift::randomOnHemisphere<Vec3f>();
     }
 }

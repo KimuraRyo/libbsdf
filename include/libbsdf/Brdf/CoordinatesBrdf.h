@@ -28,8 +28,7 @@ public:
     /*!
      * Constructs a BRDF.
      *
-     * \param equalIntervalAngles If this parameter is true, angles of sample points
-     * are equally-spaced intervals.
+     * \param equalIntervalAngles If this parameter is true, angles of sample points are equally-spaced intervals.
      */
     CoordinatesBrdf(int         numAngles0,
                     int         numAngles1,

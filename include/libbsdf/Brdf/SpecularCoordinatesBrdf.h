@@ -29,7 +29,11 @@ private:
     using BaseBrdf = CoordinatesBrdf<CoordSys>;
 
 public:
-    /*! Constructs a spectral BRDF. */
+    /*!
+     * Constructs a spectral BRDF.
+     *
+     * \param equalIntervalAngles If this parameter is true, angles of sample points are equally-spaced intervals.
+     */
     SpecularCoordinatesBrdf(int         numInTheta,
                             int         numInPhi,
                             int         numSpecTheta,
@@ -164,6 +168,9 @@ public:
     int getNumInPhi    () const; /*!< Gets the number of azimuthal angles of an incoming direction. */
     int getNumSpecTheta() const; /*!< Gets the number of polar angles of a specular direction. */
     int getNumSpecPhi  () const; /*!< Gets the number of azimuthal angles of a specular direction. */
+
+    /*! Sets up specular offsets using a refractive index. */
+    void setupSpecularOffsets(float refractiveIndex);
 
     /*! Gets the specular offset at an index. */
     float getSpecularOffset(int index) const;

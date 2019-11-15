@@ -71,12 +71,7 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
     samples_->updateAngleAttributes();
 
     if (refractiveIndex != 1.0f) {
-        for (int i = 0; i < getNumInTheta(); ++i) {
-            float inTheta = getInTheta(i);
-            float sinT = std::min(std::sin(inTheta) / refractiveIndex, 1.0f);
-            float refractedTheta = std::asin(sinT);
-            setSpecularOffset(i, refractedTheta - inTheta);
-        }
+        setupSpecularOffsets(refractiveIndex);
     }
 }
 
@@ -124,6 +119,16 @@ SpecularCoordinatesBrdf::~SpecularCoordinatesBrdf() {}
 SpecularCoordinatesBrdf* SpecularCoordinatesBrdf::clone() const
 {
     return new SpecularCoordinatesBrdf(*this);
+}
+
+void SpecularCoordinatesBrdf::setupSpecularOffsets(float refractiveIndex)
+{
+    for (int i = 0; i < getNumInTheta(); ++i) {
+        float inTheta = getInTheta(i);
+        float sinT = std::min(std::sin(inTheta) / refractiveIndex, 1.0f);
+        float refractedTheta = std::asin(sinT);
+        setSpecularOffset(i, refractedTheta - inTheta);
+    }
 }
 
 bool SpecularCoordinatesBrdf::validate(bool verbose) const

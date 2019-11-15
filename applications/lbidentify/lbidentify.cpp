@@ -9,11 +9,10 @@
 #include <iostream>
 #include <memory>
 
-#include <libbsdf/Reader/AstmReader.h>
-#include <libbsdf/Reader/DdrReader.h>
-#include <libbsdf/Reader/LightToolsBsdfReader.h>
-#include <libbsdf/Reader/MerlBinaryReader.h>
-#include <libbsdf/Reader/ZemaxBsdfReader.h>
+#include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
+#include <libbsdf/Reader/ReaderUtility.h>
 
 #include <ArgumentParser.h>
 #include <Utility.h>
@@ -28,7 +27,7 @@ using std::endl;
  */
 
 const std::string APP_NAME("lbidentify");
-const std::string APP_VERSION("1.0.1");
+const std::string APP_VERSION("1.0.2");
 
 void showHelp()
 {
@@ -37,11 +36,12 @@ void showHelp()
     cout << "lbidentify identifies a BRDF/BTDF file." << endl;
     cout << endl;
     cout << "Positional Arguments:" << endl;
-    cout << "  file     Name of an input BRDF/BTDF file." << endl;
+    cout << "  file     Name of the input BRDF/BTDF file." << endl;
     cout << "           Valid formats:" << endl;
     cout << "               Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
-    cout << "               Zemax BSDF (\".bsdf\")" << endl;
+    cout << "               LightTools/Zemax BSDF (\".bsdf\")" << endl;
     cout << "               ASTM E1392-96(2002) (\".astm\")" << endl;
+    cout << "               MERL binary Files (\".binary\")" << endl;
     cout << endl;
     cout << "Options:" << endl;
     cout << "  -h, --help       show this help message and exit" << endl;
@@ -200,48 +200,10 @@ int main(int argc, char** argv)
 
     std::string fileName = ap.getTokens().at(0);
 
-    FileType fileType = reader_utility::classifyFile(fileName);
-
-    // Load a BRDF/BTDF file.
-    std::shared_ptr<Brdf> brdf;
-    std::unique_ptr<TwoSidedMaterial> material;
-    DataType dataType = UNKNOWN_DATA;
-    switch (fileType) {
-        case ASTM_FILE:
-            brdf.reset(AstmReader::read(fileName));
-            break;
-        case INTEGRA_DDR_FILE:
-            brdf.reset(DdrReader::read(fileName));
-            dataType = BRDF_DATA;
-            break;
-        case INTEGRA_DDT_FILE:
-            brdf.reset(DdrReader::read(fileName));
-            dataType = BTDF_DATA;
-            break;
-        case lb::LIGHTTOOLS_FILE: {
-            material.reset(LightToolsBsdfReader::read(fileName));
-            std::shared_ptr<Brdf> fBrdf = material->getFrontMaterial()->getBsdf()->getBrdf();
-            std::shared_ptr<Btdf> fBtdf = material->getFrontMaterial()->getBsdf()->getBtdf();
-            std::shared_ptr<Brdf> bBrdf = material->getBackMaterial()->getBsdf()->getBrdf();
-            std::shared_ptr<Btdf> bBtdf = material->getBackMaterial()->getBsdf()->getBtdf();
-
-            if      (fBrdf) { brdf = fBrdf;            dataType = BRDF_DATA; }
-            else if (fBtdf) { brdf = fBtdf->getBrdf(); dataType = BTDF_DATA; }
-            else if (bBrdf) { brdf = bBrdf;            dataType = BRDF_DATA; }
-            else if (bBtdf) { brdf = bBtdf->getBrdf(); dataType = BTDF_DATA; }
-            break;
-        }
-        case lb::MERL_BINARY_FILE:
-            brdf.reset(MerlBinaryReader::read(fileName));
-            dataType = BRDF_DATA;
-            break;
-        case lb::ZEMAX_FILE:
-            brdf.reset(ZemaxBsdfReader::read(fileName, &dataType));
-            break;
-        default:
-            cerr << "Unsupported file type: " << fileType << endl;
-            return 1;
-    }
+    // Load a BRDF/BTDF.
+    FileType fileType;
+    DataType dataType;
+    std::shared_ptr<Brdf> brdf(reader_utility::read(fileName, &fileType, &dataType));
 
     if (brdf) {
         cout << "File name: " << fileName << endl;
@@ -255,6 +217,7 @@ int main(int argc, char** argv)
         cout << "Invalid attributes are found." << endl;
     }
 
+    // Display information.
     showFileType(fileType);
     showDataType(dataType);
     showSourceType(brdf->getSourceType());
