@@ -8,6 +8,8 @@
 
 #include <libbsdf/Brdf/Analyzer.h>
 
+#include <memory>
+
 #include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
 #include <libbsdf/Common/SolidAngle.h>
 #include <libbsdf/ReflectanceModel/Fresnel.h>
