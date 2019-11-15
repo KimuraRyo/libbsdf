@@ -8,6 +8,7 @@
 
 #include <libbsdf/Brdf/Analyzer.h>
 
+#include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
 #include <libbsdf/Common/SolidAngle.h>
 #include <libbsdf/ReflectanceModel/Fresnel.h>
 
@@ -80,10 +81,59 @@ Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThInd
         if (solidAngle <= 0.0) continue;
 
         Spectrum sp = brdf.getSpectrum(inDir, centroid);
-        sumSpectrum += sp.cast<Arrayd::Scalar>() * centroid.z() * solidAngle;
+        sumSpectrum += (sp * centroid.z() * solidAngle).cast<Arrayd::Scalar>();
     }}
 
     return sumSpectrum.cast<Spectrum::Scalar>();
+}
+
+Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir)
+{
+    const SpecularCoordinatesBrdf* specBrdf           = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
+    const SphericalCoordinatesBrdf* spheBrdf          = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
+    const HalfDifferenceCoordinatesBrdf *halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
+
+    int numSpecTheta, numSpecPhi;
+
+    if (specBrdf) {
+        numSpecTheta    = specBrdf->getNumSpecTheta();
+        numSpecPhi      = specBrdf->getNumSpecPhi();
+    }
+    else if (spheBrdf) {
+        numSpecTheta    = spheBrdf->getNumOutTheta() * 2;
+        numSpecPhi      = spheBrdf->getNumOutPhi() * 2;
+    }
+    else if (halfDiffBrdf) {
+        numSpecTheta    = halfDiffBrdf->getNumHalfTheta() * 2;
+        numSpecPhi      = (halfDiffBrdf->getNumDiffTheta() + halfDiffBrdf->getNumDiffPhi()) * 2;
+    }
+    else {
+        numSpecTheta    = 90;
+        numSpecPhi      = 90;
+    }
+
+    const SampleSet* ss = brdf.getSampleSet();
+
+    std::unique_ptr<SpecularCoordinatesBrdf> inDirBrdf(new SpecularCoordinatesBrdf(1, 1, numSpecTheta, numSpecPhi,
+                                                                                   2.0f,
+                                                                                   ss->getColorModel(),
+                                                                                   ss->getNumWavelengths()));
+    float inTheta, inPhi;
+    SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
+    inDirBrdf->setInTheta(0, inTheta);
+    inDirBrdf->setInPhi(0, inPhi);
+
+    std::string inThetaStr = std::to_string(toDegree(inTheta));
+    std::string inPhiStr   = std::to_string(toDegree(inPhi));
+    inDirBrdf->setName("inDirBrdf_inTheta=" + inThetaStr + "_inPhi=" + inPhiStr);
+
+    if (specBrdf && specBrdf->getNumSpecularOffsets()) {
+        inDirBrdf->setSpecularOffset(0, specBrdf->getSpecularOffset(inTheta));
+    }
+
+    inDirBrdf->initializeSpectra(brdf);
+
+    return computeReflectance(*inDirBrdf, 0, 0);
 }
 
 SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)

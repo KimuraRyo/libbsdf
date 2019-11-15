@@ -31,6 +31,11 @@ Spectrum computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIndex,
 Spectrum computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
 
 /*!
+ * \brief Computes a reflectance of BRDF at an incoming direction.
+ */
+Spectrum computeReflectance(const Brdf& brdf, const Vec3& inDir);
+
+/*!
  * \brief Computes reflectances at each incoming direction.
  */
 SampleSet2D* computeReflectances(const SpecularCoordinatesBrdf& brdf);
