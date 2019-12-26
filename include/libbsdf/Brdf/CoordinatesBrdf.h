@@ -130,7 +130,7 @@ public:
     virtual bool validate(bool verbose = false) const;
 
     /*!
-     * Expands minimum angles to 0 and maximum angles to MAX_ANGLE,
+     * Expands minimum angles to MIN_ANGLE and maximum angles to MAX_ANGLE,
      * and constructs the extrapolated sample set.
      */
     bool expandAngles(bool angle0Expanded = true,

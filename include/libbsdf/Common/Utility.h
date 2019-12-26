@@ -66,7 +66,7 @@ template <typename T>
 T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t);
 
 /*!
- * \brief Computes a interpolated value using centripetal Catmull-Rom spline
+ * \brief Computes an interpolated value using centripetal Catmull-Rom spline
  *        at \a pos in [\a pos1,\a pos2].
  */
 template <typename T>
