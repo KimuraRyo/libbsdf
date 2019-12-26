@@ -27,6 +27,10 @@ using namespace lb;
 const std::string APP_NAME("lbconv");
 const std::string APP_VERSION("1.0.1");
 
+// Paramters
+DataType dataType = BRDF_DATA;
+bool arranged = false;
+
 void showHelp()
 {
     using std::cout;
@@ -53,6 +57,29 @@ void showHelp()
     cout << "  -arrangement     arrange BRDF/BTDF with extrapolation and conservation of energy" << endl;
 }
 
+bool readOptions(ArgumentParser* ap)
+{
+    std::string dataTypeStr;
+    if (ap->read("-scatterType", &dataTypeStr)) {
+        if (dataTypeStr == "BRDF") {
+            dataType = BRDF_DATA;
+        }
+        else if (dataTypeStr == "BTDF") {
+            dataType = BTDF_DATA;
+        }
+        else {
+            std::cerr << "Invalid scatter type: " << dataTypeStr << std::endl;
+            return false;
+        }
+    }
+
+    if (ap->read("-arrangement")) {
+        arranged = true;
+    }
+
+    return true;
+}
+
 int main(int argc, char** argv)
 {
     Log::setNotificationLevel(Log::Level::WARN_MSG);
@@ -69,25 +96,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    DataType dataType = BRDF_DATA;
-    std::string dataTypeStr;
-    if (ap.read("-scatterType", &dataTypeStr)) {
-        if (dataTypeStr == "BRDF") {
-            dataType = BRDF_DATA;
-        }
-        else if (dataTypeStr == "BTDF") {
-            dataType = BTDF_DATA;
-        }
-        else {
-            std::cerr << "Invalid scatter type: " << dataTypeStr << std::endl;
-            return 1;
-        }
-    }
-
-    bool arranged = false;
-    if (ap.read("-arrangement")) {
-        arranged = true;
-    }
+    if (!readOptions(&ap)) return 1;
 
     if (!ap.validateNumTokens(2)) return 1;
 

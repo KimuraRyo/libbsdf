@@ -28,6 +28,7 @@ const std::string APP_VERSION("1.0.0");
 const std::string ValueName         = "value";
 const std::string ReflectanceName   = "reflectance";
 
+// Paramters
 float incomingPolarAngle = 0;
 float incomingAzimuthalAngle = 0;
 float outgoingPolarAngle = 0;
@@ -121,14 +122,6 @@ int main(int argc, char** argv)
 
     if (!readOptions(&ap)) return 1;
 
-    float inTheta = toRadian(incomingPolarAngle);
-    float inPhi   = toRadian(incomingAzimuthalAngle);
-    Vec3 inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
-
-    float outTheta = toRadian(outgoingPolarAngle);
-    float outPhi   = toRadian(outgoingAzimuthalAngle);
-    Vec3 outDir = SphericalCoordinateSystem::toXyz(outTheta, outPhi);
-
     if (!ap.validateNumTokens(2)) return 1;
 
     std::string attributeTypeName = ap.getTokens().at(0);
@@ -148,6 +141,16 @@ int main(int argc, char** argv)
         std::cerr << "Invalid attributes are found." << std::endl;
         return 1;
     }
+
+    // Get an incoming direction.
+    float inTheta = toRadian(incomingPolarAngle);
+    float inPhi   = toRadian(incomingAzimuthalAngle);
+    Vec3 inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
+
+    // Get an outgoing direction.
+    float outTheta = toRadian(outgoingPolarAngle);
+    float outPhi   = toRadian(outgoingAzimuthalAngle);
+    Vec3 outDir = SphericalCoordinateSystem::toXyz(outTheta, outPhi);
 
     if (attributeTypeName == ValueName) {
         // Sample and display the value of BRDF/BTDF.

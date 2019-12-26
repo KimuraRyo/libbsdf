@@ -140,9 +140,9 @@ void showColorInfo(const SampleSet& samples)
 
 void showAngleInfo(const Brdf& brdf)
 {
-    const HalfDifferenceCoordinatesBrdf* halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
-    const SpecularCoordinatesBrdf* specBrdf           = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
-    const SphericalCoordinatesBrdf* spheBrdf          = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
+    auto halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
+    auto specBrdf     = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
+    auto spheBrdf     = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
 
     if (halfDiffBrdf) {
         cout << "Type of parameterization: Half difference" << endl;

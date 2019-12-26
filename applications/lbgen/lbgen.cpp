@@ -36,6 +36,16 @@ const std::string GgxName                       = "ggx";
 const std::string MultipleScatteringSmithName   = "multiple-scattering-smith";
 const std::string LambertianName                = "lambertian";
 
+// Paramters
+int numIncomingPolarAngles = 18;
+int numSpecularPolarAngles = 360;
+int numSpecularAzimuthalAngles = 72;
+bool conservationOfEnergyUsed = false;
+float roughness = 0.3f;
+float n = 1.5f;
+float k = 0.0f;
+int numIterations = 10;
+
 void showHelp()
 {
     using std::cout;
@@ -94,6 +104,77 @@ void showReference()
     cout << "  " << MultipleScatteringSmithName << ": " << MultipleScatteringSmith::getReference() << endl;
 }
 
+bool readOptions(ArgumentParser* ap)
+{
+    if (ap->read("-numIncomingPolarAngles", &numIncomingPolarAngles) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else {
+        numIncomingPolarAngles = app_utility::clampParameter("numIncomingPolarAngles",
+                                                             numIncomingPolarAngles + 1, 2, 3600);
+    }
+
+    if (ap->read("-numSpecularPolarAngles", &numSpecularPolarAngles) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else {
+        numSpecularPolarAngles = app_utility::clampParameter("numSpecularPolarAngles",
+                                                             numSpecularPolarAngles + 1, 2, 3600);
+    }
+
+    if (ap->read("-numSpecularAzimuthalAngles", &numSpecularAzimuthalAngles) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else {
+        numSpecularAzimuthalAngles = app_utility::clampParameter("numSpecularAzimuthalAngles",
+                                                                 numSpecularAzimuthalAngles + 1, 2, 3600);
+    }
+
+    if (ap->read("-conservationOfEnergy")) {
+        conservationOfEnergyUsed = true;
+    }
+
+#ifdef _OPENMP
+    int numThreads;
+    ArgumentParser::ResultType result_numThreads = ap->read("-numThreads", &numThreads);
+    if (result_numThreads == ArgumentParser::OK) {
+        omp_set_num_threads(numThreads);
+    }
+    else if (result_numThreads == ArgumentParser::ERROR) {
+        return false;
+    }
+#endif
+
+    if (ap->read("-roughness", &roughness) == ArgumentParser::ERROR) {
+        return false;
+    }
+
+    if (ap->read("-n", &n) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else if (n <= 0.0f) {
+        std::cerr << "Invalid value (n): " << n << std::endl;
+        return false;
+    }
+
+    if (ap->read("-k", &k) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else if (k < 0.0f) {
+        std::cerr << "Invalid value (k): " << k << std::endl;
+        return false;
+    }
+
+    if (ap->read("-numIterations", &numIterations) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else {
+        numIterations = app_utility::clampParameter("numIterations", numIterations, 1, 10000);
+    }
+
+    return true;
+}
+
 SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     float                   n,
                                     int                     numIncomingPolarAngles,
@@ -142,79 +223,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    int numIncomingPolarAngles = 18;
-    if (ap.read("-numIncomingPolarAngles", &numIncomingPolarAngles) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else {
-        numIncomingPolarAngles = app_utility::clampParameter("numIncomingPolarAngles",
-                                                             numIncomingPolarAngles + 1, 2, 3600);
-    }
-
-    int numSpecularPolarAngles = 360;
-    if (ap.read("-numSpecularPolarAngles", &numSpecularPolarAngles) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else {
-        numSpecularPolarAngles = app_utility::clampParameter("numSpecularPolarAngles",
-                                                             numSpecularPolarAngles + 1, 2, 3600);
-    }
-
-    int numSpecularAzimuthalAngles = 72;
-    if (ap.read("-numSpecularAzimuthalAngles", &numSpecularAzimuthalAngles) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else {
-        numSpecularAzimuthalAngles = app_utility::clampParameter("numSpecularAzimuthalAngles",
-                                                                 numSpecularAzimuthalAngles + 1, 2, 3600);
-    }
-
-    bool conservationOfEnergyUsed = false;
-    if (ap.read("-conservationOfEnergy")) {
-        conservationOfEnergyUsed = true;
-    }
-
-#ifdef _OPENMP
-    int numThreads;
-    ArgumentParser::ResultType result_numThreads = ap.read("-numThreads", &numThreads);
-    if (result_numThreads == ArgumentParser::OK) {
-        omp_set_num_threads(numThreads);
-    }
-    else if (result_numThreads == ArgumentParser::ERROR) {
-        return 1;
-    }
-#endif
-
-    float roughness = 0.3f;
-    if (ap.read("-roughness", &roughness) == ArgumentParser::ERROR) {
-        return 1;
-    }
-
-    float n = 1.5f;
-    if (ap.read("-n", &n) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else if (n <= 0.0f) {
-        std::cerr << "Invalid value (n): " << n << std::endl;
-        return 1;
-    }
-
-    float k = 0.0f;
-    if (ap.read("-k", &k) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else if (k < 0.0f) {
-        std::cerr << "Invalid value (k): " << k << std::endl;
-        return 1;
-    }
-
-    int numIterations = 10;
-    if (ap.read("-numIterations", &numIterations) == ArgumentParser::ERROR) {
-        return 1;
-    }
-    else {
-        numIterations = app_utility::clampParameter("numIterations", numIterations, 1, 10000);
-    }
+    if (!readOptions(&ap)) return 1;
 
     if (!ap.validateNumTokens(2)) return 1;
 

@@ -199,21 +199,19 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf&   brdf,
 
 SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
 {
-    using SpecBrdf = SpecularCoordinatesBrdf;
+    SpecularCoordinatesBrdf* convertedBrdf;
 
-    SpecBrdf* convertedBrdf;
-
-    if (const SpecBrdf* specBrdf = dynamic_cast<const SpecBrdf*>(&brdf)) {
-        convertedBrdf = new SpecBrdf(*specBrdf);
+    if (auto specBrdf = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf)) {
+        convertedBrdf = new SpecularCoordinatesBrdf(*specBrdf);
     }
-    else if (const SphericalCoordinatesBrdf* spheBrdf = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf)) {
+    else if (auto spheBrdf = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf)) {
         using std::max;
 
         const SampleSet* ss = spheBrdf->getSampleSet();
 
         int numSpecTheta = max(ss->getNumAngles2(), 181);
         int numSpecPhi   = max(ss->getNumAngles3(), 73);
-        convertedBrdf = new SpecBrdf(*spheBrdf, numSpecTheta, numSpecPhi);
+        convertedBrdf = new SpecularCoordinatesBrdf(*spheBrdf, numSpecTheta, numSpecPhi);
     }
     else {
         const SampleSet* ss = brdf.getSampleSet();
@@ -228,7 +226,7 @@ SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
                                                                 SpecularCoordinateSystem::MAX_ANGLE2,
                                                                 2.0f);
 
-        convertedBrdf = new SpecBrdf(brdf, inThetaAngles, inPhiAngles, specThetaAngles, specPhiAngles);
+        convertedBrdf = new SpecularCoordinatesBrdf(brdf, inThetaAngles, inPhiAngles, specThetaAngles, specPhiAngles);
     }
 
     return convertedBrdf;

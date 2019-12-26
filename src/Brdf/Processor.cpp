@@ -835,7 +835,7 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
     for (int inPhIndex = 0;                     inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
     for (int spThIndex = 0;                     spThIndex < brdf->getNumSpecTheta(); ++spThIndex) {
         Spectrum gRef0 = gRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
-        Spectrum gRef1 = gRefs->getSpectrum(inThBoundaryIndex    , inPhIndex);
+        Spectrum gRef1 = gRefs->getSpectrum(inThBoundaryIndex,     inPhIndex);
 
         Spectrum dRef0 = dRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
         Spectrum dRef1 = dRefs->getSpectrum(inThBoundaryIndex,     inPhIndex);

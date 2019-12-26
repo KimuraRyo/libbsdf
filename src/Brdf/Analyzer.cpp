@@ -91,9 +91,9 @@ Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThInd
 
 Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir)
 {
-    const SpecularCoordinatesBrdf* specBrdf           = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
-    const SphericalCoordinatesBrdf* spheBrdf          = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
-    const HalfDifferenceCoordinatesBrdf *halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
+    auto specBrdf     = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
+    auto spheBrdf     = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
+    auto halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
 
     int numSpecTheta, numSpecPhi;
 
