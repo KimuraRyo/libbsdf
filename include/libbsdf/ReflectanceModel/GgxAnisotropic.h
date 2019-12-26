@@ -112,8 +112,8 @@ inline Vec3 GgxAnisotropic::compute(const Vec3& L,
     double dotHN = H.dot(N);
     double dotHT = H.dot(T);
     double dotHB = H.dot(B);
-    double dotLH = min(L.dot(H), 1.0f);
-    double dotVH = min(V.dot(H), 1.0f);
+    double dotLH = min(L.dot(H), Vec3::Scalar(1));
+    double dotVH = min(V.dot(H), Vec3::Scalar(1));
 
     Vec3 F = fresnelSchlick(dotVH, color);
 #else

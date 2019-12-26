@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2017-2018 Kimura Ryo                                  //
+// Copyright (C) 2017-2019 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -98,8 +98,8 @@ inline Vec3 Ggx::compute(const Vec3&    L,
     Vec3 H = (L + V).normalized();
 
     double dotHN = H.dot(N);
-    double dotLH = min(L.dot(H), 1.0f);
-    double dotVH = min(V.dot(H), 1.0f);
+    double dotLH = min(L.dot(H), Vec3::Scalar(1));
+    double dotVH = min(V.dot(H), Vec3::Scalar(1));
 
     Vec3 F = fresnelSchlick(dotVH, color);
 #else
