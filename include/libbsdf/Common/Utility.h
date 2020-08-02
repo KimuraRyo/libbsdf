@@ -332,13 +332,15 @@ T toRadian(const T& degree)
 template <typename T>
 T toDegrees(const T& radians)
 {
-    return radians * T::Scalar(180 / PI_D);
+    using ScalarType = typename T::Scalar;
+    return radians * ScalarType(180 / PI_D);
 }
 
 template <typename T>
 T toRadians(const T& degrees)
 {
-    return degrees * T::Scalar(PI_D / 180);
+    using ScalarType = typename T::Scalar;
+    return degrees * ScalarType(PI_D / 180);
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
