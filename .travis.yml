@@ -5,7 +5,7 @@ matrix:
   #  - os: linux
   include:
     - os: linux
-      dist: xenial
+      dist: bionic
       sudo: false
       #language: c++
       addons:
