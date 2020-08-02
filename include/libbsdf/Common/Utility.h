@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -66,8 +66,7 @@ template <typename T>
 T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t);
 
 /*!
- * \brief Computes an interpolated value using centripetal Catmull-Rom spline
- *        at \a pos in [\a pos1,\a pos2].
+ * \brief Computes an interpolated value using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
  */
 template <typename T>
 T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
@@ -78,13 +77,25 @@ T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
 template <typename Vec3T>
 Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir);
 
+/*! \brief Inverts an outgoing direction using a bilateral symmetry. */
+template <typename Vec3T>
+Vec3T toBilateralSymmetry(const Vec3T& inDir, const Vec3T& outDir);
+
 /*! \brief Converts a value from radians to degrees. */
 template <typename T>
-T toDegree(T radian);
+T toDegree(const T& radian);
 
 /*! \brief Converts a value from degrees to radians. */
 template <typename T>
-T toRadian(T degree);
+T toRadian(const T& degree);
+
+/*! \brief Converts an array from radians to degrees. */
+template <typename T>
+T toDegrees(const T& radians);
+
+/*! \brief Converts an array from degrees to radians. */
+template <typename T>
+T toRadians(const T& degrees);
 
 /*! \brief Converts a coordinate system. */
 template <typename SrcCoordSysT, typename DestCoordSysT>
@@ -101,13 +112,39 @@ void convertCoordinateSystem(float  srcAngle0,
 template <typename T>
 bool hasSameColor(const T& ss0, const T& ss1);
 
-/*! \brief Converts from CIE-XYZ to sRGB. */
+/*! \brief Converts tristimulus values using a color space. */
+template <typename Vec3T>
+Vec3T convertColorSpace(const Vec3T& values, const float* matrix);
+
+/*! \brief Converts from CIE XYZ to sRGB. */
 template <typename Vec3T>
 Vec3T xyzToSrgb(const Vec3T& xyz);
 
-/*! \brief Converts from sRGB to CIE-XYZ. */
+/*! \brief Converts from sRGB to CIE XYZ. */
 template <typename Vec3T>
 Vec3T srgbToXyz(const Vec3T& rgb);
+
+/*! \brief Converts from CIE XYZ to Adobe RGB (1998). */
+template <typename Vec3T>
+Vec3T xyzToAdobeRgb(const Vec3T& xyz);
+
+/*! \brief Converts from Adobe RGB (1998) to CIE XYZ. */
+template <typename Vec3T>
+Vec3T adobeRgbToXyz(const Vec3T& rgb);
+
+/*! \brief Converts from CIE XYZ to CIE LAB. */
+template <typename Vec3T>
+Vec3T xyzToLab(const Vec3T& xyz);
+
+/*! \brief Converts from xyY to CIE XYZ. */
+template <typename Vec3T>
+Vec3T xyyToXyz(const Vec3T& xyy);
+
+/*! \brief Computes the color difference using CIEDE2000. */
+Vec3::Scalar computeCiede2000(const Vec3& lab0, const Vec3& lab1);
+
+/*! \brief Finds nearest Munsell properties. */
+Vec3 findMunsellProperties(const Vec3& xyz, std::string* hue, float* value, int* chroma);
 
 /*! \brief Fixes a direction if the Z-component is negative. */
 template <typename Vec3T>
@@ -115,6 +152,17 @@ void fixDownwardDir(Vec3T* dir);
 
 /*! \brief Returns true if a direction faces the back of a surface. */
 bool isDownwardDir(const Vec3& dir);
+
+/*! \brief Returns an enumerator as an integer. */
+template <typename EnumT>
+typename std::underlying_type<EnumT>::type asInteger(const EnumT& value);
+
+/*! \brief Returns true if both parameters have common enumerator. */
+template <typename EnumT>
+bool hasSameEnumerator(const EnumT& value0, const EnumT& value1);
+
+/*! \brief Gets the current date in ISO 8601 format (YYYY-MM-DD). */
+std::string getDate();
 
 /*
  * Implementation
@@ -246,16 +294,50 @@ Vec3T reflect(const Vec3T& dir, const Vec3T& normalDir)
     return 2 * normalDir.dot(dir) * normalDir - dir;
 }
 
-template <typename T>
-T toDegree(T radian)
+template <typename Vec3T>
+Vec3T toBilateralSymmetry(const Vec3T& inDir, const Vec3T& outDir)
 {
-    return radian / T(PI_D) * 180;
+    using ScalarType = typename Vec3T::Scalar;
+
+    ScalarType outTheta, outPhi;
+    SphericalCoordinateSystem::fromXyz(outDir, &outTheta, &outPhi);
+
+    // Compute the outgoing azimuthal angle inverted along the incident plane.
+    ScalarType inPhi = SphericalCoordinateSystem::toPhi(inDir);
+    ScalarType invertedOutPhi = -outPhi + 2 * inPhi;
+
+    if (invertedOutPhi < ScalarType(0)) {
+        invertedOutPhi += ScalarType(TAU_D);
+    }
+    else if (invertedOutPhi < TAU_D) {
+        invertedOutPhi -= ScalarType(TAU_D);
+    }
+
+    return SphericalCoordinateSystem::toXyz(outTheta, invertedOutPhi);
 }
 
 template <typename T>
-T toRadian(T degree)
+T toDegree(const T& radian)
 {
-    return degree / 180 * T(PI_D);
+    return static_cast<T>(radian * 180.0 / PI_D);
+}
+
+template <typename T>
+T toRadian(const T& degree)
+{
+    return static_cast<T>(degree * PI_D / 180.0);
+}
+
+template <typename T>
+T toDegrees(const T& radians)
+{
+    return radians * T::Scalar(180 / PI_D);
+}
+
+template <typename T>
+T toRadians(const T& degrees)
+{
+    return degrees * T::Scalar(PI_D / 180);
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
@@ -277,29 +359,91 @@ void convertCoordinateSystem(float  srcAngle0,
 }
 
 template <typename Vec3T>
-Vec3T xyzToSrgb(const Vec3T& xyz)
+Vec3T convertColorSpace(const Vec3T& values, const float* matrix)
 {
     using ScalarType = typename Vec3T::Scalar;
 
     Eigen::Matrix<ScalarType, 3, 3> mat;
-    mat << CieData::XYZ_sRGB[0], CieData::XYZ_sRGB[1], CieData::XYZ_sRGB[2],
-           CieData::XYZ_sRGB[3], CieData::XYZ_sRGB[4], CieData::XYZ_sRGB[5],
-           CieData::XYZ_sRGB[6], CieData::XYZ_sRGB[7], CieData::XYZ_sRGB[8];
+    mat << matrix[0], matrix[1], matrix[2],
+           matrix[3], matrix[4], matrix[5],
+           matrix[6], matrix[7], matrix[8];
 
-    return mat * xyz;
+    return mat * values;
+}
+
+template <typename Vec3T>
+Vec3T xyzToSrgb(const Vec3T& xyz)
+{
+    return convertColorSpace(xyz, CieData::XYZ_sRGB);
 }
 
 template <typename Vec3T>
 Vec3T srgbToXyz(const Vec3T& rgb)
 {
+    return convertColorSpace(rgb, CieData::sRGB_XYZ);
+}
+
+template <typename Vec3T>
+Vec3T xyzToAdobeRgb(const Vec3T& xyz)
+{
+    return convertColorSpace(xyz, CieData::XYZ_AdobeRGB);
+}
+
+template <typename Vec3T>
+Vec3T adobeRgbToXyz(const Vec3T& rgb)
+{
+    return convertColorSpace(rgb, CieData::AdobeRGB_XYZ);
+}
+
+template <typename Vec3T>
+Vec3T xyzToLab(const Vec3T& xyz)
+{
+    using std::pow;
+
+    auto f = [](double t) {
+        constexpr double delta = 6.0 / 29.0;
+        if (t > pow(delta, 3.0)) {
+            return pow(t, 1.0 / 3.0);
+        }
+        else {
+            return t / (3.0 * delta * delta) + (4.0 / 29.0);
+        }
+    };
+
+    // White point under Illuminant D65
+    // https://en.wikipedia.org/wiki/CIELAB_color_space
+    constexpr double Xn = 0.950489;
+    constexpr double Yn = 1.0;
+    constexpr double Zn = 1.088840;
+
+    double fx = f(xyz.x() / Xn);
+    double fy = f(xyz.y() / Yn);
+    double fz = f(xyz.z() / Zn);
+
+    double L = 116.0 * fy - 16.0;
+    double a = 500.0 * (fx - fy);
+    double b = 200.0 * (fy - fz);
+
+    return Vec3T(L, a, b);
+}
+
+template <typename Vec3T>
+Vec3T xyyToXyz(const Vec3T& xyy)
+{
     using ScalarType = typename Vec3T::Scalar;
 
-    Eigen::Matrix<ScalarType, 3, 3> mat;
-    mat << CieData::sRGB_XYZ[0], CieData::sRGB_XYZ[1], CieData::sRGB_XYZ[2],
-           CieData::sRGB_XYZ[3], CieData::sRGB_XYZ[4], CieData::sRGB_XYZ[5],
-           CieData::sRGB_XYZ[6], CieData::sRGB_XYZ[7], CieData::sRGB_XYZ[8];
+    ScalarType x = xyy[0];
+    ScalarType y = xyy[1];
+    ScalarType Y = xyy[2];
 
-    return mat * rgb;
+    if (y == ScalarType(0)) {
+        Vec3T::Zero();
+    }
+
+    ScalarType X = Y / y * x;
+    ScalarType Z = Y / y * (ScalarType(1) - x - y);
+
+    return Vec3T(X, Y, Z);
 }
 
 template <typename Vec3T>
@@ -320,6 +464,18 @@ void fixDownwardDir(Vec3T* dir)
 inline bool isDownwardDir(const Vec3& dir)
 {
     return (dir.z() < -0.00001);
+}
+
+template <typename EnumT>
+typename std::underlying_type<EnumT>::type asInteger(const EnumT& value)
+{
+    return static_cast<typename std::underlying_type<EnumT>::type>(value);
+}
+
+template <typename EnumT>
+bool hasSameEnumerator(const EnumT& value0, const EnumT& value1)
+{
+    return static_cast<bool>(asInteger(value0) & asInteger(value1));
 }
 
 } // namespace lb

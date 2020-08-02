@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -9,6 +9,7 @@
 #ifndef LIBBSDF_SPECTRUM_UTILITY_H
 #define LIBBSDF_SPECTRUM_UTILITY_H
 
+#include <libbsdf/Common/Array.h>
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {
@@ -20,17 +21,27 @@ namespace lb {
 class SpectrumUtility
 {
 public:
+    /*! Converts from a spectrum to CIE XYZ. */
+    static Vec3 spectrumToXyz(const Spectrum&   spectrum,
+                              const Arrayf&     wavelengths);
+
+    /*! Converts from a spectrum to CIE XYZ. */
+    static Vec3 spectrumToXyz(const Spectrum&   spectrum,
+                              ColorModel        colorModel,
+                              const Arrayf&     wavelengths);
+
     /*! Converts from a spectrum to sRGB. Negative sRGB values are clamped. */
-    template <typename T>
-    static Vec3 spectrumToSrgb(const T& spectrum, const T& wavelengths);
+    static Vec3 spectrumToSrgb(const Spectrum&  spectrum,
+                               const Arrayf&    wavelengths);
 
-    /*! Converts from a spectrum to Y of CIE-XYZ. */
-    template <typename T>
-    static Vec3::Scalar spectrumToY(const T& spectrum, const T& wavelengths);
+    /*! Converts from a spectrum to Y of CIE XYZ. */
+    static Vec3::Scalar spectrumToY(const Spectrum& spectrum,
+                                    const Arrayf&   wavelengths);
 
-    /*! Converts from a spectrum to CIE-XYZ. */
-    template <typename T>
-    static Vec3 spectrumToXyz(const T& spectrum, const T& wavelengths);
+    /*! Converts from a spectrum to Y of CIE XYZ using lb::ColorModel. */
+    static float spectrumToY(const Spectrum&    spectrum,
+                             ColorModel         colorModel,
+                             const Arrayf&      wavelengths);
 
     /*! Converts from a wavelength to sRGB. Negative or more than 1.0 sRGB values are clamped. */
     static Vec3 wavelengthToSrgb(float wavelength);
@@ -39,90 +50,19 @@ private:
     /*! Finds the nearest index in the array of wavelengths. */
     static int findNearestIndex(float wavelength);
 
-    /*! Computes constants to normalize sRGB. */
-    static Vec3 computeNormalizingConstant_sRGB();
+    /*! Computes constants to normalize CIE XYZ. */
+    static Vec3 computeXyzNormalizingConstant();
 
-    /*! Precomputed constants to normalize sRGB values. */
-    static const Vec3 NORMALIZING_CONSTANT_SRGB;
-
-    /*! Precomputed constants to normalize CIE_XYZ values. */
+    /*! Precomputed constants to normalize CIE XYZ values. */
     static const Vec3 NORMALIZING_CONSTANT_CIE_XYZ;
 };
 
-template <typename T>
-Vec3 SpectrumUtility::spectrumToSrgb(const T& spectrum, const T& wavelengths)
+inline Vec3 SpectrumUtility::spectrumToSrgb(const Spectrum& spectrum,
+                                            const Arrayf&   wavelengths)
 {
     Vec3 xyz = spectrumToXyz(spectrum, wavelengths);
     Vec3 rgb = xyzToSrgb(xyz);
-    rgb = rgb.cwiseMax(0.0);
-    return rgb.cwiseQuotient(NORMALIZING_CONSTANT_SRGB);
-}
-
-template <typename T>
-Vec3::Scalar SpectrumUtility::spectrumToY(const T& spectrum, const T& wavelengths)
-{
-    assert(spectrum.size() == wavelengths.size());
-
-    float prevWl = wavelengths[0];
-    int index0 = findNearestIndex(prevWl);
-    Vec3::Scalar prevY = CieData::XYZ[index0 * 3 + 1];
-    prevY *= CieData::D65[index0] * spectrum[0];
-
-    Vec3d::Scalar sumY = 0.0;
-
-    // Trapezoidal rule
-    for (int i = 1; i < wavelengths.size(); ++i) {
-        float wl = wavelengths[i];
-        int index = findNearestIndex(wl);
-        Vec3::Scalar y = CieData::XYZ[index * 3 + 1];
-        y *= CieData::D65[index] * spectrum[i];
-
-        Vec3::Scalar area = (wl - prevWl) * (prevY + y);
-        sumY += area;
-
-        prevWl = wl;
-        prevY = y;
-    }
-    sumY /= 2.0;
-
-    return sumY / NORMALIZING_CONSTANT_CIE_XYZ[1];
-}
-
-template <typename T>
-Vec3 SpectrumUtility::spectrumToXyz(const T& spectrum, const T& wavelengths)
-{
-    assert(spectrum.size() == wavelengths.size());
-
-    float prevWl = wavelengths[0];
-    int index0 = findNearestIndex(prevWl);
-    Vec3 prevXyz(CieData::XYZ[index0 * 3],
-                 CieData::XYZ[index0 * 3 + 1],
-                 CieData::XYZ[index0 * 3 + 2]);
-    prevXyz *= CieData::D65[index0] * spectrum[0];
-
-    Vec3d sumXyz = Vec3d::Zero();
-
-    // Trapezoidal rule
-    for (int i = 1; i < wavelengths.size(); ++i) {
-        float wl = wavelengths[i];
-        int index = findNearestIndex(wl);
-        Vec3 xyz(CieData::XYZ[index * 3],
-                 CieData::XYZ[index * 3 + 1],
-                 CieData::XYZ[index * 3 + 2]);
-        xyz *= CieData::D65[index] * spectrum[i];
-
-        Vec3 area = (wl - prevWl) * (prevXyz + xyz);
-
-        sumXyz[0] += area[0];
-        sumXyz[1] += area[1];
-        sumXyz[2] += area[2];
-
-        prevWl = wl;
-        prevXyz = xyz;
-    }
-    sumXyz /= 2.0;
-
-    return Vec3(sumXyz.cast<Vec3::Scalar>());
+    return rgb.cwiseMax(0.0);
 }
 
 inline Vec3 SpectrumUtility::wavelengthToSrgb(float wavelength)

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,7 +16,7 @@
 
 #define LIBBSDF_MAJOR_VERSION 0
 #define LIBBSDF_MINOR_VERSION 9
-#define LIBBSDF_PATCH_VERSION 12
+#define LIBBSDF_PATCH_VERSION 13
 
 namespace lb {
 

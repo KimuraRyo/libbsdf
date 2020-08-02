@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2017 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -13,9 +13,10 @@ namespace lb {
 
 /*!
  * \struct CieData
- * \brief  The CieData struct provides the data of CIE-XYZ, sRGB, and color matching functions.
+ * \brief  The CieData struct provides the data of CIE XYZ, sRGB, and color matching functions.
  *
  * The range of wavelength is between 360nm and 830nm. The interval is 5nm.
+ * Reference white is D65.
  */
 struct CieData
 {
@@ -27,8 +28,11 @@ struct CieData
     static const float XYZ[]; /*!< CIE(1931) 2-deg color matching function. */
     static const float D65[]; /*!< CIE Standard Illuminant D65 relative spectral power distribution. */
 
-    static const float XYZ_sRGB[9]; /*!< Transformation matrix from CIE-XYZ to sRGB. */
-    static const float sRGB_XYZ[9]; /*!< Transformation matrix from sRGB to CIE-XYZ. */
+    static const float XYZ_sRGB[9]; /*!< Transformation matrix from CIE XYZ to sRGB. */
+    static const float sRGB_XYZ[9]; /*!< Transformation matrix from sRGB to CIE XYZ. */
+
+    static const float XYZ_AdobeRGB[9]; /*!< Transformation matrix from CIE XYZ to Adobe RGB (1998). */
+    static const float AdobeRGB_XYZ[9]; /*!< Transformation matrix from Adobe RGB (1998) to CIE XYZ. */
 };
 
 } // namespace lb
