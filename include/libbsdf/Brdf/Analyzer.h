@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2019 Kimura Ryo                                  //
+// Copyright (C) 2018-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,25 +20,32 @@
 
 namespace lb {
 
-/*!
- * \brief Computes a reflectance of BRDF with a spherical coordinate system.
- */
+/*! \brief Computes a reflectance of BRDF with a spherical coordinate system. */
 Spectrum computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
 
-/*!
- * \brief Computes a reflectance of BRDF with a specular coordinate system.
- */
+/*! \brief Computes a reflectance of BRDF with a specular coordinate system. */
 Spectrum computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
 
 /*!
  * \brief Computes a reflectance of BRDF at an incoming direction.
+ *
+ *  Partial reflectances are calculated in a specular coordinate system and integrated.
+ *
+ * \param numThetaDivisions The division number of specular polar angles.
+ * \param numPhiDivisions   The division number of specular azimuthal angles.
  */
-Spectrum computeReflectance(const Brdf& brdf, const Vec3& inDir);
+Spectrum computeReflectance(const Brdf& brdf,
+                            const Vec3& inDir,
+                            int         numThetaDivisions = 90,
+                            int         numPhiDivisions = 72);
 
-/*!
- * \brief Computes reflectances at each incoming direction.
- */
+/*! \brief Computes reflectances at each incoming direction. */
 SampleSet2D* computeReflectances(const SpecularCoordinatesBrdf& brdf);
+
+/*! \brief Computes bihemispherical reflectance (white sky albedo). */
+Spectrum computeBihemisphericalReflectance(const Brdf&  brdf,
+                                           int          numInThetaDivisions = 9,
+                                           int          numInPhiDivisions = 36);
 
 /*!
  * \brief Computes specular reflectances using a standard sample.
@@ -64,13 +71,39 @@ SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                          float                          maxSpecularTheta = PI_2_F);
 
 /*!
+ * \brief Computes the bilateral symmetry of BRDF.
+ * 
+ * The returned spectrum is the bihemispherical reflectance (white sky albedo) of
+ * the absolute difference between the original and reversed BRDF.
+ *
+ * \param numInThetaDivisions   The division number of incoming polar angles to get the bihemispherical reflectance.
+ * \param numInPhiDivisions     The division number of incoming azimuthal angles to get the bihemispherical reflectance.
+ */
+Spectrum computeBilateralSymmetry(const Brdf&   brdf,
+                                  int           numInThetaDivisions = 9,
+                                  int           numInPhiDivisions = 36);
+
+/*!
+ * \brief Computes the reciprocity of BRDF.
+ * 
+ * The returned spectrum is the bihemispherical reflectance (white sky albedo) of
+ * the absolute difference between the original and reversed BRDF.
+ *
+ * \param numInThetaDivisions   The division number of incoming polar angles to get the bihemispherical reflectance.
+ * \param numInPhiDivisions     The division number of incoming azimuthal angles to get the bihemispherical reflectance.
+ */
+Spectrum computeReciprocity(const Brdf& brdf,
+                            int         numInThetaDivisions = 9,
+                            int         numInPhiDivisions = 36);
+
+/*!
  * \brief Finds thresholds to separate the diffuse component from a BRDF.
  * \param maxTheta Maxmum incoming and outgoing polar angle to define the range of search.
  */
 Spectrum findDiffuseThresholds(const Brdf&      brdf,
                                const double&    maxTheta = PI_2_F);
 
-/*! Returns true if a coordinate system has the angles of an incoming direction. */
+/*! \brief Returns true if a coordinate system has the angles of an incoming direction. */
 bool isInDirDependentCoordinateSystem(const Brdf& brdf);
 
 } // namespace lb

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -7,6 +7,8 @@
 // =================================================================== //
 
 #include <libbsdf/Brdf/Processor.h>
+
+#include <set>
 
 #include <libbsdf/Brdf/Analyzer.h>
 #include <libbsdf/Brdf/RandomSampleSet.h>
@@ -119,72 +121,303 @@ void lb::divideByCosineOutTheta(Brdf* brdf)
     }}}}
 }
 
-SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
+Brdf* lb::fillAnglesUsingBilateralSymmetry(const Brdf& brdf)
 {
-    RandomSampleSet<SphericalCoordinateSystem>::AngleList filledAngles;
-
-    for (int i = 0; i < brdf->getNumOutPhi(); ++i) {
-        float outPhi = brdf->getOutPhi(i);
-        bool angleOmitted = (outPhi != 0.0f &&
-                             !isEqual(outPhi, PI_F) &&
-                             !isEqual(outPhi, TAU_F));
-        if (angleOmitted) {
-            filledAngles.push_back(SphericalCoordinateSystem::MAX_ANGLE3 - outPhi);
-        }
+    if (!hasSameEnumerator(brdf.getReductionType(), ReductionType::BILATERAL_SYMMETRY)) {
+        lbError << "[lb::fillAnglesUsingBilateralSymmetry] lb::Brdf must have ReductionType::BILATERAL_SYMMETRY.";
+        return nullptr;
     }
 
-    const SampleSet* ss = brdf->getSampleSet();
+    if (hasSameEnumerator(brdf.getReductionType(), ReductionType::RECIPROCITY)) {
+        lbError << "[lb::fillAnglesUsingBilateralSymmetry] ReductionType::RECIPROCITY is not acceptable.";
+        return nullptr;
+    }
 
-    int numOutPhi = brdf->getNumOutPhi() + static_cast<int>(filledAngles.size());
-    SphericalCoordinatesBrdf* filledBrdf = new SphericalCoordinatesBrdf(brdf->getNumInTheta(),
-                                                                        brdf->getNumInPhi(),
-                                                                        brdf->getNumOutTheta(),
-                                                                        numOutPhi,
-                                                                        ss->getColorModel(),
-                                                                        ss->getNumWavelengths());
+    const SampleSet* ss = brdf.getSampleSet();
+
+    std::set<float> filledAngles;
+    for (int i = 0; i < ss->getNumAngles3(); ++i) {
+        float angle3 = ss->getAngle3(i);
+        if (angle3 > increase(PI_F)) break;
+
+        filledAngles.insert(angle3);
+
+        if (isEqual(angle3, PI_F)) continue;
+
+        filledAngles.insert(TAU_F - angle3);
+    }
+
+    Brdf* filledBrdf = brdf.clone();
     SampleSet* filledSs = filledBrdf->getSampleSet();
 
-    // Set angles.
-    filledSs->getAngles0() = ss->getAngles0();
-    filledSs->getAngles1() = ss->getAngles1();
-    filledSs->getAngles2() = ss->getAngles2();
-    for (int i = 0; i < filledBrdf->getNumOutPhi(); ++i) {
-        if (i < brdf->getNumOutPhi()) {
-            filledBrdf->setOutPhi(i, brdf->getOutPhi(i));
+    filledSs->resizeAngles(filledSs->getNumAngles0(),
+                           filledSs->getNumAngles1(),
+                           filledSs->getNumAngles2(),
+                           static_cast<int>(filledAngles.size()));
+    array_util::copy(filledAngles, &filledSs->getAngles3());
+
+    filledSs->updateAngleAttributes();
+
+    // Copy samples using a plane symmetry.
+    for (int i0 = 0; i0 < filledSs->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < filledSs->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < filledSs->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < filledSs->getNumAngles3(); ++i3) {
+        Spectrum sp;
+
+        if (filledSs->getAngle3(i3) <= PI_F) {
+            sp = ss->getSpectrum(i0, i1, i2, i3);
         }
         else {
-            filledBrdf->setOutPhi(i, filledAngles.at(i - brdf->getNumOutPhi()));
-        }
-    }
-    Arrayf& outPhiAngles = filledSs->getAngles3();
-    std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
-
-    // Set wavelengths.
-    for (int i = 0; i < filledSs->getNumWavelengths(); ++i) {
-        float wl = ss->getWavelength(i);
-        filledSs->setWavelength(i, wl);
-    }
-
-    for (int inThIndex  = 0; inThIndex  < filledBrdf->getNumInTheta();  ++inThIndex)  {
-    for (int inPhIndex  = 0; inPhIndex  < filledBrdf->getNumInPhi();    ++inPhIndex)  {
-    for (int outThIndex = 0; outThIndex < filledBrdf->getNumOutTheta(); ++outThIndex) {
-    for (int outPhIndex = 0; outPhIndex < filledBrdf->getNumOutPhi();   ++outPhIndex) {
-        float outPhi = filledBrdf->getOutPhi(outPhIndex);
-
-        // Find the corresponding index.
-        int origIndex;
-        for (origIndex = 0; origIndex < brdf->getNumOutPhi(); ++origIndex) {
-            float origOutPhi = brdf->getOutPhi(origIndex);
-            bool outPhiEqual = (origOutPhi == outPhi ||
-                                isEqual(origOutPhi, SphericalCoordinateSystem::MAX_ANGLE3 - outPhi));
-            if (outPhiEqual) break;
+            sp = ss->getSpectrum(i0, i1, i2, (filledSs->getNumAngles3() - 1) - i3);
         }
 
-        Spectrum& sp = brdf->getSpectrum(inThIndex, inPhIndex, outThIndex, origIndex);
-        filledBrdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex, sp);
+        filledSs->setSpectrum(i0, i1, i2, i3, sp);
     }}}}
 
+    int type = (asInteger(filledBrdf->getReductionType()) &
+                ~asInteger(ReductionType::BILATERAL_SYMMETRY));
+    filledBrdf->setReductionType(static_cast<ReductionType>(type));
+
     return filledBrdf;
+}
+
+void fixSlightlyNegativeDir(Vec3* dir)
+{
+    if (std::abs(dir->z()) < EPSILON_F) {
+        dir->z() = EPSILON_F;
+        dir->normalize();
+    }
+};
+
+Brdf* lb::reduceAnglesUsingBilateralSymmetry(const Brdf& brdf)
+{
+    if (hasSameEnumerator(brdf.getReductionType(), ReductionType::RECIPROCITY)) {
+        lbError << "[lb::reduceAnglesUsingBilateralSymmetry] ReductionType::RECIPROCITY is not acceptable.";
+        return nullptr;
+    }
+
+    const SampleSet* ss = brdf.getSampleSet();
+
+    // Create an angle array in [0, PI].
+    std::set<float> reducedAngles;
+    for (int i = 0; i < ss->getNumAngles3(); ++i) {
+        float angle3 = ss->getAngle3(i);
+
+        bool closeAngleFound = false;
+
+        // Ignore a close angle.
+        for (auto& val : reducedAngles) {
+            using std::abs;
+
+            constexpr float eps = EPSILON_F * 10.0f;
+            if (abs(val - angle3)           < eps ||
+                abs(val - (TAU_F - angle3)) < eps) {
+                closeAngleFound = true;
+                break;
+            }
+        }
+
+        if (closeAngleFound) continue;
+
+        if (angle3 <= increase(PI_F)) {
+            reducedAngles.insert(angle3);
+        }
+        else {
+            reducedAngles.insert(TAU_F - angle3);
+        }
+    }
+
+    Brdf* reducedBrdf = brdf.clone();
+    SampleSet* reducedSs = reducedBrdf->getSampleSet();
+
+    reducedSs->resizeAngles(reducedSs->getNumAngles0(),
+                            reducedSs->getNumAngles1(),
+                            reducedSs->getNumAngles2(),
+                            static_cast<int>(reducedAngles.size()));
+    array_util::copy(reducedAngles, &reducedSs->getAngles3());
+
+    reducedSs->updateAngleAttributes();
+
+    // Average two BRDFs using a plane symmetry.
+    for (int i0 = 0; i0 < reducedSs->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < reducedSs->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < reducedSs->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < reducedSs->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        reducedBrdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        Vec3 invertedOutDir = toBilateralSymmetry(inDir, outDir);
+
+        fixSlightlyNegativeDir(&inDir);
+        fixSlightlyNegativeDir(&outDir);
+        fixSlightlyNegativeDir(&invertedOutDir);
+
+        Spectrum sp     = brdf.getSpectrum(inDir, outDir);
+        Spectrum invSp  = brdf.getSpectrum(inDir, invertedOutDir);
+
+        reducedSs->setSpectrum(i0, i1, i2, i3, (sp + invSp) * 0.5);
+    }}}}
+
+    int type = (asInteger(reducedBrdf->getReductionType()) |
+                asInteger(ReductionType::BILATERAL_SYMMETRY));
+    reducedBrdf->setReductionType(static_cast<ReductionType>(type));
+
+    return reducedBrdf;
+}
+
+HalfDifferenceCoordinatesBrdf* lb::fillAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf)
+{
+    if (!hasSameEnumerator(brdf.getReductionType(), ReductionType::RECIPROCITY)) {
+        lbError << "[lb::fillAnglesUsingReciprocity] lb::Brdf must have ReductionType::RECIPROCITY.";
+        return nullptr;
+    }
+
+    const SampleSet* ss = brdf.getSampleSet();
+
+    bool symmetryUsed = hasSameEnumerator(brdf.getReductionType(), ReductionType::BILATERAL_SYMMETRY);
+    float maxAngle3 = symmetryUsed ? PI_2_F : PI_F;
+
+    // Get the reversed angle.
+    auto reverse = [symmetryUsed](float angle) { return symmetryUsed ? (PI_F - angle) : (angle + PI_F); };
+
+    std::set<float> filledAngles;
+    for (int i = 0; i < ss->getNumAngles3(); ++i) {
+        float angle3 = ss->getAngle3(i);
+        if (angle3 > increase(maxAngle3)) break;
+
+        filledAngles.insert(angle3);
+
+        if (!symmetryUsed && angle3 == 0.0f) continue;
+
+        filledAngles.insert(reverse(angle3));
+    }
+
+    HalfDifferenceCoordinatesBrdf* filledBrdf = brdf.clone();
+    SampleSet* filledSs = filledBrdf->getSampleSet();
+
+    filledSs->resizeAngles(filledSs->getNumAngles0(),
+                           filledSs->getNumAngles1(),
+                           filledSs->getNumAngles2(),
+                           static_cast<int>(filledAngles.size()));
+    array_util::copy(filledAngles, &filledSs->getAngles3());
+
+    filledSs->updateAngleAttributes();
+
+    // Copy samples using reciprocity.
+    for (int i0 = 0; i0 < filledSs->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < filledSs->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < filledSs->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < filledSs->getNumAngles3(); ++i3) {
+        Spectrum sp;
+
+        if (filledSs->getAngle3(i3) <= maxAngle3) {
+            sp = ss->getSpectrum(i0, i1, i2, i3);
+        }
+        else {
+            if (symmetryUsed) {
+                sp = ss->getSpectrum(i0, i1, i2, (filledSs->getNumAngles3() - 1) - i3);
+            }
+            else {
+                sp = ss->getSpectrum(i0, i1, i2, i3 - (ss->getNumAngles3() - 1));
+            }
+        }
+
+        filledSs->setSpectrum(i0, i1, i2, i3, sp);
+    }}}}
+
+    int type = (asInteger(filledBrdf->getReductionType()) &
+                ~asInteger(ReductionType::RECIPROCITY));
+    filledBrdf->setReductionType(static_cast<ReductionType>(type));
+
+    return filledBrdf;
+}
+
+HalfDifferenceCoordinatesBrdf* lb::reduceAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+
+    bool symmetryUsed = hasSameEnumerator(brdf.getReductionType(), ReductionType::BILATERAL_SYMMETRY);
+    float maxAngle3 = symmetryUsed ? decrease(PI_2_F) : PI_F;
+
+    // Get the reversed angle.
+    auto reverse = [symmetryUsed](float angle) { return symmetryUsed ? (PI_F - angle) : (angle - PI_F); };
+
+    // Create an angle array in [0, PI].
+    std::set<float> reducedAngles;
+    for (int i = 0; i < ss->getNumAngles3(); ++i) {
+        float angle3 = ss->getAngle3(i);
+
+        bool closeAngleFound = false;
+
+        // Ignore a close angle.
+        for (auto& val : reducedAngles) {
+            using std::abs;
+
+            constexpr float eps = EPSILON_F * 10.0f;
+            if (abs(val - angle3)          < eps ||
+                abs(val - reverse(angle3)) < eps) {
+                closeAngleFound = true;
+                break;
+            }
+        }
+
+        if (closeAngleFound) continue;
+
+        if (angle3 <= increase(maxAngle3)) {
+            reducedAngles.insert(angle3);
+        }
+        else {
+            reducedAngles.insert(reverse(angle3));
+        }
+    }
+
+    HalfDifferenceCoordinatesBrdf* reducedBrdf = brdf.clone();
+    SampleSet* reducedSs = reducedBrdf->getSampleSet();
+
+    reducedSs->resizeAngles(reducedSs->getNumAngles0(),
+                            reducedSs->getNumAngles1(),
+                            reducedSs->getNumAngles2(),
+                            static_cast<int>(reducedAngles.size()));
+    array_util::copy(reducedAngles, &reducedSs->getAngles3());
+
+    reducedSs->updateAngleAttributes();
+
+    // Average two BRDFs using reciprocity.
+    for (int i0 = 0; i0 < reducedSs->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < reducedSs->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < reducedSs->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < reducedSs->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        reducedBrdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        Spectrum sp, reversedSp;
+
+        if (symmetryUsed) {
+            float angle0, angle1, angle2, angle3;
+            sp = brdf.getSpectrum(inDir, outDir);
+
+            reducedBrdf->fromXyz(outDir, inDir, &angle0, &angle1, &angle2, &angle3);
+            if (angle3 > PI_F) {
+                angle3 = TAU_F - angle3;
+                reducedBrdf->toXyz(angle0, angle1, angle2, angle3, &outDir, &inDir);
+            }
+
+            reversedSp = brdf.getSpectrum(outDir, inDir);
+        }
+        else {
+            sp = brdf.getSpectrum(inDir, outDir);
+            reversedSp = brdf.getSpectrum(outDir, inDir);
+        }
+
+        reducedSs->setSpectrum(i0, i1, i2, i3, (sp + reversedSp) * 0.5f);
+    }}}}
+
+    int type = (asInteger(reducedBrdf->getReductionType()) |
+                asInteger(ReductionType::RECIPROCITY));
+    reducedBrdf->setReductionType(static_cast<ReductionType>(type));
+
+    return reducedBrdf;
 }
 
 void lb::averageSpectraAtInThetaOf0(Brdf* brdf)
@@ -221,53 +454,6 @@ void lb::averageSpectraAtInThetaOf0(Brdf* brdf)
             ss->setSpectrum(0, i2, i3, avgSp);
         }
     }
-}
-
-SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
-                                           float                            rotationAngle)
-{
-    assert(rotationAngle > -TAU_F && rotationAngle < TAU_F);
-
-    if (rotationAngle < 0.0f) {
-        rotationAngle += TAU_F;
-    }
-
-    SphericalCoordinatesBrdf* rotatedBrdf = new SphericalCoordinatesBrdf(brdf);
-    SampleSet* ss = rotatedBrdf->getSampleSet();
-
-    ss->updateAngleAttributes();
-    if (!ss->isEqualIntervalAngles3()) {
-        for (int i = 0; i < rotatedBrdf->getNumOutPhi(); ++i) {
-            float outPhi = rotatedBrdf->getOutPhi(i) + rotationAngle;
-            if (outPhi > TAU_F) {
-                outPhi -= TAU_F;
-            }
-
-            rotatedBrdf->setOutPhi(i, outPhi);
-        }
-
-        Arrayf& outPhiAngles = ss->getAngles3();
-        std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
-    }
-
-    for (int inThIndex  = 0; inThIndex  < rotatedBrdf->getNumInTheta();  ++inThIndex)  {
-    for (int inPhIndex  = 0; inPhIndex  < rotatedBrdf->getNumInPhi();    ++inPhIndex)  {
-    for (int outThIndex = 0; outThIndex < rotatedBrdf->getNumOutTheta(); ++outThIndex) {
-    for (int outPhIndex = 0; outPhIndex < rotatedBrdf->getNumOutPhi();   ++outPhIndex) {
-        float inTheta  = rotatedBrdf->getInTheta(inThIndex);
-        float inPhi    = rotatedBrdf->getInPhi(inPhIndex);
-        float outTheta = rotatedBrdf->getOutTheta(outThIndex);
-        float outPhi   = rotatedBrdf->getOutPhi(outPhIndex) - rotationAngle;
-
-        if (outPhi < 0.0f) {
-            outPhi += TAU_F;
-        }
-
-        Spectrum sp = brdf.getSpectrum(inTheta, inPhi, outTheta, outPhi);
-        rotatedBrdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex, sp);
-    }}}}
-
-    return rotatedBrdf;
 }
 
 void lb::fixEnergyConservation(SpecularCoordinatesBrdf* brdf)
@@ -925,11 +1111,131 @@ bool lb::fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value)
     return true;
 }
 
+SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
+{
+    const SampleSet* ss = brdf->getSampleSet();
+
+    if (!ss->isOneSide()) {
+        lbWarn << "[lb::fillSymmetricBrdf] Sample points are not contained in one side of the incident plane.";
+        return nullptr;
+    }
+
+    std::vector<float> filledAngles;
+
+    for (int i = 0; i < brdf->getNumOutPhi(); ++i) {
+        float outPhi = brdf->getOutPhi(i);
+        bool inIncidentPlane = (outPhi == 0.0f ||
+                                isEqual(outPhi, PI_F) ||
+                                isEqual(outPhi, TAU_F));
+        if (!inIncidentPlane) {
+            filledAngles.push_back(SphericalCoordinateSystem::MAX_ANGLE3 - outPhi);
+        }
+    }
+
+    int numOutPhi = brdf->getNumOutPhi() + static_cast<int>(filledAngles.size());
+    SphericalCoordinatesBrdf* filledBrdf = new SphericalCoordinatesBrdf(brdf->getNumInTheta(),
+                                                                        brdf->getNumInPhi(),
+                                                                        brdf->getNumOutTheta(),
+                                                                        numOutPhi,
+                                                                        ss->getColorModel(),
+                                                                        ss->getNumWavelengths());
+    SampleSet* filledSs = filledBrdf->getSampleSet();
+
+    // Set angles.
+    filledSs->getAngles0() = ss->getAngles0();
+    filledSs->getAngles1() = ss->getAngles1();
+    filledSs->getAngles2() = ss->getAngles2();
+    for (int i = 0; i < filledBrdf->getNumOutPhi(); ++i) {
+        if (i < brdf->getNumOutPhi()) {
+            filledBrdf->setOutPhi(i, brdf->getOutPhi(i));
+        }
+        else {
+            filledBrdf->setOutPhi(i, filledAngles.at(i - brdf->getNumOutPhi()));
+        }
+    }
+    Arrayf& outPhiAngles = filledSs->getAngles3();
+    std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
+
+    // Set wavelengths.
+    for (int i = 0; i < filledSs->getNumWavelengths(); ++i) {
+        float wl = ss->getWavelength(i);
+        filledSs->setWavelength(i, wl);
+    }
+
+    for (int inThIndex  = 0; inThIndex  < filledBrdf->getNumInTheta();  ++inThIndex)  {
+    for (int inPhIndex  = 0; inPhIndex  < filledBrdf->getNumInPhi();    ++inPhIndex)  {
+    for (int outThIndex = 0; outThIndex < filledBrdf->getNumOutTheta(); ++outThIndex) {
+    for (int outPhIndex = 0; outPhIndex < filledBrdf->getNumOutPhi();   ++outPhIndex) {
+        float outPhi = filledBrdf->getOutPhi(outPhIndex);
+
+        // Find the corresponding index.
+        int origIndex;
+        for (origIndex = 0; origIndex < brdf->getNumOutPhi(); ++origIndex) {
+            float origOutPhi = brdf->getOutPhi(origIndex);
+            bool outPhiEqual = (origOutPhi == outPhi ||
+                                isEqual(origOutPhi, SphericalCoordinateSystem::MAX_ANGLE3 - outPhi));
+            if (outPhiEqual) break;
+        }
+
+        Spectrum& sp = brdf->getSpectrum(inThIndex, inPhIndex, outThIndex, origIndex);
+        filledBrdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex, sp);
+    }}}}
+
+    return filledBrdf;
+}
+
+SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
+                                           float                            rotationAngle)
+{
+    assert(rotationAngle > -TAU_F && rotationAngle < TAU_F);
+
+    if (rotationAngle < 0.0f) {
+        rotationAngle += TAU_F;
+    }
+
+    SphericalCoordinatesBrdf* rotatedBrdf = new SphericalCoordinatesBrdf(brdf);
+    SampleSet* ss = rotatedBrdf->getSampleSet();
+
+    ss->updateAngleAttributes();
+    if (!ss->isEqualIntervalAngles3()) {
+        for (int i = 0; i < rotatedBrdf->getNumOutPhi(); ++i) {
+            float outPhi = rotatedBrdf->getOutPhi(i) + rotationAngle;
+            if (outPhi > TAU_F) {
+                outPhi -= TAU_F;
+            }
+
+            rotatedBrdf->setOutPhi(i, outPhi);
+        }
+
+        Arrayf& outPhiAngles = ss->getAngles3();
+        std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
+    }
+
+    for (int inThIndex  = 0; inThIndex  < rotatedBrdf->getNumInTheta();  ++inThIndex)  {
+    for (int inPhIndex  = 0; inPhIndex  < rotatedBrdf->getNumInPhi();    ++inPhIndex)  {
+    for (int outThIndex = 0; outThIndex < rotatedBrdf->getNumOutTheta(); ++outThIndex) {
+    for (int outPhIndex = 0; outPhIndex < rotatedBrdf->getNumOutPhi();   ++outPhIndex) {
+        float inTheta  = rotatedBrdf->getInTheta(inThIndex);
+        float inPhi    = rotatedBrdf->getInPhi(inPhIndex);
+        float outTheta = rotatedBrdf->getOutTheta(outThIndex);
+        float outPhi   = rotatedBrdf->getOutPhi(outPhIndex) - rotationAngle;
+
+        if (outPhi < 0.0f) {
+            outPhi += TAU_F;
+        }
+
+        Spectrum sp = brdf.getSpectrum(inTheta, inPhi, outTheta, outPhi);
+        rotatedBrdf->setSpectrum(inThIndex, inPhIndex, outThIndex, outPhIndex, sp);
+    }}}}
+
+    return rotatedBrdf;
+}
+
 void lb::xyzToSrgb(SampleSet* samples)
 {
     ColorModel cm = samples->getColorModel();
     if (cm != XYZ_MODEL) {
-        lbError << "[xyzToSrgb] Not CIE-XYZ model: " << cm;
+        lbError << "[xyzToSrgb] Not CIE XYZ model: " << cm;
         return;
     }
 
@@ -971,12 +1277,14 @@ bool lb::compute(const Brdf& src0, const Brdf& src1, Brdf* dest,
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
-    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         Vec3 inDir, outDir;
+        Spectrum sp0, sp1;
+    #pragma omp parallel for private(inDir, outDir, sp0, sp1)
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         dest->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-        const Spectrum& sp0 = src0.getSpectrum(inDir, outDir);
-        const Spectrum& sp1 = src1.getSpectrum(inDir, outDir);
+        sp0 = src0.getSpectrum(inDir, outDir);
+        sp1 = src1.getSpectrum(inDir, outDir);
         ss->setSpectrum(i0, i1, i2, i3, manipulator(sp0, sp1));
     }}}}
 

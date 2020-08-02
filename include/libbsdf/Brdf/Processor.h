@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,6 +16,7 @@
 
 #include <functional>
 
+#include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
@@ -62,20 +63,45 @@ void editComponents(int                 i0,
 void divideByCosineOutTheta(Brdf* brdf);
 
 /*!
- * \brief Fills omitted data using plane symmetry.
+ * \brief Fills omitted angles using a bilateral symmetry.
+ *
+ * lb::BRDF must have lb::ReductionType::BILATERAL_SYMMETRY.
+ * lb::ReductionType::RECIPROCITY is not acceptable.
+ * For both of a bilateral symmetry and reciprocity,
+ * this function must be executed after fillAnglesUsingReciprocity().
+ *
  * \return A new BRDF with appended angles.
  */
-SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
+Brdf* fillAnglesUsingBilateralSymmetry(const Brdf& brdf);
+
+/*!
+ * \brief Reduces angles using a bilateral symmetry.
+ *
+ * lb::ReductionType::RECIPROCITY is not acceptable.
+ * For the reduction with a bilateral symmetry and reciprocity,
+ * this function must be executed before fillAnglesUsingReciprocity().
+ *
+ * \return The averaged BRDF of both sides of the incident plane.
+ */
+Brdf* reduceAnglesUsingBilateralSymmetry(const Brdf& brdf);
+
+/*!
+ * \brief Fills omitted angles using reciprocity.
+ *
+ * lb::BRDF must have ReductionType::RECIPROCITY.
+ *
+ * \return A new BRDF with appended angles.
+ */
+HalfDifferenceCoordinatesBrdf* fillAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf);
+
+/*!
+ * \brief Reduces angles using reciprocity.
+ * \return The averaged BRDF with reversed incoming and outgoing directions.
+ */
+HalfDifferenceCoordinatesBrdf* reduceAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf);
 
 /*! \brief Averages the samples at the incoming polar angle of 0 degrees using rotational symmetry. */
 void averageSpectraAtInThetaOf0(Brdf* brdf);
-
-/*!
- * \brief Rotates a BRDF using an outgoing azimuthal angle.
- * \return A new BRDF with rotated angles.
- */
-SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
-                                       float                            rotationAngle);
 
 /*! \brief Fixes the energy conservation of the BRDF with each incoming direction. */
 void fixEnergyConservation(SpecularCoordinatesBrdf* brdf);
@@ -156,7 +182,23 @@ void copySpectraFromPhiOf0To360(SampleSet* samples);
 /*! \brief Fills spectra of samples if incoming polar angle is 90 degrees. */
 bool fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value = 0.0);
 
-/*! \brief Converts the color model from CIE-XYZ to sRGB. */
+/*!
+ * \brief Fills omitted data using a plane symmetry.
+ *
+ * BRDF data must be contained in one side of the incident plane.
+ *
+ * \return A new BRDF with appended angles.
+ */
+SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
+
+/*!
+ * \brief Rotates a BRDF using an outgoing azimuthal angle.
+ * \return A new BRDF with rotated angles.
+ */
+SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
+                                       float                            rotationAngle);
+
+/*! \brief Converts the color model from CIE XYZ to sRGB. */
 void xyzToSrgb(SampleSet* samples);
 
 /*! \brief Fills spectra of samples with a value. */

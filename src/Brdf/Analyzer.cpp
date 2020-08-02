@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2019 Kimura Ryo                                  //
+// Copyright (C) 2018-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
+#include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Common/SolidAngle.h>
 #include <libbsdf/ReflectanceModel/Fresnel.h>
 
@@ -89,37 +90,18 @@ Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThInd
     return sumSpectrum.cast<Spectrum::Scalar>();
 }
 
-Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir)
+Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir, int numThetaDivisions, int numPhiDivisions)
 {
-    auto specBrdf     = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
-    auto spheBrdf     = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
-    auto halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
-
-    int numSpecTheta, numSpecPhi;
-
-    if (specBrdf) {
-        numSpecTheta    = specBrdf->getNumSpecTheta();
-        numSpecPhi      = specBrdf->getNumSpecPhi();
-    }
-    else if (spheBrdf) {
-        numSpecTheta    = spheBrdf->getNumOutTheta() * 2;
-        numSpecPhi      = spheBrdf->getNumOutPhi() * 2;
-    }
-    else if (halfDiffBrdf) {
-        numSpecTheta    = halfDiffBrdf->getNumHalfTheta() * 2;
-        numSpecPhi      = (halfDiffBrdf->getNumDiffTheta() + halfDiffBrdf->getNumDiffPhi()) * 2;
-    }
-    else {
-        numSpecTheta    = 90;
-        numSpecPhi      = 90;
-    }
-
     const SampleSet* ss = brdf.getSampleSet();
 
-    std::unique_ptr<SpecularCoordinatesBrdf> inDirBrdf(new SpecularCoordinatesBrdf(1, 1, numSpecTheta, numSpecPhi,
+    std::unique_ptr<SpecularCoordinatesBrdf> inDirBrdf(new SpecularCoordinatesBrdf(1, 1,
+                                                                                   numThetaDivisions + 1,
+                                                                                   numPhiDivisions + 1,
                                                                                    2.0f,
                                                                                    ss->getColorModel(),
                                                                                    ss->getNumWavelengths()));
+    inDirBrdf->getSampleSet()->getWavelengths() = ss->getWavelengths();
+
     float inTheta, inPhi;
     SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
     inDirBrdf->setInTheta(0, inTheta);
@@ -129,6 +111,7 @@ Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir)
     std::string inPhiStr   = std::to_string(toDegree(inPhi));
     inDirBrdf->setName("inDirBrdf_inTheta=" + inThetaStr + "_inPhi=" + inPhiStr);
 
+    auto specBrdf = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
     if (specBrdf && specBrdf->getNumSpecularOffsets()) {
         inDirBrdf->setSpecularOffset(0, specBrdf->getSpecularOffset(inTheta));
     }
@@ -160,6 +143,44 @@ SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
     }}
 
     return reflectances;
+}
+
+Spectrum lb::computeBihemisphericalReflectance(const Brdf&  brdf,
+                                               int          numInThetaDivisions,
+                                               int          numInPhiDivisions)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+
+    Spectrum sumSp(ss->getNumWavelengths());
+    sumSp.setZero();
+
+    static Log::Level origLogLevel = Log::getNotificationLevel();
+    Log::setNotificationLevel(Log::Level::WARN_MSG);
+
+    int numPhi = ss->isIsotropic() ? 1 : numInPhiDivisions;
+    int phIndex;
+    Vec3::Scalar inTheta, inPhi;
+    Vec3 inDir;
+    Spectrum sp;
+    #pragma omp parallel for private(phIndex, inTheta, inPhi, inDir, sp)
+    for (int thIndex = 0; thIndex <= numInThetaDivisions; ++thIndex) {
+        for (phIndex = 0; phIndex < numPhi; ++phIndex) {
+            inTheta = thIndex * PI_2_D / numInThetaDivisions;
+            inPhi = phIndex * TAU_D / numInPhiDivisions;
+
+            inTheta = std::min(inTheta, decrease(PI_2_D));
+
+            inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
+            sp = computeReflectance(brdf, inDir);
+
+            #pragma omp critical
+            sumSp += sp;
+        }
+    }
+
+    Log::setNotificationLevel(origLogLevel);
+
+    return sumSp / ((numInThetaDivisions + 1) * numPhi);
 }
 
 SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
@@ -263,6 +284,62 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
     }}
 
     return ss2;
+}
+
+Spectrum lb::computeBilateralSymmetry(const Brdf& brdf, int numInThetaDivisions, int numInPhiDivisions)
+{
+    assert(numInThetaDivisions > 0 && numInPhiDivisions > 0);
+
+    std::unique_ptr<Brdf> invertedBrdf(brdf.clone());
+    SampleSet* ss = invertedBrdf->getSampleSet();
+
+    // Create the BRDF inverted along the incident plane.
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        invertedBrdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        Vec3 invertedOutDir = toBilateralSymmetry(inDir, outDir);
+
+        Spectrum sp = brdf.getSpectrum(inDir, invertedOutDir);
+        ss->setSpectrum(i0, i1, i2, i3, sp);
+    }}}}
+
+    std::unique_ptr<Brdf> diffBrdf(brdf.clone());
+
+    auto diff = [](const Spectrum& sp0, const Spectrum& sp1) { return (sp0 - sp1).cwiseAbs(); };
+    compute(brdf, *invertedBrdf, diffBrdf.get(), diff);
+
+    return computeBihemisphericalReflectance(*diffBrdf, numInThetaDivisions, numInPhiDivisions);
+}
+
+Spectrum lb::computeReciprocity(const Brdf& brdf, int numInThetaDivisions, int numInPhiDivisions)
+{
+    assert(numInThetaDivisions > 0 && numInPhiDivisions > 0);
+
+    std::unique_ptr<Brdf> reversedBrdf(brdf.clone());
+    SampleSet* ss = reversedBrdf->getSampleSet();
+
+    // Create the reciprocally reversed BRDF.
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        reversedBrdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+
+        Spectrum sp = brdf.getSpectrum(outDir, inDir);
+        ss->setSpectrum(i0, i1, i2, i3, sp);
+    }}}}
+
+    std::unique_ptr<Brdf> diffBrdf(brdf.clone());
+
+    auto diff = [](const Spectrum& sp0, const Spectrum& sp1) { return (sp0 - sp1).cwiseAbs(); };
+    compute(brdf, *reversedBrdf, diffBrdf.get(), diff);
+
+    return computeBihemisphericalReflectance(*diffBrdf, numInThetaDivisions, numInPhiDivisions);
 }
 
 Spectrum lb::findDiffuseThresholds(const Brdf&      brdf,
