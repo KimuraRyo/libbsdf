@@ -196,7 +196,7 @@ public:
                float specTheta,
                float specPhi,
                Vec3* inDir,
-               Vec3* outDir) const;
+               Vec3* outDir) const override;
 
     /*!
      * Converts from incoming and outgoing directions to four angles and assigns them
@@ -208,7 +208,7 @@ public:
                  float*         inTheta,
                  float*         inPhi,
                  float*         specTheta,
-                 float*         specPhi) const;
+                 float*         specPhi) const override;
 
     /*!
      * Converts from incoming and outgoing directions to three angles and assigns them
@@ -219,7 +219,7 @@ public:
                  const Vec3&    outDir,
                  float*         inTheta,
                  float*         specTheta,
-                 float*         specPhi) const;
+                 float*         specPhi) const override;
 
     /*!
      * Validates spectra, angles, wavelengths, and other attributes.

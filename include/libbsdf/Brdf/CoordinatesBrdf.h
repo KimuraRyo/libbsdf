@@ -112,10 +112,10 @@ public:
                  float*         angle2,
                  float*         angle3) const override;
 
-    std::string getAngle0Name() const; /*!< Gets a name of angle0. */
-    std::string getAngle1Name() const; /*!< Gets a name of angle1. */
-    std::string getAngle2Name() const; /*!< Gets a name of angle2. */
-    std::string getAngle3Name() const; /*!< Gets a name of angle3. */
+    std::string getAngle0Name() const override; /*!< Gets a name of angle0. */
+    std::string getAngle1Name() const override; /*!< Gets a name of angle1. */
+    std::string getAngle2Name() const override; /*!< Gets a name of angle2. */
+    std::string getAngle3Name() const override; /*!< Gets a name of angle3. */
 
     /*!
      * Validates spectra, angles, wavelengths, and other attributes.

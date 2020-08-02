@@ -168,7 +168,7 @@ Spectrum lb::computeBihemisphericalReflectance(const Brdf&  brdf,
             inTheta = thIndex * PI_2_D / numInThetaDivisions;
             inPhi = phIndex * TAU_D / numInPhiDivisions;
 
-            inTheta = std::min(inTheta, decrease(PI_2_D));
+            inTheta = std::min(inTheta, static_cast<Vec3::Scalar>(decrease(PI_2_D)));
 
             inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
             sp = computeReflectance(brdf, inDir);

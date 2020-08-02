@@ -18,6 +18,7 @@
 #include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Log.h>
+#include <libbsdf/Common/SphericalCoordinateSystem.h>
 
 namespace lb {
 
