@@ -1,5 +1,5 @@
 ## =================================================================== ##
-## Copyright (C) 2014-2019 Kimura Ryo                                  ##
+## Copyright (C) 2014-2020 Kimura Ryo                                  ##
 ##                                                                     ##
 ## This Source Code Form is subject to the terms of the Mozilla Public ##
 ## License, v. 2.0. If a copy of the MPL was not distributed with this ##
@@ -41,14 +41,8 @@ endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-
-    # 32 bit executable
-    if(CMAKE_SIZEOF_VOID_P MATCHES 4)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:SSE2")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
-    endif()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set (CMAKE_CXX_STANDARD 17)
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
