@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2019 Kimura Ryo                                  //
+// Copyright (C) 2018-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -19,6 +19,7 @@
 #include <libbsdf/ReflectanceModel/ReflectanceModelUtility.h>
 
 #include <libbsdf/Writer/DdrWriter.h>
+#include <libbsdf/Writer/SsddWriter.h>
 
 #include <ArgumentParser.h>
 #include <Utility.h>
@@ -26,17 +27,17 @@
 using namespace lb;
 
 /*
- * BRDF/BTDF generator
+ * BSDF generator
  */
 
 const std::string APP_NAME("lbgen");
-const std::string APP_VERSION("1.0.10");
+const std::string APP_VERSION("1.0.11");
 
 const std::string GgxName                       = "ggx";
 const std::string MultipleScatteringSmithName   = "multiple-scattering-smith";
 const std::string LambertianName                = "lambertian";
 
-// Paramters
+// Parameters
 int numIncomingPolarAngles = 18;
 int numSpecularPolarAngles = 360;
 int numSpecularAzimuthalAngles = 72;
@@ -53,13 +54,15 @@ void showHelp()
 
     cout << "Usage: lbgen [options ...] bsdf_model out_file" << endl;
     cout << endl;
-    cout << "lbgen generates BRDF/BTDF data and saves an Integra BSDF file." << endl;
+    cout << "lbgen generates BSDF data and saves the file(s)." << endl;
     cout << endl;
     cout << "Positional Arguments:" << endl;
-    cout << "  bsdf_model  Analytic BSDF model" << endl;
-    cout << "  out_file    Name of generated file";
-    cout << " (\".ddr\" or \".ddt\" is acceptable as a suffix for BRDF or BTDF.";
-    cout << " Otherwise, \".ddr\" and \".ddt\" files are generated.)" << endl;
+    cout << "  bsdf_model   Analytic BSDF model" << endl;
+    cout << "  out_file     Name of generated file";
+    cout << "                   Valid formats:" << endl;
+    cout << "                       Surface Scattering Distribution Data (\".ssdd\")" << endl;
+    cout << "                       Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
+    cout << "                           If there is no file extension, \".ddr\" and \".ddt\" files are generated." << endl;
     cout << endl;
     cout << "Options:" << endl;
     cout << "  -h, --help                   show this help message and exit" << endl;
@@ -69,7 +72,7 @@ void showHelp()
     cout << "  -numIncomingPolarAngles      set the division number of incoming polar angles (default: 18)" << endl;
     cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 360)" << endl;
     cout << "  -numSpecularAzimuthalAngles  set the division number of specular azimuthal angles (default: 72)" << endl;
-    cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectances and transmittances exceed one" << endl;
+    cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectance and transmittance exceed one" << endl;
 #ifdef _OPENMP
     cout << "  -numThreads                  set the number of threads used by parallel processing" << endl;
 #endif
@@ -258,16 +261,42 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // Create BRDFs/BTDFs and save files.
-    std::string comments = app_utility::createComments(argc, argv, APP_NAME, APP_VERSION);
-    if (reader_utility::hasSuffix(fileName, ".ddr")) {
-        std::unique_ptr<SpecularCoordinatesBrdf> brdf(createBrdf(*model,
-                                                                 1.0f,
-                                                                 numIncomingPolarAngles,
-                                                                 numSpecularPolarAngles,
-                                                                 numSpecularAzimuthalAngles,
-                                                                 BRDF_DATA));
+    FileType fileType;
+    if (reader_utility::hasSuffix(fileName, ".ssdd")) {
+        fileType = SSDD_FILE;
+    }
+    else if (reader_utility::hasSuffix(fileName, ".ddr")) {
+        fileType = INTEGRA_DDR_FILE;
+    }
+    else if (reader_utility::hasSuffix(fileName, ".ddt")) {
+        fileType = INTEGRA_DDT_FILE;
+    }
 
+    std::unique_ptr<SpecularCoordinatesBrdf> brdf, btdfData;
+
+    // Create a BRDF.
+    if (fileType != INTEGRA_DDT_FILE) {
+        brdf.reset(createBrdf(*model,
+                              1.0f,
+                              numIncomingPolarAngles,
+                              numSpecularPolarAngles,
+                              numSpecularAzimuthalAngles,
+                              BRDF_DATA));
+    }
+
+    // Create BTDF data in lb::SpecularCoordinatesBrdf.
+    if (fileType != INTEGRA_DDR_FILE) {
+        btdfData.reset(createBrdf(*model,
+                                  n,
+                                  numIncomingPolarAngles,
+                                  numSpecularPolarAngles,
+                                  numSpecularAzimuthalAngles,
+                                  BTDF_DATA));
+    }
+
+    // Save files.
+    std::string comments = app_utility::createComments(argc, argv, APP_NAME, APP_VERSION);
+    if (fileType == INTEGRA_DDR_FILE) {
         if (conservationOfEnergyUsed) {
             fixEnergyConservation(brdf.get());
         }
@@ -276,47 +305,37 @@ int main(int argc, char** argv)
             std::cout << "Saved: " << fileName << std::endl;
         }
     }
-    else if (reader_utility::hasSuffix(fileName, ".ddt")) {
-        std::unique_ptr<SpecularCoordinatesBrdf> btdf(createBrdf(*model,
-                                                                 n,
-                                                                 numIncomingPolarAngles,
-                                                                 numSpecularPolarAngles,
-                                                                 numSpecularAzimuthalAngles,
-                                                                 BTDF_DATA));
-
+    else if (fileType == INTEGRA_DDT_FILE) {
         if (conservationOfEnergyUsed) {
-            fixEnergyConservation(btdf.get());
+            fixEnergyConservation(btdfData.get());
         }
 
-        if (DdrWriter::write(fileName, *btdf, comments)) {
+        if (DdrWriter::write(fileName, *btdfData, comments)) {
             std::cout << "Saved: " << fileName << std::endl;
         }
     }
     else {
-        std::unique_ptr<SpecularCoordinatesBrdf> brdf(createBrdf(*model,
-                                                                 1.0f,
-                                                                 numIncomingPolarAngles,
-                                                                 numSpecularPolarAngles,
-                                                                 numSpecularAzimuthalAngles,
-                                                                 BRDF_DATA));
-
-        std::unique_ptr<SpecularCoordinatesBrdf> btdf(createBrdf(*model,
-                                                                 n,
-                                                                 numIncomingPolarAngles,
-                                                                 numSpecularPolarAngles,
-                                                                 numSpecularAzimuthalAngles,
-                                                                 BTDF_DATA));
-
         if (conservationOfEnergyUsed) {
-            fixEnergyConservation(brdf.get(), btdf.get());
+            fixEnergyConservation(brdf.get(), btdfData.get());
         }
 
-        if (DdrWriter::write(fileName + ".ddr", *brdf, comments)) {
-            std::cout << "Saved: " << fileName + ".ddr" << std::endl;
-        }
+        if (fileType == SSDD_FILE) {
+            std::unique_ptr<Btdf> btdf(new Btdf(std::move(btdfData)));
+            std::unique_ptr<Bsdf> bsdf(new Bsdf(std::move(brdf), std::move(btdf)));
+            std::unique_ptr<Material> material(new Material(std::move(bsdf)));
 
-        if (DdrWriter::write(fileName + ".ddt", *btdf, comments)) {
-            std::cout << "Saved: " << fileName + ".ddt" << std::endl;
+            if (SsddWriter::write(fileName, *material, SsddWriter::DataFormat::ASCII_DATA, comments)) {
+                std::cout << "Saved: " << fileName << std::endl;
+            }
+        }
+        else {
+            if (DdrWriter::write(fileName + ".ddr", *brdf, comments)) {
+                std::cout << "Saved: " << fileName + ".ddr" << std::endl;
+            }
+
+            if (DdrWriter::write(fileName + ".ddt", *btdfData, comments)) {
+                std::cout << "Saved: " << fileName + ".ddt" << std::endl;
+            }
         }
     }
 

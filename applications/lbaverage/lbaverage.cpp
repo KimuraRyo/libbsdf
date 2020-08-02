@@ -33,7 +33,7 @@ void showHelp()
     using std::cout;
     using std::endl;
 
-    cout << "Usage: lbaverage [options ...] in_file1 in_file2... out_file" << endl;
+    cout << "Usage: lbaverage [options ...] in_file1 in_file2 ... out_file" << endl;
     cout << endl;
     cout << "lbaverage averages two or more BRDFs/BTDFs." << endl;
     cout << "Input files must have the same type of color." << endl;

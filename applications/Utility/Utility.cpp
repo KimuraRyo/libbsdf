@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2019 Kimura Ryo                                       //
+// Copyright (C) 2019-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,7 +25,7 @@ std::string app_utility::createComments(int                 argc,
                                         const std::string&  version)
 {
     std::string comments("Software: " + name + "-" + version);
-    comments += "\n;; Arguments:";
+    comments += "\nArguments:";
     for (int i = 1; i < argc; ++i) {
         comments += " " + std::string(argv[i]);
     }

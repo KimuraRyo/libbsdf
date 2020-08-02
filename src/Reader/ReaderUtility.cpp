@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -14,6 +14,8 @@
 #include <libbsdf/Reader/DdrReader.h>
 #include <libbsdf/Reader/LightToolsBsdfReader.h>
 #include <libbsdf/Reader/MerlBinaryReader.h>
+#include <libbsdf/Reader/SdrReader.h>
+#include <libbsdf/Reader/SsddReader.h>
 #include <libbsdf/Reader/ZemaxBsdfReader.h>
 
 using namespace lb;
@@ -49,26 +51,46 @@ std::istream& reader_utility::safeGetline(std::istream& stream, std::string& tok
 {
     token.clear();
 
+#if defined(LIBBSDF_USE_STDGETLINE_IN_SAFEGETLINE)
+    if (std::getline(stream, token)) {
+        if (token.size() &&
+            token[token.size() - 1] == '\r') {
+            token = token.substr(0, token.size() - 1);
+        }
+    }
+
+    if (stream.eof()) {
+        lbInfo << "[reader_utility::safeGetline] EOF found.";
+    }
+#else
     std::istream::sentry se(stream, true);
     std::streambuf* sb = stream.rdbuf();
 
-    for (;;) {
+    while (true) {
         int c = sb->sbumpc();
         switch (c) {
             case '\n':
                 return stream;
             case '\r':
-                if (sb->sgetc() == '\n')
+                if (sb->sgetc() == '\n') {
                     sb->sbumpc();
+                }
+
                 return stream;
-            case EOF:
-                if (token.empty())
+            case std::streambuf::traits_type::eof():
+                if (token.empty()) {
                     stream.setstate(std::ios::eofbit);
+                }
+                lbInfo << "[reader_utility::safeGetline] EOF found.";
+
                 return stream;
             default:
-                token += (char)c;
+                token += static_cast<char>(c);
         }
     }
+#endif
+
+    return stream;
 }
 
 bool reader_utility::hasSuffix(const std::string &fileName, const std::string &suffix)
@@ -132,13 +154,16 @@ FileType reader_utility::classifyFile(const std::string& fileName)
     else if (hasSuffix(name, ".binary")) {
         return MERL_BINARY_FILE;
     }
+    else if (hasSuffix(name, ".ssdd")) {
+        return SSDD_FILE;
+    }
 
     return UNKNOWN_FILE;
 }
 
-std::shared_ptr<Brdf> reader_utility::read(const std::string&   fileName,
-                                           FileType*            fileType,
-                                           DataType*            dataType)
+std::shared_ptr<Brdf> reader_utility::readBrdf(const std::string&   fileName,
+                                               FileType*            fileType,
+                                               DataType*            dataType)
 {
     std::ifstream ifs(fileName.c_str());
     if (ifs.fail()) {
@@ -163,9 +188,11 @@ std::shared_ptr<Brdf> reader_utility::read(const std::string&   fileName,
             brdf.reset(DdrReader::read(fileName));
             *dataType = BTDF_DATA;
             break;
-        case lb::LIGHTTOOLS_FILE: {
-            std::unique_ptr<TwoSidedMaterial> material;
-            material.reset(LightToolsBsdfReader::read(fileName));
+        case LIGHTTOOLS_FILE: {
+            std::unique_ptr<TwoSidedMaterial> material(LightToolsBsdfReader::read(fileName));
+
+            if (!material) return nullptr;
+
             std::shared_ptr<Brdf> fBrdf = material->getFrontMaterial()->getBsdf()->getBrdf();
             std::shared_ptr<Btdf> fBtdf = material->getFrontMaterial()->getBsdf()->getBtdf();
             std::shared_ptr<Brdf> bBrdf = material->getBackMaterial()->getBsdf()->getBrdf();
@@ -177,11 +204,33 @@ std::shared_ptr<Brdf> reader_utility::read(const std::string&   fileName,
             else if (bBtdf) { brdf = bBtdf->getBrdf(); *dataType = BTDF_DATA; }
             break;
         }
-        case lb::MERL_BINARY_FILE:
+        case MERL_BINARY_FILE:
             brdf.reset(MerlBinaryReader::read(fileName));
             *dataType = BRDF_DATA;
             break;
-        case lb::ZEMAX_FILE:
+        case SSDD_FILE: {
+            std::unique_ptr<Material> material(SsddReader::read(fileName));
+
+            if (!material) return nullptr;
+
+            if (std::shared_ptr<Bsdf> bsdf = material->getBsdf()) {
+                if (bsdf->getBrdf()) {
+                    brdf = bsdf->getBrdf();
+                    *dataType = BRDF_DATA;
+                }
+                else if (bsdf->getBtdf()) {
+                    brdf = bsdf->getBtdf()->getBrdf();
+                    *dataType = BTDF_DATA;
+                }
+            }
+            else {
+                lbInfo << "[reader_utility::read] BRDF/BTDF does not exist in this SSDD file.";
+                return nullptr;
+            }
+
+            break;
+        }
+        case ZEMAX_FILE:
             brdf.reset(ZemaxBsdfReader::read(fileName, dataType));
             break;
         default:
@@ -190,4 +239,80 @@ std::shared_ptr<Brdf> reader_utility::read(const std::string&   fileName,
     }
 
     return brdf;
+}
+
+std::shared_ptr<Material> reader_utility::readMaterial(const std::string&   fileName,
+                                                       FileType*            fileType)
+{
+    std::ifstream ifs(fileName.c_str());
+    if (ifs.fail()) {
+        lbError << "[reader_utility::read] Could not open: " << fileName;
+        return nullptr;
+    }
+
+    *fileType = reader_utility::classifyFile(fileName);
+
+    // Load BRDF, BTDF, specular reflectance, and specular transmittance.
+    std::shared_ptr<Material> material;
+    switch (*fileType) {
+        case LIGHTTOOLS_FILE: {
+            std::unique_ptr<TwoSidedMaterial> twoSidedMat(LightToolsBsdfReader::read(fileName));
+
+            std::shared_ptr<Material> frontMat  = twoSidedMat->getFrontMaterial();
+            std::shared_ptr<Material> backMat   = twoSidedMat->getBackMaterial();
+
+            // Return a front material if it exists.
+            if (!frontMat->isEmpty()) {
+                material = frontMat;
+            }
+            else if(!backMat->isEmpty()) {
+                material = backMat;
+            }
+            else {
+                return nullptr;
+            }
+
+            break;
+        }
+        case SSDD_FILE: {
+            material.reset(SsddReader::read(fileName));
+            break;
+        }
+        case INTEGRA_SDR_FILE: {
+            std::shared_ptr<SampleSet2D> ss2(SdrReader::read(fileName));
+            if (!ss2) return nullptr;
+
+            material.reset(new Material(nullptr, ss2, nullptr));
+            break;
+        }
+        case INTEGRA_SDT_FILE: {
+            std::shared_ptr<SampleSet2D> ss2(SdrReader::read(fileName));
+            if (!ss2) return nullptr;
+
+            material.reset(new Material(nullptr, nullptr, ss2));
+            break;
+        }
+        default: {
+            DataType dataType;
+            std::shared_ptr<Brdf> brdf = readBrdf(fileName, fileType, &dataType);
+            std::shared_ptr<Bsdf> bsdf;
+            switch (dataType) {
+                case BRDF_DATA:
+                    bsdf.reset(new Bsdf(brdf, nullptr));
+                    break;
+                case BTDF_DATA: {
+                    std::shared_ptr<Btdf> btdf = std::make_shared<Btdf>(brdf);
+                    bsdf.reset(new Bsdf(nullptr, btdf));
+                    break;
+                }
+                default:
+                    return nullptr;
+            }
+
+            material.reset(new Material(bsdf));
+            break;
+        }
+    }
+
+    return material;
 }

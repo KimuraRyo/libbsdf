@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -21,6 +21,7 @@
 #include <string>
 
 #include <libbsdf/Brdf/Brdf.h>
+#include <libbsdf/Brdf/Material.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Log.h>
 
@@ -55,7 +56,10 @@ bool hasSuffix(const std::string &fileName, const std::string &suffix);
 FileType classifyFile(const std::string& fileName);
 
 /*! \brief Reads a BRDF/BTDF/BSDF/Material file and returns a lb::Brdf, file type, and data type. */
-std::shared_ptr<Brdf> read(const std::string& fileName, FileType* fileType, DataType* dataType);
+std::shared_ptr<Brdf> readBrdf(const std::string& fileName, FileType* fileType, DataType* dataType);
+
+/*! \brief Reads a Material file and returns a lb::Material and file type. */
+std::shared_ptr<Material> readMaterial(const std::string& fileName, FileType* fileType);
 
 } // namespace reader_utility
 
