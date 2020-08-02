@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -62,20 +62,20 @@ struct SpecularCoordinateSystem
                         ScalarT*    specTheta,
                         ScalarT*    specPhi);
 
-    static const char ANGLE0_NAME[]; /*!< This attribute holds the name of inTheta. */
-    static const char ANGLE1_NAME[]; /*!< This attribute holds the name of inPhi. */
-    static const char ANGLE2_NAME[]; /*!< This attribute holds the name of specTheta. */
-    static const char ANGLE3_NAME[]; /*!< This attribute holds the name of specPhi. */
+    static constexpr char ANGLE0_NAME[] = "incoming polar angle";     /*!< This attribute holds the name of inTheta. */
+    static constexpr char ANGLE1_NAME[] = "incoming azimuthal angle"; /*!< This attribute holds the name of inPhi. */
+    static constexpr char ANGLE2_NAME[] = "specular polar angle";     /*!< This attribute holds the name of specTheta. */
+    static constexpr char ANGLE3_NAME[] = "specular azimuthal angle"; /*!< This attribute holds the name of specPhi. */
 
-    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of inTheta. */
-    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of inPhi. */
-    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of specTheta. */
-    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of specPhi. */
+    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of inTheta. */
+    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of inPhi. */
+    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of specTheta. */
+    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of specPhi. */
 
-    static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of inTheta. */
-    static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of inPhi. */
-    static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of specTheta. */
-    static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of specPhi. */
+    static constexpr float MAX_ANGLE0 = PI_2_F; /*!< This attribute holds the maximum value of inTheta. */
+    static constexpr float MAX_ANGLE1 = TAU_F;  /*!< This attribute holds the maximum value of inPhi. */
+    static constexpr float MAX_ANGLE2 = PI_F;   /*!< This attribute holds the maximum value of specTheta. */
+    static constexpr float MAX_ANGLE3 = TAU_F;  /*!< This attribute holds the maximum value of specPhi. */
 
     /*! Converts an outgoing direction from a specular coordinate system to a Cartesian. */
     template <typename ScalarT>
@@ -101,8 +101,6 @@ void SpecularCoordinateSystem::toXyz(ScalarT    inTheta,
                                      Vec3*      inDir,
                                      Vec3*      outDir)
 {
-    assert(inTheta >= 0.0 && inTheta <= PI_2_D);
-
     *inDir = SphericalCoordinateSystem::toXyz(inTheta, inPhi);
     *outDir = toOutDirXyz(inTheta, inPhi, specTheta, specPhi);
 }
@@ -126,7 +124,7 @@ void SpecularCoordinateSystem::fromXyz(const Vec3&  inDir,
                                        ScalarT*     specTheta,
                                        ScalarT*     specPhi)
 {
-    ScalarT inPhi; // inPhi is 0 for isotorpic data.
+    ScalarT inPhi; // inPhi is 0 for isotropic data.
     SphericalCoordinateSystem::fromXyz(inDir, inTheta, &inPhi);
     fromOutDirXyz(outDir, *inTheta, inPhi, specTheta, specPhi);
 }
@@ -155,8 +153,6 @@ void SpecularCoordinateSystem::fromOutDirXyz(const Vec3&    outDir,
                                              ScalarT*       specTheta,
                                              ScalarT*       specPhi)
 {
-    assert(inTheta >= 0.0 && inTheta <= PI_2_D + EPSILON_F);
-
     Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-inPhi) * Vec2(outDir[0], outDir[1]);
     Vec2 rotThVec = Eigen::Rotation2D<Vec2::Scalar>(-inTheta) * Vec2(rotPhVec[0], outDir[2]);
     rotThVec[1] = clamp(rotThVec[1], Vec2::Scalar(-1), Vec2::Scalar(1));

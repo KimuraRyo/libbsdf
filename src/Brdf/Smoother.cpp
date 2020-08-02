@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2019 Kimura Ryo                                  //
+// Copyright (C) 2017-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -238,11 +238,8 @@ bool Smoother::insertAngle(std::set<Arrayf::Scalar>&    angleSet,
         return false;
     }
 
-    Spectrum lerpSp;
-    Sampler::getSpectrum<LinearInterpolator>(*brdf_, inDir, outDir, &lerpSp);
-
-    Spectrum crSp;
-    Sampler::getSpectrum<CatmullRomSplineInterpolator>(*brdf_, inDir, outDir, &crSp);
+    Spectrum lerpSp = Sampler::getSpectrum<LinearInterpolator>(*brdf_, inDir, outDir);
+    Spectrum crSp   = Sampler::getSpectrum<CatmullRomSplineInterpolator>(*brdf_, inDir, outDir);
 
     Spectrum diffSp = (lerpSp - crSp).abs();
     if (diffSp.maxCoeff() > diffThreshold_) {
@@ -265,10 +262,10 @@ void Smoother::updateBrdf()
                      static_cast<int>(angles2_.size()),
                      static_cast<int>(angles3_.size()));
 
-    copyArray(angles0_, &ss->getAngles0());
-    copyArray(angles1_, &ss->getAngles1());
-    copyArray(angles2_, &ss->getAngles2());
-    copyArray(angles3_, &ss->getAngles3());
+    array_util::copy(angles0_, &ss->getAngles0());
+    array_util::copy(angles1_, &ss->getAngles1());
+    array_util::copy(angles2_, &ss->getAngles2());
+    array_util::copy(angles3_, &ss->getAngles3());
     ss->updateAngleAttributes();
 
     initializeSpectra<CatmullRomSplineInterpolator>(*origBrdf, brdf_);

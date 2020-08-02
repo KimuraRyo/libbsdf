@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -166,9 +166,9 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
                                                                 colorModel);
     SampleSet* ss = brdf->getSampleSet();
 
-    copyArray(inThetaDegrees, &ss->getAngles0());
-    copyArray(inPhiDegrees,   &ss->getAngles1());
-    copyArray(spThetaDegrees, &ss->getAngles2());
+    array_util::copy(inThetaDegrees, &ss->getAngles0());
+    array_util::copy(inPhiDegrees,   &ss->getAngles1());
+    array_util::copy(spThetaDegrees, &ss->getAngles2());
 
     ss->getAngles0() = toRadians(ss->getAngles0());
     ss->getAngles1() = toRadians(ss->getAngles1());

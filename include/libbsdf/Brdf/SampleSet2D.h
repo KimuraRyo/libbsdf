@@ -160,30 +160,22 @@ private:
 
 inline Spectrum SampleSet2D::getSpectrum(float theta, float phi) const
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*this, theta, phi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*this, theta, phi);
 }
 
 inline Spectrum SampleSet2D::getSpectrum(float theta, float phi)
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*this, theta, phi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*this, theta, phi);
 }
 
 inline Spectrum SampleSet2D::getSpectrum(float theta) const
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*this, theta, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*this, theta);
 }
 
 inline Spectrum SampleSet2D::getSpectrum(float theta)
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*this, theta, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*this, theta);
 }
 
 inline Spectrum& SampleSet2D::getSpectrum(int thetaIndex, int phiIndex)
@@ -225,13 +217,13 @@ inline float SampleSet2D::getPhi(int index)   const { return phiAngles_[index]; 
 inline void SampleSet2D::setTheta(int index, float angle)
 {
     thetaAngles_[index] = angle;
-    equalIntervalTheta_ = isEqualInterval(thetaAngles_);
+    equalIntervalTheta_ = array_util::isEqualInterval(thetaAngles_);
 }
 
 inline void SampleSet2D::setPhi(int index, float angle)
 {
     phiAngles_[index] = angle;
-    equalIntervalPhi_ = isEqualInterval(phiAngles_);
+    equalIntervalPhi_ = array_util::isEqualInterval(phiAngles_);
 }
 
 inline Arrayf& SampleSet2D::getThetaArray() { return thetaAngles_; }

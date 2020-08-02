@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2019 Kimura Ryo                                       //
+// Copyright (C) 2019-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -56,9 +56,7 @@ bool lb::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
         Vec3 inDir, outDir;
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-        Spectrum sp;
-        Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir, &sp);
-
+        Spectrum sp = Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir);
         ss->setSpectrum(i0, i1, i2, i3, sp);
     }}}}
 
@@ -79,9 +77,7 @@ bool lb::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples)
     for (int i1 = 0; i1 < samples->getNumPhi();   ++i1) {
         float theta = samples->getTheta(i0);
         float phi   = samples->getPhi(i1);
-        Spectrum sp;
-        InterpolatorT::getSpectrum(baseSamples, theta, phi, &sp);
-
+        Spectrum sp = InterpolatorT::getSpectrum(baseSamples, theta, phi);
         samples->setSpectrum(i0, i1, sp);
     }}
 

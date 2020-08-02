@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -64,9 +64,9 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
                                                             true)
 {
     Arrayf& specThetaAngles = samples_->getAngles2();
-    specThetaAngles = createExponentialArray<Arrayf>(static_cast<int>(specThetaAngles.size()),
-                                                     CoordSys::MAX_ANGLE2,
-                                                     specThetaExponent);
+    specThetaAngles = array_util::createExponential<Arrayf>(static_cast<int>(specThetaAngles.size()),
+                                                            CoordSys::MAX_ANGLE2,
+                                                            specThetaExponent);
 
     samples_->updateAngleAttributes();
 
@@ -89,7 +89,7 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SphericalCoordinatesBrdf&
         inPhiAngles[0] = 0.0f;
     }
 
-    Arrayf specThetaAngles = createExponentialArray<Arrayf>(numSpecTheta, CoordSys::MAX_ANGLE2, 2.0f);
+    Arrayf specThetaAngles = array_util::createExponential<Arrayf>(numSpecTheta, CoordSys::MAX_ANGLE2, 2.0f);
     Arrayf specPhiAngles   = Arrayf::LinSpaced(numSpecPhi, 0.0, CoordSys::MAX_ANGLE3);
 
     samples_ = new SampleSet(static_cast<int>(inThetaAngles.size()),
@@ -107,6 +107,7 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SphericalCoordinatesBrdf&
     samples_->updateAngleAttributes();
     initializeSpectra(brdf);
 
+    reductionType_ = brdf.getReductionType();
     sourceType_ = brdf.getSourceType();
 }
 
@@ -158,4 +159,46 @@ bool SpecularCoordinatesBrdf::validate(bool verbose) const
     }
 
     return valid;
+}
+
+bool SpecularCoordinatesBrdf::expandAngles(bool angle0Expanded,
+                                           bool angle1Expanded,
+                                           bool angle2Expanded,
+                                           bool angle3Expanded)
+{
+    const Arrayf& angles0 = samples_->getAngles0();
+    Arrayf origAngles0 = angles0;
+
+    bool expanded = BaseBrdf::expandAngles(angle0Expanded,
+                                           angle1Expanded,
+                                           angle2Expanded,
+                                           angle3Expanded);
+
+    if (specularOffsets_.size() == 0) return expanded;
+
+    if (origAngles0.size() == angles0.size()) return expanded;
+
+    // Add the first element.
+    if (origAngles0[0] != angles0[0]) {
+        Arrayf origOffsets = specularOffsets_;
+
+        specularOffsets_.resize(origOffsets.size() + 1);
+        specularOffsets_[0] = origOffsets[0];
+        for (int i = 1; i < specularOffsets_.size(); ++i) {
+            specularOffsets_[i] = origOffsets[i - 1];
+        }
+    }
+
+    // Add the last element.
+    if (origAngles0[origAngles0.size() - 1] != angles0[angles0.size() - 1]) {
+        Arrayf origOffsets = specularOffsets_;
+
+        specularOffsets_.resize(origOffsets.size() + 1);
+        for (int i = 0; i < specularOffsets_.size() - 1; ++i) {
+            specularOffsets_[i] = origOffsets[i];
+        }
+        specularOffsets_[specularOffsets_.size() - 1] = origOffsets[origOffsets.size() - 1];
+    }
+
+    return expanded;
 }

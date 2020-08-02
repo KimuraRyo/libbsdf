@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -14,12 +14,11 @@
 
 using namespace lb;
 
-void LinearInterpolator::getSpectrum(const SampleSet&   samples,
-                                     float              angle0,
-                                     float              angle1,
-                                     float              angle2,
-                                     float              angle3,
-                                     Spectrum*          spectrum)
+Spectrum LinearInterpolator::getSpectrum(const SampleSet&   samples,
+                                         float              angle0,
+                                         float              angle1,
+                                         float              angle2,
+                                         float              angle3)
 {
     const Arrayf& angles0 = samples.getAngles0();
     const Arrayf& angles1 = samples.getAngles1();
@@ -29,6 +28,8 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
     int lIdx0, lIdx1, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx1, uIdx2, uIdx3; // index of the upper bound sample point
     Vec4f lowerAngles, upperAngles;
+
+    using array_util::findBounds;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles1, angle1, samples.isEqualIntervalAngles1(), &lIdx1, &uIdx1, &lowerAngles[1], &upperAngles[1]);
@@ -76,16 +77,16 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
     Spectrum sp0 = lerp(sp00, sp01, weights[1]);
     Spectrum sp1 = lerp(sp10, sp11, weights[1]);
 
-    *spectrum = lerp(sp0, sp1, weights[0]);
+    Spectrum sp = lerp(sp0, sp1, weights[0]);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
-void LinearInterpolator::getSpectrum(const SampleSet&   samples,
-                                     float              angle0,
-                                     float              angle2,
-                                     float              angle3,
-                                     Spectrum*          spectrum)
+Spectrum LinearInterpolator::getSpectrum(const SampleSet&   samples,
+                                         float              angle0,
+                                         float              angle2,
+                                         float              angle3)
 {
     const Arrayf& angles0 = samples.getAngles0();
     const Arrayf& angles2 = samples.getAngles2();
@@ -94,6 +95,8 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
     int lIdx0, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx2, uIdx3; // index of the upper bound sample point
     Vec4f lowerAngles, upperAngles;
+
+    using array_util::findBounds;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
@@ -121,9 +124,10 @@ void LinearInterpolator::getSpectrum(const SampleSet&   samples,
     Spectrum sp00 = lerp(sp000, sp001, weights[2]);
     Spectrum sp10 = lerp(sp100, sp101, weights[2]);
 
-    *spectrum = lerp(sp00, sp10, weights[0]);
+    Spectrum sp = lerp(sp00, sp10, weights[0]);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
 float LinearInterpolator::getValue(const SampleSet& samples,
@@ -141,6 +145,8 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     int lIdx0, lIdx1, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx1, uIdx2, uIdx3; // index of the upper bound sample point
     Vec4f lowerAngles, upperAngles;
+
+    using array_util::findBounds;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles1, angle1, samples.isEqualIntervalAngles1(), &lIdx1, &uIdx1, &lowerAngles[1], &upperAngles[1]);
@@ -189,8 +195,8 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     float val1 = lerp(val10, val11, weights[1]);
 
     float val = lerp(val0, val1, weights[0]);
-
     assert(!std::isnan(val) && !std::isinf(val));
+
     return val;
 }
 
@@ -207,6 +213,8 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     int lIdx0, lIdx2, lIdx3; // index of the lower bound sample point
     int uIdx0, uIdx2, uIdx3; // index of the upper bound sample point
     Vec4f lowerAngles, upperAngles;
+
+    using array_util::findBounds;
 
     findBounds(angles0, angle0, samples.isEqualIntervalAngles0(), &lIdx0, &uIdx0, &lowerAngles[0], &upperAngles[0]);
     findBounds(angles2, angle2, samples.isEqualIntervalAngles2(), &lIdx2, &uIdx2, &lowerAngles[2], &upperAngles[2]);
@@ -235,15 +243,14 @@ float LinearInterpolator::getValue(const SampleSet& samples,
     float val10 = lerp(val100, val101, weights[2]);
 
     float val = lerp(val00, val10, weights[0]);
-
     assert(!std::isnan(val) && !std::isinf(val));
+
     return val;
 }
 
-void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
-                                     float              theta,
-                                     float              phi,
-                                     Spectrum*          spectrum)
+Spectrum LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
+                                         float              theta,
+                                         float              phi)
 {
     const Arrayf& thetaArray = ss2.getThetaArray();
     const Arrayf& phiArray = ss2.getPhiArray();
@@ -252,6 +259,8 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
     int uIdx0, uIdx1; // index of the upper bound sample point
     float lowerAngle0, lowerAngle1;
     float upperAngle0, upperAngle1;
+
+    using array_util::findBounds;
 
     findBounds(thetaArray, theta, ss2.isEqualIntervalTheta(), &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
     findBounds(phiArray,   phi,   ss2.isEqualIntervalPhi(),   &lIdx1, &uIdx1, &lowerAngle1, &upperAngle1);
@@ -270,14 +279,14 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
     Spectrum sp0 = lerp(sp00, sp01, weight1);
     Spectrum sp1 = lerp(sp10, sp11, weight1);
 
-    *spectrum = lerp(sp0, sp1, weight0);
+    Spectrum sp = lerp(sp0, sp1, weight0);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
-void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
-                                     float              theta,
-                                     Spectrum*          spectrum)
+Spectrum LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
+                                         float              theta)
 {
     const Arrayf& thetaArray = ss2.getThetaArray();
 
@@ -285,6 +294,8 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
     int uIdx0; // index of the upper bound sample point
     float lowerAngle0;
     float upperAngle0;
+
+    using array_util::findBounds;
 
     findBounds(thetaArray, theta, ss2.isEqualIntervalTheta(), &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
 
@@ -294,7 +305,8 @@ void LinearInterpolator::getSpectrum(const SampleSet2D& ss2,
     float interval0 = std::max(upperAngle0 - lowerAngle0, EPSILON_F);
     float weight0 = (theta - lowerAngle0) / interval0;
 
-    *spectrum = lerp(sp0, sp1, weight0);
+    Spectrum sp = lerp(sp0, sp1, weight0);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }

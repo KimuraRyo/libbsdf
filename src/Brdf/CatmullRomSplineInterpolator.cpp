@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,12 +10,11 @@
 
 using namespace lb;
 
-void CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,
-                                               float            angle0,
-                                               float            angle1,
-                                               float            angle2,
-                                               float            angle3,
-                                               Spectrum*        spectrum)
+Spectrum CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,
+                                                   float            angle0,
+                                                   float            angle1,
+                                                   float            angle2,
+                                                   float            angle3)
 {
     const Arrayf& angles0 = samples.getAngles0();
     const Arrayf& angles1 = samples.getAngles1();
@@ -160,22 +159,21 @@ void CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,
                                   pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3,
                                   angle2, angle3);
 
-    Spectrum sp0, sp1, sp2, sp3;
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp00, sp01, sp02, sp03, angle1, &sp0);
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp10, sp11, sp12, sp13, angle1, &sp1);
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp20, sp21, sp22, sp23, angle1, &sp2);
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp30, sp31, sp32, sp33, angle1, &sp3);
+    Spectrum sp0 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp00, sp01, sp02, sp03, angle1);
+    Spectrum sp1 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp10, sp11, sp12, sp13, angle1);
+    Spectrum sp2 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp20, sp21, sp22, sp23, angle1);
+    Spectrum sp3 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp30, sp31, sp32, sp33, angle1);
 
-    catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, angle0, spectrum);
+    Spectrum sp = array_util::catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, angle0);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
-void CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,
-                                               float            angle0,
-                                               float            angle2,
-                                               float            angle3,
-                                               Spectrum*        spectrum)
+Spectrum CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,
+                                                   float            angle0,
+                                                   float            angle2,
+                                                   float            angle3)
 {
     const Arrayf& angles0 = samples.getAngles0();
     const Arrayf& angles2 = samples.getAngles2();
@@ -231,9 +229,10 @@ void CatmullRomSplineInterpolator::getSpectrum(const SampleSet& samples,
                                  pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3,
                                  angle2, angle3);
 
-    catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, angle0, spectrum);
+    Spectrum sp = array_util::catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, angle0);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
 float CatmullRomSplineInterpolator::getValue(const SampleSet&   samples,
@@ -463,10 +462,9 @@ float CatmullRomSplineInterpolator::getValue(const SampleSet&   samples,
     return val;
 }
 
-void CatmullRomSplineInterpolator::getSpectrum(const SampleSet2D&   ss2,
-                                               float                theta,
-                                               float                phi,
-                                               Spectrum*            spectrum)
+Spectrum CatmullRomSplineInterpolator::getSpectrum(const SampleSet2D&   ss2,
+                                                   float                theta,
+                                                   float                phi)
 {
     const Arrayf& thetaArray = ss2.getThetaArray();
     const Arrayf& phiArray = ss2.getPhiArray();
@@ -509,20 +507,19 @@ void CatmullRomSplineInterpolator::getSpectrum(const SampleSet2D&   ss2,
     const Spectrum& sp32 = ss2.getSpectrum(pos3Idx0, pos2Idx1);
     const Spectrum& sp33 = ss2.getSpectrum(pos3Idx0, pos3Idx1);
 
-    Spectrum sp0, sp1, sp2, sp3;
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp00, sp01, sp02, sp03, phi, &sp0);
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp10, sp11, sp12, sp13, phi, &sp1);
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp20, sp21, sp22, sp23, phi, &sp2);
-    catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp30, sp31, sp32, sp33, phi, &sp3);
+    Spectrum sp0 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp00, sp01, sp02, sp03, phi);
+    Spectrum sp1 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp10, sp11, sp12, sp13, phi);
+    Spectrum sp2 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp20, sp21, sp22, sp23, phi);
+    Spectrum sp3 = array_util::catmullRomSpline(pos0Angle1, pos1Angle1, pos2Angle1, pos3Angle1, sp30, sp31, sp32, sp33, phi);
 
-    catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, theta, spectrum);
+    Spectrum sp = array_util::catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, theta);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
-void CatmullRomSplineInterpolator::getSpectrum(const SampleSet2D&   ss2,
-                                               float                theta,
-                                               Spectrum*            spectrum)
+Spectrum CatmullRomSplineInterpolator::getSpectrum(const SampleSet2D&   ss2,
+                                                   float                theta)
 {
     const Arrayf& thetaArray = ss2.getThetaArray();
 
@@ -545,9 +542,10 @@ void CatmullRomSplineInterpolator::getSpectrum(const SampleSet2D&   ss2,
     const Spectrum& sp2 = ss2.getSpectrum(pos2Idx0);
     const Spectrum& sp3 = ss2.getSpectrum(pos3Idx0);
 
-    catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, theta, spectrum);
+    Spectrum sp = array_util::catmullRomSpline(pos0Angle0, pos1Angle0, pos2Angle0, pos3Angle0, sp0, sp1, sp2, sp3, theta);
+    assert(sp.allFinite());
 
-    assert(spectrum->allFinite());
+    return sp;
 }
 
 void CatmullRomSplineInterpolator::findBounds(const Arrayf& positions,
@@ -579,7 +577,7 @@ void CatmullRomSplineInterpolator::findBounds(const Arrayf& positions,
         return;
     }
 
-    lb::findBounds(positions, posAngle, equalIntervalPositions, pos1Index, pos2Index, pos1Angle, pos2Angle);
+    array_util::findBounds(positions, posAngle, equalIntervalPositions, pos1Index, pos2Index, pos1Angle, pos2Angle);
 
     int backIndex = static_cast<int>(positions.size() - 1);
     if (repeatBounds) {
@@ -652,14 +650,14 @@ Spectrum CatmullRomSplineInterpolator::interpolate2D(const SampleSet&   samples,
     const Spectrum& sp32 = samples.getSpectrum(index0, index1, pos3Index2, pos2Index3);
     const Spectrum& sp33 = samples.getSpectrum(index0, index1, pos3Index2, pos3Index3);
 
-    Spectrum sp0, sp1, sp2, sp3;
-    catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp00, sp01, sp02, sp03, angle3, &sp0);
-    catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp10, sp11, sp12, sp13, angle3, &sp1);
-    catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp20, sp21, sp22, sp23, angle3, &sp2);
-    catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp30, sp31, sp32, sp33, angle3, &sp3);
+    Spectrum sp0 = array_util::catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp00, sp01, sp02, sp03, angle3);
+    Spectrum sp1 = array_util::catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp10, sp11, sp12, sp13, angle3);
+    Spectrum sp2 = array_util::catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp20, sp21, sp22, sp23, angle3);
+    Spectrum sp3 = array_util::catmullRomSpline(pos0Angle3, pos1Angle3, pos2Angle3, pos3Angle3, sp30, sp31, sp32, sp33, angle3);
 
-    Spectrum sp;
-    catmullRomSpline(pos0Angle2, pos1Angle2, pos2Angle2, pos3Angle2, sp0, sp1, sp2, sp3, angle2, &sp);
+    Spectrum sp = array_util::catmullRomSpline(pos0Angle2, pos1Angle2, pos2Angle2, pos3Angle2, sp0, sp1, sp2, sp3, angle2);
+    assert(sp.allFinite());
+
     return sp;
 }
 

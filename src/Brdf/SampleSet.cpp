@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -118,22 +118,22 @@ bool SampleSet::validate(bool verbose) const
     }
 
     // Angle attributes
-    if (equalIntervalAngles0_ && !isEqualInterval(angles0_)) {
+    if (equalIntervalAngles0_ && !array_util::isEqualInterval(angles0_)) {
         valid = false;
         lbWarn << "[SampleSet::validate] equalIntervalAngles0 attribute is not updated.";
     }
 
-    if (equalIntervalAngles1_ && !isEqualInterval(angles1_)) {
+    if (equalIntervalAngles1_ && !array_util::isEqualInterval(angles1_)) {
         valid = false;
         lbWarn << "[SampleSet::validate] equalIntervalAngles1 attribute is not updated.";
     }
 
-    if (equalIntervalAngles2_ && !isEqualInterval(angles2_)) {
+    if (equalIntervalAngles2_ && !array_util::isEqualInterval(angles2_)) {
         valid = false;
         lbWarn << "[SampleSet::validate] equalIntervalAngles2 attribute is not updated.";
     }
 
-    if (equalIntervalAngles3_ && !isEqualInterval(angles3_)) {
+    if (equalIntervalAngles3_ && !array_util::isEqualInterval(angles3_)) {
         valid = false;
         lbWarn << "[SampleSet::validate] equalIntervalAngles3 attribute is not updated.";
     }
@@ -201,10 +201,10 @@ void SampleSet::resizeWavelengths(int numWavelengths)
 
 void SampleSet::updateEqualIntervalAngles()
 {
-    equalIntervalAngles0_ = isEqualInterval(angles0_);
-    equalIntervalAngles1_ = isEqualInterval(angles1_);
-    equalIntervalAngles2_ = isEqualInterval(angles2_);
-    equalIntervalAngles3_ = isEqualInterval(angles3_);
+    equalIntervalAngles0_ = array_util::isEqualInterval(angles0_);
+    equalIntervalAngles1_ = array_util::isEqualInterval(angles1_);
+    equalIntervalAngles2_ = array_util::isEqualInterval(angles2_);
+    equalIntervalAngles3_ = array_util::isEqualInterval(angles3_);
 
     lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle0: " << equalIntervalAngles0_;
     lbInfo << "[SampleSet::updateEqualIntervalAngles] Angle1: " << equalIntervalAngles1_;

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2019 Kimura Ryo                                       //
+// Copyright (C) 2019-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -12,13 +12,13 @@
 
 using namespace lb;
 
-void lb::findBounds(const Arrayf&   values,
-                    float           value,
-                    bool            equalIntervalValues,
-                    int*            lowerIndex,
-                    int*            upperIndex,
-                    float*          lowerValue,
-                    float*          upperValue)
+void array_util::findBounds(const Arrayf&   values,
+                            float           value,
+                            bool            equalIntervalValues,
+                            int*            lowerIndex,
+                            int*            upperIndex,
+                            float*          lowerValue,
+                            float*          upperValue)
 {
     if (values.size() == 1) {
         *lowerIndex = 0;

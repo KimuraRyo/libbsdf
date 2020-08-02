@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -83,26 +83,26 @@ public:
     virtual ~SpecularCoordinatesBrdf();
 
     /*! Virtual copy constructor. */
-    virtual SpecularCoordinatesBrdf* clone() const;
+    SpecularCoordinatesBrdf* clone() const override;
 
     using BaseBrdf::getSpectrum;
 
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
-    virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
+    Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const override;
 
     /*! Gets the value of the BRDF at incoming and outgoing directions and the index of wavelength. */
-    virtual float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const;
+    float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const override;
 
     /*!
      * Computes incoming and outgoing directions of a Cartesian coordinate system
      * using a set of angle indices.
      */
-    virtual void getInOutDirection(int      index0,
-                                   int      index1,
-                                   int      index2,
-                                   int      index3,
-                                   Vec3*    inDir,
-                                   Vec3*    outDir) const;
+    void getInOutDirection(int      index0,
+                           int      index1,
+                           int      index2,
+                           int      index3,
+                           Vec3*    inDir,
+                           Vec3*    outDir) const override;
 
     /*!
      * Computes outgoing directions of a Cartesian coordinate system
@@ -229,16 +229,26 @@ public:
      *   - Outside, infinite, or NaN angle
      *   - Negative, infinite, or NaN wavelength
      *
-     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
+     * \param verbose If this parameter is true, all warnings of spectra are output.
      */
-    virtual bool validate(bool verbose = false) const;
+    bool validate(bool verbose = false) const override;
+
+    /*!
+     * Expands minimum angles to MIN_ANGLE and maximum angles to MAX_ANGLE,
+     * and constructs the extrapolated sample set.
+     */
+    bool expandAngles(bool angle0Expanded = true,
+                      bool angle1Expanded = true,
+                      bool angle2Expanded = true,
+                      bool angle3Expanded = true) override;
 
 private:
     /*! Copy operator is disabled. */
     SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&);
 
     /*!
-     * The array of offsets from specular polar angles for refraction.
+     * The array of offsets from specular directions.
+     * This is efficient to represent the BTDF with refraction.
      * The size of the array is equal to the number of incoming polar angles.
      * If offsets are not used, the array is empty.
      */
@@ -254,15 +264,12 @@ inline Spectrum SpecularCoordinatesBrdf::getSpectrum(const Vec3& inDir, const Ve
     float inTheta, inPhi, specTheta, specPhi;
     fromXyz(inDir, outDir, &inTheta, &inPhi, &specTheta, &specPhi);
 
-    Spectrum sp;
     if (samples_->isIsotropic()) {
-        LinearInterpolator::getSpectrum(*samples_, inTheta, specTheta, specPhi, &sp);
+        return LinearInterpolator::getSpectrum(*samples_, inTheta, specTheta, specPhi);
     }
     else {
-        LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi, &sp);
+        return LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi);
     }
-
-    return sp;
 }
 
 inline float SpecularCoordinatesBrdf::getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const
@@ -327,9 +334,7 @@ inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta,
                                                      float specTheta,
                                                      float specPhi)
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi);
 }
 
 inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta,
@@ -337,9 +342,7 @@ inline Spectrum SpecularCoordinatesBrdf::getSpectrum(float inTheta,
                                                      float specTheta,
                                                      float specPhi) const
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, specTheta, specPhi);
 }
 
 inline Spectrum& SpecularCoordinatesBrdf::getSpectrum(int inThetaIndex,
@@ -426,8 +429,8 @@ inline float SpecularCoordinatesBrdf::getSpecularOffset(float inTheta) const
     float lowerAngle0;
     float upperAngle0;
 
-    findBounds(samples_->getAngles0(), inTheta, samples_->isEqualIntervalAngles0(),
-               &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
+    array_util::findBounds(samples_->getAngles0(), inTheta, samples_->isEqualIntervalAngles0(),
+                           &lIdx0, &uIdx0, &lowerAngle0, &upperAngle0);
 
     float interval = std::max(upperAngle0 - lowerAngle0, EPSILON_F);
     float weight = (inTheta - lowerAngle0) / interval;

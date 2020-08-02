@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,9 +25,11 @@ namespace lb {
 using Arrayf = Eigen::ArrayXf;
 using Arrayd = Eigen::ArrayXd;
 
+namespace array_util {
+
 /*! \brief Copies an array. */
 template <typename SrcT, typename DestT>
-void copyArray(const SrcT& srcArray, DestT* destArray);
+void copy(const SrcT& srcArray, DestT* destArray);
 
 /*! \brief Appends an element to the end of an array. */
 template <typename ArrayT>
@@ -35,26 +37,18 @@ void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value);
 
 /*! \brief Creates a non-equal interval array from zero to \a maxValue with \a exponent. */
 template <typename ArrayT>
-ArrayT createExponentialArray(int                       numElements,
-                              typename ArrayT::Scalar   maxValue,
-                              typename ArrayT::Scalar   exponent);
+ArrayT createExponential(int                        numElements,
+                         typename ArrayT::Scalar    maxValue,
+                         typename ArrayT::Scalar    exponent);
 
 /*!
  * \brief Interpolates arrays using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
- * \param array Interpolated array.
+ * \return Interpolated array.
  */
 template <typename T>
-void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
-                      const T& array0, const T& array1, const T& array2, const T& array3,
-                      float pos, T* array);
-
-/*! \brief Converts an array from degrees to radians. */
-template <typename T>
-T toRadians(const T& degrees);
-
-/*! \brief Converts an array from radians to degrees. */
-template <typename T>
-T toDegrees(const T& radians);
+T catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
+                   const T& array0, const T& array1, const T& array2, const T& array3,
+                   float pos);
 
 /*! \brief Returns true if the elements of an array are equally-spaced intervals. */
 template <typename T>
@@ -77,12 +71,14 @@ void findBounds(const Arrayf&   values,
                 float*          lowerValue,
                 float*          upperValue);
 
+} // namespace array_util
+
 /*
  * Implementation
  */
 
 template <typename SrcT, typename DestT>
-void copyArray(const SrcT& srcArray, DestT* destArray)
+void array_util::copy(const SrcT& srcArray, DestT* destArray)
 {
     int i = 0;
     for (auto it = srcArray.begin(); it != srcArray.end(); ++it, ++i) {
@@ -91,7 +87,7 @@ void copyArray(const SrcT& srcArray, DestT* destArray)
 }
 
 template <typename ArrayT>
-void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
+void array_util::appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
 {
     using ScalarType = typename ArrayT::Scalar;
 
@@ -109,9 +105,9 @@ void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
 }
 
 template <typename ArrayT>
-ArrayT createExponentialArray(int                       numElements,
-                              typename ArrayT::Scalar   maxValue,
-                              typename ArrayT::Scalar   exponent)
+ArrayT array_util::createExponential(int                        numElements,
+                                     typename ArrayT::Scalar    maxValue,
+                                     typename ArrayT::Scalar    exponent)
 {
     ArrayT arr = ArrayT::LinSpaced(numElements, 0.0, maxValue);
 
@@ -125,43 +121,34 @@ ArrayT createExponentialArray(int                       numElements,
 }
 
 template <typename T>
-void catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
-                      const T& array0, const T& array1, const T& array2, const T& array3,
-                      float pos, T* array)
+T array_util::catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
+                               const T& array0, const T& array1, const T& array2, const T& array3,
+                               float pos)
 {
     assert(array0.size() == array1.size() &&
            array1.size() == array2.size() &&
            array2.size() == array3.size());
 
-    array->resize(array0.size());
+    T array;
+    array.resize(array0.size());
 
     CentripetalCatmullRomSpline ccrs;
     #pragma omp parallel for private(ccrs)
-    for (int i = 0; i < array->size(); ++i) {
+    for (int i = 0; i < array.size(); ++i) {
         ccrs.initialize(Vec2(pos0, array0[i]),
                         Vec2(pos1, array1[i]),
                         Vec2(pos2, array2[i]),
                         Vec2(pos3, array3[i]));
 
         using ScalarType = typename T::Scalar;
-        (*array)[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));
+        array[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));
     }
+
+    return array;
 }
 
 template <typename T>
-T toRadians(const T& degrees)
-{
-    return degrees / 180 * PI_D;
-}
-
-template <typename T>
-T toDegrees(const T& radians)
-{
-    return radians * 180 / PI_D;
-}
-
-template <typename T>
-bool isEqualInterval(const T& array)
+bool array_util::isEqualInterval(const T& array)
 {
     if (array.size() <= 2) return false;
 

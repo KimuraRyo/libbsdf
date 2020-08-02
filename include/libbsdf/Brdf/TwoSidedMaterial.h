@@ -50,8 +50,14 @@ private:
 inline std::shared_ptr<Material> TwoSidedMaterial::getFrontMaterial() { return frontMaterial_; }
 inline std::shared_ptr<Material> TwoSidedMaterial::getBackMaterial()  { return backMaterial_; }
 
-inline const std::shared_ptr<Material> TwoSidedMaterial::getFrontMaterial() const { return frontMaterial_; }
-inline const std::shared_ptr<Material> TwoSidedMaterial::getBackMaterial()  const { return backMaterial_; }
+inline std::shared_ptr<const Material> TwoSidedMaterial::getFrontMaterial() const { return frontMaterial_; }
+inline std::shared_ptr<const Material> TwoSidedMaterial::getBackMaterial()  const { return backMaterial_; }
+
+inline bool TwoSidedMaterial::isEmpty() const
+{
+    return !((frontMaterial_ && !frontMaterial_->isEmpty()) ||
+             (backMaterial_ && !backMaterial_->isEmpty()));
+}
 
 } // namespace lb
 

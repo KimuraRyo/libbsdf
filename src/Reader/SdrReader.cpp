@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -115,7 +115,7 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
 
     ss2->setSourceType(sourceType);
 
-    copyArray(inThetaDegrees, &ss2->getThetaArray());
+    array_util::copy(inThetaDegrees, &ss2->getThetaArray());
     ss2->getThetaArray() = toRadians(ss2->getThetaArray());
 
     ss2->setPhi(0, 0.0);

@@ -70,15 +70,13 @@ SampleSet2D::~SampleSet2D()
 
 Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
 {
-    Spectrum sp;
-    Sampler::getSpectrum<LinearInterpolator>(*this, inDir, &sp);
-    return sp;
+    return Sampler::getSpectrum<LinearInterpolator>(*this, inDir);
 }
 
 void SampleSet2D::updateAngleAttributes()
 {
-    equalIntervalTheta_ = isEqualInterval(thetaAngles_);
-    equalIntervalPhi_   = isEqualInterval(phiAngles_);
+    equalIntervalTheta_ = array_util::isEqualInterval(thetaAngles_);
+    equalIntervalPhi_   = array_util::isEqualInterval(phiAngles_);
 
     lbInfo
         << "[SampleSet2D::updateAngleAttributes] equalIntervalTheta_: "

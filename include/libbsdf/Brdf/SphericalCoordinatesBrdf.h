@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -56,7 +56,7 @@ public:
     virtual ~SphericalCoordinatesBrdf();
 
     /*! Virtual copy constructor. */
-    virtual SphericalCoordinatesBrdf* clone() const;
+    SphericalCoordinatesBrdf* clone() const override;
 
     using BaseBrdf::getSpectrum;
 
@@ -126,9 +126,7 @@ inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta,
                                                       float outTheta,
                                                       float outPhi)
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, outTheta, outPhi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, outTheta, outPhi);
 }
 
 inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta,
@@ -136,9 +134,7 @@ inline Spectrum SphericalCoordinatesBrdf::getSpectrum(float inTheta,
                                                       float outTheta,
                                                       float outPhi) const
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, outTheta, outPhi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*samples_, inTheta, inPhi, outTheta, outPhi);
 }
 
 inline Spectrum& SphericalCoordinatesBrdf::getSpectrum(int inThetaIndex,

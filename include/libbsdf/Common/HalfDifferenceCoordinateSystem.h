@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -64,20 +64,20 @@ struct HalfDifferenceCoordinateSystem
                         ScalarT*    diffTheta,
                         ScalarT*    diffPhi);
 
-    static const char ANGLE0_NAME[]; /*!< This attribute holds the name of halfTheta. */
-    static const char ANGLE1_NAME[]; /*!< This attribute holds the name of halfPhi. */
-    static const char ANGLE2_NAME[]; /*!< This attribute holds the name of diffTheta. */
-    static const char ANGLE3_NAME[]; /*!< This attribute holds the name of diffPhi. */
+    static constexpr char ANGLE0_NAME[] = "half polar angle";           /*!< This attribute holds the name of halfTheta. */
+    static constexpr char ANGLE1_NAME[] = "half azimuthal angle";       /*!< This attribute holds the name of halfPhi. */
+    static constexpr char ANGLE2_NAME[] = "difference polar angle";     /*!< This attribute holds the name of diffTheta. */
+    static constexpr char ANGLE3_NAME[] = "difference azimuthal angle"; /*!< This attribute holds the name of diffPhi. */
 
-    static const float MIN_ANGLE0; /*!< This attribute holds the minimum value of halfTheta. */
-    static const float MIN_ANGLE1; /*!< This attribute holds the minimum value of halfPhi. */
-    static const float MIN_ANGLE2; /*!< This attribute holds the minimum value of diffTheta. */
-    static const float MIN_ANGLE3; /*!< This attribute holds the minimum value of diffPhi. */
+    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of halfTheta. */
+    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of halfPhi. */
+    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of diffTheta. */
+    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of diffPhi. */
 
-    static const float MAX_ANGLE0; /*!< This attribute holds the maximum value of halfTheta. */
-    static const float MAX_ANGLE1; /*!< This attribute holds the maximum value of halfPhi. */
-    static const float MAX_ANGLE2; /*!< This attribute holds the maximum value of diffTheta. */
-    static const float MAX_ANGLE3; /*!< This attribute holds the maximum value of diffPhi. */
+    static constexpr float MAX_ANGLE0 = PI_2_F; /*!< This attribute holds the maximum value of halfTheta. */
+    static constexpr float MAX_ANGLE1 = TAU_F;  /*!< This attribute holds the maximum value of halfPhi. */
+    static constexpr float MAX_ANGLE2 = PI_2_F; /*!< This attribute holds the maximum value of diffTheta. */
+    static constexpr float MAX_ANGLE3 = TAU_F;  /*!< This attribute holds the maximum value of diffPhi. */
 };
 
 template <typename ScalarT>
@@ -88,6 +88,9 @@ void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
                                            Vec3*    inDir,
                                            Vec3*    outDir)
 {
+    // Avoid unstable results.
+    diffTheta = std::min(diffTheta, ScalarT(decrease(MAX_ANGLE2)));
+
     Vec3 halfDir = SphericalCoordinateSystem::toXyz(halfTheta, halfPhi);
     Vec3 diffDir = SphericalCoordinateSystem::toXyz(diffTheta, diffPhi);
 
@@ -96,8 +99,6 @@ void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
     *inDir = Vec3(static_cast<Vec3::Scalar>(rotPhVec[0]),
                   static_cast<Vec3::Scalar>(rotPhVec[1]),
                   static_cast<Vec3::Scalar>(rotThVec[1]));
-
-    (*inDir)[2] = std::max((*inDir)[2], Vec3::Scalar(0));
     inDir->normalize();
 
     *outDir = reflect(*inDir, halfDir);
@@ -133,7 +134,7 @@ void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
                                              ScalarT*       diffPhi)
 {
     Vec3 halfDir = (inDir + outDir).normalized();
-    ScalarT halfPhi; // halfPhi is 0 for isotorpic data.
+    ScalarT halfPhi; // halfPhi is 0 for isotropic data.
     SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, &halfPhi);
 
     Vec2 rotPhVec = Eigen::Rotation2D<Vec2::Scalar>(-halfPhi)

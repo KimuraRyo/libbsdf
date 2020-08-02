@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -306,10 +306,10 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
                                                                   numChannels);
     SampleSet* ss = brdf->getSampleSet();
 
-    copyArray(inThetaDegrees,  &ss->getAngles0());
+    array_util::copy(inThetaDegrees,    &ss->getAngles0());
     brdf->setInPhi(0, 0.0f);
-    copyArray(outThetaDegrees, &ss->getAngles2());
-    copyArray(outPhiDegrees,   &ss->getAngles3());
+    array_util::copy(outThetaDegrees,   &ss->getAngles2());
+    array_util::copy(outPhiDegrees,     &ss->getAngles3());
 
     ss->getAngles0() = toRadians(ss->getAngles0());
     ss->getAngles2() = toRadians(ss->getAngles2());

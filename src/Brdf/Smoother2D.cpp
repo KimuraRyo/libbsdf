@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2019 Kimura Ryo                                  //
+// Copyright (C) 2017-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -115,11 +115,8 @@ bool Smoother2D::insertAngle(std::set<Arrayf::Scalar>&  angleSet,
 
     Vec2f midAngles = (angles + nextAngles) / 2.0f;
 
-    Spectrum lerpSp;
-    LinearInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1], &lerpSp);
-
-    Spectrum crSp;
-    CatmullRomSplineInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1], &crSp);
+    Spectrum lerpSp = LinearInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
+    Spectrum crSp = CatmullRomSplineInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
 
     Spectrum diffSp = (lerpSp - crSp).abs();
     if (diffSp.maxCoeff() > diffThreshold_) {
@@ -137,8 +134,8 @@ void Smoother2D::updateSamples()
     SampleSet2D* origSs2 = new SampleSet2D(*samples_);
     samples_->resizeAngles(static_cast<int>(angles0_.size()), static_cast<int>(angles1_.size()));
 
-    copyArray(angles0_, &samples_->getThetaArray());
-    copyArray(angles1_, &samples_->getPhiArray());
+    array_util::copy(angles0_, &samples_->getThetaArray());
+    array_util::copy(angles1_, &samples_->getPhiArray());
     samples_->updateAngleAttributes();
 
     lb::initializeSpectra<CatmullRomSplineInterpolator>(*origSs2, samples_);

@@ -25,11 +25,7 @@ namespace lb {
 class Btdf
 {
 public:
-    /*!
-     * Constructs a BTDF.
-     *
-     * \warning \a brdf is deleted in destructor.
-     */
+    /*! Constructs a BTDF. */
     explicit Btdf(std::shared_ptr<Brdf> brdf);
 
     virtual ~Btdf();
@@ -49,7 +45,7 @@ public:
                            Vec3*    outDir) const;
 
     std::shared_ptr<Brdf>       getBrdf();       /*!< Gets the BRDF data. */
-    const std::shared_ptr<Brdf> getBrdf() const; /*!< Gets the BRDF data. */
+    std::shared_ptr<const Brdf> getBrdf() const; /*!< Gets the BRDF data. */
 
     SampleSet*       getSampleSet();       /*!< Gets sample points. */
     const SampleSet* getSampleSet() const; /*!< Gets sample points. */
@@ -65,8 +61,10 @@ private:
 
 inline Spectrum Btdf::getSpectrum(const Vec3& inDir, const Vec3& outDir) const
 {
-    Spectrum sp = brdf_->getSpectrum(Vec3(inDir[0],  inDir[1],  std::abs(inDir[2])),
-                                     Vec3(outDir[0], outDir[1], std::abs(outDir[2])));
+    using std::abs;
+
+    Spectrum sp = brdf_->getSpectrum(Vec3(inDir[0],  inDir[1],  abs(inDir[2])),
+                                     Vec3(outDir[0], outDir[1], abs(outDir[2])));
     return sp;
 }
 
@@ -78,8 +76,8 @@ inline void Btdf::getInOutDirection(int index0, int index1, int index2, int inde
     outDir->z() = -outDir->z();
 }
 
-inline       std::shared_ptr<Brdf> Btdf::getBrdf()       { return brdf_; }
-inline const std::shared_ptr<Brdf> Btdf::getBrdf() const { return brdf_; }
+inline std::shared_ptr<      Brdf> Btdf::getBrdf()       { return brdf_; }
+inline std::shared_ptr<const Brdf> Btdf::getBrdf() const { return brdf_; }
 
 inline       SampleSet* Btdf::getSampleSet()       { return brdf_->getSampleSet(); }
 inline const SampleSet* Btdf::getSampleSet() const { return brdf_->getSampleSet(); }

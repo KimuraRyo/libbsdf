@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -57,7 +57,7 @@ public:
     virtual ~HalfDifferenceCoordinatesBrdf();
 
     /*! Virtual copy constructor. */
-    virtual HalfDifferenceCoordinatesBrdf* clone() const;
+    HalfDifferenceCoordinatesBrdf* clone() const override;
 
     using BaseBrdf::getSpectrum;
 
@@ -127,9 +127,7 @@ inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta,
                                                            float diffTheta,
                                                            float diffPhi)
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi);
 }
 
 inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta,
@@ -137,9 +135,7 @@ inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(float halfTheta,
                                                            float diffTheta,
                                                            float diffPhi) const
 {
-    Spectrum sp;
-    LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi, &sp);
-    return sp;
+    return LinearInterpolator::getSpectrum(*samples_, halfTheta, halfPhi, diffTheta, diffPhi);
 }
 
 inline Spectrum& HalfDifferenceCoordinatesBrdf::getSpectrum(int halfThetaIndex,

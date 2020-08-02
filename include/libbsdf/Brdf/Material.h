@@ -20,22 +20,15 @@ namespace lb {
  * \class   Material
  * \brief   The Material class provides the material data structure.
  *
- * The data includes BSDF, specular reflectances and transmittances, and TIS.
+ * The data includes a BSDF, specular reflectances, and specular transmittances.
  */
 class Material
 {
 public:
-    /*!
-     * Constructs a material.
-     *
-     * \warning \a bsdf, \a specularReflectances, \a specularTransmittances,
-     * \a reflectionTis, and \a transmissionTis are deleted in destructor.
-     */
-    Material(std::shared_ptr<Bsdf>          bsdf,
-             std::shared_ptr<SampleSet2D>   specularReflectances,
-             std::shared_ptr<SampleSet2D>   specularTransmittances,
-             std::shared_ptr<SampleSet2D>   reflectionTis = nullptr,
-             std::shared_ptr<SampleSet2D>   transmissionTis = nullptr);
+    /*! Constructs a material. */
+    explicit Material(std::shared_ptr<Bsdf>         bsdf,
+                      std::shared_ptr<SampleSet2D>  specularReflectances = nullptr,
+                      std::shared_ptr<SampleSet2D>  specularTransmittances = nullptr);
 
     virtual ~Material();
 
@@ -43,31 +36,31 @@ public:
     std::shared_ptr<Bsdf> getBsdf();
 
     /*! Gets the BSDF data. */
-    const std::shared_ptr<Bsdf> getBsdf() const;
+    std::shared_ptr<const Bsdf> getBsdf() const;
+
+    /*! Sets the BSDF data. */
+    void setBsdf(std::shared_ptr<Bsdf> bsdf);
 
     /*! Gets the array of specular reflectance. */
     std::shared_ptr<SampleSet2D> getSpecularReflectances();
 
     /*! Gets the array of specular reflectance. */
-    const std::shared_ptr<SampleSet2D> getSpecularReflectances() const;
+    std::shared_ptr<const SampleSet2D> getSpecularReflectances() const;
+
+    /*! Sets the array of specular reflectance. */
+    void setSpecularReflectances(std::shared_ptr<SampleSet2D> specularReflectances);
 
     /*! Gets the array of specular transmittance. */
     std::shared_ptr<SampleSet2D> getSpecularTransmittances();
 
     /*! Gets the array of specular transmittance. */
-    const std::shared_ptr<SampleSet2D> getSpecularTransmittances() const;
+    std::shared_ptr<const SampleSet2D> getSpecularTransmittances() const;
 
-    /*! Gets the TIS of reflection. */
-    std::shared_ptr<SampleSet2D> getReflectionTis();
+    /*! Sets the array of specular transmittance. */
+    void setSpecularTransmittances(std::shared_ptr<SampleSet2D> specularTransmittances);
 
-    /*! Gets the TIS of reflection. */
-    const std::shared_ptr<SampleSet2D> getReflectionTis() const;
-
-    /*! Gets the TIS of transmission. */
-    std::shared_ptr<SampleSet2D> getTransmissionTis();
-
-    /*! Gets the TIS of transmission. */
-    const std::shared_ptr<SampleSet2D> getTransmissionTis() const;
+    /*! Returns true if BRDF, BTDF, specular reflectance, and specular transmittance do not exist. */
+    bool isEmpty() const;
 
 protected:
     std::shared_ptr<Bsdf> bsdf_; /*!< This attribute holds the BSDF data including angles, wavelengths, and spectra. */
@@ -75,28 +68,38 @@ protected:
     std::shared_ptr<SampleSet2D> specularReflectances_;     /*!< The array of specular reflectance. */
     std::shared_ptr<SampleSet2D> specularTransmittances_;   /*!< The array of specular transmittance. */
 
-    std::shared_ptr<SampleSet2D> reflectionTis_;    /*!< Total Integrated Scatter (TIS) of reflection. */
-    std::shared_ptr<SampleSet2D> transmissionTis_;  /*!< Total Integrated Scatter (TIS) of transmission. */
-
 private:
     /*! Copy operator is disabled. */
     Material& operator=(const Material&);
 };
 
-inline       std::shared_ptr<Bsdf> Material::getBsdf()       { return bsdf_; }
-inline const std::shared_ptr<Bsdf> Material::getBsdf() const { return bsdf_; }
+inline std::shared_ptr<      Bsdf> Material::getBsdf()       { return bsdf_; }
+inline std::shared_ptr<const Bsdf> Material::getBsdf() const { return bsdf_; }
 
-inline       std::shared_ptr<SampleSet2D> Material::getSpecularReflectances()       { return specularReflectances_; }
-inline const std::shared_ptr<SampleSet2D> Material::getSpecularReflectances() const { return specularReflectances_; }
+inline void Material::setBsdf(std::shared_ptr<Bsdf> bsdf) { bsdf_ = bsdf; }
 
-inline       std::shared_ptr<SampleSet2D> Material::getSpecularTransmittances()       { return specularTransmittances_; }
-inline const std::shared_ptr<SampleSet2D> Material::getSpecularTransmittances() const { return specularTransmittances_; }
+inline std::shared_ptr<      SampleSet2D> Material::getSpecularReflectances()       { return specularReflectances_; }
+inline std::shared_ptr<const SampleSet2D> Material::getSpecularReflectances() const { return specularReflectances_; }
 
-inline       std::shared_ptr<SampleSet2D> Material::getReflectionTis()       { return reflectionTis_; }
-inline const std::shared_ptr<SampleSet2D> Material::getReflectionTis() const { return reflectionTis_; }
+inline void Material::setSpecularReflectances(std::shared_ptr<SampleSet2D> specularReflectances)
+{
+    specularReflectances_ = specularReflectances;
+}
 
-inline       std::shared_ptr<SampleSet2D> Material::getTransmissionTis()       { return transmissionTis_; }
-inline const std::shared_ptr<SampleSet2D> Material::getTransmissionTis() const { return transmissionTis_; }
+inline std::shared_ptr<      SampleSet2D> Material::getSpecularTransmittances()       { return specularTransmittances_; }
+inline std::shared_ptr<const SampleSet2D> Material::getSpecularTransmittances() const { return specularTransmittances_; }
+
+inline void Material::setSpecularTransmittances(std::shared_ptr<SampleSet2D> specularTransmittances)
+{
+    specularTransmittances_ = specularTransmittances;
+}
+
+inline bool Material::isEmpty() const
+{
+    return !((bsdf_ && !bsdf_->isEmpty()) ||
+             specularReflectances_ ||
+             specularTransmittances_);
+}
 
 } // namespace lb
 

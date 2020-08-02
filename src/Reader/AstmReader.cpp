@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -222,10 +222,10 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     SampleSet* ss = brdf->getSampleSet();
 
     // Set angles.
-    copyArray(inThetaAngles,  &ss->getAngles0());
-    copyArray(inPhiAngles,    &ss->getAngles1());
-    copyArray(outThetaAngles, &ss->getAngles2());
-    copyArray(outPhiAngles,   &ss->getAngles3());
+    array_util::copy(inThetaAngles,  &ss->getAngles0());
+    array_util::copy(inPhiAngles,    &ss->getAngles1());
+    array_util::copy(outThetaAngles, &ss->getAngles2());
+    array_util::copy(outPhiAngles,   &ss->getAngles3());
 
     // Set wavelengths.
     for (int i = 0; i < static_cast<int>(wavelengths.size()); ++i) {

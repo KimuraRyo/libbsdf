@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,8 +10,8 @@
 #define LIBBSDF_COORDINATES_BRDF_H
 
 #include <libbsdf/Brdf/Brdf.h>
-#include <libbsdf/Brdf/Sampler.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
+#include <libbsdf/Brdf/Sampler.h>
 
 namespace lb {
 
@@ -61,56 +61,56 @@ public:
     virtual ~CoordinatesBrdf();
 
     /*! Virtual copy constructor. */
-    virtual CoordinatesBrdf<CoordSysT>* clone() const;
+    CoordinatesBrdf<CoordSysT>* clone() const override;
 
     /*! Gets the spectrum of the BRDF at incoming and outgoing directions. */
-    virtual Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const;
+    Spectrum getSpectrum(const Vec3& inDir, const Vec3& outDir) const override;
 
     /*! Gets the value of the BRDF at incoming and outgoing directions and the index of wavelength. */
-    virtual float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const;
+    float getValue(const Vec3& inDir, const Vec3& outDir, int wavelengthIndex) const override;
 
     /*!
      * Computes incoming and outgoing directions of a Cartesian coordinate system
      * using a set of angle indices.
      */
-    virtual void getInOutDirection(int      index0,
-                                   int      index1,
-                                   int      index2,
-                                   int      index3,
-                                   Vec3*    inDir,
-                                   Vec3*    outDir) const;
+    void getInOutDirection(int      index0,
+                           int      index1,
+                           int      index2,
+                           int      index3,
+                           Vec3*    inDir,
+                           Vec3*    outDir) const override;
 
     /*!
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.
      */
-    virtual void toXyz(float angle0,
-                       float angle1,
-                       float angle2,
-                       float angle3,
-                       Vec3* inDir,
-                       Vec3* outDir) const;
+    void toXyz(float angle0,
+               float angle1,
+               float angle2,
+               float angle3,
+               Vec3* inDir,
+               Vec3* outDir) const override;
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
      * assigns them to \a angle0, \a angle1, \a angle2, and \a angle3.
      */
-    virtual void fromXyz(const Vec3&    inDir,
-                         const Vec3&    outDir,
-                         float*         angle0,
-                         float*         angle1,
-                         float*         angle2,
-                         float*         angle3) const;
+    void fromXyz(const Vec3&    inDir,
+                 const Vec3&    outDir,
+                 float*         angle0,
+                 float*         angle1,
+                 float*         angle2,
+                 float*         angle3) const override;
 
     /*!
      * Converts from incoming and outgoing directions to three angles for an isotropic BRDF and
      * assigns them to \a angle0, \a angle2, and \a angle3.
      */
-    virtual void fromXyz(const Vec3&    inDir,
-                         const Vec3&    outDir,
-                         float*         angle0,
-                         float*         angle2,
-                         float*         angle3) const;
+    void fromXyz(const Vec3&    inDir,
+                 const Vec3&    outDir,
+                 float*         angle0,
+                 float*         angle2,
+                 float*         angle3) const override;
 
     std::string getAngle0Name() const; /*!< Gets a name of angle0. */
     std::string getAngle1Name() const; /*!< Gets a name of angle1. */
@@ -125,9 +125,9 @@ public:
      *   - Outside, infinite, or NaN angle
      *   - Negative, infinite, or NaN wavelength
      *
-     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
+     * \param verbose If this parameter is true, all warnings of spectra are output.
      */
-    virtual bool validate(bool verbose = false) const;
+    bool validate(bool verbose = false) const override;
 
     /*!
      * Expands minimum angles to MIN_ANGLE and maximum angles to MAX_ANGLE,
@@ -136,10 +136,10 @@ public:
     bool expandAngles(bool angle0Expanded = true,
                       bool angle1Expanded = true,
                       bool angle2Expanded = true,
-                      bool angle3Expanded = true);
+                      bool angle3Expanded = true) override;
 
     /*! Clamps all angles to minimum and maximum values of each coordinate system. */
-    void clampAngles();
+    void clampAngles() override;
 
 protected:
     /*! Sets the angle0 at the index. The array of angles must be sorted in ascending order. */
@@ -200,6 +200,7 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&     brdf,
     samples_->updateAngleAttributes();
     initializeSpectra(brdf);
 
+    reductionType_ = brdf.getReductionType();
     sourceType_ = brdf.getSourceType();
 }
 
@@ -221,6 +222,7 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf& brdf,
 
     initializeSpectra(brdf);
 
+    reductionType_ = brdf.getReductionType();
     sourceType_ = brdf.getSourceType();
 }
 
@@ -243,9 +245,7 @@ CoordinatesBrdf<CoordSysT>* CoordinatesBrdf<CoordSysT>::clone() const
 template <typename CoordSysT>
 Spectrum CoordinatesBrdf<CoordSysT>::getSpectrum(const Vec3& inDir, const Vec3& outDir) const
 {
-    Spectrum sp;
-    Sampler::getSpectrum<CoordSysT, LinearInterpolator>(*samples_, inDir, outDir, &sp);
-    return sp;
+    return Sampler::getSpectrum<CoordSysT, LinearInterpolator>(*samples_, inDir, outDir);
 }
 
 template <typename CoordSysT>
@@ -422,6 +422,8 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles(bool angle0Expanded,
     Arrayf angles1 = samples_->getAngles1();
     Arrayf angles2 = samples_->getAngles2();
     Arrayf angles3 = samples_->getAngles3();
+
+    using array_util::appendElement;
 
     if (angle0Expanded && !isEqual(angles0[0], CoordSysT::MIN_ANGLE0)) { appendElement(&angles0, CoordSysT::MIN_ANGLE0); }
     if (angle1Expanded && !isEqual(angles1[0], CoordSysT::MIN_ANGLE1)) { appendElement(&angles1, CoordSysT::MIN_ANGLE1); }

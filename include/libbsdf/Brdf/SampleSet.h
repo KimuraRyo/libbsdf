@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -149,21 +149,21 @@ public:
      *   - Infinite or NaN angle
      *   - Negative, infinite, or NaN wavelength
      *
-     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
+     * \param verbose If this parameter is true, all warnings of spectra are output.
      */
     bool validate(bool verbose = false) const;
 
     /*! Returns true if the data is isotropic. */
     bool isIsotropic() const;
 
-    /*! Returns true if sample points are containd in one side of the plane of incidence. */
+    /*! Returns true if sample points are contained in one side of the plane of incidence. */
     bool isOneSide() const;
 
     /*!
      * \brief Updates angle attributes.
      *
      * Updates the attributes whether angles are set at equal intervals.
-     * Updates the attributes whether sample points are containd in one side of the plane of incidence.
+     * Updates the attributes whether sample points are contained in one side of the plane of incidence.
      */
     void updateAngleAttributes();
 
@@ -191,10 +191,10 @@ private:
     /*! Updates the attributes whether angles are set at equal intervals. */
     void updateEqualIntervalAngles();
 
-    /*! Distinguishes the attributes whether sample points are containd in one side of the plane of incidence. */
+    /*! Distinguishes the attributes whether sample points are contained in one side of the plane of incidence. */
     bool distinguishOneSide() const;
 
-    /*! Updates the attributes whether sample points are containd in one side of the plane of incidence. */
+    /*! Updates the attributes whether sample points are contained in one side of the plane of incidence. */
     void updateOneSide();
 
     SpectrumList spectra_; /*!< The list of spectrum for each pair of incoming and outgoing directions. */
@@ -213,7 +213,7 @@ private:
 
     Arrayf wavelengths_; /*!< The array of wavelengths. */
 
-    /*! This attribute holds whether sample points are containd in one side of the plane of incidence. */
+    /*! This attribute holds whether sample points are contained in one side of the plane of incidence. */
     bool oneSide_;
 };
 
@@ -278,25 +278,25 @@ inline float SampleSet::getAngle3(int index) const { return angles3_[index]; }
 inline void SampleSet::setAngle0(int index, float angle)
 {
     angles0_[index] = angle;
-    equalIntervalAngles0_ = isEqualInterval(angles0_);
+    equalIntervalAngles0_ = array_util::isEqualInterval(angles0_);
 }
 
 inline void SampleSet::setAngle1(int index, float angle)
 {
     angles1_[index] = angle;
-    equalIntervalAngles1_ = isEqualInterval(angles1_);
+    equalIntervalAngles1_ = array_util::isEqualInterval(angles1_);
 }
 
 inline void SampleSet::setAngle2(int index, float angle)
 {
     angles2_[index] = angle;
-    equalIntervalAngles2_ = isEqualInterval(angles2_);
+    equalIntervalAngles2_ = array_util::isEqualInterval(angles2_);
 }
 
 inline void SampleSet::setAngle3(int index, float angle)
 {
     angles3_[index] = angle;
-    equalIntervalAngles3_ = isEqualInterval(angles3_);
+    equalIntervalAngles3_ = array_util::isEqualInterval(angles3_);
 }
 
 inline Arrayf& SampleSet::getAngles0() { return angles0_; }
