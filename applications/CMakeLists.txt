@@ -27,6 +27,7 @@ set_target_properties(${UTILITY_LIB_NAME} PROPERTIES FOLDER ${LIBBSDF_APPLICATIO
 
 add_subdirectory(lbanalyze)
 add_subdirectory(lbaverage)
+add_subdirectory(lbcombine)
 add_subdirectory(lbcompare)
 add_subdirectory(lbconv)
 add_subdirectory(lbgen)
