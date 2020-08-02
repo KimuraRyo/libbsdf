@@ -165,8 +165,8 @@ Spectrum lb::computeBihemisphericalReflectance(const Brdf&  brdf,
     #pragma omp parallel for private(phIndex, inTheta, inPhi, inDir, sp)
     for (int thIndex = 0; thIndex <= numInThetaDivisions; ++thIndex) {
         for (phIndex = 0; phIndex < numPhi; ++phIndex) {
-            inTheta = thIndex * PI_2_D / numInThetaDivisions;
-            inPhi = phIndex * TAU_D / numInPhiDivisions;
+            inTheta = static_cast<Vec3::Scalar>(thIndex * PI_2_D / numInThetaDivisions);
+            inPhi   = static_cast<Vec3::Scalar>(phIndex * TAU_D / numInPhiDivisions);
 
             inTheta = std::min(inTheta, static_cast<Vec3::Scalar>(decrease(PI_2_D)));
 

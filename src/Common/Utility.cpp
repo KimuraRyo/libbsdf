@@ -110,7 +110,7 @@ Vec3::Scalar lb::computeCiede2000(const Vec3& lab0, const Vec3& lab1)
                          pow(deltaHPrime / (kH * SH), 2.0) +
                          (RT * (deltaCPrime / (kC * SC)) * (deltaHPrime / (kH * SH))));
 
-    return deltaE;
+    return static_cast<Vec3::Scalar>(deltaE);
 }
 
 Vec3 lb::findMunsellProperties(const Vec3& xyz, std::string* hue, float* value, int* chroma)
@@ -140,7 +140,7 @@ Vec3 lb::findMunsellProperties(const Vec3& xyz, std::string* hue, float* value, 
 
         // Find a neutral color.
         if (prevV != MunsellData::V[i]) {
-            Vec3 neutralXyz = Vec3(0.95047, 1, 1.08883) * munsellY;
+            Vec3 neutralXyz = Vec3(0.95047f, 1.0f, 1.08883f) * munsellY;
             Vec3 neutralLab = xyzToLab(neutralXyz);
 
             distance = computeCiede2000(lab, neutralLab);

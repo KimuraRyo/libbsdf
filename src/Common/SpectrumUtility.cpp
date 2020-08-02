@@ -44,8 +44,9 @@ Vec3 SpectrumUtility::spectrumToXyz(const Spectrum& spectrum,
     }
     sumXyz /= 2.0;
 
-    const Vec3 neutralXyz(0.95047, 1, 1.08883);
-    sumXyz = sumXyz.cwiseQuotient(NORMALIZING_CONSTANT_CIE_XYZ).cwiseProduct(neutralXyz);
+    const Vec3d neutralXyz(0.95047, 1, 1.08883);
+    const Vec3d normalizingConst = NORMALIZING_CONSTANT_CIE_XYZ.cast<Vec3d::Scalar>();
+    sumXyz = sumXyz.cwiseQuotient(normalizingConst).cwiseProduct(neutralXyz);
 
     return Vec3(sumXyz.cast<Vec3::Scalar>());
 }
@@ -56,7 +57,7 @@ Vec3 SpectrumUtility::spectrumToXyz(const Spectrum& spectrum,
 {
     switch (colorModel) {
         case MONOCHROMATIC_MODEL:
-            return Vec3(0.95047, 1, 1.08883) * spectrum[0];
+            return Vec3(0.95047f, 1.0f, 1.08883f) * spectrum[0];
         case RGB_MODEL:
             return srgbToXyz(toVec3(spectrum));
         case XYZ_MODEL:
@@ -95,7 +96,7 @@ Vec3::Scalar SpectrumUtility::spectrumToY(const Spectrum& spectrum, const Arrayf
     }
     sumY /= 2.0;
 
-    return sumY / NORMALIZING_CONSTANT_CIE_XYZ[1];
+    return static_cast<Vec3::Scalar>(sumY / NORMALIZING_CONSTANT_CIE_XYZ[1]);
 }
 
 float SpectrumUtility::spectrumToY(const Spectrum&  spectrum,
