@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -24,18 +24,21 @@ Brdf::Brdf(int          numAngles0,
                                     numAngles3,
                                     colorModel,
                                     numWavelengths)),
+             reductionType_(ReductionType::NONE),
              sourceType_(UNKNOWN_SOURCE)
 {
     lbTrace << "[Brdf::Brdf]";
 }
 
 Brdf::Brdf() : samples_(0),
+               reductionType_(ReductionType::NONE),
                sourceType_(UNKNOWN_SOURCE)
 {
     lbTrace << "[Brdf::Brdf]";
 }
 
 Brdf::Brdf(const Brdf& brdf) : samples_(new SampleSet(*brdf.getSampleSet())),
+                               reductionType_(brdf.getReductionType()),
                                sourceType_(brdf.getSourceType())
 {
     lbTrace << "[Brdf::Brdf]";

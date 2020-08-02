@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -53,6 +53,12 @@ public:
 
     /*! Gets the sample set including angles, wavelengths, and spectra. */
     const SampleSet* getSampleSet() const;
+
+    /*! Gets the source type. */
+    ReductionType getReductionType() const;
+
+    /*! Sets the source type. */
+    void setReductionType(ReductionType type);
 
     /*! Gets the source type. */
     SourceType getSourceType() const;
@@ -122,7 +128,7 @@ public:
      *   - Outside, infinite, or NaN angle
      *   - Negative, infinite, or NaN wavelength
      *
-     * \param verbose If this parameter is true, all messages of lb::Log::Level::WARN_MSG are output.
+     * \param verbose If this parameter is true, all warnings of spectra are output.
      */
     virtual bool validate(bool verbose = false) const = 0;
 
@@ -151,7 +157,8 @@ protected:
     /*! This attribute holds the sample set including angles, wavelengths, and spectra. */
     SampleSet* samples_;
 
-    SourceType sourceType_; /*!< The data type of source. */
+    ReductionType   reductionType_; /*!< The reduction type of data. */
+    SourceType      sourceType_;    /*!< The data type of source. */
 
 private:
     /*! Copy operator is disabled. */
@@ -162,6 +169,10 @@ private:
 
 inline       SampleSet* Brdf::getSampleSet()       { return samples_; }
 inline const SampleSet* Brdf::getSampleSet() const { return samples_; }
+
+inline ReductionType Brdf::getReductionType() const { return reductionType_; }
+
+inline void Brdf::setReductionType(ReductionType type) { reductionType_ = type; }
 
 inline SourceType Brdf::getSourceType() const { return sourceType_; }
 

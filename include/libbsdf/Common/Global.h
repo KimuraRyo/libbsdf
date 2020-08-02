@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -68,7 +68,15 @@ enum FileType {
     INTEGRA_SDT_FILE,
     LIGHTTOOLS_FILE,
     MERL_BINARY_FILE,
+    SSDD_FILE,
     ZEMAX_FILE
+};
+
+/*! \brief The reduction type of data. */
+enum class ReductionType {
+    NONE                = 0,
+    BILATERAL_SYMMETRY  = 1 << 0,
+    RECIPROCITY         = 1 << 1
 };
 
 /*! \brief The data type of source. */
