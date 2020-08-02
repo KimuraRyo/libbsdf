@@ -60,47 +60,47 @@ bool SsddWriter::write(const std::string&   fileName,
     ofs << ssdd::API << " libbsdf-" << getVersion() << endl;
     ofs << ssdd::DATE << " " << getDate() << endl;
 
-    const Bsdf& bsdf = *material.getBsdf();
-    const Brdf& brdf = *bsdf.getBrdf();
-    const Btdf& btdf = *bsdf.getBtdf();
-    const SampleSet2D& specR = *material.getSpecularReflectances();
-    const SampleSet2D& specT = *material.getSpecularTransmittances();
+    std::shared_ptr<const Bsdf> bsdf = material.getBsdf();
+    std::shared_ptr<const Brdf> brdf = bsdf->getBrdf();
+    std::shared_ptr<const Btdf> btdf = bsdf->getBtdf();
+    std::shared_ptr<const SampleSet2D> specR = material.getSpecularReflectances();
+    std::shared_ptr<const SampleSet2D> specT = material.getSpecularTransmittances();
 
     // Output BRDF data.
-    if (&brdf) {
+    if (brdf) {
         ofs << endl << ssdd::DATA_TYPE << " " << ssdd::DATA_TYPE_BRDF << endl;
 
-        if (!output(brdf, format, ofs)) {
+        if (!output(*brdf, format, ofs)) {
             lbError << "[SsddWriter::write] Failed to save: " << fileName;
             return false;
         }
     }
 
     // Output BTDF data.
-    if (&btdf) {
+    if (btdf) {
         ofs << endl << ssdd::DATA_TYPE << " " << ssdd::DATA_TYPE_BTDF << endl;
 
-        if (!output(*btdf.getBrdf(), format, ofs)) {
+        if (!output(*btdf->getBrdf(), format, ofs)) {
             lbError << "[SsddWriter::write] Failed to save: " << fileName;
             return false;
         }
     }
 
     // Output specular reflectance data.
-    if (&specR) {
+    if (specR) {
         ofs << endl << ssdd::DATA_TYPE << " " << ssdd::DATA_TYPE_SPECULAR_REFLECTANCE << endl;
 
-        if (!output(specR, format, ofs)) {
+        if (!output(*specR, format, ofs)) {
             lbError << "[SsddWriter::write] Failed to save: " << fileName;
             return false;
         }
     }
 
     // Output specular transmittance data.
-    if (&specT) {
+    if (specT) {
         ofs << endl << ssdd::DATA_TYPE << " " << ssdd::DATA_TYPE_SPECULAR_TRANSMITTANCE << endl;
 
-        if (!output(specT, format, ofs)) {
+        if (!output(*specT, format, ofs)) {
             lbError << "[SsddWriter::write] Failed to save: " << fileName;
             return false;
         }
