@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,3 +16,11 @@ TwoSidedMaterial::TwoSidedMaterial(std::shared_ptr<Material> frontMaterial,
                                      backMaterial_(backMaterial) {}
 
 TwoSidedMaterial::~TwoSidedMaterial() {}
+
+bool TwoSidedMaterial::validate(bool verbose) const
+{
+    bool frontMatInvalid    = (frontMaterial_   && !frontMaterial_->validate(verbose));
+    bool backMatInvalid     = (backMaterial_    && !backMaterial_->validate(verbose));
+
+    return (!frontMatInvalid && !backMatInvalid);
+}

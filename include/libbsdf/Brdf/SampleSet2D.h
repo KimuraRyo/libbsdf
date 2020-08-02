@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -90,6 +90,17 @@ public:
 
     int getNumTheta() const; /*!< Gets the number of polar angles. */
     int getNumPhi()   const; /*!< Gets the number of azimuthal angles. */
+
+    /*!
+     * Validates spectra, angles, wavelengths, and other attributes.
+     * False is returned if the data contains one of the following:
+     *   - Infinite or NaN spectrum
+     *   - Infinite or NaN angle
+     *   - Negative, infinite, or NaN wavelength
+     *
+     * \param verbose If this parameter is true, all warnings of spectra are output.
+     */
+    bool validate(bool verbose = false) const;
 
     /*! Returns true if polar angles are set at equal intervals. */
     bool isEqualIntervalTheta() const;

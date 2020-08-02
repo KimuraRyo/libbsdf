@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,6 +10,17 @@
 
 using namespace lb;
 
-Btdf::Btdf(std::shared_ptr<Brdf> brdf) : brdf_(brdf) {}
+Btdf::Btdf(std::shared_ptr<Brdf> brdf) : brdf_(brdf)
+{
+    lbTrace << "[Btdf::Btdf]";
+}
 
-Btdf::~Btdf() {}
+Btdf::~Btdf()
+{
+    lbTrace << "[Btdf::~Btdf]";
+}
+
+bool Btdf::validate(bool verbose) const
+{
+    return brdf_->validate(verbose);
+}

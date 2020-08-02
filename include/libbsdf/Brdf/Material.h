@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -61,6 +61,18 @@ public:
 
     /*! Returns true if BRDF, BTDF, specular reflectance, and specular transmittance do not exist. */
     bool isEmpty() const;
+
+    /*!
+     * Validates spectra, angles, wavelengths, and other attributes.
+     * False is returned if the data contains one of the following:
+     *   - Infinite or NaN spectrum
+     *   - Negative spectrum on a visible hemisphere
+     *   - Outside, infinite, or NaN angle
+     *   - Negative, infinite, or NaN wavelength
+     *
+     * \param verbose If this parameter is true, all warnings of spectra are output.
+     */
+    virtual bool validate(bool verbose = false) const;
 
 protected:
     std::shared_ptr<Bsdf> bsdf_; /*!< This attribute holds the BSDF data including angles, wavelengths, and spectra. */

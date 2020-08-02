@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -66,6 +66,94 @@ SampleSet2D::SampleSet2D(int        numTheta,
 SampleSet2D::~SampleSet2D()
 {
     lbTrace << "[SampleSet2D::~SampleSet2D]";
+}
+
+bool SampleSet2D::validate(bool verbose) const
+{
+    bool valid = true;
+    bool spectraValid = true;
+
+    // Spectra
+    for (int i0 = 0; i0 < thetaAngles_.size(); ++i0) {
+        if (!spectraValid && !verbose) break;
+    for (int i1 = 0; i1 < phiAngles_.size(); ++i1) {
+        const Spectrum& sp = getSpectrum(i0, i1);
+
+        if (!sp.allFinite()) {
+            spectraValid = false;
+
+            if (sp.hasNaN()) {
+                lbWarn
+                    << "[SampleSet2D::validate] The spectrum contains NaN value(s) at ("
+                    << i0 << ", " << i1 << "):\n\t"
+                    << sp.format(LB_EIGEN_IO_FMT);
+            }
+            else {
+                lbWarn
+                    << "[SampleSet2D::validate] The spectrum contains +/-INF value(s) at ("
+                    << i0 << ", " << i1 << "):\n\t"
+                    << sp.format(LB_EIGEN_IO_FMT);
+            }
+
+            if (!verbose) break;
+        }
+    }}
+
+    if (spectraValid) {
+        lbInfo << "[SampleSet2D::validate] Spectra are valid.";
+    }
+    else {
+        valid = false;
+        lbWarn << "[SampleSet2D::validate] Invalid spectra are found.";
+    }
+
+    // Angle arrays
+    if (thetaAngles_.allFinite()) {
+        lbInfo << "[SampleSet2D::validate] The array of angle0 is valid.";
+    }
+    else {
+        valid = false;
+        lbWarn << "[SampleSet2D::validate] The invalid angle(s) in angles0 is found.";
+    }
+
+    if (phiAngles_.allFinite()) {
+        lbInfo << "[SampleSet2D::validate] The array of angle1 is valid.";
+    }
+    else {
+        valid = false;
+        lbWarn << "[SampleSet2D::validate] The invalid angle(s) in angles1 is found.";
+    }
+
+    // Angle attributes
+    if (equalIntervalTheta_ && !array_util::isEqualInterval(thetaAngles_)) {
+        valid = false;
+        lbWarn << "[SampleSet2D::validate] equalIntervalTheta_ attribute is not updated.";
+    }
+
+    if (equalIntervalPhi_ && !array_util::isEqualInterval(phiAngles_)) {
+        valid = false;
+        lbWarn << "[SampleSet2D::validate] equalIntervalPhi_ attribute is not updated.";
+    }
+
+    // Wavelengths
+    if (wavelengths_.allFinite()) {
+        if (wavelengths_.minCoeff() < 0.0f) {
+            lbWarn
+                << "[SampleSet2D::validate] The negative wavelength(s) is found:\n\t"
+                << wavelengths_.format(LB_EIGEN_IO_FMT);
+        }
+        else {
+            lbInfo << "[SampleSet2D::validate] Wavelengths are valid.";
+        }
+    }
+    else {
+        valid = false;
+        lbWarn
+            << "[SampleSet2D::validate] The invalid wavelength(s) is found:\n\t"
+            << wavelengths_.format(LB_EIGEN_IO_FMT);
+    }
+
+    return valid;
 }
 
 Spectrum SampleSet2D::getSpectrum(const Vec3& inDir) const
