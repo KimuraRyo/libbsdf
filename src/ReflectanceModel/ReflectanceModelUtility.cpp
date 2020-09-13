@@ -127,7 +127,7 @@ Spectrum ReflectanceModelUtility::getSpectrum(const ReflectanceModel&   model,
 
     // Adjust horizontal and downward directions.
     const Vec3::Scalar epsilon = Vec3::Scalar(EPSILON_F);
-    inDir.z()  = max(inDir.z(), 0.001);
+    inDir.z()  = max(inDir.z(), Vec3::Scalar(0.001));
     outDir.z() = max(outDir.z(), epsilon);
 
     // Adjust a downward outgoing direction along the Z-axis.

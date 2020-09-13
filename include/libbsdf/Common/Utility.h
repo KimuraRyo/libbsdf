@@ -428,9 +428,11 @@ Vec3T xyzToLab(const Vec3T& xyz)
     double fy = f(xyz.y() / Yn);
     double fz = f(xyz.z() / Zn);
 
-    double L = 116.0 * fy - 16.0;
-    double a = 500.0 * (fx - fy);
-    double b = 200.0 * (fy - fz);
+    using ScalarType = typename Vec3T::Scalar;
+
+    ScalarType L = static_cast<ScalarType>(116.0 * fy - 16.0);
+    ScalarType a = static_cast<ScalarType>(500.0 * (fx - fy));
+    ScalarType b = static_cast<ScalarType>(200.0 * (fy - fz));
 
     return Vec3T(L, a, b);
 }
