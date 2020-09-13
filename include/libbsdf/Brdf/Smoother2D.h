@@ -76,7 +76,7 @@ private:
     int     maxIteration0_; /*!< The maximum number of iterations of the division of angle0. */
     int     maxIteration1_; /*!< The maximum number of iterations of the division of angle1. */
 
-    float   minAngleInterval_; /*!< The minimum interval of devided angles. */
+    float   minAngleInterval_; /*!< The minimum interval of divided angles. */
 
     std::set<Arrayf::Scalar> angles0_; /*!< The angle array to insert sample points. */
     std::set<Arrayf::Scalar> angles1_; /*!< The angle array to insert sample points. */

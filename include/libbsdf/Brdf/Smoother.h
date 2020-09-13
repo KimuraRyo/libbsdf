@@ -98,7 +98,7 @@ private:
     int maxIteration2_; /*!< The maximum number of iterations of the division of angle2. */
     int maxIteration3_; /*!< The maximum number of iterations of the division of angle3. */
 
-    float minAngleInterval_; /*!< The minimum interval of devided angles. */
+    float minAngleInterval_; /*!< The minimum interval of divided angles. */
 
     /*!
      * The maximum specular polar angle to avoid smoothing.
