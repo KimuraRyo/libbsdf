@@ -231,7 +231,7 @@ bool Smoother::insertAngle(std::set<Arrayf::Scalar>&    angleSet,
 
     Vec4f midAngles = (angles + nextAngles) / 2.0f;
 
-    lb::Vec3 inDir, outDir;
+    Vec3 inDir, outDir;
     brdf_->toXyz(midAngles[0], midAngles[1], midAngles[2], midAngles[3], &inDir, &outDir);
 
     if (inDir.z() <= 0.0 || outDir.z() <= 0.0) {

@@ -128,7 +128,9 @@ void SpecularCoordinatesBrdf::setupSpecularOffsets(float refractiveIndex)
         float inTheta = getInTheta(i);
         float sinT = std::min(std::sin(inTheta) / refractiveIndex, 1.0f);
         float refractedTheta = std::asin(sinT);
-        setSpecularOffset(i, refractedTheta - inTheta);
+        float offset = refractedTheta - inTheta;
+
+        setSpecularOffset(i, offset);
     }
 }
 

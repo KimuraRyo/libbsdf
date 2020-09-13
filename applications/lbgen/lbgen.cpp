@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 
+#include <libbsdf/Brdf/Optimizer.h>
 #include <libbsdf/Brdf/Processor.h>
 
 #include <libbsdf/Reader/ReaderUtility.h>
@@ -31,7 +32,7 @@ using namespace lb;
  */
 
 const std::string APP_NAME("lbgen");
-const std::string APP_VERSION("1.0.11");
+const std::string APP_VERSION("1.1.0");
 
 const std::string GgxName                       = "ggx";
 const std::string MultipleScatteringSmithName   = "multiple-scattering-smith";
@@ -42,6 +43,7 @@ int numIncomingPolarAngles = 18;
 int numSpecularPolarAngles = 360;
 int numSpecularAzimuthalAngles = 72;
 bool conservationOfEnergyUsed = false;
+bool intervalAdjustmentUsed = false;
 float roughness = 0.3f;
 float n = 1.5f;
 float k = 0.0f;
@@ -73,6 +75,7 @@ void showHelp()
     cout << "  -numSpecularPolarAngles      set the division number of specular polar angles (default: 360)" << endl;
     cout << "  -numSpecularAzimuthalAngles  set the division number of specular azimuthal angles (default: 72)" << endl;
     cout << "  -conservationOfEnergy        fix BSDF/BRDF/BTDF if the sum of reflectance and transmittance exceed one" << endl;
+    cout << "  -intervalAdjustment          adjust angle intervals by recalculation with the selected model" << endl;
 #ifdef _OPENMP
     cout << "  -numThreads                  set the number of threads used by parallel processing" << endl;
 #endif
@@ -137,6 +140,10 @@ bool readOptions(ArgumentParser* ap)
         conservationOfEnergyUsed = true;
     }
 
+    if (ap->read("-intervalAdjustment")) {
+        intervalAdjustmentUsed = true;
+    }
+
 #ifdef _OPENMP
     int numThreads;
     ArgumentParser::ResultType result_numThreads = ap->read("-numThreads", &numThreads);
@@ -185,8 +192,6 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                     int                     numSpecularAzimuthalAngles,
                                     DataType                dataType)
 {
-    n = std::max(n, 1.0f);
-
     SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(numIncomingPolarAngles,
                                                                 1,
                                                                 numSpecularPolarAngles,
@@ -194,7 +199,25 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
                                                                 2.0f,
                                                                 MONOCHROMATIC_MODEL, 1, n);
 
-    reflectance_model_utility::setupTabularBrdf(model, brdf, dataType);
+    ReflectanceModelUtility::setupBrdf(model, brdf, dataType);
+
+    if (intervalAdjustmentUsed) {
+        const lb::SampleSet* ss = brdf->getSampleSet();
+
+        // Save the number of angles before optimization.
+        int numAngles0 = ss->getNumAngles0();
+        int numAngles1 = ss->getNumAngles1();
+        int numAngles2 = ss->getNumAngles2();
+        int numAngles3 = ss->getNumAngles3();
+
+        lb::Optimizer optimizer(brdf, 0.001f, 0.01f);
+        optimizer.optimize();
+
+        lb::ReflectanceModelUtility::setupBrdf(model, brdf,
+                                               numAngles0, numAngles1, numAngles2, numAngles3,
+                                               dataType, n);
+    }
+
     brdf->setSourceType(GENERATED_SOURCE);
 
     return brdf;
@@ -270,6 +293,9 @@ int main(int argc, char** argv)
     }
     else if (reader_utility::hasSuffix(fileName, ".ddt")) {
         fileType = INTEGRA_DDT_FILE;
+    }
+    else {
+        fileType = UNKNOWN_FILE;
     }
 
     std::unique_ptr<SpecularCoordinatesBrdf> brdf, btdfData;

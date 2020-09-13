@@ -1,15 +1,10 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
-
-/*!
- * \file    ReflectanceModelUtility.h
- * \brief   The ReflectanceModelUtility.h header file includes the functions for reflectance models.
- */
 
 #ifndef LIBBSDF_REFLECTANCE_MODEL_UTILITY_H
 #define LIBBSDF_REFLECTANCE_MODEL_UTILITY_H
@@ -18,15 +13,67 @@
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
 
 namespace lb {
-namespace reflectance_model_utility {
 
-/*! Sets up a lb::Brdf using an analytic reflectance or transmittance model. */
-bool setupTabularBrdf(const ReflectanceModel&   model,
-                      Brdf*                     brdf,
-                      DataType                  dataType = BRDF_DATA,
-                      float                     maxValue = 10000000000.0f);
+/*!
+ * \class   ReflectanceModelUtility
+ * \brief   The ReflectanceModelUtility class provides the functions for reflectance models.
+ */
+class ReflectanceModelUtility
+{
+public:
+    /*! Sets up a lb::Brdf using an analytic reflectance or transmittance model. */
+    static bool setupBrdf(const ReflectanceModel&   model,
+                          Brdf*                     brdf,
+                          DataType                  dataType = BRDF_DATA);
 
-} // namespace reflectance_model_utility
+    /*!
+     * Sets up a lb::Brdf using an analytic reflectance or transmittance model.
+     * Angles are adaptively inserted up to maximum angles.
+     *
+     * \param numAngles0    Upper limit of the number of angle0.
+     * \param numAngles1    Upper limit of the number of angle1.
+     * \param numAngles2    Upper limit of the number of angle2.
+     * \param numAngles3    Upper limit of the number of angle3.
+     */
+    static bool setupBrdf(const ReflectanceModel&   model,
+                          Brdf*                     brdf,
+                          int                       numAngles0,
+                          int                       numAngles1,
+                          int                       numAngles2,
+                          int                       numAngles3,
+                          DataType                  dataType = BRDF_DATA,
+                          float                     ior = 1.0f);
+
+private:
+    static Spectrum getSpectrum(const ReflectanceModel& model,
+                                const Brdf&             brdf,
+                                DataType                dataType,
+                                float                   angle0,
+                                float                   angle1,
+                                float                   angle2,
+                                float                   angle3);
+
+    static bool insertAngle0(const ReflectanceModel&    model,
+                             Brdf*                      brdf,
+                             int                        numAngles,
+                             DataType                   dataType);
+
+    static bool insertAngle1(const ReflectanceModel&    model,
+                             Brdf*                      brdf,
+                             int                        numAngles,
+                             DataType                   dataType);
+
+    static bool insertAngle2(const ReflectanceModel&    model,
+                             Brdf*                      brdf,
+                             int                        numAngles,
+                             DataType                   dataType);
+
+    static bool insertAngle3(const ReflectanceModel&    model,
+                             Brdf*                      brdf,
+                             int                        numAngles,
+                             DataType                   dataType);
+};
+
 } // namespace lb
 
 #endif // LIBBSDF_REFLECTANCE_MODEL_UTILITY_H

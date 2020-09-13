@@ -22,6 +22,8 @@
 
 namespace lb {
 
+class Brdf;
+
 /*! \brief Clamps a value between a minimum and maximum value. */
 template <typename T>
 T clamp(T value, T minValue, T maxValue);
@@ -153,6 +155,9 @@ void fixDownwardDir(Vec3T* dir);
 
 /*! \brief Returns true if a direction faces the back of a surface. */
 bool isDownwardDir(const Vec3& dir);
+
+/*! \brief Returns true if either an incoming or outgoing direction faces the back of a surface. */
+bool hasDownwardDir(const Brdf& brdf, int i0, int i1, int i2, int i3);
 
 /*! \brief Returns an enumerator as an integer. */
 template <typename EnumT>

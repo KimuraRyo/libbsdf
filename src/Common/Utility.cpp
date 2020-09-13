@@ -11,6 +11,7 @@
 #include <chrono>
 #include <iomanip>
 
+#include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Common/MunsellData.h>
 
 using namespace lb;
@@ -169,6 +170,21 @@ Vec3 lb::findMunsellProperties(const Vec3& xyz, std::string* hue, float* value, 
     }
 
     return nearestXyz;
+}
+
+
+bool lb::hasDownwardDir(const Brdf& brdf, int i0, int i1, int i2, int i3)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+
+    Vec3 inDir, outDir;
+    brdf.toXyz(ss->getAngle0(i0),
+               ss->getAngle1(i1),
+               ss->getAngle2(i2),
+               ss->getAngle3(i3),
+               &inDir, &outDir);
+
+    return (isDownwardDir(inDir) || isDownwardDir(outDir));
 }
 
 std::string lb::getDate()
