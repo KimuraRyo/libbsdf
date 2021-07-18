@@ -47,7 +47,7 @@ public:
                                               const Vec2T&                  v1,
                                               const Vec2T&                  v2,
                                               const Vec2T&                  v3,
-                                              typename const Vec2T::Scalar& x);
+                                              const typename Vec2T::Scalar& x);
 
     /*!
      * Computes an interpolated array using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
@@ -55,15 +55,15 @@ public:
      * \return Interpolated array.
      */
     template <typename ArrayT>
-    static ArrayT interpolate(typename const ArrayT::Scalar&    pos0,
-                              typename const ArrayT::Scalar&    pos1,
-                              typename const ArrayT::Scalar&    pos2,
-                              typename const ArrayT::Scalar&    pos3,
+    static ArrayT interpolate(const typename ArrayT::Scalar&    pos0,
+                              const typename ArrayT::Scalar&    pos1,
+                              const typename ArrayT::Scalar&    pos2,
+                              const typename ArrayT::Scalar&    pos3,
                               const ArrayT&                     arr0,
                               const ArrayT&                     arr1,
                               const ArrayT&                     arr2,
                               const ArrayT&                     arr3,
-                              typename const ArrayT::Scalar&    pos);
+                              const typename ArrayT::Scalar&    pos);
 
 private:
     /*! Computes the coefficients of cubic Hermite spline using positions and tangents. */
@@ -99,7 +99,7 @@ typename Vec2T::Scalar CentripetalCatmullRomSpline::interpolate(const Vec2T&    
                                                                 const Vec2T&                    v1,
                                                                 const Vec2T&                    v2,
                                                                 const Vec2T&                    v3,
-                                                                typename const Vec2T::Scalar&   x)
+                                                                const typename Vec2T::Scalar&   x)
 {
     CentripetalCatmullRomSpline ccrs(v0.cast<Vec2::Scalar>(),
                                      v1.cast<Vec2::Scalar>(),
@@ -111,15 +111,15 @@ typename Vec2T::Scalar CentripetalCatmullRomSpline::interpolate(const Vec2T&    
 }
 
 template <typename ArrayT>
-ArrayT CentripetalCatmullRomSpline::interpolate(typename const ArrayT::Scalar&  pos0,
-                                                typename const ArrayT::Scalar&  pos1,
-                                                typename const ArrayT::Scalar&  pos2,
-                                                typename const ArrayT::Scalar&  pos3,
+ArrayT CentripetalCatmullRomSpline::interpolate(const typename ArrayT::Scalar&  pos0,
+                                                const typename ArrayT::Scalar&  pos1,
+                                                const typename ArrayT::Scalar&  pos2,
+                                                const typename ArrayT::Scalar&  pos3,
                                                 const ArrayT&                   arr0,
                                                 const ArrayT&                   arr1,
                                                 const ArrayT&                   arr2,
                                                 const ArrayT&                   arr3,
-                                                typename const ArrayT::Scalar&  pos)
+                                                const typename ArrayT::Scalar&  pos)
 {
     assert(arr0.size() == arr1.size() &&
            arr1.size() == arr2.size() &&
