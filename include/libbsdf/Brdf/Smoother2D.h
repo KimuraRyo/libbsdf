@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017 Kimura Ryo                                       //
+// Copyright (C) 2017-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -30,13 +30,13 @@ public:
 
     /*!
      * Gets the threshold to insert sample points.
-     * This is the difference between linear and Catmull-Rom spline interpolation.
+     * This is the difference between linear and smooth interpolation.
      */
     float getDiffThreshold() const;
 
     /*!
      * Sets the threshold to insert sample points.
-     * This is the difference between linear and Catmull-Rom spline interpolation.
+     * This is the difference between linear and smooth interpolation.
      */
     void setDiffThreshold(float threshold);
 
@@ -68,7 +68,7 @@ private:
     SampleSet2D* samples_;
 
     /*!
-     * The difference between linear and Catmull-Rom spline interpolation.
+     * The difference between linear and smooth interpolation.
      * This attribute holds whether an angle is inserted.
      */
     float   diffThreshold_;

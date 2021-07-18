@@ -52,13 +52,15 @@ bool lb::initializeSpectra(const Brdf& baseBrdf, Brdf* brdf)
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
-    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         Vec3 inDir, outDir;
-        brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-
-        Spectrum sp = Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir);
-        ss->setSpectrum(i0, i1, i2, i3, sp);
-    }}}}
+        Spectrum sp;
+        #pragma omp parallel for private(inDir, outDir, sp)
+        for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+            brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
+            sp = Sampler::getSpectrum<InterpolatorT>(baseBrdf, inDir, outDir);
+            ss->setSpectrum(i0, i1, i2, i3, sp);
+        }
+    }}}
 
     return true;
 }

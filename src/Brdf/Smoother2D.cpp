@@ -8,14 +8,16 @@
 
 #include <libbsdf/Brdf/Smoother2D.h>
 
-#include <libbsdf/Brdf/CatmullRomSplineInterpolator.h>
 #include <libbsdf/Brdf/Initializer.h>
 #include <libbsdf/Brdf/LinearInterpolator.h>
 #include <libbsdf/Brdf/Sampler.h>
+#include <libbsdf/Brdf/SmoothInterpolator.h>
 
 #include <libbsdf/Common/Array.h>
 
 using namespace lb;
+
+using Interpolator = MonotoneCubicInterpolator;
 
 Smoother2D::Smoother2D(SampleSet2D* samples)
                        : samples_(samples),
@@ -115,10 +117,10 @@ bool Smoother2D::insertAngle(std::set<Arrayf::Scalar>&  angleSet,
 
     Vec2f midAngles = (angles + nextAngles) / 2.0f;
 
-    Spectrum lerpSp = LinearInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
-    Spectrum crSp = CatmullRomSplineInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
+    Spectrum lerpSp     = LinearInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
+    Spectrum smoothSp   = Interpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
 
-    Spectrum diffSp = (lerpSp - crSp).abs();
+    Spectrum diffSp = (lerpSp - smoothSp).abs();
     if (diffSp.maxCoeff() > diffThreshold_) {
         auto ret = angleSet.insert(midAngles[angleSuffix]);
         if (ret.second) {
@@ -138,7 +140,7 @@ void Smoother2D::updateSamples()
     array_util::copy(angles1_, &samples_->getPhiArray());
     samples_->updateAngleAttributes();
 
-    lb::initializeSpectra<CatmullRomSplineInterpolator>(*origSs2, samples_);
+    lb::initializeSpectra<Interpolator>(*origSs2, samples_);
 
     delete origSs2;
 }

@@ -17,7 +17,6 @@
 #include <iterator>
 #include <vector>
 
-#include <libbsdf/Common/CentripetalCatmullRomSpline.h>
 #include <libbsdf/Common/Utility.h>
 
 namespace lb {
@@ -40,15 +39,6 @@ template <typename ArrayT>
 ArrayT createExponential(int                        numElements,
                          typename ArrayT::Scalar    maxValue,
                          typename ArrayT::Scalar    exponent);
-
-/*!
- * \brief Interpolates arrays using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
- * \return Interpolated array.
- */
-template <typename T>
-T catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
-                   const T& array0, const T& array1, const T& array2, const T& array3,
-                   float pos);
 
 /*! \brief Returns true if the elements of an array are equally-spaced intervals. */
 template <typename T>
@@ -118,33 +108,6 @@ ArrayT array_util::createExponential(int                        numElements,
     }
 
     return arr;
-}
-
-template <typename T>
-T array_util::catmullRomSpline(float pos0, float pos1, float pos2, float pos3,
-                               const T& array0, const T& array1, const T& array2, const T& array3,
-                               float pos)
-{
-    assert(array0.size() == array1.size() &&
-           array1.size() == array2.size() &&
-           array2.size() == array3.size());
-
-    T array;
-    array.resize(array0.size());
-
-    CentripetalCatmullRomSpline ccrs;
-    #pragma omp parallel for private(ccrs)
-    for (int i = 0; i < array.size(); ++i) {
-        ccrs.initialize(Vec2(pos0, array0[i]),
-                        Vec2(pos1, array1[i]),
-                        Vec2(pos2, array2[i]),
-                        Vec2(pos3, array3[i]));
-
-        using ScalarType = typename T::Scalar;
-        array[i] = static_cast<ScalarType>(ccrs.interpolateY(pos));
-    }
-
-    return array;
 }
 
 template <typename T>

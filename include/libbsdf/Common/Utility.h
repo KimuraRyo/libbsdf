@@ -14,7 +14,6 @@
 #ifndef LIBBSDF_UTILITY_H
 #define LIBBSDF_UTILITY_H
 
-#include <libbsdf/Common/CentripetalCatmullRomSpline.h>
 #include <libbsdf/Common/CieData.h>
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Log.h>
@@ -63,18 +62,6 @@ T hermiteInterpolation3(const T& v0, const T& v1, float t);
 /*! \brief Computes smoothly interpolated values with 5th-order Hermite interpolation. */
 template <typename T>
 T hermiteInterpolation5(const T& v0, const T& v1, float t);
-
-/*! \brief Computes interpolated values using uniform Catmull-Rom spline. */
-template <typename T>
-T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t);
-
-/*!
- * \brief Computes an interpolated value using centripetal Catmull-Rom spline at \a pos in [\a pos1,\a pos2].
- */
-template <typename T>
-T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
-                   const T& val0, const T& val1, const T& val2, const T& val3,
-                   const T& pos);
 
 /*! \brief Computes a specular direction. */
 template <typename Vec3T>
@@ -243,32 +230,6 @@ T hermiteInterpolation5(const T& v0, const T& v1, float t)
 {
     float coeff = smootherstep(0.0f, 1.0f, t);
     return lerp(v0, v1, coeff);
-}
-
-template <typename T>
-T catmullRomSpline(const T& v0, const T& v1, const T& v2, const T& v3, float t)
-{
-    float t2 = t * t;
-    float t3 = t2 * t;
-
-    return static_cast<T>(((2.0 * v1) +
-                           (-v0 + v2) * t +
-                           (2.0 * v0 - 5.0 * v1 + 4.0 * v2 - v3) * t2 +
-                           (-v0 + 3.0 * v1 - 3.0 * v2 + v3) * t3) * 0.5);
-}
-
-template <typename T>
-T catmullRomSpline(const T& pos0, const T& pos1, const T& pos2, const T& pos3,
-                   const T& val0, const T& val1, const T& val2, const T& val3,
-                   const T& pos)
-{
-    Vec2 v0(pos0, val0);
-    Vec2 v1(pos1, val1);
-    Vec2 v2(pos2, val2);
-    Vec2 v3(pos3, val3);
-    CentripetalCatmullRomSpline ccrs(v0, v1, v2, v3);
-
-    return static_cast<T>(ccrs.interpolateY(pos));
 }
 
 template <typename T>
