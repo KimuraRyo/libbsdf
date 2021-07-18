@@ -101,10 +101,10 @@ typename Vec2T::Scalar CentripetalCatmullRomSpline::interpolate(const Vec2T&    
                                                                 const Vec2T&                    v3,
                                                                 const typename Vec2T::Scalar&   x)
 {
-    CentripetalCatmullRomSpline ccrs(v0.cast<Vec2::Scalar>(),
-                                     v1.cast<Vec2::Scalar>(),
-                                     v2.cast<Vec2::Scalar>(),
-                                     v3.cast<Vec2::Scalar>());
+    CentripetalCatmullRomSpline ccrs(v0.template cast<Vec2::Scalar>(),
+                                     v1.template cast<Vec2::Scalar>(),
+                                     v2.template cast<Vec2::Scalar>(),
+                                     v3.template cast<Vec2::Scalar>());
 
     using Scalar = typename Vec2T::Scalar;
     return static_cast<Scalar>(ccrs.interpolateY(static_cast<double>(x)));
