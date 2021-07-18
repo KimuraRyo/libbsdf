@@ -7,7 +7,6 @@ matrix:
     - os: linux
       dist: bionic
       sudo: false
-      #language: c++
       addons:
         apt:
           sources:
@@ -20,15 +19,13 @@ matrix:
       env:
         - EIGEN3_INCLUDE_DIR="/usr/include/eigen3"
     - os: osx
-      #osx_image: xcode10.2
       sudo: false
-      #language: objective-c
       addons:
         homebrew:
           packages:
             - cmake
             - eigen
-          update: true
+          update: false
       env:
         - EIGEN3_INCLUDE_DIR="/usr/local/include/eigen3"
 
