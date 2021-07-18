@@ -1,6 +1,6 @@
 # libbsdf
 
-[![Build Status](https://travis-ci.org/KimuraRyo/libbsdf.svg?branch=master)](https://travis-ci.org/KimuraRyo/libbsdf)
+[![Build Status](https://www.travis-ci.com/KimuraRyo/libbsdf.svg?branch=master)](https://www.travis-ci.com/github/KimuraRyo/libbsdf)
 
 ## Overview
 libbsdf is a C++ library for BSDF, BRDF, and BTDF.
