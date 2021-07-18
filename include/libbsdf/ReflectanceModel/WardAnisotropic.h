@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2018 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -96,7 +96,8 @@ inline Vec3 WardAnisotropic::compute(const Vec3&    L,
     float sqDotHT = (dotHT / roughnessX) * (dotHT / roughnessX);
     float sqDotHB = (dotHB / roughnessY) * (dotHB / roughnessY);
 
-    float brdf = 1.0f / sqrt(max(dotLN * dotVN, EPSILON_F))
+    constexpr float suppressionCoeff = 0.01f;
+    float brdf = 1.0f / sqrt(max(dotLN * dotVN, suppressionCoeff))
                * exp(-2.0f * (sqDotHT + sqDotHB) / (1.0f + dotHN))
                / (4.0f * PI_F * roughnessX * roughnessY);
 

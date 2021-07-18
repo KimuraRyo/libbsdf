@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2018 Kimura Ryo                                  //
+// Copyright (C) 2015-2020 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -68,6 +68,7 @@ inline Vec3 WardIsotropic::compute(const Vec3&  L,
 {
     using std::acos;
     using std::exp;
+    using std::max;
     using std::sqrt;
     using std::tan;
 
@@ -80,7 +81,8 @@ inline Vec3 WardIsotropic::compute(const Vec3&  L,
     float sqRoughness = roughness * roughness;
     float tanHN = tan(acos(dotHN));
 
-    float brdf = 1.0f / sqrt(dotLN * dotVN)
+    constexpr float suppressionCoeff = 0.01f;
+    float brdf = 1.0f / sqrt(max(dotLN * dotVN, suppressionCoeff))
                * exp(-(tanHN * tanHN / sqRoughness))
                / (4.0f * PI_F * sqRoughness);
     return color * brdf;
