@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -46,6 +46,10 @@ public:
     /*! Converts from a wavelength to sRGB. Negative or more than 1.0 sRGB values are clamped. */
     static Vec3 wavelengthToSrgb(float wavelength);
 
+    /*! \brief Converts from spectrum, tristimulus values, or monochromatic value to sRGB. */
+    template <typename Vec3T, typename DataT>
+    static Vec3T toSrgb(const Spectrum& sp, const DataT& ss);
+
 private:
     /*! Finds the nearest index in the array of wavelengths. */
     static int findNearestIndex(float wavelength);
@@ -76,6 +80,26 @@ inline Vec3 SpectrumUtility::wavelengthToSrgb(float wavelength)
     rgb = rgb.cwiseMax(0.0);
     rgb /= std::max(rgb.maxCoeff(), Vec3::Scalar(0.001));
     return rgb;
+}
+
+template <typename Vec3T, typename DataT>
+Vec3T SpectrumUtility::toSrgb(const Spectrum& sp, const DataT& ss)
+{
+    using ScalarType = typename Vec3T::Scalar;
+
+    if (ss.getColorModel() == RGB_MODEL) {
+        return sp.cast<ScalarType>();
+    }
+    else if (ss.getColorModel() == XYZ_MODEL) {
+        return xyzToSrgb<Vec3T>(sp.cast<ScalarType>());
+    }
+    else if (ss.getNumWavelengths() == 1) {
+        return Vec3T(sp[0], sp[0], sp[0]);
+    }
+    else {
+        Vec3 rgb = SpectrumUtility::spectrumToSrgb(sp, ss.getWavelengths());
+        return rgb.cast<ScalarType>();
+    }
 }
 
 inline int SpectrumUtility::findNearestIndex(float wavelength)
