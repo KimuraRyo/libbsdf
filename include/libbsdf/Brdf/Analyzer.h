@@ -98,7 +98,7 @@ Spectrum computeReciprocity(const Brdf& brdf,
 
 /*!
  * \brief Finds thresholds to separate the diffuse component from a BRDF.
- * \param maxTheta Maxmum incoming and outgoing polar angle to define the range of search.
+ * \param maxTheta Maximum incoming and outgoing polar angle to define the range of search.
  */
 Spectrum findDiffuseThresholds(const Brdf&      brdf,
                                const double&    maxTheta = PI_2_F);
