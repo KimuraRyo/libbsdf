@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -164,6 +164,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
         else if (isEqual(headStr, "psi")) {
             int numInPhi;
             ifs >> numInPhi;
+            ddr_sdr_utility::ignoreCommentLines(ifs);
             for (int i = 0; i < numInPhi; ++i) {
                 float angle;
                 ifs >> angle;
@@ -173,6 +174,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
         else if (isEqual(headStr, "sigma")) {
             int numInTheta;
             ifs >> numInTheta;
+            ddr_sdr_utility::ignoreCommentLines(ifs);
             for (int i = 0; i < numInTheta; ++i) {
                 float angle;
                 ifs >> angle;
@@ -180,6 +182,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             }
         }
         else if (isEqual(headStr, "sigmaT")) {
+            ddr_sdr_utility::ignoreCommentLines(ifs);
             size_t numSpecThetaOffsets = inThetaDegrees.size();
             for (size_t i = 0; i < numSpecThetaOffsets; ++i) {
                 float angle;
@@ -190,6 +193,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
         else if (isEqual(headStr, "phi")) {
             int numSpecPhi;
             ifs >> numSpecPhi;
+            ddr_sdr_utility::ignoreCommentLines(ifs);
             for (int i = 0; i < numSpecPhi; ++i) {
                 float angle;
                 ifs >> angle;
@@ -199,6 +203,7 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
         else if (isEqual(headStr, "theta")) {
             int numSpecTheta;
             ifs >> numSpecTheta;
+            ddr_sdr_utility::ignoreCommentLines(ifs);
             for (int i = 0; i < numSpecTheta; ++i) {
                 float angle;
                 ifs >> angle;
@@ -210,8 +215,8 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                  isEqual(headStr, "red") ||
                  isEqual(headStr, "gre") ||
                  isEqual(headStr, "blu") ||
-                 isEqual(headStr, "green") ||   // Not correct keyword in the specification
-                 isEqual(headStr, "blue")) {    // Not correct keyword in the specification
+                 isEqual(headStr, "green") || // Not correct keyword in the specification
+                 isEqual(headStr, "blue")) {  // Not correct keyword in the specification
             ifs.seekg(pos, std::ios_base::beg);
             break;
         }
@@ -290,8 +295,8 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
                  isEqual(dataStr, "red") ||
                  isEqual(dataStr, "gre") ||
                  isEqual(dataStr, "blu") ||
-                 isEqual(dataStr, "green") ||   // Not correct specification
-                 isEqual(dataStr, "blue")) {    // Not correct specification
+                 isEqual(dataStr, "green") || // Not correct keyword in the specification
+                 isEqual(dataStr, "blue")) {  // Not correct keyword in the specification
             if (colorModel == SPECTRAL_MODEL) {
                 float wavelength;
                 ifs >> wavelength;
