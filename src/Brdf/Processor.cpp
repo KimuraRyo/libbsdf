@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -989,11 +989,11 @@ SphericalCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrd
     return insertBrdfAlongInPhiTemplate(baseBrdf, insertedBrdf, inPhi);
 }
 
-void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta, float diffuseTheta)
+void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float inTheta, float diffuseTheta)
 {
     if (brdf->getNumInTheta() < 3 ||
-        brdf->getInTheta(1) > incomingTheta ||
-        brdf->getInTheta(brdf->getNumInTheta() - 1) <= incomingTheta) {
+        brdf->getInTheta(1) > inTheta ||
+        brdf->getInTheta(brdf->getNumInTheta() - 1) <= inTheta) {
         return;
     }
 
@@ -1010,7 +1010,7 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
 
     int inThBoundaryIndex = 0;
     for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
-        if (brdf->getInTheta(inThIndex) > incomingTheta) {
+        if (brdf->getInTheta(inThIndex) > inTheta) {
             break;
         }
 
@@ -1059,6 +1059,39 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
     delete glossyBrdf;
     delete dRefs;
     delete gRefs;
+}
+
+void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float outTheta)
+{
+    SampleSet* ss = brdf->getSampleSet();
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        Vec3 inDir, outDir;
+        brdf->toXyz(ss->getAngle0(i0),
+                    ss->getAngle1(i1),
+                    ss->getAngle2(i2),
+                    ss->getAngle3(i3),
+                    &inDir, &outDir);
+
+        float theta, phi;
+        SphericalCoordinateSystem::fromXyz(outDir, &theta, &phi);
+
+        if (theta >= outTheta && i2 >= 2) {
+            const Spectrum& sp0 = ss->getSpectrum(i0, i1, i2 - 2, i3);
+            const Spectrum& sp1 = ss->getSpectrum(i0, i1, i2 - 1, i3);
+
+            float angle2_0 = ss->getAngle2(i2 - 2);
+            float angle2_1 = ss->getAngle2(i2 - 1);
+            float t = (ss->getAngle2(i2) - angle2_0) / (angle2_1 - angle2_0);
+
+            Spectrum sp = lerp(sp0, sp1, t);
+            sp = sp.cwiseMax(Spectrum::Scalar(0));
+            ss->setSpectrum(i0, i1, i2, i3, sp);
+        }
+    }}}}
 }
 
 void lb::copySpectraFromPhiOf0To360(SampleSet* samples)

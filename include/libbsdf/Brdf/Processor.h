@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -165,12 +165,18 @@ SphericalCoordinatesBrdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  
 
 /*!
  * \brief Recalculates a BRDF with linearly extrapolated reflectances.
- * \param incomingTheta Minimum incoming polar angle of extrapolated samples.
- * \param diffuseTheta  Maxmum incoming and outgoing polar angle to define the range to search the diffuse component.
+ * \param inTheta       Minimum incoming polar angle of extrapolated samples.
+ * \param diffuseTheta  Maximum incoming and outgoing polar angle to define the range to search the diffuse component.
  *
  * When a BRDF is extrapolated, it is separated into glossy and diffuse components to improve calculation results.
  */
-void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float incomingTheta, float diffuseTheta);
+void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float inTheta, float diffuseTheta);
+
+/*!
+ * \brief Extrapolates a BRDF along outgoing polar angle.
+ * \param outTheta  Minimum outgoing polar angle of extrapolated samples.
+ */
+void extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float outTheta);
 
 /*!
  * \brief Copies spectra from the azimuthal angle of 0 degrees to 360 degrees.
