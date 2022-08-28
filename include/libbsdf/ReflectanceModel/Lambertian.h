@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,24 +25,23 @@ public:
         parameters_.push_back(Parameter("Color", &color_));
     }
 
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& N,
-                        const Vec3& color);
+    template <typename T>
+    static T compute(const T& color);
 
-    Vec3 getValue(const Vec3& inDir, const Vec3&) const
+    Vec3 getValue(const Vec3& inDir, const Vec3&) const override
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        return compute(inDir, N, color_);
+        return color_ * inDir.dot(N);
     }
 
-    Vec3 getBrdfValue(const Vec3&, const Vec3&) const
+    Vec3 getBrdfValue(const Vec3&, const Vec3&) const override
     {
-        return color_ / PI_F;
+        return compute(color_);
     }
 
-    bool isIsotropic() const { return true; }
+    bool isIsotropic() const override { return true; }
 
-    std::string getName() const { return "Lambertian"; }
+    std::string getName() const override { return "Lambertian"; }
 
 private:
     Vec3 color_;
@@ -52,11 +51,11 @@ private:
  * Implementation
  */
 
-inline Vec3 Lambertian::compute(const Vec3& L,
-                                const Vec3& N,
-                                const Vec3& color)
+template <typename T>
+T Lambertian::compute(const T& color)
 {
-    return color * L.dot(N);
+    using Scalar = typename T::Scalar;
+    return color / Scalar(PI_D);
 }
 
 } // namespace lb

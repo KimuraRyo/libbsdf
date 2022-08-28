@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2020 Kimura Ryo                                  //
+// Copyright (C) 2015-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -43,6 +43,9 @@ public:
                           int                       numAngles3,
                           DataType                  dataType = BRDF_DATA,
                           float                     ior = 1.0f);
+
+    /*! Dumps information about parameters to lbInfo. */
+    static void dumpParametersInfo(const ReflectanceModel& model);
 
 private:
     static Spectrum getSpectrum(const ReflectanceModel& model,

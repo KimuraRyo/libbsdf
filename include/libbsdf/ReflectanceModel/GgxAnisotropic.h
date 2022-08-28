@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2019 Kimura Ryo                                  //
+// Copyright (C) 2017-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -15,10 +15,7 @@
 
 namespace lb {
 
-/*!
- * GGX anisotropic BSDF model.
- * The default refractive index and extinction coefficient are values of aluminium at 550nm.
- */
+/*! GGX anisotropic BSDF model. */
 class GgxAnisotropic : public ReflectanceModel
 {
 public:
@@ -26,9 +23,21 @@ public:
 
     GgxAnisotropic(const Vec3&  color,
                    float        roughnessX,
+                   float        roughnessY)
+                   : color_     (color),
+                     roughnessX_(roughnessX),
+                     roughnessY_(roughnessY)
+    {
+        parameters_.push_back(Parameter("Color",        &color_));
+        parameters_.push_back(Parameter("Roughness X",  &roughnessX_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Roughness Y",  &roughnessY_, 0.01f, 1.0f));
+    }
+
+    GgxAnisotropic(const Vec3&  color,
+                   float        roughnessX,
                    float        roughnessY,
-                   float        refractiveIndex = 0.96521f,
-                   float        extinctionCoefficient = 6.3995f)
+                   float        refractiveIndex,
+                   float        extinctionCoefficient)
                    : color_                 (color),
                      roughnessX_            (roughnessX),
                      roughnessY_            (roughnessY),
@@ -38,39 +47,50 @@ public:
         parameters_.push_back(Parameter("Color",                    &color_));
         parameters_.push_back(Parameter("Roughness X",              &roughnessX_, 0.01f, 1.0f));
         parameters_.push_back(Parameter("Roughness Y",              &roughnessY_, 0.01f, 1.0f));
-#if !defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
         parameters_.push_back(Parameter("Refractive index",         &refractiveIndex_, 0.01f, 100.0f));
         parameters_.push_back(Parameter("Extinction coefficient",   &extinctionCoefficient_, 0.0f, 100.0f));
-#endif
     }
 
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& V,
-                        const Vec3& N,
-                        const Vec3& T,
-                        const Vec3& B,
-                        const Vec3& color,
-                        float       roughnessX,
-                        float       roughnessY,
-                        float       refractiveIndex = 0.96521f,
-                        float       extinctionCoefficient = 6.3995f);
+    template <typename Vec3T, typename ColorT, typename ScalarT>
+    static ColorT compute(const Vec3T&      L,
+                          const Vec3T&      V,
+                          const Vec3T&      N,
+                          const Vec3T&      T,
+                          const Vec3T&      B,
+                          const ColorT&     color,
+                          const ScalarT&    roughnessX,
+                          const ScalarT&    roughnessY);
 
-    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
+    template <typename Vec3T, typename ColorT, typename ScalarT>
+    static ColorT compute(const Vec3T&      L,
+                          const Vec3T&      V,
+                          const Vec3T&      N,
+                          const Vec3T&      T,
+                          const Vec3T&      B,
+                          const ColorT&     color,
+                          const ScalarT&    roughnessX,
+                          const ScalarT&    roughnessY,
+                          const ScalarT&    refractiveIndex,
+                          const ScalarT&    extinctionCoefficient);
+
+    Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const override
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
         const Vec3 T = Vec3(1.0, 0.0, 0.0);
         const Vec3 B = Vec3(0.0, -1.0, 0.0);
 
-        return compute(inDir, outDir, N, T, B,
-                       color_, roughnessX_, roughnessY_,
-                       refractiveIndex_, extinctionCoefficient_);
+#if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
+        return compute(inDir, outDir, N, T, B, color_, roughnessX_, roughnessY_);
+#else
+        return compute(inDir, outDir, N, T, B, color_, roughnessX_, roughnessY_, refractiveIndex_, extinctionCoefficient_);
+#endif
     }
 
-    bool isIsotropic() const { return false; }
+    bool isIsotropic() const override { return false; }
 
-    std::string getName() const { return "GGX (anisotropic)"; }
+    std::string getName() const override { return "GGX (anisotropic)"; }
 
-    std::string getDescription() const
+    std::string getDescription() const override
     {
         std::string reference("Brent Burley, \"Physically based shading at Disney,\" part of \"Practical physically based shading in film and game production\", SIGGRAPH 2012 Course Notes, 2012.");
         return reference;
@@ -88,97 +108,126 @@ private:
  * Implementation
  */
 
-inline Vec3 GgxAnisotropic::compute(const Vec3& L,
-                                    const Vec3& V,
-                                    const Vec3& N,
-                                    const Vec3& T,
-                                    const Vec3& B,
-                                    const Vec3& color,
-                                    float       roughnessX,
-                                    float       roughnessY,
-                                    float       refractiveIndex,
-                                    float       extinctionCoefficient)
+template <typename Vec3T, typename ColorT, typename ScalarT>
+ColorT GgxAnisotropic::compute(const Vec3T&     L,
+                               const Vec3T&     V,
+                               const Vec3T&     N,
+                               const Vec3T&     T,
+                               const Vec3T&     B,
+                               const ColorT&    color,
+                               const ScalarT&   roughnessX,
+                               const ScalarT&   roughnessY)
 {
     using std::abs;
     using std::acos;
     using std::min;
 
-    double dotLN = L.dot(N);
-    double dotVN = V.dot(N);
+    ScalarT dotNL = static_cast<ScalarT>(N.dot(L));
+    ScalarT dotNV = static_cast<ScalarT>(N.dot(V));
 
-#if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
-    Vec3 H = (L + V).normalized();
+    Vec3T H = (L + V).normalized();
 
-    double dotHN = H.dot(N);
-    double dotHT = H.dot(T);
-    double dotHB = H.dot(B);
-    double dotLH = min(L.dot(H), Vec3::Scalar(1));
-    double dotVH = min(V.dot(H), Vec3::Scalar(1));
+    ScalarT dotNH = static_cast<ScalarT>(N.dot(H));
+    ScalarT dotTH = static_cast<ScalarT>(T.dot(H));
+    ScalarT dotBH = static_cast<ScalarT>(B.dot(H));
 
-    Vec3 F = fresnelSchlick(dotVH, color);
-#else
-    bool reflected = (dotVN >= 0.0);
+    ScalarT dotLH = static_cast<ScalarT>(Ggx::clampDotLH(L.dot(H)));
+    ScalarT dotVH = dotLH;
 
-    // If the transmission of conductor is found, 0.0 is returned.
-    if (!reflected && extinctionCoefficient > 0.00001f) {
-        return Vec3::Zero();
-    }
+    ColorT F = computeSchlickFresnel(dotLH, color);
 
-    // If the refractive index of dielectric is 1.0, 0.0 is returned.
-    if (refractiveIndex == 1.0f && extinctionCoefficient < 0.00001f) {
-        return Vec3::Zero();
-    }
+    ScalarT alphaX = roughnessX * roughnessX;
+    ScalarT alphaY = roughnessY * roughnessY;
+    ScalarT sqAlpha = alphaX * alphaY;
 
-    Vec3 H = reflected ? (L + V).normalized() : -(L + refractiveIndex * V).normalized();
-
-    // incoming direction of transmission at inside of surface
-    if (!reflected && refractiveIndex < 1.0f) {
-        H = -H;
-    }
-
-    double dotHN = H.dot(N);
-    double dotHT = H.dot(T);
-    double dotHB = H.dot(B);
-    double dotLH = clamp(static_cast<double>(L.dot(H)), -1.0, 1.0);
-    double dotVH = clamp(static_cast<double>(V.dot(H)), -1.0, 1.0);
-
-    if (!reflected && (dotLH < 0.0 || // F
-                       dotLH * dotLN < 0.0 || // G
-                       dotVH * dotVN < 0.0 || // G
-                       dotHN < 0.0 // D
-                       )) {
-        return Vec3::Zero();
-    }
-
-    Vec3 F = color * fresnelComplex(acos(dotLH), refractiveIndex, extinctionCoefficient);
-#endif
-
-    double alphaX = roughnessX * roughnessX;
-    double alphaY = roughnessY * roughnessY;
-    double sqAlpha = alphaX * alphaY;
-
-    double G = Ggx::computeG1(dotLN, sqAlpha) * Ggx::computeG1(dotVN, sqAlpha);
+    ScalarT G = Ggx::computeG1(dotNL, sqAlpha) * Ggx::computeG1(dotNV, sqAlpha);
 
     // GTR (Generalized-Trowbridge-Reitz) distribution function is implemented here.
     // This function with gamma = 2 is equivalent to GGX.
-    double denominatorD = dotHT * dotHT / (alphaX * alphaX)
-                        + dotHB * dotHB / (alphaY * alphaY)
-                        + dotHN * dotHN;
-    double D = 1.0 / (PI_D * sqAlpha * denominatorD * denominatorD);
+    ScalarT d = dotTH * dotTH / (alphaX * alphaX)
+              + dotBH * dotBH / (alphaY * alphaY)
+              + dotNH * dotNH;
+    ScalarT D = ScalarT(1) / (ScalarT(PI_D) * sqAlpha * d * d);
 
-#if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
-    return F * G * D / (4.0 * dotLN * dotVN);
-#else
+    return F * G * D / (ScalarT(4) * dotNL * dotNV);
+}
+
+
+template <typename Vec3T, typename ColorT, typename ScalarT>
+ColorT GgxAnisotropic::compute(const Vec3T&     L,
+                               const Vec3T&     V,
+                               const Vec3T&     N,
+                               const Vec3T&     T,
+                               const Vec3T&     B,
+                               const ColorT&    color,
+                               const ScalarT&   roughnessX,
+                               const ScalarT&   roughnessY,
+                               const ScalarT&   refractiveIndex,
+                               const ScalarT&   extinctionCoefficient)
+{
+    using std::abs;
+    using std::acos;
+    using std::min;
+
+    ScalarT dotNL = static_cast<ScalarT>(N.dot(L));
+    ScalarT dotNV = static_cast<ScalarT>(N.dot(V));
+
+    bool reflected = (dotNV >= ScalarT(0));
+
+    // If the transmission of conductor is found, 0.0 is returned.
+    if (!reflected && extinctionCoefficient > ScalarT(0.00001)) {
+        return ColorT::Zero();
+    }
+
+    // If the refractive index of dielectric is 1.0, 0.0 is returned.
+    if (refractiveIndex == ScalarT(1) && extinctionCoefficient < ScalarT(0.00001)) {
+        return ColorT::Zero();
+    }
+
+    Vec3T H = reflected ? (L + V).normalized() : -(L + refractiveIndex * V).normalized();
+
+    // Transmission from the back side of the surface.
+    if (!reflected && refractiveIndex < ScalarT(1)) {
+        H = -H;
+    }
+
+    ScalarT dotNH = static_cast<ScalarT>(N.dot(H));
+    ScalarT dotTH = static_cast<ScalarT>(T.dot(H));
+    ScalarT dotBH = static_cast<ScalarT>(B.dot(H));
+    ScalarT dotLH = static_cast<ScalarT>(Ggx::clampDotLH(L.dot(H)));
+    ScalarT dotVH = reflected ? dotLH : clamp(static_cast<ScalarT>(V.dot(H)), ScalarT(-1), ScalarT(1));
+
+    if (!reflected && (dotLH < ScalarT(0) ||
+                       dotLH * dotNL < ScalarT(0) ||
+                       dotVH * dotNV < ScalarT(0) ||
+                       dotNH < ScalarT(0))) {
+        return ColorT::Zero();
+    }
+
+    ColorT F = color * computeComplexFresnel(acos(dotLH), refractiveIndex, extinctionCoefficient);
+
+    ScalarT alphaX = roughnessX * roughnessX;
+    ScalarT alphaY = roughnessY * roughnessY;
+    ScalarT sqAlpha = alphaX * alphaY;
+
+    ScalarT G = Ggx::computeG1(dotNL, sqAlpha) * Ggx::computeG1(dotNV, sqAlpha);
+
+    // GTR (Generalized-Trowbridge-Reitz) distribution function is implemented here.
+    // This function with gamma = 2 is equivalent to GGX.
+    ScalarT d = dotTH * dotTH / (alphaX * alphaX)
+              + dotBH * dotBH / (alphaY * alphaY)
+              + dotNH * dotNH;
+    ScalarT D = ScalarT(1) / (ScalarT(PI_D) * sqAlpha * d * d);
+
     if (reflected) {
-        return F * G * D / (4.0 * abs(dotLN) * abs(dotVN));
+        return F * G * D / (ScalarT(4) * abs(dotNL) * abs(dotNV));
     }
     else {
-        double denominator = dotLH + refractiveIndex * dotVH;
-        return (abs(dotLH) * abs(dotVH)) / (abs(dotLN) * abs(dotVN)) *
+        ScalarT d = dotLH + refractiveIndex * dotVH;
+        return (abs(dotLH) * abs(dotVH)) / (abs(dotNL) * abs(dotNV)) *
                refractiveIndex * refractiveIndex *
-               (Vec3::Ones() - F) * G * D / (denominator * denominator);
+               (ColorT::Ones() - F) * G * D / (d * d);
     }
-#endif
 }
 
 } // namespace lb

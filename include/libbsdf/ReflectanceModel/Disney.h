@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2019 Kimura Ryo                                  //
+// Copyright (C) 2018-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -104,7 +104,7 @@ inline Vec3 Disney::compute(const Vec3& L,
     double dotHB = H.dot(B);
     double dotVH = min(V.dot(H), Vec3::Scalar(1));
 
-    Vec3 F = fresnelSchlick(dotVH, specularColor);
+    Vec3 F = computeSchlickFresnel(dotVH, specularColor);
 
     // Remap roughness.
     double roughnessXG = 0.5 + roughnessX * 0.5;
@@ -114,10 +114,10 @@ inline Vec3 Disney::compute(const Vec3& L,
     double sqAlphaG = alphaXG * alphaYG;
     double G = Ggx::computeG1(dotVN, sqAlphaG) * Ggx::computeG1(dotLN, sqAlphaG);
 
-    double denominatorD = dotHT * dotHT / (alphaX * alphaX)
-                        + dotHB * dotHB / (alphaY * alphaY)
-                        + dotHN * dotHN;
-    double D = 1.0 / (PI_D * sqAlpha * denominatorD * denominatorD);
+    double d = dotHT * dotHT / (alphaX * alphaX)
+             + dotHB * dotHB / (alphaY * alphaY)
+             + dotHN * dotHN;
+    double D = 1.0 / (PI_D * sqAlpha * d * d);
 
     // specular component
     Vec3 sBrdf = F * G * D / (4.0 * dotLN * dotVN);

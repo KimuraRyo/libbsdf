@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2019 Kimura Ryo                                  //
+// Copyright (C) 2016-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -9,7 +9,7 @@
 #ifndef LIBBSDF_REFLECTANCE_MODEL_H
 #define LIBBSDF_REFLECTANCE_MODEL_H
 
-#include<vector>
+#include <vector>
 
 #include <libbsdf/Common/Vector.h>
 
@@ -75,17 +75,17 @@ public:
         const std::string&  getName() const;
         ParameterType       getType() const;
 
-        float*  getFloat();
-        Vec3*   getVec3();
-        int*    getInt();
+        float*  getFloat() const;
+        Vec3*   getVec3() const;
+        int*    getInt() const;
 
-        float*  getMinFloat();
-        Vec3*   getMinVec3();
-        int*    getMinInt();
+        float*  getMinFloat() const;
+        Vec3*   getMinVec3() const;
+        int*    getMinInt() const;
 
-        float*  getMaxFloat();
-        Vec3*   getMaxVec3();
-        int*    getMaxInt();
+        float*  getMaxFloat() const;
+        Vec3*   getMaxVec3() const;
+        int*    getMaxInt() const;
 
         const std::string& getDescription() const;
 
@@ -111,11 +111,14 @@ public:
      */
     virtual Vec3 getBrdfValue(const Vec3& inDir, const Vec3& outDir) const;
 
-    /*! Returns ture if this reflectance model is isotropic. */
+    /*! Returns true if this reflectance model is isotropic. */
     virtual bool isIsotropic() const = 0;
 
     /*! Gets the list of parameters for a reflectance model. */
     Parameters& getParameters();
+
+    /*! Gets the list of parameters for a reflectance model. */
+    const Parameters& getParameters() const;
 
     virtual std::string getName() const;
 
@@ -140,52 +143,57 @@ inline ReflectanceModel::Parameter::ParameterType ReflectanceModel::Parameter::g
     return type_;
 }
 
-inline float* ReflectanceModel::Parameter::getFloat()
+inline float* ReflectanceModel::Parameter::getFloat() const
 {
     return value_.real;
 }
 
-inline Vec3* ReflectanceModel::Parameter::getVec3()
+inline Vec3* ReflectanceModel::Parameter::getVec3() const
 {
     return value_.vec3;
 }
 
-inline int* ReflectanceModel::Parameter::getInt()
+inline int* ReflectanceModel::Parameter::getInt() const
 {
     return value_.integer;
 }
 
-inline float* ReflectanceModel::Parameter::getMinFloat()
+inline float* ReflectanceModel::Parameter::getMinFloat() const
 {
     return minValue_.real;
 }
 
-inline Vec3* ReflectanceModel::Parameter::getMinVec3()
+inline Vec3* ReflectanceModel::Parameter::getMinVec3() const
 {
     return minValue_.vec3;
 }
 
-inline int* ReflectanceModel::Parameter::getMinInt()
+inline int* ReflectanceModel::Parameter::getMinInt() const
 {
     return minValue_.integer;
 }
 
-inline float* ReflectanceModel::Parameter::getMaxFloat()
+inline float* ReflectanceModel::Parameter::getMaxFloat() const
 {
     return maxValue_.real;
 }
 
-inline Vec3* ReflectanceModel::Parameter::getMaxVec3()
+inline Vec3* ReflectanceModel::Parameter::getMaxVec3() const
 {
     return maxValue_.vec3;
 }
 
-inline int* ReflectanceModel::Parameter::getMaxInt()
+inline int* ReflectanceModel::Parameter::getMaxInt() const
 {
     return maxValue_.integer;
 }
 
 inline ReflectanceModel::Parameters& ReflectanceModel::getParameters()
+{
+    return parameters_;
+}
+
+inline const ReflectanceModel::Parameters& ReflectanceModel::getParameters() const
 {
     return parameters_;
 }

@@ -1,5 +1,5 @@
-// =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+﻿// =================================================================== //
+// Copyright (C) 2015-2021 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -17,101 +17,140 @@
 namespace lb {
 
 /*! Fresnel reflection. */
-float fresnel(float inTheta, float n1, float n2);
+template <typename T>
+T computeFresnel(const T& inTheta, const T& n1, const T& n2);
 
 /*! Fresnel reflection. */
-float fresnel(float inTheta, float n);
+template <typename T>
+T computeFresnel(const T& inTheta, const T& n);
 
 /*! Fresnel reflection with a complex refractive index. */
-float fresnelComplex(float inTheta, float n, float k);
+template <typename T>
+T computeComplexFresnel(const T& inTheta, const T& n, const T& k);
 
 /*! Schlick's approximation of Fresnel reflection. */
-float fresnelSchlick(float inTheta, float n1, float n2 = 1.0f);
+template <typename T>
+T computeSchlickFresnel(const T& inTheta, const T& n1, const T& n2 = T(1));
 
 /*! Schlick's approximation of Fresnel reflection. */
-Vec3 fresnelSchlick(float cosLN, const Vec3& R0);
+template <typename ScalarT, typename ColorT>
+ColorT computeSchlickFresnel(const ScalarT& dotNV, const ColorT& R0);
+
+/*!
+ * Spherical Gaussian approximation of Fresnel reflection.
+ * Sébastien Lagarde, "Spherical Gaussian approximation for Blinn-Phong, Phong and Fresnel," June 2012.
+ */
+template <typename ScalarT, typename ColorT>
+ColorT computeSphericalGaussianFresnel(const ScalarT& cosLN, const ColorT& R0);
 
 /*
  * Implementation
  */
 
-inline float fresnel(float inTheta, float n1, float n2)
+template <typename T>
+T computeFresnel(const T& inTheta, const T& n1, const T& n2)
 {
-    assert(inTheta >= 0.0f && inTheta <= PI_2_F);
+    assert(inTheta >= T(0) && inTheta <= T(PI_2_D));
 
-    float cosI = std::cos(inTheta);
-    float sinT = n1 / n2 * std::sin(inTheta);
-
-    if (sinT >= 1.0f) {
-        // total internal reflection
-        return 1.0f;
-    }
-
-    float cosT = std::sqrt(1.0f - sinT * sinT);
-
-    float rs = (n1 * cosI - n2 * cosT) / (n1 * cosI + n2 * cosT);
-    float Rs = rs * rs;
-
-    float rp = (n1 * cosT - n2 * cosI) / (n1 * cosT + n2 * cosI);
-    float Rp = rp * rp;
-
-    return (Rs + Rp) / 2.0f;
-}
-
-inline float fresnel(float inTheta, float n)
-{
-    return fresnel(inTheta, 1.0f, n);
-}
-
-inline float fresnelComplex(float inTheta, float n, float k)
-{
-    if (k == 0.0f) {
-        return fresnel(inTheta, n);
-    }
-
-    assert(inTheta >= 0.0f && inTheta <= PI_2_F);
-
+    using std::cos;
+    using std::sin;
     using std::sqrt;
 
-    float sinI = std::sin(inTheta);
-    float cosI = std::cos(inTheta);
-    float tanI = std::tan(inTheta);
+    T cosI = cos(inTheta);
+    T sinT = n1 / n2 * sin(inTheta);
 
-    float sqSinI = sinI * sinI;
-    float sqCosI = cosI * cosI;
-    float sqTanI = tanI * tanI;
-    float sqN = n * n;
-    float sqK = k * k;
+    if (sinT >= T(1)) {
+        // total internal reflection
+        return T(1);
+    }
 
-    float nks = sqN - sqK - sqSinI;
-    float sqA = (sqrt(nks * nks + 4.0f * sqN * sqK) + (sqN - sqK - sqSinI)) / 2.0f;
-    float sqB = (sqrt(nks * nks + 4.0f * sqN * sqK) - (sqN - sqK - sqSinI)) / 2.0f;
+    T cosT = sqrt(T(1) - sinT * sinT);
 
-    float a = sqrt(sqA);
+    T rs = (n1 * cosI - n2 * cosT) / (n1 * cosI + n2 * cosT);
+    T Rs = rs * rs;
 
-    float Rs = (sqA + sqB - 2.0f * a * cosI + sqCosI)
-             / (sqA + sqB + 2.0f * a * cosI + sqCosI);
+    T rp = (n1 * cosT - n2 * cosI) / (n1 * cosT + n2 * cosI);
+    T Rp = rp * rp;
 
-    float Rp = Rs
-             * (sqA + sqB - 2.0f * a * sinI * tanI + sqSinI * sqTanI)
-             / (sqA + sqB + 2.0f * a * sinI * tanI + sqSinI * sqTanI);
-
-    return (Rs + Rp) / 2.0f;
+    return (Rs + Rp) / T(2);
 }
 
-inline float fresnelSchlick(float inTheta, float n1, float n2)
+template <typename T>
+T computeFresnel(const T& inTheta, const T& n)
 {
-    assert(inTheta >= 0.0f && inTheta <= PI_2_F);
-
-    float r0 = (n1 - n2) / (n1 + n2);
-    float R0 = r0 * r0;
-
-    return R0 + (1.0f - R0) * std::pow(1.0f - std::cos(inTheta), 5.0f);
+    return computeFresnel(inTheta, T(1), n);
 }
 
-inline Vec3 fresnelSchlick(float cosLN, const Vec3& R0)
+template <typename T>
+T computeComplexFresnel(const T& inTheta, const T& n, const T& k)
 {
-    return R0 + (Vec3(1.0, 1.0, 1.0) - R0) * std::pow(1.0f - cosLN, 5.0f);
+    assert(inTheta >= T(0) && inTheta <= T(PI_2_D));
+
+    using std::cos;
+    using std::sin;
+    using std::sqrt;
+    using std::tan;
+
+    if (k == T(0)) {
+        return computeFresnel(inTheta, n);
+    }
+
+    T sinI = sin(inTheta);
+    T cosI = cos(inTheta);
+    T tanI = tan(inTheta);
+
+    T sqSinI = sinI * sinI;
+    T sqCosI = cosI * cosI;
+    T sqTanI = tanI * tanI;
+    T sqN = n * n;
+    T sqK = k * k;
+
+    T nks = sqN - sqK - sqSinI;
+    T sqA = (sqrt(nks * nks + T(4) * sqN * sqK) + (sqN - sqK - sqSinI)) / T(2);
+    T sqB = (sqrt(nks * nks + T(4) * sqN * sqK) - (sqN - sqK - sqSinI)) / T(2);
+
+    T a = sqrt(sqA);
+
+    T Rs = (sqA + sqB - T(2) * a * cosI + sqCosI)
+         / (sqA + sqB + T(2) * a * cosI + sqCosI);
+
+    T Rp = Rs
+         * (sqA + sqB - T(2) * a * sinI * tanI + sqSinI * sqTanI)
+         / (sqA + sqB + T(2) * a * sinI * tanI + sqSinI * sqTanI);
+
+    return (Rs + Rp) / T(2);
+}
+
+template <typename T>
+T computeSchlickFresnel(const T& inTheta, const T& n1, const T& n2)
+{
+    assert(inTheta >= T(0) && inTheta <= T(PI_2_D));
+
+    using std::cos;
+    using std::pow;
+
+    T r0 = (n1 - n2) / (n1 + n2);
+    T R0 = r0 * r0;
+
+    return R0 + (T(1) - R0) * pow(T(1) - cos(inTheta), T(5));
+}
+
+template <typename ScalarT, typename ColorT>
+ColorT computeSchlickFresnel(const ScalarT& dotNV, const ColorT& R0)
+{
+    assert(dotNV >= ScalarT(0) && dotNV <= ScalarT(1));
+
+    using std::pow;
+
+    return R0 + (ColorT::Ones() - R0) * pow(ScalarT(1) - dotNV, ScalarT(5));
+}
+
+template <typename ScalarT, typename ColorT>
+ColorT computeSphericalGaussianFresnel(const ScalarT& dotNV, const ColorT& R0)
+{
+    using std::exp2;
+
+    return R0 + (ColorT::Ones() - R0) * exp2((ScalarT(-5.55473) * dotNV - ScalarT(6.98316)) * dotNV);
 }
 
 } // namespace lb

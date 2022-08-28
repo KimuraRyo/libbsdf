@@ -98,10 +98,10 @@ inline Vec3 CookTorrance::compute(const Vec3&   L,
     double dotVH = min(V.dot(H), Vec3::Scalar(1));
 
 #if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
-    Vec3 F = fresnelSchlick(dotVH, color);
+    Vec3 F = computeSchlickFresnel(dotVH, color);
 #else
     float inTheta = static_cast<float>(std::acos(dotVH));
-    Vec3 F = color * fresnelComplex(inTheta, refractiveIndex, extinctionCoefficient);
+    Vec3 F = color * computeComplexFresnel(inTheta, refractiveIndex, extinctionCoefficient);
 #endif
 
     double G = min(dotHN * dotVN / dotVH,

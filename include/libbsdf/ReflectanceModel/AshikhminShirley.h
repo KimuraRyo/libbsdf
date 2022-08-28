@@ -105,7 +105,7 @@ inline Vec3 AshikhminShirley::compute(const Vec3&   L,
     float sqDotHN = dotHN * dotHN;
 
     // specular component
-    Vec3 F = fresnelSchlick(dotHL, specularColor);
+    Vec3 F = computeSchlickFresnel(dotHL, specularColor);
     Vec3 sBrdf = sqrt((shininessX + 1.0f) * (shininessY + 1.0f)) / (8.0f * PI_F)
                * pow(dotHN, (shininessX * sqDotHT + shininessY * sqDotHB) / max(1.0f - sqDotHN, EPSILON_F))
                / (dotHL * max(dotLN, dotVN))

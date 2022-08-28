@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -44,8 +44,8 @@ template<typename T>
 constexpr T increase(T val);
 
 /*! \brief Computes linearly-interpolated values. */
-template <typename T>
-T lerp(const T& v0, const T& v1, float t);
+template <typename DataT, typename ParameterT>
+DataT lerp(const DataT& v0, const DataT& v1, const ParameterT& t);
 
 /*! \brief Interpolates smoothly between two input values with cubic Hermite interpolation. */
 template <typename T>
@@ -56,12 +56,12 @@ template <typename T>
 T smootherstep(const T& v0, const T& v1, const T& t);
 
 /*! \brief Computes smoothly interpolated values with cubic Hermite interpolation. */
-template <typename T>
-T hermiteInterpolation3(const T& v0, const T& v1, float t);
+template <typename DataT, typename ParameterT>
+DataT hermiteInterpolation3(const DataT& v0, const DataT& v1, const ParameterT& t);
 
 /*! \brief Computes smoothly interpolated values with 5th-order Hermite interpolation. */
-template <typename T>
-T hermiteInterpolation5(const T& v0, const T& v1, float t);
+template <typename DataT, typename ParameterT>
+DataT hermiteInterpolation5(const DataT& v0, const DataT& v1, const ParameterT& t);
 
 /*! \brief Computes a specular direction. */
 template <typename Vec3T>
@@ -86,6 +86,10 @@ T toDegrees(const T& radians);
 /*! \brief Converts an array from degrees to radians. */
 template <typename T>
 T toRadians(const T& degrees);
+
+/*! \brief Computes a logarithmically scaled value. */
+template <typename ValueT, typename BaseT>
+ValueT toLogScale(const ValueT& value, const BaseT& base);
 
 /*! \brief Converts a coordinate system. */
 template <typename SrcCoordSysT, typename DestCoordSysT>
@@ -168,23 +172,24 @@ std::string getDate();
 template <typename T>
 T clamp(T value, T minValue, T maxValue)
 {
-    using std::min;
     using std::max;
+    using std::min;
     return max(minValue, min(maxValue, value));
 }
 
 template <typename T>
-int sign(T val) {
+int sign(T val)
+{
     return (T(0) < val) - (val < T(0));
 }
 
-template<typename T>
+template <typename T>
 constexpr T decrease(T val)
 {
     return val - std::numeric_limits<T>::epsilon() * val;
 }
 
-template<typename T>
+template <typename T>
 constexpr T increase(T val)
 {
     return val + std::numeric_limits<T>::epsilon() * val;
@@ -202,8 +207,8 @@ bool isEqual(T lhs, T rhs)
     return (abs(lhs - rhs) <= tolerance);
 }
 
-template <typename T>
-T lerp(const T& v0, const T& v1, float t)
+template <typename DataT, typename ParameterT>
+DataT lerp(const DataT& v0, const DataT& v1, const ParameterT& t)
 {
     return v0 + (v1 - v0) * t;
 }
@@ -222,17 +227,17 @@ T smootherstep(const T& v0, const T& v1, const T& t)
     return coeff * coeff * coeff * (coeff * (coeff * T(6) - T(15)) + T(10));
 }
 
-template <typename T>
-T hermiteInterpolation3(const T& v0, const T& v1, float t)
+template <typename DataT, typename ParameterT>
+DataT hermiteInterpolation3(const DataT& v0, const DataT& v1, const ParameterT& t)
 {
-    float coeff = smoothstep(0.0f, 1.0f, t);
+    ParameterT coeff = smoothstep(ParameterT(0), ParameterT(1), t);
     return lerp(v0, v1, coeff);
 }
 
-template <typename T>
-T hermiteInterpolation5(const T& v0, const T& v1, float t)
+template <typename DataT, typename ParameterT>
+DataT hermiteInterpolation5(const DataT& v0, const DataT& v1, const ParameterT& t)
 {
-    float coeff = smootherstep(0.0f, 1.0f, t);
+    ParameterT coeff = smootherstep(ParameterT(0), ParameterT(1), t);
     return lerp(v0, v1, coeff);
 }
 
@@ -311,6 +316,13 @@ T toRadians(const T& degrees)
 {
     using ScalarType = typename T::Scalar;
     return degrees * ScalarType(PI_D / 180);
+}
+
+template <typename ValueT, typename BaseT>
+ValueT toLogScale(const ValueT& value, const BaseT& base)
+{
+    using std::log;
+    return static_cast<ValueT>(log(value + ValueT(1)) / log(base));
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
