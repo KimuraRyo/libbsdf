@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -33,6 +33,8 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
 
     ddr_sdr_utility::ignoreCommentLines(ifs);
     std::ifstream::pos_type pos = ifs.tellg();
+
+    using reader_utility::isEqual;
 
     // Read a header.
     std::string headStr;
@@ -91,11 +93,13 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
                 inThetaDegrees.push_back(angle);
             }
         }
-        else if (reader_utility::toLower(headStr) == "wl" ||
-                 reader_utility::toLower(headStr) == "bw" ||
-                 reader_utility::toLower(headStr) == "red" ||
-                 reader_utility::toLower(headStr) == "gre" ||
-                 reader_utility::toLower(headStr) == "blu") {
+        else if (isEqual(headStr, "wl") ||
+                 isEqual(headStr, "bw") ||
+                 isEqual(headStr, "red") ||
+                 isEqual(headStr, "gre") ||
+                 isEqual(headStr, "blu") ||
+                 isEqual(headStr, "green") || // Not correct keyword in the specification
+                 isEqual(headStr, "blue")) {  // Not correct keyword in the specification
             ifs.seekg(pos, std::ios_base::beg);
             break;
         }
@@ -129,11 +133,13 @@ SampleSet2D* SdrReader::read(const std::string& fileName)
         if (dataStr.empty()) {
             continue;
         }
-        else if (reader_utility::toLower(dataStr) == "wl" ||
-                 reader_utility::toLower(dataStr) == "bw" ||
-                 reader_utility::toLower(dataStr) == "red" ||
-                 reader_utility::toLower(dataStr) == "gre" ||
-                 reader_utility::toLower(dataStr) == "blu") {
+        else if (isEqual(dataStr, "wl") ||
+                 isEqual(dataStr, "bw") ||
+                 isEqual(dataStr, "red") ||
+                 isEqual(dataStr, "gre") ||
+                 isEqual(dataStr, "blu") ||
+                 isEqual(dataStr, "green") || // Not correct keyword in the specification
+                 isEqual(dataStr, "blue")) {  // Not correct keyword in the specification
             if (colorModel == SPECTRAL_MODEL) {
                 float wavelength;
                 ifs >> wavelength;
