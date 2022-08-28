@@ -218,7 +218,7 @@ T Ggx::computeD(const T& dotNH, const T& sqAlpha)
 }
 
 template <typename T>
-static T Ggx::clampDotLH(const T& dotLH)
+T Ggx::clampDotLH(const T& dotLH)
 {
 #if defined(LIBBSDF_USE_CERES_SOLVER)
     // ceres::acos returns NaN as the derivative if the argument is 1 or -1.
