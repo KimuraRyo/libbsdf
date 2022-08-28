@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -38,6 +38,14 @@ public:
     /*! Generates a random integer. Range is [0,std::numeric_limits<uint32_t>::max()]. */
     uint32_t next();
 
+    /*! Generates a random floating-point number. Range is [0.0,1.0]. */
+    template <typename T>
+    T next();
+
+    /*! Generates a random point on the surface of a unit hemisphere. The coordinate system is Z-up. */
+    template <typename Vec3T>
+    Vec3T nextOnHemisphere();
+
     /*! Generates a random integer. Range is [0,std::numeric_limits<uint32_t>::max()]. */
     static uint32_t random();
 
@@ -45,7 +53,7 @@ public:
     template <typename T>
     static T random();
 
-    /*! Generates a random point on the surface of a unit hemisphere. Z-up coordinate system is used. */
+    /*! Generates a random point on the surface of a unit hemisphere. The coordinate system is Z-up. */
     template <typename Vec3T>
     static Vec3T randomOnHemisphere();
 
@@ -72,6 +80,26 @@ inline uint32_t Xorshift::next()
     w_ = (w_ ^ (w_ >> 19)) ^ (t ^ (t >> 8));
 
     return w_;
+}
+
+template <typename T>
+inline T Xorshift::next()
+{
+    return static_cast<T>(next()) / std::numeric_limits<uint32_t>::max();
+}
+
+template <typename Vec3T>
+inline Vec3T Xorshift::nextOnHemisphere()
+{
+    using Scalar = typename Vec3T::Scalar;
+
+    Scalar z = next<Scalar>();
+    Scalar phi = next<Scalar>() * TAU_F;
+    Scalar coeff = std::sqrt(1 - z * z);
+    Scalar x = coeff * std::cos(phi);
+    Scalar y = coeff * std::sin(phi);
+
+    return Vec3T(x, y, z);
 }
 
 inline uint32_t Xorshift::random()
