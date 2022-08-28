@@ -64,7 +64,7 @@ void showHelp()
     cout << "                   Valid formats:" << endl;
     cout << "                       Surface Scattering Distribution Data (\".ssdd\")" << endl;
     cout << "                       Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
-    cout << "                           If there is no file extension, \".ddr\" and \".ddt\" files are generated." << endl;
+    cout << "                       If there is no file extension, \".ddr\" and \".ddt\" files are generated." << endl;
     cout << endl;
     cout << "Options:" << endl;
     cout << "  -h, --help                   show this help message and exit" << endl;
