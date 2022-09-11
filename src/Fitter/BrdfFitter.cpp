@@ -39,8 +39,8 @@ BrdfFitter::Data::Data(const Brdf& brdf, int numSampling, const Vec3::Scalar& ma
             Sample sample;
             sample.inDir = inDir;
             sample.outDir = outDir;
-            sample.value =
-                toSrgb<Vec3, SampleSet>(brdf.getSpectrum(sample.inDir, sample.outDir), *ss);
+            sample.value = SpectrumUtility::toSrgb<Vec3, SampleSet>(
+                brdf.getSpectrum(sample.inDir, sample.outDir), *ss);
 
             samples_.push_back(sample);
         }}}}
@@ -55,8 +55,8 @@ BrdfFitter::Data::Data(const Brdf& brdf, int numSampling, const Vec3::Scalar& ma
 
             if (sample.inDir[2] < threshold || sample.outDir[2] < threshold) continue;
 
-            sample.value =
-                toSrgb<Vec3, SampleSet>(brdf.getSpectrum(sample.inDir, sample.outDir), *ss);
+            sample.value = SpectrumUtility::toSrgb<Vec3, SampleSet>(
+                brdf.getSpectrum(sample.inDir, sample.outDir), *ss);
 
             samples_.push_back(sample);
             ++count;
