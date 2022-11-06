@@ -12,7 +12,7 @@ project(libbsdf)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-option(USE_Fitting "Use Fitting" OFF)
+option(LIBBSDF_ENABLE_FITTING "Enable fitting functions with Ceres Solver" OFF)
 
 set(HEADER_PATH include/libbsdf)
 set(SOURCE_PATH src)
@@ -30,25 +30,28 @@ endmacro()
 set(SOURCES)
 set_sources(Brdf)
 set_sources(Common)
-if(USE_Fitting)
+if(LIBBSDF_ENABLE_FITTING)
     set_sources(Fitter)
 endif()
 set_sources(Reader)
 set_sources(ReflectanceModel)
 set_sources(Writer)
 
+# Set delaunator-cpp.
+set(DELAUNATOR_PATH src/ThirdParty/delaunator-cpp)
+set(DELAUNATOR_SOURCES "${DELAUNATOR_PATH}/delaunator.hpp" "${DELAUNATOR_PATH}/delaunator.cpp")
+source_group("ThirdParty\\delaunator-cpp" FILES ${DELAUNATOR_SOURCES})
+list(APPEND SOURCES ${DELAUNATOR_SOURCES})
+
 include_directories(include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-# Enable all warnings
-#add_definitions(-Wall)
 
 if(EIGEN3_INCLUDE_DIR)
     include_directories("${EIGEN3_INCLUDE_DIR}")
 endif()
 
-if(USE_Fitting)
+if(LIBBSDF_ENABLE_FITTING)
     find_package(Ceres REQUIRED)
     set(USED_LIBRARIES "Ceres::ceres")
     add_definitions(-DLIBBSDF_USE_CERES_SOLVER)
@@ -63,8 +66,8 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
 endif()
 
-option(USE_OpenMP "Use OpenMP" ON)
-if(USE_OpenMP)
+option(LIBBSDF_USE_OPENMP "Use OpenMP" ON)
+if(LIBBSDF_USE_OPENMP)
     find_package(OpenMP QUIET)
     if(OPENMP_FOUND)
         message("OpenMP found")
@@ -76,8 +79,8 @@ endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
 
-option(BUILD_LIBBSDF_APPLICATIONS "Enable to build libbsdf Applications" ON)
-if(BUILD_LIBBSDF_APPLICATIONS)
+option(LIBBSDF_BUILD_APPLICATIONS "Enable to build libbsdf Applications" ON)
+if(LIBBSDF_BUILD_APPLICATIONS)
     add_subdirectory(applications)
 
     if(NOT DEFINED LIBBSDF_CORE_FOLDER_NAME)
