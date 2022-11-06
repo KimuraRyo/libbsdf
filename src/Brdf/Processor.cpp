@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2021 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -1337,7 +1337,7 @@ void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
     }
 }
 
-void lb::fixNegativeSpectra(Brdf* brdf)
+void lb::fixNegativeSpectra(Brdf* brdf, bool upperHemisphere)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -1348,7 +1348,7 @@ void lb::fixNegativeSpectra(Brdf* brdf)
         Vec3 inDir, outDir;
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-        if (isDownwardDir(outDir)) continue;
+        if (upperHemisphere && isDownwardDir(outDir)) continue;
 
         Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
         sp = sp.cwiseMax(0);

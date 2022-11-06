@@ -176,7 +176,6 @@ public:
     /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
     void resizeWavelengths(int numWavelengths);
 
-private:
     /*! Gets the index of the spectrum from a set of angle indices. */
     size_t getIndex(int index0,
                     int index1,
@@ -188,6 +187,7 @@ private:
                     int index2,
                     int index3) const;
 
+private:
     /*! Updates the attributes whether angles are set at equal intervals. */
     void updateEqualIntervalAngles();
 

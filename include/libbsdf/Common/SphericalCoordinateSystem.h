@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -79,8 +79,11 @@ struct SphericalCoordinateSystem
     static constexpr float MAX_ANGLE3 = TAU_F;  /*!< This attribute holds the maximum value of outPhi. */
 
     /*! Converts from a spherical coordinate system to a Cartesian. */
+    static Vec3 toXyz(const Vec2& thetaPhi);
+
+    /*! Converts from a spherical coordinate system to a Cartesian. */
     template <typename ScalarT>
-    static Vec3 toXyz(ScalarT theta, ScalarT phi);
+    static Vec3 toXyz(const ScalarT& theta, const ScalarT& phi);
 
     /*! Converts from a Cartesian coordinate system to a spherical. */
     template <typename ScalarT>
@@ -142,17 +145,24 @@ void SphericalCoordinateSystem::fromXyz(const Vec3& inDir,
     }
 }
 
-template <typename ScalarT>
-Vec3 SphericalCoordinateSystem::toXyz(ScalarT theta, ScalarT phi)
+inline Vec3 SphericalCoordinateSystem::toXyz(const Vec2& thetaPhi)
 {
-    Vec2f thetaPhi(theta, phi);
-    Vec2f sinArray = thetaPhi.array().sin();
-    Vec2f cosArray = thetaPhi.array().cos();
+    return toXyz(thetaPhi[0], thetaPhi[1]);
+}
 
-    Vec3 lhs(sinArray[0], sinArray[0], cosArray[0]);
-    Vec3 rhs(cosArray[1], sinArray[1], 1);
+template <typename ScalarT>
+Vec3 SphericalCoordinateSystem::toXyz(const ScalarT& theta, const ScalarT& phi)
+{
+    using Scalar = Vec3::Scalar;
+    using std::cos;
+    using std::sin;
 
-    return lhs.cwiseProduct(rhs).normalized();
+    Scalar sinTh = static_cast<Scalar>(sin(theta));
+    Scalar sinPh = static_cast<Scalar>(sin(phi));
+    Scalar cosTh = static_cast<Scalar>(cos(theta));
+    Scalar cosPh = static_cast<Scalar>(cos(phi));
+
+    return Vec3(sinTh * cosPh, sinTh * sinPh, cosTh);
 }
 
 template <typename ScalarT>

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2021 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -30,6 +30,12 @@ constexpr float TAU_F   = static_cast<float>(TAU_D);
 
 constexpr float EPSILON_F   = std::numeric_limits<float>::epsilon();
 constexpr double EPSILON_D  = std::numeric_limits<double>::epsilon();
+
+#if defined(LIBBSDF_DOUBLE_PRECISION_VECTOR)
+constexpr double EPSILON = EPSILON_D;
+#else
+constexpr float EPSILON = EPSILON_F;
+#endif
 
 /*! \brief The data type of a spectrum. */
 using Spectrum = Eigen::ArrayXf;

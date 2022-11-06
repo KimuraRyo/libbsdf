@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2021 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -223,8 +223,11 @@ bool subtract(const Brdf& src0, const Brdf& src1, Brdf* dest);
 /*! \brief Multiplies spectra of samples by a value. */
 void multiplySpectra(SampleSet* samples, Spectrum::Scalar value);
 
-/*! \brief Fixes negative values of spectra to 0 on an upper hemisphere. */
-void fixNegativeSpectra(Brdf* brdf);
+/*!
+ * \brief Fixes negative values of spectra to 0.
+ * \param upperHemisphere   If this parameter is true, processing is applied only to the upper hemisphere.
+ */
+void fixNegativeSpectra(Brdf* brdf, bool upperHemisphere = true);
 
 /*! \brief Fixes negative values of spectra to 0. */
 void fixNegativeSpectra(SampleSet* samples);

@@ -51,7 +51,7 @@ public:
 private:
     /*!
      * Computes the centroid of a planar triangle.
-     * This is different from the centroid of a spherial triangle, but similar for a small triangle.
+     * This is different from the centroid of a spherical triangle, but similar for a small triangle.
      */
     static Vec3 computeCentroid(const Vec3& v0, const Vec3& v1, const Vec3& v2);
 

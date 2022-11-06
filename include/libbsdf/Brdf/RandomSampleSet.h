@@ -43,7 +43,10 @@ public:
     const Spectrum& findSpectrumOfNearestSample(const AngleList& angles,
                                                 bool             reciprocity = false) const;
 
-    /*! Estimates the spectrum of a set of angles using a coordinate system (\a LocalCoordSysT). */
+    /*!
+     * Estimates the spectrum of a set of angles using a coordinate system (\a LocalCoordSysT).
+     * The nearest sample is searched with weights.
+     */
     template <typename LocalCoordSysT>
     const Spectrum& estimateSpectrum(const AngleList&   angles,
                                      float              weight0 = 1.0f,

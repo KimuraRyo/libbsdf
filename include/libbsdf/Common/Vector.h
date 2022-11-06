@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2019 Kimura Ryo                                  //
+// Copyright (C) 2014-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -44,6 +44,20 @@ using Vec4 = Vec4f;
 /*! \brief Converts from a vector to lb::Vec3. */
 template <typename Vec3T>
 Vec3 toVec3(const Vec3T& vec3);
+
+/*! Operator to compare lb::Vec2. */
+struct CompareVec2
+{
+    bool operator()(const Vec2& v0, const Vec2& v1) const
+    {
+        for (int i = 0; i < 2; ++i) {
+            if (v0(i) < v1(i)) return true;
+            if (v0(i) > v1(i)) return false;
+        }
+
+        return false;
+    }
+};
 
 /*
  * Implementation
