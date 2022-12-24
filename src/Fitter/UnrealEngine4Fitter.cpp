@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2021 Kimura Ryo                                       //
+// Copyright (C) 2021-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -79,6 +79,17 @@ private:
     double                    metallic_;
 };
 
+UnrealEngine4 UnrealEngine4Fitter::estimateParameters(const Brdf&         brdf,
+                                                      int                 numSampling,
+                                                      const Vec3::Scalar& maxTheta)
+{
+    UnrealEngine4 model(Vec3(0.5, 0.5, 0.5), 0.5f, 0.5f, 0.01f);
+
+    estimateParameters(&model, brdf, numSampling, maxTheta);
+
+    return model;
+}
+
 void UnrealEngine4Fitter::estimateParameters(UnrealEngine4*      model,
                                              const Brdf&         brdf,
                                              int                 numSampling,
@@ -98,11 +109,11 @@ void UnrealEngine4Fitter::estimateParameters(UnrealEngine4*      model,
                          *params.at(2).getFloat(),
                          *params.at(3).getFloat());
 
-    Vec3* colorVec3 = params.at(0).getVec3();
-    double color[3] = { (*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2] };
-    double metallic     = *params.at(1).getFloat();
-    double specular     = *params.at(2).getFloat();
-    double roughness    = *params.at(3).getFloat();
+    Vec3*  colorVec3 = params.at(0).getVec3();
+    double color[3] = {(*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2]};
+    double metallic = *params.at(1).getFloat();
+    double specular = *params.at(2).getFloat();
+    double roughness = *params.at(3).getFloat();
 
     ceres::Problem problem;
 
@@ -112,10 +123,10 @@ void UnrealEngine4Fitter::estimateParameters(UnrealEngine4*      model,
         problem.AddResidualBlock(costFunc, nullptr, color, &metallic, &specular, &roughness);
     }
 
-    setParameterBounds(&problem, color,         params.at(0));
-    setParameterBounds(&problem, &metallic,     params.at(1));
-    setParameterBounds(&problem, &specular,     params.at(2));
-    setParameterBounds(&problem, &roughness,    params.at(3));
+    setParameterBounds(&problem, color, params.at(0));
+    setParameterBounds(&problem, &metallic, params.at(1));
+    setParameterBounds(&problem, &specular, params.at(2));
+    setParameterBounds(&problem, &roughness, params.at(3));
 
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::DENSE_QR;
@@ -168,23 +179,24 @@ void UnrealEngine4Fitter::estimateWithoutMetallic(UnrealEngine4* model, const Da
 {
     ReflectanceModel::Parameters& params = model->getParameters();
 
-    Vec3* colorVec3 = params.at(0).getVec3();
-    double color[3] = { (*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2] };
-    double metallic     = *params.at(1).getFloat();
-    double specular     = *params.at(2).getFloat();
-    double roughness    = *params.at(3).getFloat();
+    Vec3*  colorVec3 = params.at(0).getVec3();
+    double color[3] = {(*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2]};
+    double metallic = *params.at(1).getFloat();
+    double specular = *params.at(2).getFloat();
+    double roughness = *params.at(3).getFloat();
 
     ceres::Problem problem;
 
     for (auto& s : data.getSamples()) {
         ConstMetallicCost* cost = new ConstMetallicCost(s, metallic);
-        ceres::CostFunction* costFunc = new ceres::AutoDiffCostFunction<ConstMetallicCost, 3, 3, 1, 1>(cost);
+        ceres::CostFunction* costFunc =
+            new ceres::AutoDiffCostFunction<ConstMetallicCost, 3, 3, 1, 1>(cost);
         problem.AddResidualBlock(costFunc, nullptr, color, &specular, &roughness);
     }
 
-    setParameterBounds(&problem, color,         params.at(0));
-    setParameterBounds(&problem, &specular,     params.at(2));
-    setParameterBounds(&problem, &roughness,    params.at(3));
+    setParameterBounds(&problem, color, params.at(0));
+    setParameterBounds(&problem, &specular, params.at(2));
+    setParameterBounds(&problem, &roughness, params.at(3));
 
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::DENSE_QR;

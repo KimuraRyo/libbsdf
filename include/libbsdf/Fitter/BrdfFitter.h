@@ -48,10 +48,9 @@ public:
     public:
         /*!
          * Constructs samples of BRDF for fitting.
-         * 
-         * \param numSampling   The number of samples for fitting. If 0, samples in tabular data of
-         *                      lb::Brdf is used.
-         * \param maxTheta      Maximum polar angle to avoid using data from large polar angles.
+         *
+         * \param numSampling   The number of samples for fitting. If 0, samples in tabular data of \a brdf are used.
+         * \param maxTheta      Maximum incoming and outgoing polar angle of sample points for fitting.
          */
         explicit Data(const Brdf&         brdf,
                       int                 numSampling = 100000,

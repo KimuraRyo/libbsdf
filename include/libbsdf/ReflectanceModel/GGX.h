@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2017-2021 Kimura Ryo                                  //
+// Copyright (C) 2017-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,54 +22,34 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     Ggx(const Vec3& color,
-        float       roughness)
-        : color_    (color),
-          roughness_(roughness)
-    {
-        parameters_.push_back(Parameter("Color",        &color_));
-        parameters_.push_back(Parameter("Roughness",    &roughness_, 0.01f, 1.0f));
-    }
-
-    Ggx(const Vec3& color,
         float       roughness,
         float       refractiveIndex,
-        float       extinctionCoefficient)
-        : color_                (color),
-          roughness_            (roughness),
-          refractiveIndex_      (refractiveIndex),
+        float       extinctionCoefficient = 0.0f)
+        : color_(color),
+          roughness_(roughness),
+          refractiveIndex_(refractiveIndex),
           extinctionCoefficient_(extinctionCoefficient)
     {
-        parameters_.push_back(Parameter("Color",                    &color_));
-        parameters_.push_back(Parameter("Roughness",                &roughness_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Refractive index",         &refractiveIndex_, 0.01f, 100.0f));
-        parameters_.push_back(Parameter("Extinction coefficient",   &extinctionCoefficient_, 0.0f, 100.0f));
+        parameters_.push_back(Parameter("Color", &color_));
+        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_, 0.01f, 100.0f));
+        parameters_.push_back(
+            Parameter("Extinction coefficient", &extinctionCoefficient_, 0.0f, 100.0f));
     }
 
     template <typename Vec3T, typename ColorT, typename ScalarT>
-    static ColorT compute(const Vec3T&      L,
-                          const Vec3T&      V,
-                          const Vec3T&      N,
-                          const ColorT&     color,
-                          const ScalarT&    roughness);
-
-    template <typename Vec3T, typename ColorT, typename ScalarT>
-    static ColorT compute(const Vec3T&      L,
-                          const Vec3T&      V,
-                          const Vec3T&      N,
-                          const ColorT&     color,
-                          const ScalarT&    roughness,
-                          const ScalarT&    refractiveIndex,
-                          const ScalarT&    extinctionCoefficient);
+    static ColorT compute(const Vec3T&   L,
+                          const Vec3T&   V,
+                          const Vec3T&   N,
+                          const ColorT&  color,
+                          const ScalarT& roughness,
+                          const ScalarT& refractiveIndex,
+                          const ScalarT& extinctionCoefficient);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const override
     {
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-
-#if defined(LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX)
-        return compute(inDir, outDir, N, color_, roughness_);
-#else
         return compute(inDir, outDir, N, color_, roughness_, refractiveIndex_, extinctionCoefficient_);
-#endif
     }
 
     bool isIsotropic() const override { return true; }
@@ -96,10 +76,10 @@ public:
     static T clampDotLH(const T& dotLH);
 
 private:
-    Vec3    color_;
-    float   roughness_;
-    float   refractiveIndex_;
-    float   extinctionCoefficient_;
+    Vec3  color_;
+    float roughness_;
+    float refractiveIndex_;
+    float extinctionCoefficient_;
 };
 
 /*
@@ -107,43 +87,13 @@ private:
  */
 
 template <typename Vec3T, typename ColorT, typename ScalarT>
-ColorT Ggx::compute(const Vec3T&    L,
-                    const Vec3T&    V,
-                    const Vec3T&    N,
-                    const ColorT&   color,
-                    const ScalarT&  roughness)
-{
-    using std::abs;
-    using std::acos;
-    using std::min;
-
-    ScalarT dotNL = static_cast<ScalarT>(N.dot(L));
-    ScalarT dotNV = static_cast<ScalarT>(N.dot(V));
-
-    Vec3T H = (L + V).normalized();
-
-    ScalarT dotNH = static_cast<ScalarT>(N.dot(H));
-    ScalarT dotLH = static_cast<ScalarT>(clampDotLH(L.dot(H)));
-
-    ColorT F = computeSchlickFresnel(dotLH, color);
-
-    ScalarT alpha = roughness * roughness;
-    ScalarT sqAlpha = alpha * alpha;
-
-    ScalarT G = computeG1(dotNL, sqAlpha) * computeG1(dotNV, sqAlpha);
-    ScalarT D = computeD(dotNH, sqAlpha);
-
-    return F * G * D / (ScalarT(4) * dotNL * dotNV);
-}
-
-template <typename Vec3T, typename ColorT, typename ScalarT>
-ColorT Ggx::compute(const Vec3T&    L,
-                    const Vec3T&    V,
-                    const Vec3T&    N,
-                    const ColorT&   color,
-                    const ScalarT&  roughness,
-                    const ScalarT&  refractiveIndex,
-                    const ScalarT&  extinctionCoefficient)
+ColorT Ggx::compute(const Vec3T&   L,
+                    const Vec3T&   V,
+                    const Vec3T&   N,
+                    const ColorT&  color,
+                    const ScalarT& roughness,
+                    const ScalarT& refractiveIndex,
+                    const ScalarT& extinctionCoefficient)
 {
     using std::abs;
     using std::acos;

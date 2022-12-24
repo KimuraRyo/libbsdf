@@ -13,8 +13,6 @@
 
 #include <libbsdf/Common/Vector.h>
 
-//#define LIBBSDF_USE_COLOR_INSTEAD_OF_REFRACTIVE_INDEX // Color at the incoming polar angle of 0 is used.
-
 namespace lb {
 
 /*!

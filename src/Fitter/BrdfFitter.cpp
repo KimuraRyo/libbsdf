@@ -10,6 +10,8 @@
 
 #include <ceres/ceres.h>
 
+#include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
+#include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Common/SpectrumUtility.h>
 #include <libbsdf/Common/Utility.h>
 #include <libbsdf/Common/Xorshift.h>
@@ -18,9 +20,13 @@ using namespace lb;
 
 BrdfFitter::Data::Data(const Brdf& brdf, int numSampling, const Vec3::Scalar& maxTheta)
 {
+    if (maxTheta < toRadian(Vec3::Scalar(10))) {
+        lbWarn << "[BrdfFitter::Data::Data] maxTheta is too small. maxTheta: " << maxTheta;
+    }
+
     const SampleSet* ss = brdf.getSampleSet();
 
-    const Vec3::Scalar threshold = std::cos(maxTheta);
+    const Vec3::Scalar threshold = std::max(std::cos(maxTheta), Vec3::Scalar(0));
 
     if (numSampling <= 0 || maxTheta < toRadian(Vec3::Scalar(EPSILON_F))) {
         for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
@@ -48,9 +54,32 @@ BrdfFitter::Data::Data(const Brdf& brdf, int numSampling, const Vec3::Scalar& ma
     else {
         int count = 0;
         Xorshift rnd;
+
+        bool inDirIsParam = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf) ||
+                            dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
+
         while (count < numSampling) {
             Sample sample;
-            sample.inDir = rnd.nextOnHemisphere<Vec3>();
+
+            // If the type of BRDF has incident directions as parameters, they are taken as sample points for fitting.
+            if (inDirIsParam) {
+                int inThIndex = Xorshift::random() % ss->getNumAngles0();
+
+                int inPhIndex;
+                if (ss->isIsotropic()) {
+                    inPhIndex = 0;
+                }
+                else {
+                    inPhIndex = Xorshift::random() % (ss->getNumAngles1() - 1);
+                }
+
+                sample.inDir = SphericalCoordinateSystem::toXyz(ss->getAngle0(inThIndex),
+                                                                ss->getAngle1(inPhIndex));
+            }
+            else {
+                sample.inDir = rnd.nextOnHemisphere<Vec3>();
+            }
+
             sample.outDir = rnd.nextOnHemisphere<Vec3>();
 
             if (sample.inDir[2] < threshold || sample.outDir[2] < threshold) continue;
