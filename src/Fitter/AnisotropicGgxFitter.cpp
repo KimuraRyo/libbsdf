@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#include <libbsdf/Fitter/GgxAnisotropicFitter.h>
+#include <libbsdf/Fitter/AnisotropicGgxFitter.h>
 
 #include <thread>
 

@@ -11,7 +11,7 @@
 
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Fitter/BrdfFitter.h>
-#include <libbsdf/ReflectanceModel/GgxAnisotropic.h>
+#include <libbsdf/ReflectanceModel/AnisotropicGgx.h>
 
 namespace lb {
 
