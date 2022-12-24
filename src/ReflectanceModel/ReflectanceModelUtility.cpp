@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2021 Kimura Ryo                                  //
+// Copyright (C) 2016-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -9,6 +9,7 @@
 #include <libbsdf/ReflectanceModel/ReflectanceModelUtility.h>
 
 #include <cassert>
+#include <iostream>
 #include <set>
 
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
@@ -118,13 +119,14 @@ void ReflectanceModelUtility::dumpParametersInfo(const ReflectanceModel& model)
     for (auto& param : params) {
         switch (param.getType()) {
             case ReflectanceModel::Parameter::FLOAT_PARAMETER:
-                lbInfo << param.getName() << ": " << *param.getFloat();
+                std::cout << param.getName() << ": " << *param.getFloat() << std::endl;
                 break;
             case ReflectanceModel::Parameter::VEC3_PARAMETER:
-                lbInfo << param.getName() << ": " << param.getVec3()->format(LB_EIGEN_IO_FMT);
+                std::cout << param.getName() << ": " << param.getVec3()->format(LB_EIGEN_IO_FMT)
+                          << std::endl;
                 break;
             case ReflectanceModel::Parameter::INT_PARAMETER:
-                lbInfo << param.getName() << ": " << *param.getInt();
+                std::cout << param.getName() << ": " << *param.getInt() << std::endl;
                 break;
             default:
                 lbError << "Invalid parameter type: " << param.getType();

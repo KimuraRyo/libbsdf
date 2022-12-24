@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2020 Kimura Ryo                                  //
+// Copyright (C) 2018-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -107,9 +107,9 @@ Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir, int numThet
     inDirBrdf->setInTheta(0, inTheta);
     inDirBrdf->setInPhi(0, inPhi);
 
-    std::string inThetaStr = std::to_string(toDegree(inTheta));
-    std::string inPhiStr   = std::to_string(toDegree(inPhi));
-    inDirBrdf->setName("inDirBrdf_inTheta=" + inThetaStr + "_inPhi=" + inPhiStr);
+    //std::string inThetaStr = std::to_string(toDegree(inTheta));
+    //std::string inPhiStr   = std::to_string(toDegree(inPhi));
+    //inDirBrdf->setName("inDirBrdf_inTheta=" + inThetaStr + "_inPhi=" + inPhiStr);
 
     auto specBrdf = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
     if (specBrdf && specBrdf->getNumSpecularOffsets()) {
@@ -286,7 +286,38 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
     return ss2;
 }
 
-Spectrum lb::computeBilateralSymmetry(const Brdf& brdf, int numInThetaDivisions, int numInPhiDivisions)
+Spectrum lb::computeDifference(const Brdf& brdf0,
+                               const Brdf& brdf1,
+                               int         numInThetaDivisions,
+                               int         numInPhiDivisions)
+{
+    assert(numInThetaDivisions > 0 && numInPhiDivisions > 0);
+
+    const SampleSet* ss0 = brdf0.getSampleSet();
+    const SampleSet* ss1 = brdf1.getSampleSet();
+
+    if (!hasSameColor(*ss0, *ss1)) {
+        lbError << "[lb::computeDifference] Color models are not identical.";
+        return Spectrum();
+    }
+
+    int numInPhi = std::max(ss0->getNumAngles1(), ss1->getNumAngles1());
+    std::unique_ptr<Brdf> diffBrdf(new SpecularCoordinatesBrdf(
+        19, numInPhi, 91, 73, 2.0f, ss0->getColorModel(), ss0->getNumWavelengths()));
+
+    SampleSet* ss = diffBrdf->getSampleSet();
+
+    ss->getWavelengths() = ss0->getWavelengths();
+
+    auto diff = [](const Spectrum& sp0, const Spectrum& sp1) { return (sp0 - sp1).cwiseAbs(); };
+    compute(brdf0, brdf1, diffBrdf.get(), diff);
+
+    return computeBihemisphericalReflectance(*diffBrdf, numInThetaDivisions, numInPhiDivisions);
+}
+
+Spectrum lb::computeDegreeOfBilateralSymmetry(const Brdf& brdf,
+                                              int         numInThetaDivisions,
+                                              int         numInPhiDivisions)
 {
     assert(numInThetaDivisions > 0 && numInPhiDivisions > 0);
 
@@ -315,7 +346,8 @@ Spectrum lb::computeBilateralSymmetry(const Brdf& brdf, int numInThetaDivisions,
     return computeBihemisphericalReflectance(*diffBrdf, numInThetaDivisions, numInPhiDivisions);
 }
 
-Spectrum lb::computeReciprocity(const Brdf& brdf, int numInThetaDivisions, int numInPhiDivisions)
+Spectrum
+lb::computeReciprocityError(const Brdf& brdf, int numInThetaDivisions, int numInPhiDivisions)
 {
     assert(numInThetaDivisions > 0 && numInPhiDivisions > 0);
 

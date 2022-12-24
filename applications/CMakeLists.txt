@@ -28,6 +28,11 @@ add_subdirectory(lbaverage)
 add_subdirectory(lbcombine)
 add_subdirectory(lbcompare)
 add_subdirectory(lbconv)
+
+if(LIBBSDF_ENABLE_FITTING)
+    add_subdirectory(lbfit)
+endif()
+
 add_subdirectory(lbgen)
 add_subdirectory(lbidentify)
 add_subdirectory(lbinsert)

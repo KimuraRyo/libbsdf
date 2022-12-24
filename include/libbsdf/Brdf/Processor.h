@@ -204,6 +204,9 @@ SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
 SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
                                        float                            rotationAngle);
 
+/*! \brief Converts a BRDF to an sRGB BRDF. */
+Brdf* toSrgb(const Brdf& brdf);
+
 /*! \brief Converts the color model from CIE XYZ to sRGB. */
 void xyzToSrgb(SampleSet* samples);
 

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2020 Kimura Ryo                                  //
+// Copyright (C) 2018-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -71,30 +71,42 @@ SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                          float                          maxSpecularTheta = PI_2_F);
 
 /*!
- * \brief Computes the bilateral symmetry of BRDF.
- * 
- * The returned spectrum is the bihemispherical reflectance (white sky albedo) of
- * the absolute difference between the original and reversed BRDF.
+ * \brief Computes the error between two BRDFs.
+ *
+ * The error is acquired as the bihemispherical reflectance of the difference of two BRDFs.
  *
  * \param numInThetaDivisions   The division number of incoming polar angles to get the bihemispherical reflectance.
  * \param numInPhiDivisions     The division number of incoming azimuthal angles to get the bihemispherical reflectance.
  */
-Spectrum computeBilateralSymmetry(const Brdf&   brdf,
-                                  int           numInThetaDivisions = 9,
-                                  int           numInPhiDivisions = 36);
+Spectrum computeDifference(const Brdf& brdf0,
+                           const Brdf& brdf1,
+                           int         numInThetaDivisions = 9,
+                           int         numInPhiDivisions = 36);
 
 /*!
- * \brief Computes the reciprocity of BRDF.
- * 
+ * \brief Computes the degree of the bilateral symmetry of BRDF.
+ *
  * The returned spectrum is the bihemispherical reflectance (white sky albedo) of
- * the absolute difference between the original and reversed BRDF.
+ * the absolute difference between the original BRDF and the BRDF inverted in the incident plane.
  *
  * \param numInThetaDivisions   The division number of incoming polar angles to get the bihemispherical reflectance.
  * \param numInPhiDivisions     The division number of incoming azimuthal angles to get the bihemispherical reflectance.
  */
-Spectrum computeReciprocity(const Brdf& brdf,
-                            int         numInThetaDivisions = 9,
-                            int         numInPhiDivisions = 36);
+Spectrum computeDegreeOfBilateralSymmetry(const Brdf& brdf,
+                                          int         numInThetaDivisions = 9,
+                                          int         numInPhiDivisions = 36);
+
+/*!
+ * \brief Computes the reciprocity error of a BRDF.
+ *
+ * The returned spectrum is the bihemispherical reflectance (white sky albedo) of
+ * the absolute difference between the original BRDF and the BRDF with the incoming and outgoing directions reversed.
+ *
+ * \param numInThetaDivisions   The division number of incoming polar angles to get the bihemispherical reflectance.
+ * \param numInPhiDivisions     The division number of incoming azimuthal angles to get the bihemispherical reflectance.
+ */
+Spectrum
+computeReciprocityError(const Brdf& brdf, int numInThetaDivisions = 9, int numInPhiDivisions = 36);
 
 /*!
  * \brief Finds thresholds to separate the diffuse component from a BRDF.

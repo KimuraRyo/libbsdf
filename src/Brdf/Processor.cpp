@@ -12,6 +12,7 @@
 
 #include <libbsdf/Brdf/Analyzer.h>
 #include <libbsdf/Brdf/RandomSampleSet.h>
+#include <libbsdf/Common/SpectrumUtility.h>
 
 using namespace lb;
 
@@ -1262,6 +1263,33 @@ SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf
     }}}}
 
     return rotatedBrdf;
+}
+
+Brdf* lb::toSrgb(const Brdf& brdf)
+{
+    Brdf* srgbBrdf = brdf.clone();
+    SampleSet* srgbSs = srgbBrdf->getSampleSet();
+
+    srgbSs->setColorModel(RGB_MODEL);
+    srgbSs->resizeWavelengths(3);
+    srgbSs->setWavelength(0, 0.0f);
+    srgbSs->setWavelength(1, 0.0f);
+    srgbSs->setWavelength(2, 0.0f);
+
+    const SampleSet* ss = brdf.getSampleSet();
+
+    for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
+    for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
+    for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
+    for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
+        const Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
+        Vec3f rgb = SpectrumUtility::toSrgb<Vec3f, SampleSet>(sp, *ss);
+        Spectrum rgbSp(3);
+        rgbSp << rgb[0], rgb[1], rgb[2];
+        srgbSs->setSpectrum(i0, i1, i2, i3, rgbSp);
+    }}}}
+
+    return srgbBrdf;
 }
 
 void lb::xyzToSrgb(SampleSet* samples)
