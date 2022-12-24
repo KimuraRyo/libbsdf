@@ -11,7 +11,7 @@
 
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/ReflectanceModel/Fresnel.h>
-#include <libbsdf/ReflectanceModel/GGX.h>
+#include <libbsdf/ReflectanceModel/Ggx.h>
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
 
 namespace lb {

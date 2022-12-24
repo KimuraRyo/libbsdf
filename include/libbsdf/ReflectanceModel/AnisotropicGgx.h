@@ -10,7 +10,7 @@
 #define LIBBSDF_ANISOTROPIC_GGX_H
 
 #include <libbsdf/Common/Global.h>
-#include <libbsdf/ReflectanceModel/GGX.h>
+#include <libbsdf/ReflectanceModel/Ggx.h>
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
 
 namespace lb {
