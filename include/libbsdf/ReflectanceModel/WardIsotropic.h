@@ -1,13 +1,13 @@
 // =================================================================== //
-// Copyright (C) 2015-2020 Kimura Ryo                                  //
+// Copyright (C) 2015-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#ifndef LIBBSDF_WARD_ISOTROPIC_H
-#define LIBBSDF_WARD_ISOTROPIC_H
+#ifndef LIBBSDF_ISOTROPIC_WARD_H
+#define LIBBSDF_ISOTROPIC_WARD_H
 
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
@@ -15,12 +15,12 @@
 namespace lb {
 
 /*! Ward isotropic reflectance model. */
-class WardIsotropic : public ReflectanceModel
+class IsotropicWard : public ReflectanceModel
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    WardIsotropic(const Vec3&   color,
+    IsotropicWard(const Vec3&   color,
                   float         roughness)
                   : color_      (color),
                     roughness_  (roughness)
@@ -60,7 +60,7 @@ private:
  * Implementation
  */
 
-inline Vec3 WardIsotropic::compute(const Vec3&  L,
+inline Vec3 IsotropicWard::compute(const Vec3&  L,
                                    const Vec3&  V,
                                    const Vec3&  N,
                                    const Vec3&  color,
@@ -90,4 +90,4 @@ inline Vec3 WardIsotropic::compute(const Vec3&  L,
 
 } // namespace lb
 
-#endif // LIBBSDF_WARD_ISOTROPIC_H
+#endif // LIBBSDF_ISOTROPIC_WARD_H

@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#ifndef LIBBSDF_GGX_ANISOTROPIC_H
-#define LIBBSDF_GGX_ANISOTROPIC_H
+#ifndef LIBBSDF_ANISOTROPIC_GGX_H
+#define LIBBSDF_ANISOTROPIC_GGX_H
 
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/ReflectanceModel/GGX.h>
@@ -16,12 +16,12 @@
 namespace lb {
 
 /*! Anisotropic GGX BSDF model. */
-class GgxAnisotropic : public ReflectanceModel
+class AnisotropicGgx : public ReflectanceModel
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    GgxAnisotropic(const Vec3& color,
+    AnisotropicGgx(const Vec3& color,
                    float       roughnessX,
                    float       roughnessY,
                    float       refractiveIndex,
@@ -83,7 +83,7 @@ private:
  */
 
 template <typename Vec3T, typename ColorT, typename ScalarT>
-ColorT GgxAnisotropic::compute(const Vec3T&   L,
+ColorT AnisotropicGgx::compute(const Vec3T&   L,
                                const Vec3T&   V,
                                const Vec3T&   N,
                                const Vec3T&   T,
@@ -161,4 +161,4 @@ ColorT GgxAnisotropic::compute(const Vec3T&   L,
 
 } // namespace lb
 
-#endif // LIBBSDF_GGX_ANISOTROPIC_H
+#endif // LIBBSDF_ANISOTROPIC_GGX_H

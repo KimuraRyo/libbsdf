@@ -36,7 +36,7 @@ struct Cost
 
         JetVec3 c(color[0], color[1], color[2]);
         JetVec3 value =
-            GgxAnisotropic::compute(inDir, outDir, normal, tangent, binormal, c, *roughnessX,
+            AnisotropicGgx::compute(inDir, outDir, normal, tangent, binormal, c, *roughnessX,
                                     *roughnessY, *refractiveIndex, *extinctionCoefficient);
 
         JetVec3 diff = BrdfFitter::toLogScale(sample_->value) - BrdfFitter::toLogScale(value);
@@ -51,18 +51,18 @@ private:
     const BrdfFitter::Sample* sample_;
 };
 
-GgxAnisotropic GgxAnisotropicFitter::estimateParameters(const Brdf&         brdf,
+AnisotropicGgx AnisotropicGgxFitter::estimateParameters(const Brdf&         brdf,
                                                         int                 numSampling,
                                                         const Vec3::Scalar& maxTheta)
 {
-    GgxAnisotropic model(Vec3(0.5, 0.5, 0.5), 0.01f, 0.01f, 1.5f, 0.0f);
+    AnisotropicGgx model(Vec3(0.5, 0.5, 0.5), 0.01f, 0.01f, 1.5f, 0.0f);
 
     estimateParameters(&model, brdf, numSampling, maxTheta);
 
     return model;
 }
 
-void GgxAnisotropicFitter::estimateParameters(GgxAnisotropic*     model,
+void AnisotropicGgxFitter::estimateParameters(AnisotropicGgx*     model,
                                               const Brdf&         brdf,
                                               int                 numSampling,
                                               const Vec3::Scalar& maxTheta)

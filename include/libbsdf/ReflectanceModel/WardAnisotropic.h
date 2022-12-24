@@ -1,13 +1,13 @@
 // =================================================================== //
-// Copyright (C) 2015-2020 Kimura Ryo                                  //
+// Copyright (C) 2015-2022 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#ifndef LIBBSDF_WARD_ANISOTROPIC_H
-#define LIBBSDF_WARD_ANISOTROPIC_H
+#ifndef LIBBSDF_ANISOTROPIC_WARD_H
+#define LIBBSDF_ANISOTROPIC_WARD_H
 
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/ReflectanceModel/ReflectanceModel.h>
@@ -15,12 +15,12 @@
 namespace lb {
 
 /*! Ward anisotropic reflectance model. */
-class WardAnisotropic : public ReflectanceModel
+class AnisotropicWard : public ReflectanceModel
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    WardAnisotropic(const Vec3& color,
+    AnisotropicWard(const Vec3& color,
                     float       roughnessX,
                     float       roughnessY)
                     : color_        (color),
@@ -70,7 +70,7 @@ private:
  * Implementation
  */
 
-inline Vec3 WardAnisotropic::compute(const Vec3&    L,
+inline Vec3 AnisotropicWard::compute(const Vec3&    L,
                                      const Vec3&    V,
                                      const Vec3&    N,
                                      const Vec3&    T,
@@ -106,4 +106,4 @@ inline Vec3 WardAnisotropic::compute(const Vec3&    L,
 
 } // namespace lb
 
-#endif // LIBBSDF_WARD_ANISOTROPIC_H
+#endif // LIBBSDF_ANISOTROPIC_WARD_H

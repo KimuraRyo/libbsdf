@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.            //
 // =================================================================== //
 
-#ifndef LIBBSDF_GGX_ANISOTROPIC_FITTER_H
-#define LIBBSDF_GGX_ANISOTROPIC_FITTER_H
+#ifndef LIBBSDF_ANISOTROPIC_GGX_FITTER_H
+#define LIBBSDF_ANISOTROPIC_GGX_FITTER_H
 
 #include <libbsdf/Brdf/Brdf.h>
 #include <libbsdf/Fitter/BrdfFitter.h>
@@ -16,10 +16,10 @@
 namespace lb {
 
 /*!
- * \class   GgxAnisotropicFitter
- * \brief   The GgxAnisotropicFitter class provides functions to fit the parameters of the anisotropic GGX reflectance model to BRDF.
+ * \class   AnisotropicGgxFitter
+ * \brief   The AnisotropicGgxFitter class provides functions to fit the parameters of the anisotropic GGX reflectance model to BRDF.
  */
-class GgxAnisotropicFitter : public BrdfFitter
+class AnisotropicGgxFitter : public BrdfFitter
 {
 public:
     /*!
@@ -30,7 +30,7 @@ public:
      * \param maxTheta      Maximum incoming and outgoing polar angle of sample points for fitting.
      * \return              Reflectance model with fitted parameters.
      */
-    static GgxAnisotropic estimateParameters(const Brdf&         brdf,
+    static AnisotropicGgx estimateParameters(const Brdf&         brdf,
                                              int                 numSampling = 100000,
                                              const Vec3::Scalar& maxTheta = Vec3::Scalar(PI_2_D));
 
@@ -42,7 +42,7 @@ public:
      * \param numSampling   The number of samples for fitting. If 0, samples in tabular data of \a brdf are used.
      * \param maxTheta      Maximum incoming and outgoing polar angle of sample points for fitting.
      */
-    static void estimateParameters(GgxAnisotropic*     model,
+    static void estimateParameters(AnisotropicGgx*     model,
                                    const Brdf&         brdf,
                                    int                 numSampling = 100000,
                                    const Vec3::Scalar& maxTheta = Vec3::Scalar(PI_2_D));
@@ -50,4 +50,4 @@ public:
 
 } // namespace lb
 
-#endif // LIBBSDF_GGX_ANISOTROPIC_FITTER_H
+#endif // LIBBSDF_ANISOTROPIC_GGX_FITTER_H
