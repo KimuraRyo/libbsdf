@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2022 Kimura Ryo                                       //
+// Copyright (C) 2022-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -13,6 +13,8 @@
 #include <src/ThirdParty/delaunator-cpp/delaunator.hpp>
 
 using namespace lb;
+
+const size_t DelaunayTriangulation::INVALID_INDEX = delaunator::INVALID_INDEX;
 
 DelaunayTriangulation::DelaunayTriangulation()
 {
@@ -35,16 +37,17 @@ bool DelaunayTriangulation::computeDelaunayTriangles()
 
     delaunator::Delaunator d(coords_);
 
-    // Set vertices on convex hull.
+    // Set vertex indices on convex hull.
     size_t h = d.hull_start;
     while (true) {
-        convexHull_.emplace_back(Vec2(d.coords[2 * h], d.coords[2 * h + 1]));
+        convexHull_.push_back(h);
         h = d.hull_next[h];
 
         if (h == d.hull_start) break;
     }
 
     triangles_ = std::move(d.triangles);
+    halfedges_ = std::move(d.halfedges);
 
     return true;
 }

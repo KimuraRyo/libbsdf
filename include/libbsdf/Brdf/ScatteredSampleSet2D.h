@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2022 Kimura Ryo                                       //
+// Copyright (C) 2022-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -50,12 +50,22 @@ public:
     /*! Gets Delaunay triangulation of 2D sample points. */
     const DelaunayTriangulation& getDelaunayTriangulation() const;
 
+    /*! Gets the list of spectrum for each direction. */
+    const std::vector<Spectrum>& getSpectra() const;
+
     /*! Adds a pair of a direction and a spectrum to the list of sample points. */
     void addSample(const Vec3& dir, const Spectrum& sp);
 
+    /*! Adds smoothly interpolated sample points. */
+    void addInterpolatedSamples();
+
 private:
-    /*! Computes the intersection of the unit circle with a line starting from inside the circle. */
-    Vec2 computeIntersectionOnUnitCircle(const Vec2& pos, const Vec2& dir);
+    /*!
+     * Computes the intersection of the circle with a line starting from inside the circle.
+     * 
+     * \param radius    The radius of a circle on a stereographic projection.
+     */
+    Vec2 computeIntersectionOnCircle(const Vec2& pos, const Vec2& dir, const double& radius = 1.0);
 
     /*! Adds extrapolated sample points on a unit sphere using preconstructed delaunay triangles. */
     void addExtrapolatedSamplesOnUnitSphere();
@@ -81,6 +91,11 @@ inline const ScatteredSampleSet2D::SampleMap& ScatteredSampleSet2D::getSampleMap
 inline const DelaunayTriangulation& ScatteredSampleSet2D::getDelaunayTriangulation() const
 {
     return dt_;
+}
+
+inline const std::vector<Spectrum>& ScatteredSampleSet2D::getSpectra() const
+{
+    return spectra_;
 }
 
 inline void ScatteredSampleSet2D::addSample(const Vec3& dir, const Spectrum& sp)
