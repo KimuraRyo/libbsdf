@@ -411,12 +411,12 @@ static double gamma(double x)
 {
     return exp(abgam(x + 5)) / (x * (x + 1) * (x + 2) * (x + 3) * (x + 4));
 }
-} // namespace mss
 
 static double beta(double m, double n)
 {
     return (mss::gamma(m) * mss::gamma(n) / mss::gamma(m + n));
 }
+} // namespace mss
 
 /*
  * Implementation of MicrosurfaceHeightUniform
@@ -1026,7 +1026,7 @@ float MicrosurfaceDielectric::evalSingleScattering(const Vec3f& wi, const Vec3f&
         // G2
         float Lambda_i = m_microsurfaceslope->Lambda(wi);
         float Lambda_o = m_microsurfaceslope->Lambda(-wo);
-        float G2 = static_cast<float>(beta(1.0f + Lambda_i, 1.0f + Lambda_o));
+        float G2 = static_cast<float>(mss::beta(1.0f + Lambda_i, 1.0f + Lambda_o));
 
         using std::max;
 
