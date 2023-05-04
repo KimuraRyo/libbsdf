@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2021 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -407,20 +407,33 @@ SpecularCoordinatesBrdf* DdrReader::read(const std::string& fileName)
             for (wlIndex = 0; wlIndex < numWl; ++wlIndex) {
                 for (int inThIndex = 0; inThIndex < numInTh; ++inThIndex) {
                 for (int inPhIndex = 0; inPhIndex < numInPh; ++inPhIndex) {
-                    Spectrum refSp = computeReflectance(*brdf, inThIndex, inPhIndex);
+                    Spectrum refSp;
+
+                    // Two functions are used to improve the accuracy of reflectance calculations.
+                    if (brdf->getNumSpecTheta() >= 64 && brdf->getNumSpecPhi() >= 64) {
+                        refSp = computeReflectance(*brdf, inThIndex, inPhIndex);
+                    }
+                    else {
+                        Vec3 inDir = SphericalCoordinateSystem::toXyz(brdf->getInTheta(inThIndex),
+                                                                      brdf->getInPhi(inPhIndex));
+                        refSp = lb::computeReflectance(*brdf, inDir);
+                    }
+
+                    float reflectance = refSp[wlIndex];
+                    if (reflectance <= 0.0f)
+                        continue;
 
                     // Edit samples with "kbdf".
-                    float maxReflectance = refSp.maxCoeff();
                     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
                     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
                         Spectrum& sp = ss->getSpectrum(inThIndex, inPhIndex, i2, i3);
-                        sp /= maxReflectance;
+                        sp[wlIndex] /= reflectance;
 
                         // A reflectance equals "kbdf".
                         float kbdf = kbdfs.at(inThIndex +
                                               numInTh * inPhIndex +
                                               numInTh * numInPh * wlIndex);
-                        sp *= kbdf;
+                        sp[wlIndex] *= kbdf;
                     }}
                 }}
             }
