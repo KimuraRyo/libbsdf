@@ -29,7 +29,8 @@ jobs:
           apt-get update
           apt-get install -y \
             cmake \
-            libeigen3-dev
+            libeigen3-dev \
+            ninja-build
 
       - name: Setup Environment
         if: matrix.build_type == 'Release'
