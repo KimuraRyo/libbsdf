@@ -28,6 +28,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y \
+            build-essential \
             cmake \
             libeigen3-dev \
             ninja-build
