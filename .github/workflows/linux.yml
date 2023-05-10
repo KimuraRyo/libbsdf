@@ -10,6 +10,7 @@ jobs:
       run:
         shell: bash -e -o pipefail {0}
     env:
+      CCACHE_DIR: ${{github.workspace}}/ccache
       CMAKE_GENERATOR: Ninja
       DEBIAN_FRONTEND: noninteractive
     strategy:
@@ -29,9 +30,18 @@ jobs:
           apt-get update
           apt-get install -y \
             build-essential \
+            ccache \
             cmake \
             libeigen3-dev \
             ninja-build
+
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v3
+        with:
+          path: ${{env.CCACHE_DIR}}
+          key: ${{matrix.os}}-ccache-${{matrix.build_type}}-${{github.run_id}}
+          restore-keys: ${{matrix.os}}-ccache-${{matrix.build_type}}-
 
       - name: Setup Environment
         if: matrix.build_type == 'Release'
@@ -41,7 +51,9 @@ jobs:
       - name: Configure
         run: |
           cmake -S . -B build_${{matrix.build_type}} \
-                -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+                -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
+                -DCMAKE_C_COMPILER_LAUNCHER=$(which ccache) \
+                -DCMAKE_CXX_COMPILER_LAUNCHER=$(which ccache)
 
       - name: Build
         run: |
