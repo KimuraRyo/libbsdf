@@ -52,6 +52,7 @@ jobs:
         run: |
           cmake -S . -B build_${{matrix.build_type}} \
                 -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
+                -DCMAKE_PREFIX_PATH=${{env.CCACHE_DIR}} \
                 -DCMAKE_C_COMPILER_LAUNCHER=$(which ccache) \
                 -DCMAKE_CXX_COMPILER_LAUNCHER=$(which ccache)
 
