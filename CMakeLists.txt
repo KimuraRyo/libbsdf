@@ -1,5 +1,5 @@
 ## =================================================================== ##
-## Copyright (C) 2014-2022 Kimura Ryo                                  ##
+## Copyright (C) 2014-2023 Kimura Ryo                                  ##
 ##                                                                     ##
 ## This Source Code Form is subject to the terms of the Mozilla Public ##
 ## License, v. 2.0. If a copy of the MPL was not distributed with this ##
@@ -47,20 +47,22 @@ include_directories(include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(EIGEN3_INCLUDE_DIR)
-    include_directories("${EIGEN3_INCLUDE_DIR}")
+find_package(Eigen3 REQUIRED)
+if(Eigen3_FOUND)
+    message("Found Eigen-${Eigen3_VERSION}: ${Eigen3_DIR}")
+    set(EIGEN3_LIB "Eigen3::Eigen")
 endif()
 
 if(LIBBSDF_ENABLE_FITTING)
     find_package(Ceres REQUIRED)
-    set(USED_LIBRARIES "Ceres::ceres")
+    set(CERES_LIB "Ceres::ceres")
     add_definitions(-DLIBBSDF_USE_CERES_SOLVER)
 endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 else()
-    set (CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD 17)
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
@@ -90,4 +92,4 @@ if(LIBBSDF_BUILD_APPLICATIONS)
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${LIBBSDF_CORE_FOLDER_NAME})
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${USED_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} Eigen3::Eigen ${CERES_LIB})
