@@ -43,12 +43,6 @@ jobs:
           key: ${{matrix.os}}-ccache-${{matrix.build_type}}-${{github.run_id}}
           restore-keys: ${{matrix.os}}-ccache-${{matrix.build_type}}-
 
-      - name: ls
-        run: |
-          ls -la
-          cd ${{env.CCACHE_DIR}}
-          ls -la
-
       - name: Setup Environment
         if: matrix.build_type == 'Release'
         run: |
