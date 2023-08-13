@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020 Kimura Ryo                                       //
+// Copyright (C) 2020-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -15,12 +15,8 @@
 
 using namespace lb;
 
-Optimizer::Optimizer(Brdf* brdf,
-                     float diffThreshold,
-                     float ratioThreshold)
-                     : brdf_(brdf),
-                       diffThreshold_(diffThreshold),
-                       ratioThreshold_(ratioThreshold)
+Optimizer::Optimizer(Brdf* brdf, double diffThreshold, double ratioThreshold)
+    : brdf_(brdf), diffThreshold_(diffThreshold), ratioThreshold_(ratioThreshold)
 {
 }
 
@@ -37,7 +33,7 @@ void Optimizer::optimize()
 void Optimizer::setupAngles0()
 {
     const SampleSet* ss = brdf_->getSampleSet();
-    const Arrayf& angles = ss->getAngles0();
+    const Arrayd&    angles = ss->getAngles0();
 
     angles0_.insert(angles[0]);
 
@@ -55,9 +51,9 @@ void Optimizer::setupAngles0()
 
             int nextIndex = index + 1;
 
-            float angle     = angles[index];
-            float prevAngle = angles[prevIndex];
-            float nextAngle = angles[nextIndex];
+            double angle = angles[index];
+            double prevAngle = angles[prevIndex];
+            double nextAngle = angles[nextIndex];
 
             bool prevDownward = hasDownwardDir(*brdf_, prevIndex, i1, i2, i3);
             bool nextDownward = hasDownwardDir(*brdf_, nextIndex, i1, i2, i3);
@@ -82,7 +78,7 @@ void Optimizer::setupAngles0()
 void Optimizer::setupAngles1()
 {
     const SampleSet* ss = brdf_->getSampleSet();
-    const Arrayf& angles = ss->getAngles1();
+    const Arrayd&    angles = ss->getAngles1();
 
     angles1_.insert(angles[0]);
 
@@ -100,9 +96,9 @@ void Optimizer::setupAngles1()
 
             int nextIndex = index + 1;
 
-            float angle     = angles[index];
-            float prevAngle = angles[prevIndex];
-            float nextAngle = angles[nextIndex];
+            double angle = angles[index];
+            double prevAngle = angles[prevIndex];
+            double nextAngle = angles[nextIndex];
 
             bool prevDownward = hasDownwardDir(*brdf_, i0, prevIndex, i2, i3);
             bool nextDownward = hasDownwardDir(*brdf_, i0, nextIndex, i2, i3);
@@ -127,7 +123,7 @@ void Optimizer::setupAngles1()
 void Optimizer::setupAngles2()
 {
     const SampleSet* ss = brdf_->getSampleSet();
-    const Arrayf& angles = ss->getAngles2();
+    const Arrayd&    angles = ss->getAngles2();
 
     angles2_.insert(angles[0]);
 
@@ -145,9 +141,9 @@ void Optimizer::setupAngles2()
 
             int nextIndex = index + 1;
 
-            float angle     = angles[index];
-            float prevAngle = angles[prevIndex];
-            float nextAngle = angles[nextIndex];
+            double angle = angles[index];
+            double prevAngle = angles[prevIndex];
+            double nextAngle = angles[nextIndex];
 
             bool prevDownward = hasDownwardDir(*brdf_, i0, i1, prevIndex, i3);
             bool nextDownward = hasDownwardDir(*brdf_, i0, i1, nextIndex, i3);
@@ -172,7 +168,7 @@ void Optimizer::setupAngles2()
 void Optimizer::setupAngles3()
 {
     const SampleSet* ss = brdf_->getSampleSet();
-    const Arrayf& angles = ss->getAngles3();
+    const Arrayd&    angles = ss->getAngles3();
 
     angles3_.insert(angles[0]);
 
@@ -190,9 +186,9 @@ void Optimizer::setupAngles3()
 
             int nextIndex = index + 1;
 
-            float angle     = angles[index];
-            float prevAngle = angles[prevIndex];
-            float nextAngle = angles[nextIndex];
+            double angle = angles[index];
+            double prevAngle = angles[prevIndex];
+            double nextAngle = angles[nextIndex];
 
             bool prevDownward = hasDownwardDir(*brdf_, i0, i1, i2, prevIndex);
             bool nextDownward = hasDownwardDir(*brdf_, i0, i1, i2, nextIndex);
@@ -214,14 +210,14 @@ void Optimizer::setupAngles3()
     }
 }
 
-bool Optimizer::isExtraAngle(float          angle,
-                             float          prevAngle,
-                             float          nextAngle,
-                             bool           prevDownward,
-                             bool           nextDownward,
-                             const Arrayd&  sp,
-                             const Arrayd&  prevSp,
-                             const Arrayd&  nextSp)
+bool Optimizer::isExtraAngle(double        angle,
+                             double        prevAngle,
+                             double        nextAngle,
+                             bool          prevDownward,
+                             bool          nextDownward,
+                             const Arrayd& sp,
+                             const Arrayd& prevSp,
+                             const Arrayd& nextSp)
 {
     Arrayd diffSp;
 

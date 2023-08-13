@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2022 Kimura Ryo                                       //
+// Copyright (C) 2022-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -70,8 +70,8 @@ void SimpleAnisotropicGgxFitter::estimateParameters(SimpleAnisotropicGgx* model,
 
     Vec3*  colorVec3 = params.at(0).getVec3();
     double color[3] = {(*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2]};
-    double roughnessX = *params.at(1).getFloat();
-    double roughnessY = *params.at(2).getFloat();
+    double roughnessX = *params.at(1).getReal();
+    double roughnessY = *params.at(2).getReal();
 
     ceres::Problem problem;
 
@@ -98,11 +98,9 @@ void SimpleAnisotropicGgxFitter::estimateParameters(SimpleAnisotropicGgx* model,
     ceres::Solve(options, &problem, &summary);
     lbInfo << summary.FullReport();
 
-    using Scalar = typename Vec3::Scalar;
-
-    (*colorVec3)[0] = static_cast<Scalar>(color[0]);
-    (*colorVec3)[1] = static_cast<Scalar>(color[1]);
-    (*colorVec3)[2] = static_cast<Scalar>(color[2]);
-    *params.at(1).getFloat() = static_cast<float>(roughnessX);
-    *params.at(2).getFloat() = static_cast<float>(roughnessY);
+    (*colorVec3)[0] = color[0];
+    (*colorVec3)[1] = color[1];
+    (*colorVec3)[2] = color[2];
+    *params.at(1).getReal() = roughnessX;
+    *params.at(2).getReal() = roughnessY;
 }

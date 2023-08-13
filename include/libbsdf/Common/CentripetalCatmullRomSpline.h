@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2015-2020 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -55,15 +55,15 @@ public:
      * \return Interpolated array.
      */
     template <typename ArrayT>
-    static ArrayT interpolate(const typename ArrayT::Scalar&    pos0,
-                              const typename ArrayT::Scalar&    pos1,
-                              const typename ArrayT::Scalar&    pos2,
-                              const typename ArrayT::Scalar&    pos3,
-                              const ArrayT&                     arr0,
-                              const ArrayT&                     arr1,
-                              const ArrayT&                     arr2,
-                              const ArrayT&                     arr3,
-                              const typename ArrayT::Scalar&    pos);
+    static ArrayT interpolate(double        pos0,
+                              double        pos1,
+                              double        pos2,
+                              double        pos3,
+                              const ArrayT& arr0,
+                              const ArrayT& arr1,
+                              const ArrayT& arr2,
+                              const ArrayT& arr3,
+                              double        pos);
 
 private:
     /*! Computes the coefficients of cubic Hermite spline using positions and tangents. */
@@ -95,11 +95,11 @@ inline void CentripetalCatmullRomSpline::computeCoefficients(const Vec2& pos1,
 }
 
 template <typename Vec2T>
-typename Vec2T::Scalar CentripetalCatmullRomSpline::interpolate(const Vec2T&                    v0,
-                                                                const Vec2T&                    v1,
-                                                                const Vec2T&                    v2,
-                                                                const Vec2T&                    v3,
-                                                                const typename Vec2T::Scalar&   x)
+typename Vec2T::Scalar CentripetalCatmullRomSpline::interpolate(const Vec2T&                  v0,
+                                                                const Vec2T&                  v1,
+                                                                const Vec2T&                  v2,
+                                                                const Vec2T&                  v3,
+                                                                const typename Vec2T::Scalar& x)
 {
     CentripetalCatmullRomSpline ccrs(v0.template cast<Vec2::Scalar>(),
                                      v1.template cast<Vec2::Scalar>(),
@@ -111,15 +111,15 @@ typename Vec2T::Scalar CentripetalCatmullRomSpline::interpolate(const Vec2T&    
 }
 
 template <typename ArrayT>
-ArrayT CentripetalCatmullRomSpline::interpolate(const typename ArrayT::Scalar&  pos0,
-                                                const typename ArrayT::Scalar&  pos1,
-                                                const typename ArrayT::Scalar&  pos2,
-                                                const typename ArrayT::Scalar&  pos3,
-                                                const ArrayT&                   arr0,
-                                                const ArrayT&                   arr1,
-                                                const ArrayT&                   arr2,
-                                                const ArrayT&                   arr3,
-                                                const typename ArrayT::Scalar&  pos)
+ArrayT CentripetalCatmullRomSpline::interpolate(double        pos0,
+                                                double        pos1,
+                                                double        pos2,
+                                                double        pos3,
+                                                const ArrayT& arr0,
+                                                const ArrayT& arr1,
+                                                const ArrayT& arr2,
+                                                const ArrayT& arr3,
+                                                double        pos)
 {
     assert(arr0.size() == arr1.size() &&
            arr1.size() == arr2.size() &&

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2018 Kimura Ryo                                  //
+// Copyright (C) 2016-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,20 +20,14 @@ class BlinnPhong : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    BlinnPhong(const Vec3&  color,
-               float        shininess)
-               : color_     (color),
-                 shininess_ (shininess)
+    BlinnPhong(const Vec3& color, double shininess) : color_(color), shininess_(shininess)
     {
-        parameters_.push_back(Parameter("Color",        &color_));
-        parameters_.push_back(Parameter("Shininess",    &shininess_, 0.0f, 1000.0f));
+        parameters_.push_back(Parameter("Color", &color_));
+        parameters_.push_back(Parameter("Shininess", &shininess_, 0.0, 1000.0));
     }
 
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& V,
-                        const Vec3& N,
-                        const Vec3& color,
-                        float       shininess);
+    static Vec3
+    compute(const Vec3& L, const Vec3& V, const Vec3& N, const Vec3& color, double shininess);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -46,8 +40,8 @@ public:
         using std::max;
 
         const Vec3 N = Vec3(0.0, 0.0, 1.0);
-        float dotLN = inDir.dot(N);
-        return getValue(inDir, outDir) / max(dotLN, EPSILON_F);
+        double     dotLN = inDir.dot(N);
+        return getValue(inDir, outDir) / max(dotLN, EPSILON_D);
     }
 
     bool isIsotropic() const { return true; }
@@ -61,8 +55,8 @@ public:
     }
 
 private:
-    Vec3    color_;
-    float   shininess_;
+    Vec3   color_;
+    double shininess_;
 };
 
 /*
@@ -73,14 +67,14 @@ inline Vec3 BlinnPhong::compute(const Vec3& L,
                                 const Vec3& V,
                                 const Vec3& N,
                                 const Vec3& color,
-                                float       shininess)
+                                double      shininess)
 {
     using std::max;
     using std::pow;
 
-    Vec3 H = (L + V).normalized();
-    float dotHN = H.dot(N);
-    return color * pow(max(dotHN, 0.0f), shininess);
+    Vec3   H = (L + V).normalized();
+    double dotHN = H.dot(N);
+    return color * pow(max(dotHN, 0.0), shininess);
 }
 
 } // namespace lb

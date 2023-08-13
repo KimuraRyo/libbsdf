@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,11 +16,11 @@ SampleSet::SampleSet(int        numAngles0,
                      int        numAngles3,
                      ColorModel colorModel,
                      int        numWavelengths)
-                     : equalIntervalAngles0_(false),
-                       equalIntervalAngles1_(false),
-                       equalIntervalAngles2_(false),
-                       equalIntervalAngles3_(false),
-                       oneSide_(false)
+    : equalIntervalAngles0_(false),
+      equalIntervalAngles1_(false),
+      equalIntervalAngles2_(false),
+      equalIntervalAngles3_(false),
+      oneSide_(false)
 {
     assert(numAngles0 > 0 && numAngles1 > 0 && numAngles2 > 0 && numAngles3 > 0);
 
@@ -217,16 +217,16 @@ bool SampleSet::distinguishOneSide() const
     bool containing_0_PI = false;
     bool containing_PI_2PI = false;
 
-    const float offset = EPSILON_F * 2.0f;
+    constexpr double offset = EPSILON_D * 2;
 
     for (int i = 0; i < angles3_.size(); ++i) {
-        float angle = angles3_[i];
+        double angle = angles3_[i];
 
-        if (angle > offset && angle < PI_F - offset * PI_F) {
+        if (angle > offset && angle < PI_D - offset * PI_D) {
             containing_0_PI = true;
         }
 
-        if (angle > PI_F + offset * PI_F && angle < TAU_F - offset * TAU_F) {
+        if (angle > PI_D + offset * PI_D && angle < TAU_D - offset * TAU_D) {
             containing_PI_2PI = true;
         }
     }

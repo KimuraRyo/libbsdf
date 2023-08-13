@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2018 Kimura Ryo                                  //
+// Copyright (C) 2016-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -21,21 +21,15 @@ class Minnaert : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    Minnaert(const Vec3&    albedo,
-             float          darkness)
-             : albedo_  (albedo),
-               darkness_(darkness)
+    Minnaert(const Vec3& albedo, double darkness) : albedo_(albedo), darkness_(darkness)
     {
-        parameters_.push_back(Parameter("Albedo",   &albedo_));
-        parameters_.push_back(Parameter("Darkness", &darkness_, 0.0f, 100.0f));
+        parameters_.push_back(Parameter("Albedo", &albedo_));
+        parameters_.push_back(Parameter("Darkness", &darkness_, 0.0, 100.0));
     }
 
     /*! \warning The unit of a returned value is the radiance factor. */
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& V,
-                        const Vec3& N,
-                        const Vec3& albedo,
-                        float       darkness);
+    static Vec3
+    compute(const Vec3& L, const Vec3& V, const Vec3& N, const Vec3& albedo, double darkness);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -45,7 +39,7 @@ public:
 
     Vec3 getBrdfValue(const Vec3& inDir, const Vec3& outDir) const
     {
-        return getValue(inDir, outDir) / PI_F;
+        return getValue(inDir, outDir) / PI_D;
     }
 
     bool isIsotropic() const { return true; }
@@ -59,29 +53,26 @@ public:
     }
 
 private:
-    Vec3    albedo_;
-    float   darkness_;
+    Vec3   albedo_;
+    double darkness_;
 };
 
 /*
  * Implementation
  */
 
-inline Vec3 Minnaert::compute(const Vec3&   L,
-                              const Vec3&   V,
-                              const Vec3&   N,
-                              const Vec3&   albedo,
-                              float         darkness)
+inline Vec3
+Minnaert::compute(const Vec3& L, const Vec3& V, const Vec3& N, const Vec3& albedo, double darkness)
 {
     using std::pow;
 
-    float dotLN = L.dot(N);
-    float dotVN = V.dot(N);
+    double dotLN = L.dot(N);
+    double dotVN = V.dot(N);
 
-    Vec3 val = albedo * pow(dotLN * dotVN, darkness - 1.0f);
+    Vec3 val = albedo * pow(dotLN * dotVN, darkness - 1);
 
     // Normalized values are returned.
-    return (darkness + 1.0f) * 0.5f * val;
+    return (darkness + 1) * 0.5 * val;
 }
 
 } // namespace lb

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -23,48 +23,38 @@ class Sampler
 public:
     /*! Gets the interpolated spectrum of sample points at incoming and outgoing directions. */
     template <typename CoordSysT, typename InterpolatorT>
-    static Spectrum getSpectrum(const SampleSet&    samples,
-                                const Vec3&         inDir,
-                                const Vec3&         outDir);
+    static Spectrum getSpectrum(const SampleSet& samples, const Vec3& inDir, const Vec3& outDir);
 
     /*!
      * Gets the interpolated value of sample points at incoming and outgoing directions
      * and the index of wavelength.
      */
     template <typename CoordSysT, typename InterpolatorT>
-    static float getValue(const SampleSet&  samples,
-                          const Vec3&       inDir,
-                          const Vec3&       outDir,
-                          int               wavelengthIndex);
+    static float
+    getValue(const SampleSet& samples, const Vec3& inDir, const Vec3& outDir, int wavelengthIndex);
 
     /*! Gets the interpolated spectrum of sample points at incoming and outgoing directions. */
     template <typename InterpolatorT>
-    static Spectrum getSpectrum(const Brdf& brdf,
-                                const Vec3& inDir,
-                                const Vec3& outDir);
+    static Spectrum getSpectrum(const Brdf& brdf, const Vec3& inDir, const Vec3& outDir);
 
     /*!
      * Gets the interpolated value of sample points at incoming and outgoing directions
      * and the index of wavelength.
      */
     template <typename InterpolatorT>
-    static float getValue(const Brdf&   brdf,
-                          const Vec3&   inDir,
-                          const Vec3&   outDir,
-                          int           wavelengthIndex);
+    static float
+    getValue(const Brdf& brdf, const Vec3& inDir, const Vec3& outDir, int wavelengthIndex);
 
     /*! Gets the interpolated spectrum of sample points at an incoming direction. */
     template <typename InterpolatorT>
-    static Spectrum getSpectrum(const SampleSet2D&  ss2,
-                                const Vec3&         inDir);
+    static Spectrum getSpectrum(const SampleSet2D& ss2, const Vec3& inDir);
 };
 
 template <typename CoordSysT, typename InterpolatorT>
-inline Spectrum Sampler::getSpectrum(const SampleSet&   samples,
-                                     const Vec3&        inDir,
-                                     const Vec3&        outDir)
+inline Spectrum
+Sampler::getSpectrum(const SampleSet& samples, const Vec3& inDir, const Vec3& outDir)
 {
-    float angle0, angle1, angle2, angle3;
+    double angle0, angle1, angle2, angle3;
     if (samples.isIsotropic()) {
         CoordSysT::fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
         return InterpolatorT::getSpectrum(samples, angle0, angle2, angle3);
@@ -81,7 +71,7 @@ inline float Sampler::getValue(const SampleSet& samples,
                                const Vec3&      outDir,
                                int              wavelengthIndex)
 {
-    float angle0, angle1, angle2, angle3;
+    double angle0, angle1, angle2, angle3;
     if (samples.isIsotropic()) {
         CoordSysT::fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
         return InterpolatorT::getValue(samples, angle0, angle2, angle3, wavelengthIndex);
@@ -93,13 +83,11 @@ inline float Sampler::getValue(const SampleSet& samples,
 }
 
 template <typename InterpolatorT>
-inline Spectrum Sampler::getSpectrum(const Brdf&    brdf,
-                                     const Vec3&    inDir,
-                                     const Vec3&    outDir)
+inline Spectrum Sampler::getSpectrum(const Brdf& brdf, const Vec3& inDir, const Vec3& outDir)
 {
     const SampleSet* ss = brdf.getSampleSet();
 
-    float angle0, angle1, angle2, angle3;
+    double angle0, angle1, angle2, angle3;
     if (ss->isIsotropic()) {
         brdf.fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
         return InterpolatorT::getSpectrum(*ss, angle0, angle2, angle3);
@@ -111,14 +99,12 @@ inline Spectrum Sampler::getSpectrum(const Brdf&    brdf,
 }
 
 template <typename InterpolatorT>
-inline float Sampler::getValue(const Brdf&  brdf,
-                               const Vec3&  inDir,
-                               const Vec3&  outDir,
-                               int          wavelengthIndex)
+inline float
+Sampler::getValue(const Brdf& brdf, const Vec3& inDir, const Vec3& outDir, int wavelengthIndex)
 {
     const SampleSet* ss = brdf.getSampleSet();
 
-    float angle0, angle1, angle2, angle3;
+    double angle0, angle1, angle2, angle3;
     if (ss->isIsotropic()) {
         brdf.fromXyz(inDir, outDir, &angle0, &angle2, &angle3);
         return InterpolatorT::getValue(*ss, angle0, angle2, angle3, wavelengthIndex);
@@ -130,12 +116,11 @@ inline float Sampler::getValue(const Brdf&  brdf,
 }
 
 template <typename InterpolatorT>
-inline Spectrum Sampler::getSpectrum(const SampleSet2D& ss2,
-                                     const Vec3&        inDir)
+inline Spectrum Sampler::getSpectrum(const SampleSet2D& ss2, const Vec3& inDir)
 {
-    float inTheta, inPhi;
+    double inTheta, inPhi;
     if (ss2.isIsotropic()) {
-        inTheta = static_cast<float>(std::acos(inDir[2]));
+        inTheta = std::acos(inDir[2]);
         return InterpolatorT::getSpectrum(ss2, inTheta);
     }
     else {

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2020 Kimura Ryo                                  //
+// Copyright (C) 2018-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -32,22 +32,25 @@ using namespace lb;
  */
 
 const std::string APP_NAME("lbgen");
-const std::string APP_VERSION("1.1.0");
+const std::string APP_VERSION("1.1.1");
 
 const std::string GgxName                       = "ggx";
 const std::string MultipleScatteringSmithName   = "multiple-scattering-smith";
 const std::string LambertianName                = "lambertian";
 
 // Parameters
-int numIncomingPolarAngles = 18;
-int numSpecularPolarAngles = 360;
-int numSpecularAzimuthalAngles = 72;
-bool conservationOfEnergyUsed = false;
-bool intervalAdjustmentUsed = false;
+int   numIncomingPolarAngles = 18;
+int   numSpecularPolarAngles = 360;
+int   numSpecularAzimuthalAngles = 72;
+bool  conservationOfEnergyUsed = false;
+bool  intervalAdjustmentUsed = false;
 float roughness = 0.3f;
 float n = 1.5f;
 float k = 0.0f;
-int numIterations = 10;
+int   materialType = 1;
+int   heightType = 1;
+int   slopeType = 0;
+int   numIterations = 10;
 
 void showHelp()
 {
@@ -89,14 +92,24 @@ void showList()
     cout << "Acceptable models:" << endl;
     cout << "  " << GgxName << endl;
     cout << "      Valid options:" << endl;
-    cout << "          -roughness  set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
-    cout << "          -n          set refractive index (default: 1.5)" << endl;
-    cout << "          -k          set extinction coefficient (default: 0.0)" << endl;
+    cout << "          -roughness   set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
+    cout << "          -n           set refractive index (default: 1.5)" << endl;
+    cout << "          -k           set extinction coefficient (default: 0.0)" << endl;
     cout << "  " << MultipleScatteringSmithName << endl;
     cout << "      Valid options:" << endl;
-    cout << "          -roughness      set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
-    cout << "          -n              set refractive index (default: 1.5)" << endl;
-    cout << "          -numIterations  set the number of sampling iterations (default: 10)" << endl;
+    cout << "          -roughness       set roughness of surface (default: 0.3, range: [0.01, 1.0])" << endl;
+    cout << "          -n               set refractive index (default: 1.5). Effective only for dielectric material." << endl;
+    cout << "          -materialType    set the type of material (default: 1)" << endl;
+    cout << "                               0: Conductor" << endl;
+    cout << "                               1: Dielectric" << endl;
+    cout << "                               2: Diffuse" << endl;
+    cout << "          -heightType      set the type of height (default: 1)" << endl;
+    cout << "                               0: Uniform" << endl;
+    cout << "                               1: Gaussian" << endl;
+    cout << "          -slopeType       set the type of slope (default: 0)" << endl;
+    cout << "                               0: Beckmann" << endl;
+    cout << "                               1: GGX" << endl;
+    cout << "          -numIterations   set the number of sampling iterations (default: 10)" << endl;
     cout << "  " << LambertianName << endl;
     cout << "      Valid options: none" << endl;
 }
@@ -175,6 +188,30 @@ bool readOptions(ArgumentParser* ap)
         return false;
     }
 
+    if (ap->read("-materialType", &materialType) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else if (materialType < 0 || materialType > 2) {
+        std::cerr << "Invalid value (materialType): " << materialType << std::endl;
+        return false;
+    }
+
+    if (ap->read("-heightType", &heightType) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else if (heightType < 0 || heightType > 1) {
+        std::cerr << "Invalid value (heightType): " << heightType << std::endl;
+        return false;
+    }
+
+    if (ap->read("-slopeType", &slopeType) == ArgumentParser::ERROR) {
+        return false;
+    }
+    else if (slopeType < 0 || slopeType > 1) {
+        std::cerr << "Invalid value (slopeType): " << slopeType << std::endl;
+        return false;
+    }
+
     if (ap->read("-numIterations", &numIterations) == ArgumentParser::ERROR) {
         return false;
     }
@@ -186,18 +223,15 @@ bool readOptions(ArgumentParser* ap)
 }
 
 SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
-                                    float                   n,
-                                    int                     numIncomingPolarAngles,
-                                    int                     numSpecularPolarAngles,
-                                    int                     numSpecularAzimuthalAngles,
+                                    float                   refractiveIndex,
+                                    int                     numInTheta,
+                                    int                     numSpecTheta,
+                                    int                     numSpecPhi,
                                     DataType                dataType)
 {
-    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(numIncomingPolarAngles,
-                                                                1,
-                                                                numSpecularPolarAngles,
-                                                                numSpecularAzimuthalAngles,
-                                                                2.0f,
-                                                                MONOCHROMATIC_MODEL, 1, n);
+    SpecularCoordinatesBrdf* brdf = new SpecularCoordinatesBrdf(
+        numInTheta, 1, numSpecTheta, numSpecPhi, 2.0f,
+        MONOCHROMATIC_MODEL, 1, refractiveIndex);
 
     ReflectanceModelUtility::setupBrdf(model, brdf, dataType);
 
@@ -213,9 +247,8 @@ SpecularCoordinatesBrdf* createBrdf(const ReflectanceModel& model,
         lb::Optimizer optimizer(brdf, 0.001f, 0.01f);
         optimizer.optimize();
 
-        lb::ReflectanceModelUtility::setupBrdf(model, brdf,
-                                               numAngles0, numAngles1, numAngles2, numAngles3,
-                                               dataType, n);
+        lb::ReflectanceModelUtility::setupBrdf(model, brdf, numAngles0, numAngles1, numAngles2,
+                                               numAngles3, dataType, refractiveIndex);
     }
 
     brdf->setSourceType(GENERATED_SOURCE);
@@ -265,15 +298,8 @@ int main(int argc, char** argv)
     }
     else if (modelName == MultipleScatteringSmithName) {
         roughness = app_utility::clampParameter("roughness", roughness, 0.01f, 1.0f);
-
-        MultipleScatteringSmith::MaterialType matType = (k == 0.0f) ? MultipleScatteringSmith::DIELECTRIC_MATERIAL
-                                                                    : MultipleScatteringSmith::CONDUCTOR_MATERIAL;
-
-        model.reset(new MultipleScatteringSmith(white, roughness, roughness, n,
-                                                static_cast<int>(matType),
-                                                static_cast<int>(MultipleScatteringSmith::GAUSSIAN_HEIGHT),
-                                                static_cast<int>(MultipleScatteringSmith::BECKMANN_SLOPE),
-                                                numIterations));
+        model.reset(new MultipleScatteringSmith(white, roughness, roughness, n, materialType,
+                                                heightType, slopeType, numIterations));
     }
     else if (modelName == LambertianName) {
         n = 1.0f;

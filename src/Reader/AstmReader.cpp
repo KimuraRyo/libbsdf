@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -118,10 +118,10 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         }
     }
 
-    std::set<float> inThetaAngles;
-    std::set<float> inPhiAngles;
-    std::set<float> outThetaAngles;
-    std::set<float> outPhiAngles;
+    std::set<double> inThetaAngles;
+    std::set<double> inPhiAngles;
+    std::set<double> outThetaAngles;
+    std::set<double> outPhiAngles;
 
     SphericalCoordinatesRandomSampleSet rss;
     SphericalCoordinatesRandomSampleSet::SampleMap& samples = rss.getSampleMap();
@@ -142,18 +142,18 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 token.erase(token.size() - 1);
             }
 
-            float val = static_cast<float>(std::atof(token.c_str()));
+            double val = std::atof(token.c_str());
 
             if (count <= 3) {
-                if (val < 0.0f) {
-                    val += TAU_F;
+                if (val < 0) {
+                    val += TAU_D;
                 }
 
                 val = std::min(val, SphericalCoordinateSystem::MAX_ANGLE3);
                 angles.push_back(val);
             }
             else {
-                values[count - 4] = std::max(val, 0.0f);
+                values[count - 4] = static_cast<float>(std::max(val, 0.0));
             }
 
             ++count;
@@ -176,13 +176,13 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     }
 
     // Modify data for the isotropic BRDF with the incoming azimuthal angle of non-zero radian.
-    if (inPhiAngles.size() == 1 && *inPhiAngles.begin() != 0.0f) {
+    if (inPhiAngles.size() == 1 && *inPhiAngles.begin() != 0) {
         // Rotate outgoing azimuthal angles using the incoming azimuthal angle.
         SphericalCoordinatesRandomSampleSet::AngleList rotatedAngles;
         for (auto it = outPhiAngles.begin(); it != outPhiAngles.end(); ++it) {
-            float outPhi = *it - *inPhiAngles.begin();
-            if (outPhi < 0.0f) {
-                outPhi += TAU_F;
+            double outPhi = *it - *inPhiAngles.begin();
+            if (outPhi < 0) {
+                outPhi += TAU_D;
             }
 
             rotatedAngles.push_back(outPhi);
@@ -194,11 +194,11 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         SphericalCoordinatesRandomSampleSet::SampleMap modifiedSamples;
         for (auto it = samples.begin(); it != samples.end(); ++it) {
             SphericalCoordinatesRandomSampleSet::AngleList angles = it->first;
-            float outPhi = angles.at(3) - *inPhiAngles.begin();
-            if (outPhi < 0.0f) {
-                outPhi += TAU_F;
+            double outPhi = angles.at(3) - *inPhiAngles.begin();
+            if (outPhi < 0) {
+                outPhi += TAU_D;
             }
-            angles.at(1) = 0.0f;
+            angles.at(1) = 0;
             angles.at(3) = outPhi;
 
             modifiedSamples[angles] = it->second;
@@ -207,10 +207,10 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
         std::copy(modifiedSamples.begin(), modifiedSamples.end(), std::inserter(samples, samples.begin()));
 
         inPhiAngles.clear();
-        inPhiAngles.insert(0.0f);
+        inPhiAngles.insert(0);
     }
 
-    outPhiAngles.insert(0.0f);
+    outPhiAngles.insert(0);
     outPhiAngles.insert(SphericalCoordinateSystem::MAX_ANGLE3);
 
     SphericalCoordinatesBrdf* brdf = new SphericalCoordinatesBrdf(static_cast<int>(inThetaAngles.size()),

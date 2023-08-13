@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2021 Kimura Ryo                                  //
+// Copyright (C) 2016-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -36,64 +36,64 @@ public:
         /*! Types of parameter. */
         enum ParameterType
         {
-            FLOAT_PARAMETER,
+            REAL_PARAMETER,
             VEC3_PARAMETER,
             INT_PARAMETER
         };
 
         union ValueUnion
         {
-            float*  real;
+            double* real;
             Vec3*   vec3;
             int*    integer;
         };
 
-        Parameter(const std::string&    name,
-                  float*                value,
-                  const float&          minValue = 0.0f,
-                  const float&          maxValue = 1.0f,
-                  const std::string&    description = "");
+        Parameter(const std::string& name,
+                  double*            value,
+                  const double&      minValue = 0.0,
+                  const double&      maxValue = 1.0,
+                  const std::string& description = "");
 
-        Parameter(const std::string&    name,
-                  Vec3*                 value,
-                  const Vec3&           minValue = Vec3::Zero(),
-                  const Vec3&           maxValue = Vec3::Ones(),
-                  const std::string&    description = "");
+        Parameter(const std::string& name,
+                  Vec3*              value,
+                  const Vec3&        minValue = Vec3::Zero(),
+                  const Vec3&        maxValue = Vec3::Ones(),
+                  const std::string& description = "");
 
-        Parameter(const std::string&    name,
-                  int*                  value,
-                  int                   minValue = 0,
-                  int                   maxValue = 999,
-                  const std::string&    description = "");
+        Parameter(const std::string& name,
+                  int*               value,
+                  int                minValue = 0,
+                  int                maxValue = 999,
+                  const std::string& description = "");
 
         ~Parameter();
         Parameter(const Parameter& param);
         Parameter& operator=(const Parameter& param);
 
-        const std::string&  getName() const;
-        ParameterType       getType() const;
+        const std::string& getName() const;
+        ParameterType      getType() const;
 
-        float*  getFloat() const;
+        double* getReal() const;
         Vec3*   getVec3() const;
         int*    getInt() const;
 
-        float*  getMinFloat() const;
+        double* getMinReal() const;
         Vec3*   getMinVec3() const;
         int*    getMinInt() const;
 
-        float*  getMaxFloat() const;
+        double* getMaxReal() const;
         Vec3*   getMaxVec3() const;
         int*    getMaxInt() const;
 
         const std::string& getDescription() const;
 
     private:
-        std::string     name_;
-        ParameterType   type_;
-        ValueUnion      value_;
-        ValueUnion      minValue_;
-        ValueUnion      maxValue_;
-        std::string     description_;
+        std::string   name_;
+        ParameterType type_;
+        ValueUnion    value_;
+        ValueUnion    minValue_;
+        ValueUnion    maxValue_;
+        std::string   description_;
     };
 
     using Parameters = std::vector<Parameter>;
@@ -126,10 +126,7 @@ protected:
     Parameters parameters_;
 };
 
-inline const std::string& ReflectanceModel::Parameter::getName() const
-{
-    return name_;
-}
+inline const std::string& ReflectanceModel::Parameter::getName() const { return name_; }
 
 inline const std::string& ReflectanceModel::Parameter::getDescription() const
 {
@@ -141,55 +138,19 @@ inline ReflectanceModel::Parameter::ParameterType ReflectanceModel::Parameter::g
     return type_;
 }
 
-inline float* ReflectanceModel::Parameter::getFloat() const
-{
-    return value_.real;
-}
+inline double* ReflectanceModel::Parameter::getReal() const { return value_.real; }
+inline Vec3* ReflectanceModel::Parameter::getVec3() const { return value_.vec3; }
+inline int* ReflectanceModel::Parameter::getInt() const { return value_.integer; }
 
-inline Vec3* ReflectanceModel::Parameter::getVec3() const
-{
-    return value_.vec3;
-}
+inline double* ReflectanceModel::Parameter::getMinReal() const { return minValue_.real; }
+inline Vec3* ReflectanceModel::Parameter::getMinVec3() const { return minValue_.vec3; }
+inline int* ReflectanceModel::Parameter::getMinInt() const { return minValue_.integer; }
 
-inline int* ReflectanceModel::Parameter::getInt() const
-{
-    return value_.integer;
-}
+inline double* ReflectanceModel::Parameter::getMaxReal() const { return maxValue_.real; }
+inline Vec3* ReflectanceModel::Parameter::getMaxVec3() const { return maxValue_.vec3; }
+inline int* ReflectanceModel::Parameter::getMaxInt() const { return maxValue_.integer; }
 
-inline float* ReflectanceModel::Parameter::getMinFloat() const
-{
-    return minValue_.real;
-}
-
-inline Vec3* ReflectanceModel::Parameter::getMinVec3() const
-{
-    return minValue_.vec3;
-}
-
-inline int* ReflectanceModel::Parameter::getMinInt() const
-{
-    return minValue_.integer;
-}
-
-inline float* ReflectanceModel::Parameter::getMaxFloat() const
-{
-    return maxValue_.real;
-}
-
-inline Vec3* ReflectanceModel::Parameter::getMaxVec3() const
-{
-    return maxValue_.vec3;
-}
-
-inline int* ReflectanceModel::Parameter::getMaxInt() const
-{
-    return maxValue_.integer;
-}
-
-inline ReflectanceModel::Parameters& ReflectanceModel::getParameters()
-{
-    return parameters_;
-}
+inline ReflectanceModel::Parameters& ReflectanceModel::getParameters() { return parameters_; }
 
 inline const ReflectanceModel::Parameters& ReflectanceModel::getParameters() const
 {

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -17,9 +17,9 @@
 
 using namespace lb;
 
-bool DdrWriter::write(const std::string&                fileName,
-                      const SpecularCoordinatesBrdf&    brdf,
-                      const std::string&                comments)
+bool DdrWriter::write(const std::string&             fileName,
+                      const SpecularCoordinatesBrdf& brdf,
+                      const std::string&             comments)
 {
     std::ofstream fout(fileName.c_str());
     if (fout.fail()) {
@@ -30,10 +30,10 @@ bool DdrWriter::write(const std::string&                fileName,
     return output(brdf, fout, comments);
 }
 
-bool DdrWriter::write(const std::string&    fileName,
-                      const Brdf&           brdf,
-                      DataType              dataType,
-                      const std::string&    comments)
+bool DdrWriter::write(const std::string& fileName,
+                      const Brdf&        brdf,
+                      DataType           dataType,
+                      const std::string& comments)
 {
     if (!brdf.validate()) {
         lbError << "[DdrReader::write] BRDF data is invalid.";
@@ -46,9 +46,9 @@ bool DdrWriter::write(const std::string&    fileName,
     return DdrWriter::write(fileName, *extrapolatedBrdf, comments);
 }
 
-bool DdrWriter::output(const SpecularCoordinatesBrdf&   brdf,
-                       std::ostream&                    stream,
-                       const std::string&               comments)
+bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf,
+                       std::ostream&                  stream,
+                       const std::string&             comments)
 {
     if (!brdf.validate()) {
         lbError << "[DdrReader::write] BRDF data is invalid.";
@@ -221,14 +221,13 @@ SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
         const SampleSet* ss = brdf.getSampleSet();
         int numInPhi = (ss->getNumAngles1() == 1) ? 1 : 37;
 
-        Arrayf inThetaAngles    = Arrayf::LinSpaced(19,         0.0f, SpecularCoordinateSystem::MAX_ANGLE0);
-        Arrayf inPhiAngles      = Arrayf::LinSpaced(numInPhi,   0.0f, SpecularCoordinateSystem::MAX_ANGLE1);
-        Arrayf specPhiAngles    = Arrayf::LinSpaced(73,         0.0f, SpecularCoordinateSystem::MAX_ANGLE3);
+        Arrayd inThetaAngles = Arrayd::LinSpaced(19, 0.0, SpecularCoordinateSystem::MAX_ANGLE0);
+        Arrayd inPhiAngles = Arrayd::LinSpaced(numInPhi, 0.0, SpecularCoordinateSystem::MAX_ANGLE1);
+        Arrayd specPhiAngles = Arrayd::LinSpaced(73, 0.0, SpecularCoordinateSystem::MAX_ANGLE3);
 
         // Create narrow intervals near specular directions.
-        Arrayf specThetaAngles = array_util::createExponential<Arrayf>(91,
-                                                                       SpecularCoordinateSystem::MAX_ANGLE2,
-                                                                       2.0f);
+        Arrayd specThetaAngles =
+            array_util::createExponential<Arrayd>(91, SpecularCoordinateSystem::MAX_ANGLE2, 2.0);
 
         convertedBrdf = new SpecularCoordinatesBrdf(brdf, inThetaAngles, inPhiAngles, specThetaAngles, specPhiAngles);
     }
@@ -236,8 +235,7 @@ SpecularCoordinatesBrdf* DdrWriter::convert(const Brdf& brdf)
     return convertedBrdf;
 }
 
-SpecularCoordinatesBrdf* DdrWriter::arrange(const SpecularCoordinatesBrdf&  brdf,
-                                            DataType                        dataType)
+SpecularCoordinatesBrdf* DdrWriter::arrange(const SpecularCoordinatesBrdf& brdf, DataType dataType)
 {
     SpecularCoordinatesBrdf* arrangedBrdf = new SpecularCoordinatesBrdf(brdf);
 
@@ -245,7 +243,7 @@ SpecularCoordinatesBrdf* DdrWriter::arrange(const SpecularCoordinatesBrdf&  brdf
     if (arrangedBrdf->getNumInTheta() == 1) {
         const SampleSet* ss = arrangedBrdf->getSampleSet();
 
-        Arrayf inThetaAngles = Arrayf::LinSpaced(10, 0.0, SpecularCoordinateSystem::MAX_ANGLE0);
+        Arrayd inThetaAngles = Arrayd::LinSpaced(10, 0.0, SpecularCoordinateSystem::MAX_ANGLE0);
 
         SpecularCoordinatesBrdf* filledBrdf = new SpecularCoordinatesBrdf(*arrangedBrdf,
                                                                           inThetaAngles,

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -29,11 +29,11 @@ public:
      * Constructs a 2D sample array.
      * The initialization of angles, wavelengths, and spectra is required.
      */
-    SampleSet2D(int         numTheta,
-                int         numPhi,
-                ColorModel  colorModel = RGB_MODEL,
-                int         numWavelengths = 3,
-                bool        equalIntervalAngles = false);
+    SampleSet2D(int        numTheta,
+                int        numPhi,
+                ColorModel colorModel = RGB_MODEL,
+                int        numWavelengths = 3,
+                bool       equalIntervalAngles = false);
 
     ~SampleSet2D();
 
@@ -41,16 +41,16 @@ public:
     Spectrum getSpectrum(const Vec3& dir) const;
 
     /*! Gets the spectrum at a set of angles. */
-    Spectrum getSpectrum(float theta, float phi) const;
+    Spectrum getSpectrum(double theta, double phi) const;
 
     /*! Gets the spectrum at a set of angles. */
-    Spectrum getSpectrum(float theta, float phi);
+    Spectrum getSpectrum(double theta, double phi);
 
     /*! Gets the spectrum at a polar angle. */
-    Spectrum getSpectrum(float theta) const;
+    Spectrum getSpectrum(double theta) const;
 
     /*! Gets the spectrum at a polar angle. */
-    Spectrum getSpectrum(float theta);
+    Spectrum getSpectrum(double theta);
 
     /*! Gets the spectrum at a set of angle indices. */
     Spectrum& getSpectrum(int thetaIndex, int phiIndex);
@@ -76,17 +76,17 @@ public:
     /*! Gets a direction at a set of angle indices. */
     Vec3 getDirection(int thetaIndex, int phiIndex) const;
 
-    float getTheta(int index) const; /*!< Gets the polar angle at an index. */
-    float getPhi  (int index) const; /*!< Gets the azimuthal angle at an index. */
+    double getTheta(int index) const; /*!< Gets the polar angle at an index. */
+    double getPhi(int index) const;   /*!< Gets the azimuthal angle at an index. */
 
-    void setTheta(int index, float angle); /*!< Sets the polar angle at an index. */
-    void setPhi  (int index, float angle); /*!< Sets the azimuthal angle at an index. */
+    void setTheta(int index, double angle); /*!< Sets the polar angle at an index. */
+    void setPhi(int index, double angle);   /*!< Sets the azimuthal angle at an index. */
 
-    Arrayf& getThetaArray(); /*!< Gets the array of polar angles. */
-    Arrayf& getPhiArray();   /*!< Gets the array of azimuthal angles. */
+    Arrayd& getThetaArray(); /*!< Gets the array of polar angles. */
+    Arrayd& getPhiArray();   /*!< Gets the array of azimuthal angles. */
 
-    const Arrayf& getThetaArray() const; /*!< Gets the array of polar angles. */
-    const Arrayf& getPhiArray()   const; /*!< Gets the array of azimuthal angles. */
+    const Arrayd& getThetaArray() const; /*!< Gets the array of polar angles. */
+    const Arrayd& getPhiArray() const;   /*!< Gets the array of azimuthal angles. */
 
     int getNumTheta() const; /*!< Gets the number of polar angles. */
     int getNumPhi()   const; /*!< Gets the number of azimuthal angles. */
@@ -156,8 +156,8 @@ public:
 private:
     SpectrumList spectra_; /*!< The list of spectrum for each direction. */
 
-    Arrayf thetaAngles_; /*!< The array of polar angles. */
-    Arrayf phiAngles_;   /*!< The array of azimuthal angles. */
+    Arrayd thetaAngles_; /*!< The array of polar angles. */
+    Arrayd phiAngles_;   /*!< The array of azimuthal angles. */
 
     bool equalIntervalTheta_; /*!< This attribute holds whether polar angles are set at equal intervals. */
     bool equalIntervalPhi_;   /*!< This attribute holds whether azimuthal angles are set at equal intervals. */
@@ -169,22 +169,22 @@ private:
     SourceType sourceType_; /*!< The data type of source. */
 };
 
-inline Spectrum SampleSet2D::getSpectrum(float theta, float phi) const
+inline Spectrum SampleSet2D::getSpectrum(double theta, double phi) const
 {
     return LinearInterpolator::getSpectrum(*this, theta, phi);
 }
 
-inline Spectrum SampleSet2D::getSpectrum(float theta, float phi)
+inline Spectrum SampleSet2D::getSpectrum(double theta, double phi)
 {
     return LinearInterpolator::getSpectrum(*this, theta, phi);
 }
 
-inline Spectrum SampleSet2D::getSpectrum(float theta) const
+inline Spectrum SampleSet2D::getSpectrum(double theta) const
 {
     return LinearInterpolator::getSpectrum(*this, theta);
 }
 
-inline Spectrum SampleSet2D::getSpectrum(float theta)
+inline Spectrum SampleSet2D::getSpectrum(double theta)
 {
     return LinearInterpolator::getSpectrum(*this, theta);
 }
@@ -222,26 +222,26 @@ inline Vec3 SampleSet2D::getDirection(int thetaIndex, int phiIndex) const
     return SphericalCoordinateSystem::toXyz(thetaAngles_[thetaIndex], phiAngles_[phiIndex]);
 }
 
-inline float SampleSet2D::getTheta(int index) const { return thetaAngles_[index]; }
-inline float SampleSet2D::getPhi(int index)   const { return phiAngles_[index]; }
+inline double SampleSet2D::getTheta(int index) const { return thetaAngles_[index]; }
+inline double SampleSet2D::getPhi(int index) const { return phiAngles_[index]; }
 
-inline void SampleSet2D::setTheta(int index, float angle)
+inline void SampleSet2D::setTheta(int index, double angle)
 {
     thetaAngles_[index] = angle;
     equalIntervalTheta_ = array_util::isEqualInterval(thetaAngles_);
 }
 
-inline void SampleSet2D::setPhi(int index, float angle)
+inline void SampleSet2D::setPhi(int index, double angle)
 {
     phiAngles_[index] = angle;
     equalIntervalPhi_ = array_util::isEqualInterval(phiAngles_);
 }
 
-inline Arrayf& SampleSet2D::getThetaArray() { return thetaAngles_; }
-inline Arrayf& SampleSet2D::getPhiArray()   { return phiAngles_; }
+inline Arrayd& SampleSet2D::getThetaArray() { return thetaAngles_; }
+inline Arrayd& SampleSet2D::getPhiArray() { return phiAngles_; }
 
-inline const Arrayf& SampleSet2D::getThetaArray() const { return thetaAngles_; }
-inline const Arrayf& SampleSet2D::getPhiArray()   const { return phiAngles_; }
+inline const Arrayd& SampleSet2D::getThetaArray() const { return thetaAngles_; }
+inline const Arrayd& SampleSet2D::getPhiArray() const { return phiAngles_; }
 
 inline int SampleSet2D::getNumTheta() const { return static_cast<int>(thetaAngles_.size()); }
 inline int SampleSet2D::getNumPhi()   const { return static_cast<int>(phiAngles_.size()); }

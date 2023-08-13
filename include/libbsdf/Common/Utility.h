@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2022 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -93,14 +93,14 @@ ValueT toLogScale(const ValueT& value, const BaseT& base);
 
 /*! \brief Converts a coordinate system. */
 template <typename SrcCoordSysT, typename DestCoordSysT>
-void convertCoordinateSystem(float  srcAngle0,
-                             float  srcAngle1,
-                             float  srcAngle2,
-                             float  srcAngle3,
-                             float* destAngle0,
-                             float* destAngle1,
-                             float* destAngle2,
-                             float* destAngle3);
+void convertCoordinateSystem(double  srcAngle0,
+                             double  srcAngle1,
+                             double  srcAngle2,
+                             double  srcAngle3,
+                             double* destAngle0,
+                             double* destAngle1,
+                             double* destAngle2,
+                             double* destAngle3);
 
 /*! \brief Returns true if two sample sets have the same color model and wavelengths. */
 template <typename T>
@@ -322,21 +322,18 @@ ValueT toLogScale(const ValueT& value, const BaseT& base)
 }
 
 template <typename SrcCoordSysT, typename DestCoordSysT>
-void convertCoordinateSystem(float  srcAngle0,
-                             float  srcAngle1,
-                             float  srcAngle2,
-                             float  srcAngle3,
-                             float* destAngle0,
-                             float* destAngle1,
-                             float* destAngle2,
-                             float* destAngle3)
+void convertCoordinateSystem(double  srcAngle0,
+                             double  srcAngle1,
+                             double  srcAngle2,
+                             double  srcAngle3,
+                             double* destAngle0,
+                             double* destAngle1,
+                             double* destAngle2,
+                             double* destAngle3)
 {
     Vec3 inDir, outDir;
-    SrcCoordSysT::toXyz(srcAngle0, srcAngle1, srcAngle2, srcAngle3,
-                        &inDir, &outDir);
-
-    DestCoordSysT::fromXyz(inDir, outDir,
-                           destAngle0, destAngle1, destAngle2, destAngle3);
+    SrcCoordSysT::toXyz(srcAngle0, srcAngle1, srcAngle2, srcAngle3, &inDir, &outDir);
+    DestCoordSysT::fromXyz(inDir, outDir, destAngle0, destAngle1, destAngle2, destAngle3);
 }
 
 template <typename Vec3T>

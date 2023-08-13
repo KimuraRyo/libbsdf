@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2022 Kimura Ryo                                       //
+// Copyright (C) 2022-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,10 +22,10 @@ class SimpleGgx : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    SimpleGgx(const Vec3& color, float roughness) : color_(color), roughness_(roughness)
+    SimpleGgx(const Vec3& color, double roughness) : color_(color), roughness_(roughness)
     {
         parameters_.push_back(Parameter("Color", &color_));
-        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01, 1.0));
     }
 
     template <typename Vec3T, typename ColorT, typename ScalarT>
@@ -56,8 +56,8 @@ public:
     }
 
 private:
-    Vec3  color_;
-    float roughness_;
+    Vec3   color_;
+    double roughness_;
 };
 
 /*

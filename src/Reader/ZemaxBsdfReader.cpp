@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2020 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -27,10 +27,10 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
     SymmetryType symmetryType = UNKNOWN_SYMMETRY;
     ColorModel colorModel = UNKNOWN_MODEL;
 
-    std::vector<float> inThetaDegrees;
-    std::vector<float> inPhiDegrees;
-    std::vector<float> spThetaDegrees;
-    std::vector<float> spPhiDegrees;
+    std::vector<double> inThetaDegrees;
+    std::vector<double> inPhiDegrees;
+    std::vector<double> spThetaDegrees;
+    std::vector<double> spPhiDegrees;
 
     int numChannels = 1;
 
@@ -99,7 +99,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
             int numInPhi;
             ifs >> numInPhi;
             for (int i = 0; i < numInPhi; ++i) {
-                float angle;
+                double angle;
                 ifs >> angle;
                 inPhiDegrees.push_back(angle);
             }
@@ -108,7 +108,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
             int numInTheta;
             ifs >> numInTheta;
             for (int i = 0; i < numInTheta; ++i) {
-                float angle;
+                double angle;
                 ifs >> angle;
                 inThetaDegrees.push_back(angle);
             }
@@ -117,7 +117,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
             int numSpPhi;
             ifs >> numSpPhi;
             for (int i = 0; i < numSpPhi; ++i) {
-                float angle;
+                double angle;
                 ifs >> angle;
                 spPhiDegrees.push_back(angle);
             }
@@ -126,7 +126,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
             int numSpTheta;
             ifs >> numSpTheta;
             for (int i = 0; i < numSpTheta; ++i) {
-                float angle;
+                double angle;
                 ifs >> angle;
                 spThetaDegrees.push_back(angle);
             }
@@ -150,7 +150,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
     }
 
     if (inPhiDegrees.empty()) {
-        inPhiDegrees.push_back(0.0f);
+        inPhiDegrees.push_back(0);
     }
 
     size_t numSpecPhi = spPhiDegrees.size();
@@ -184,7 +184,7 @@ SpecularCoordinatesBrdf* ZemaxBsdfReader::read(const std::string& fileName, Data
         for (int i = numSpecPhiDegrees, reverseIndex = numSpecPhiDegrees - 2;
              i < brdf->getNumSpecPhi();
              ++i, --reverseIndex) {
-            brdf->setSpecPhi(i, PI_F + (PI_F - brdf->getSpecPhi(reverseIndex)));
+            brdf->setSpecPhi(i, PI_D + (PI_D - brdf->getSpecPhi(reverseIndex)));
         }
     }
 

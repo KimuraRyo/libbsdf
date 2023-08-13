@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2019-2020 Kimura Ryo                                  //
+// Copyright (C) 2019-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -77,8 +77,8 @@ bool lb::initializeSpectra(const SampleSet2D& baseSamples, SampleSet2D* samples)
 
     for (int i0 = 0; i0 < samples->getNumTheta(); ++i0) {
     for (int i1 = 0; i1 < samples->getNumPhi();   ++i1) {
-        float theta = samples->getTheta(i0);
-        float phi   = samples->getPhi(i1);
+        double theta = samples->getTheta(i0);
+        double phi = samples->getPhi(i1);
         Spectrum sp = InterpolatorT::getSpectrum(baseSamples, theta, phi);
         samples->setSpectrum(i0, i1, sp);
     }}

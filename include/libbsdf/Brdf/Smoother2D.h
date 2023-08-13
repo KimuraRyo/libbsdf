@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2020 Kimura Ryo                                  //
+// Copyright (C) 2017-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -58,10 +58,10 @@ private:
     bool insertAngle0();
     bool insertAngle1();
 
-    bool insertAngle(std::set<Arrayf::Scalar>&  angleSet,
-                     int                        angleSuffix,
-                     const Vec2f&               angles,
-                     const Vec2f&               nextAngles);
+    bool insertAngle(std::set<double>& angleSet,
+                     int               angleSuffix,
+                     const Vec2&       angles,
+                     const Vec2&       nextAngles);
 
     void updateSamples();
 
@@ -71,15 +71,15 @@ private:
      * The difference between linear and smooth interpolation.
      * This attribute holds whether an angle is inserted.
      */
-    float   diffThreshold_;
+    float diffThreshold_;
 
-    int     maxIteration0_; /*!< The maximum number of iterations of the division of angle0. */
-    int     maxIteration1_; /*!< The maximum number of iterations of the division of angle1. */
+    int maxIteration0_; /*!< The maximum number of iterations of the division of angle0. */
+    int maxIteration1_; /*!< The maximum number of iterations of the division of angle1. */
 
-    float   minAngleInterval_; /*!< The minimum interval of divided angles. */
+    double minAngleInterval_; /*!< The minimum interval of divided angles. */
 
-    std::set<Arrayf::Scalar> angles0_; /*!< The angle array to insert sample points. */
-    std::set<Arrayf::Scalar> angles1_; /*!< The angle array to insert sample points. */
+    std::set<double> angles0_; /*!< The angle array to insert sample points. */
+    std::set<double> angles1_; /*!< The angle array to insert sample points. */
 };
 
 inline float Smoother2D::getDiffThreshold() const { return diffThreshold_; }

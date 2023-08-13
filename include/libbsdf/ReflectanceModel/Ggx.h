@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2017-2022 Kimura Ryo                                  //
+// Copyright (C) 2017-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,19 +22,19 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     Ggx(const Vec3& color,
-        float       roughness,
-        float       refractiveIndex,
-        float       extinctionCoefficient = 0.0f)
+        double      roughness,
+        double      refractiveIndex,
+        double      extinctionCoefficient = 0.0)
         : color_(color),
           roughness_(roughness),
           refractiveIndex_(refractiveIndex),
           extinctionCoefficient_(extinctionCoefficient)
     {
         parameters_.push_back(Parameter("Color", &color_));
-        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_, 0.01f, 100.0f));
+        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_, 0.01, 100.0));
         parameters_.push_back(
-            Parameter("Extinction coefficient", &extinctionCoefficient_, 0.0f, 100.0f));
+            Parameter("Extinction coefficient", &extinctionCoefficient_, 0.0, 100.0));
     }
 
     template <typename Vec3T, typename ColorT, typename ScalarT>
@@ -76,10 +76,10 @@ public:
     static T clampDotLH(const T& dotLH);
 
 private:
-    Vec3  color_;
-    float roughness_;
-    float refractiveIndex_;
-    float extinctionCoefficient_;
+    Vec3   color_;
+    double roughness_;
+    double refractiveIndex_;
+    double extinctionCoefficient_;
 };
 
 /*

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2022 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -16,12 +16,12 @@
 
 using namespace lb;
 
-void lb::editComponents(const Brdf&         origBrdf,
-                        Brdf*               brdf,
-                        const Spectrum&     diffuseThresholds,
-                        Spectrum::Scalar    glossyIntensity,
-                        Spectrum::Scalar    glossyShininess,
-                        Spectrum::Scalar    diffuseIntensity)
+void lb::editComponents(const Brdf&     origBrdf,
+                        Brdf*           brdf,
+                        const Spectrum& diffuseThresholds,
+                        double          glossyIntensity,
+                        double          glossyShininess,
+                        double          diffuseIntensity)
 {
     const SampleSet* ss = brdf->getSampleSet();
 
@@ -39,16 +39,16 @@ void lb::editComponents(const Brdf&         origBrdf,
     brdf->setSourceType(EDITED_SOURCE);
 }
 
-void lb::editComponents(int                 i0,
-                        int                 i1,
-                        int                 i2,
-                        int                 i3,
-                        const Brdf&         origBrdf,
-                        Brdf*               brdf,
-                        const Spectrum&     diffuseThresholds,
-                        Spectrum::Scalar    glossyIntensity,
-                        Spectrum::Scalar    glossyShininess,
-                        Spectrum::Scalar    diffuseIntensity)
+void lb::editComponents(int             i0,
+                        int             i1,
+                        int             i2,
+                        int             i3,
+                        const Brdf&     origBrdf,
+                        Brdf*           brdf,
+                        const Spectrum& diffuseThresholds,
+                        double          glossyIntensity,
+                        double          glossyShininess,
+                        double          diffuseIntensity)
 {
     using std::pow;
     using std::max;
@@ -60,11 +60,11 @@ void lb::editComponents(int                 i0,
         Vec3 inDir, outDir;
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
 
-        float inTh, inPh, specTh, specPh;
+        double inTh, inPh, specTh, specPh;
         SpecularCoordinateSystem::fromXyz(inDir, outDir, &inTh, &inPh, &specTh, &specPh);
-        float specThWeight = specTh / SpecularCoordinateSystem::MAX_ANGLE2;
-        specThWeight = pow(specThWeight, 1.0f / max(glossyShininess, EPSILON_F));
-        float newSpecTh = specThWeight * SpecularCoordinateSystem::MAX_ANGLE2;
+        double specThWeight = specTh / SpecularCoordinateSystem::MAX_ANGLE2;
+        specThWeight = pow(specThWeight, 1 / max(glossyShininess, EPSILON_D));
+        double newSpecTh = specThWeight * SpecularCoordinateSystem::MAX_ANGLE2;
 
         inTh        = clamp(inTh,       SpecularCoordinateSystem::MIN_ANGLE0, SpecularCoordinateSystem::MAX_ANGLE0);
         inPh        = clamp(inPh,       SpecularCoordinateSystem::MIN_ANGLE1, SpecularCoordinateSystem::MAX_ANGLE1);
@@ -82,14 +82,14 @@ void lb::editComponents(int                 i0,
 
     // Edit a BRDF with glossy and diffuse intensity.
     for (int i = 0; i < sp.size(); ++i) {
-        Spectrum::Scalar origVal = origSp[i];
-        Spectrum::Scalar threshold = diffuseThresholds[i];
+        float origVal = origSp[i];
+        float threshold = diffuseThresholds[i];
         if (origVal <= threshold) {
-            sp[i] = origVal * diffuseIntensity;
+            sp[i] = static_cast<float>(origVal * diffuseIntensity);
         }
         else {
-            Spectrum::Scalar glossy = origVal - threshold;
-            sp[i] = glossy * glossyIntensity + threshold * diffuseIntensity;
+            float glossy = origVal - threshold;
+            sp[i] = static_cast<float>(glossy * glossyIntensity + threshold * diffuseIntensity);
         }
     }
 
@@ -136,16 +136,16 @@ Brdf* lb::fillAnglesUsingBilateralSymmetry(const Brdf& brdf)
 
     const SampleSet* ss = brdf.getSampleSet();
 
-    std::set<float> filledAngles;
+    std::set<double> filledAngles;
     for (int i = 0; i < ss->getNumAngles3(); ++i) {
-        float angle3 = ss->getAngle3(i);
-        if (angle3 > increase(PI_F)) break;
+        double angle3 = ss->getAngle3(i);
+        if (angle3 > increase(PI_D)) break;
 
         filledAngles.insert(angle3);
 
-        if (isEqual(angle3, PI_F)) continue;
+        if (isEqual(angle3, PI_D)) continue;
 
-        filledAngles.insert(TAU_F - angle3);
+        filledAngles.insert(TAU_D - angle3);
     }
 
     Brdf* filledBrdf = brdf.clone();
@@ -166,7 +166,7 @@ Brdf* lb::fillAnglesUsingBilateralSymmetry(const Brdf& brdf)
     for (int i3 = 0; i3 < filledSs->getNumAngles3(); ++i3) {
         Spectrum sp;
 
-        if (filledSs->getAngle3(i3) <= PI_F) {
+        if (filledSs->getAngle3(i3) <= PI_D) {
             sp = ss->getSpectrum(i0, i1, i2, i3);
         }
         else {
@@ -185,8 +185,8 @@ Brdf* lb::fillAnglesUsingBilateralSymmetry(const Brdf& brdf)
 
 void fixSlightlyNegativeDir(Vec3* dir)
 {
-    if (std::abs(dir->z()) < EPSILON_F) {
-        dir->z() = EPSILON_F;
+    if (std::abs(dir->z()) < EPSILON_D) {
+        dir->z() = EPSILON_D;
         dir->normalize();
     }
 };
@@ -201,9 +201,9 @@ Brdf* lb::reduceAnglesUsingBilateralSymmetry(const Brdf& brdf)
     const SampleSet* ss = brdf.getSampleSet();
 
     // Create an angle array in [0, PI].
-    std::set<float> reducedAngles;
+    std::set<double> reducedAngles;
     for (int i = 0; i < ss->getNumAngles3(); ++i) {
-        float angle3 = ss->getAngle3(i);
+        double angle3 = ss->getAngle3(i);
 
         bool closeAngleFound = false;
 
@@ -211,9 +211,9 @@ Brdf* lb::reduceAnglesUsingBilateralSymmetry(const Brdf& brdf)
         for (auto& val : reducedAngles) {
             using std::abs;
 
-            constexpr float eps = EPSILON_F * 10.0f;
+            constexpr double eps = EPSILON_F * 10;
             if (abs(val - angle3)           < eps ||
-                abs(val - (TAU_F - angle3)) < eps) {
+                abs(val - (TAU_D - angle3)) < eps) {
                 closeAngleFound = true;
                 break;
             }
@@ -221,11 +221,11 @@ Brdf* lb::reduceAnglesUsingBilateralSymmetry(const Brdf& brdf)
 
         if (closeAngleFound) continue;
 
-        if (angle3 <= increase(PI_F)) {
+        if (angle3 <= increase(PI_D)) {
             reducedAngles.insert(angle3);
         }
         else {
-            reducedAngles.insert(TAU_F - angle3);
+            reducedAngles.insert(TAU_D - angle3);
         }
     }
 
@@ -267,7 +267,8 @@ Brdf* lb::reduceAnglesUsingBilateralSymmetry(const Brdf& brdf)
     return reducedBrdf;
 }
 
-HalfDifferenceCoordinatesBrdf* lb::fillAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf)
+HalfDifferenceCoordinatesBrdf*
+lb::fillAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf)
 {
     if (!hasSameEnumerator(brdf.getReductionType(), ReductionType::RECIPROCITY)) {
         lbError << "[lb::fillAnglesUsingReciprocity] lb::Brdf must have ReductionType::RECIPROCITY.";
@@ -277,19 +278,21 @@ HalfDifferenceCoordinatesBrdf* lb::fillAnglesUsingReciprocity(const HalfDifferen
     const SampleSet* ss = brdf.getSampleSet();
 
     bool symmetryUsed = hasSameEnumerator(brdf.getReductionType(), ReductionType::BILATERAL_SYMMETRY);
-    float maxAngle3 = symmetryUsed ? PI_2_F : PI_F;
+    double maxAngle3 = symmetryUsed ? PI_2_D : PI_D;
 
     // Get the reversed angle.
-    auto reverse = [symmetryUsed](float angle) { return symmetryUsed ? (PI_F - angle) : (angle + PI_F); };
+    auto reverse = [symmetryUsed](double angle) {
+        return symmetryUsed ? (PI_D - angle) : (angle + PI_D);
+    };
 
-    std::set<float> filledAngles;
+    std::set<double> filledAngles;
     for (int i = 0; i < ss->getNumAngles3(); ++i) {
-        float angle3 = ss->getAngle3(i);
+        double angle3 = ss->getAngle3(i);
         if (angle3 > increase(maxAngle3)) break;
 
         filledAngles.insert(angle3);
 
-        if (!symmetryUsed && angle3 == 0.0f) continue;
+        if (!symmetryUsed && angle3 == 0) continue;
 
         filledAngles.insert(reverse(angle3));
     }
@@ -334,20 +337,23 @@ HalfDifferenceCoordinatesBrdf* lb::fillAnglesUsingReciprocity(const HalfDifferen
     return filledBrdf;
 }
 
-HalfDifferenceCoordinatesBrdf* lb::reduceAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf)
+HalfDifferenceCoordinatesBrdf*
+lb::reduceAnglesUsingReciprocity(const HalfDifferenceCoordinatesBrdf& brdf)
 {
     const SampleSet* ss = brdf.getSampleSet();
 
     bool symmetryUsed = hasSameEnumerator(brdf.getReductionType(), ReductionType::BILATERAL_SYMMETRY);
-    float maxAngle3 = symmetryUsed ? decrease(PI_2_F) : PI_F;
+    double maxAngle3 = symmetryUsed ? decrease(PI_2_D) : PI_D;
 
     // Get the reversed angle.
-    auto reverse = [symmetryUsed](float angle) { return symmetryUsed ? (PI_F - angle) : (angle - PI_F); };
+    auto reverse = [symmetryUsed](double angle) {
+        return symmetryUsed ? (PI_D - angle) : (angle - PI_D);
+    };
 
     // Create an angle array in [0, PI].
-    std::set<float> reducedAngles;
+    std::set<double> reducedAngles;
     for (int i = 0; i < ss->getNumAngles3(); ++i) {
-        float angle3 = ss->getAngle3(i);
+        double angle3 = ss->getAngle3(i);
 
         bool closeAngleFound = false;
 
@@ -355,7 +361,7 @@ HalfDifferenceCoordinatesBrdf* lb::reduceAnglesUsingReciprocity(const HalfDiffer
         for (auto& val : reducedAngles) {
             using std::abs;
 
-            constexpr float eps = EPSILON_F * 10.0f;
+            constexpr double eps = EPSILON_F * 10;
             if (abs(val - angle3)          < eps ||
                 abs(val - reverse(angle3)) < eps) {
                 closeAngleFound = true;
@@ -395,12 +401,12 @@ HalfDifferenceCoordinatesBrdf* lb::reduceAnglesUsingReciprocity(const HalfDiffer
         Spectrum sp, reversedSp;
 
         if (symmetryUsed) {
-            float angle0, angle1, angle2, angle3;
+            double angle0, angle1, angle2, angle3;
             sp = brdf.getSpectrum(inDir, outDir);
 
             reducedBrdf->fromXyz(outDir, inDir, &angle0, &angle1, &angle2, &angle3);
-            if (angle3 > PI_F) {
-                angle3 = TAU_F - angle3;
+            if (angle3 > PI_D) {
+                angle3 = TAU_D - angle3;
                 reducedBrdf->toXyz(angle0, angle1, angle2, angle3, &outDir, &inDir);
             }
 
@@ -430,13 +436,13 @@ void lb::averageSpectraAtInThetaOf0(Brdf* brdf)
 
     if (!acceptable ||
         !ss->isIsotropic() ||
-        ss->getAngle0(0) != 0.0f) {
+        ss->getAngle0(0) != 0) {
         return;
     }
 
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
         int numSamples = 0;
-        Spectrum sumSp = Spectrum::Zero(ss->getNumWavelengths());
+        Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
 
         for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
             if (i3 == ss->getNumAngles3() - 1 &&
@@ -445,11 +451,11 @@ void lb::averageSpectraAtInThetaOf0(Brdf* brdf)
                 break;
             }
 
-            sumSp += ss->getSpectrum(0, i2, i3);
+            sumSp += ss->getSpectrum(0, i2, i3).cast<Arrayd::Scalar>();
             ++numSamples;
         }
 
-        Spectrum avgSp = sumSp / static_cast<Spectrum::Scalar>(numSamples);
+        Spectrum avgSp = sumSp.cast<Spectrum::Scalar>() / numSamples;
 
         for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
             ss->setSpectrum(0, i2, i3, avgSp);
@@ -577,7 +583,7 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
         bool spPhBoundaryFound = false;
         int boundary0 = 0;
 
-        if (brdf->getInTheta(inThIndex) > 0.0f) {
+        if (brdf->getInTheta(inThIndex) > 0) {
             // Search the boundary of specular azimuthal angles.
             bool upwardDirFound = false;
             for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
@@ -636,9 +642,9 @@ void lb::fillBackSide(SpecularCoordinatesBrdf* brdf)
                     continue;
                 }
 
-                float spPh = brdf->getSpecPhi(spPhIndex);
-                float spPh0 = brdf->getSpecPhi(boundary0);
-                float spPh1 = brdf->getSpecPhi(boundary1);
+                double spPh = brdf->getSpecPhi(spPhIndex);
+                double spPh0 = brdf->getSpecPhi(boundary0);
+                double spPh1 = brdf->getSpecPhi(boundary1);
 
                 int boundary;
                 if ((spPh - spPh0) <= (spPh1 - spPh)) {
@@ -676,7 +682,7 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
     const SampleSet* ss = brdf->getSampleSet();
 
     if (brdf->getNumInPhi() >= 2) {
-        if (isEqual(brdf->getInTheta(0), 0.0f)) {
+        if (isEqual(brdf->getInTheta(0), 0.0)) {
             const SpecularCoordinatesBrdf origBrdf = *brdf;
 
             // Equalize samples for incoming azimuthal angles if an incoming polar angle is 0.
@@ -691,12 +697,12 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
                      ++sampledInPhIndex) {
 
                     // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
-                    const float inTheta = EPSILON_F;
-                    float inPhi = brdf->getInPhi(sampledInPhIndex);
+                    constexpr double inTheta = EPSILON_D;
+                    double           inPhi = brdf->getInPhi(sampledInPhIndex);
 
                     // Ignore an overlapping angle.
-                    if (isEqual(inPhi, TAU_F) &&
-                        isEqual(brdf->getInPhi(0), 0.0f)) {
+                    if (isEqual(inPhi, TAU_D) &&
+                        isEqual(brdf->getInPhi(0), 0.0)) {
                         continue;
                     }
 
@@ -707,8 +713,8 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
                 int numInPhi = brdf->getNumInPhi();
 
                 // Ignore an overlapping angle.
-                if (isEqual(brdf->getInPhi(0), 0.0f) &&
-                    isEqual(brdf->getInPhi(brdf->getNumInPhi() - 1), TAU_F)) {
+                if (isEqual(brdf->getInPhi(0), 0.0) &&
+                    isEqual(brdf->getInPhi(brdf->getNumInPhi() - 1), TAU_D)) {
                     --numInPhi;
                 }
 
@@ -736,7 +742,7 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
     }
 
     if (brdf->getNumSpecPhi() >= 2) {
-        if (isEqual(brdf->getSpecTheta(0), 0.0f)) {
+        if (isEqual(brdf->getSpecTheta(0), 0.0)) {
             // Equalize samples for specular azimuthal angles if a specular polar angle is 0.
             for (int inThIndex = 0; inThIndex < brdf->getNumInTheta();   ++inThIndex) {
             for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();     ++inPhIndex) {
@@ -787,7 +793,7 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
     }
 }
 
-void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta)
+void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, double maxSpecularTheta)
 {
     if (brdf->getNumSpecTheta() == 1 ||
         brdf->getNumSpecPhi() == 1) {
@@ -825,10 +831,10 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
             Spectrum sp     = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex, spPhIndex);
             Spectrum nextSp = brdf->getSpectrum(inThIndex, inPhIndex, spThIndex + 1, spPhIndex);
 
-            float spTh     = brdf->getSpecTheta(spThIndex);
-            float nextSpTh = brdf->getSpecTheta(spThIndex + 1);
+            double spTh = brdf->getSpecTheta(spThIndex);
+            double nextSpTh = brdf->getSpecTheta(spThIndex + 1);
 
-            float ratio = (0.0f - spTh) / (nextSpTh - spTh);
+            double   ratio = (0 - spTh) / (nextSpTh - spTh);
             Spectrum extrapolatedSp = lerp(sp, nextSp, ratio);
             sumSp += extrapolatedSp.cwiseMax(0.0);
 
@@ -862,13 +868,13 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
 
         for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
             Spectrum boundarySp = brdf->getSpectrum(inThIndex, inPhIndex, spThBoundary, spPhIndex);
-            float boundarySpTh = brdf->getSpecTheta(spThBoundary);
+            double   boundarySpTh = brdf->getSpecTheta(spThBoundary);
 
-            float ratio = brdf->getSpecTheta(spThIndex) / boundarySpTh;
+            double ratio = brdf->getSpecTheta(spThIndex) / boundarySpTh;
 
             // Smooth a peak.
-            if (ratio < 0.5f) {
-                ratio = smoothstep(0.0f, boundarySpTh, brdf->getSpecTheta(spThIndex));
+            if (ratio < 0.5) {
+                ratio = smoothstep(0.0, boundarySpTh, brdf->getSpecTheta(spThIndex));
             }
 
             Spectrum sp = lerp(specularSp, boundarySp, ratio);
@@ -879,11 +885,9 @@ void lb::removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTh
 
 /* Insert a BRDF in a base BRDF along incoming azimuthal angle. */
 template <typename BrdfT>
-BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
-                                    const BrdfT&    insertedBrdf,
-                                    float           inPhi)
+BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT& baseBrdf, const BrdfT& insertedBrdf, double inPhi)
 {
-    const SampleSet* baseSs     = baseBrdf.getSampleSet();
+    const SampleSet* baseSs = baseBrdf.getSampleSet();
     const SampleSet* insertedSs = insertedBrdf.getSampleSet();
 
     if (!hasSameColor(*baseSs, *insertedSs)) {
@@ -898,7 +902,7 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
         return 0;
     }
 
-    if (inPhi < 0.0f || inPhi > TAU_F) {
+    if (inPhi < 0 || inPhi > TAU_D) {
         lbError
             << "[lb::insertBrdfAlongInPhi] Specified incoming azimuthal angle is out of range: "
             << inPhi;
@@ -934,7 +938,7 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
     ss->getAngles3() = baseSs->getAngles3();
 
     // Add the inserted angle.
-    Arrayf& angles1 = ss->getAngles1();
+    Arrayd& angles1 = ss->getAngles1();
     for (int i = 0; i < baseSs->getNumAngles1(); ++i) {
         angles1[i] = baseSs->getAngles1()[i];
     }
@@ -952,10 +956,10 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
             sp = baseSs->getSpectrum(i0, i1, i2, i3);
         }
         else if (i1 == insertedIndex) {
-            float inTheta = ss->getAngle0(i0);
+            double inTheta = ss->getAngle0(i0);
 
             // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
-            float offsetInTheta = std::max(inTheta, EPSILON_F);
+            double offsetInTheta = std::max(inTheta, EPSILON_D);
 
             Vec3 inDir, outDir;
             brdf->toXyz(offsetInTheta,
@@ -976,21 +980,23 @@ BrdfT* insertBrdfAlongInPhiTemplate(const BrdfT&    baseBrdf,
     return brdf;
 }
 
-SpecularCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SpecularCoordinatesBrdf&    baseBrdf,
-                                                  const SpecularCoordinatesBrdf&    insertedBrdf,
-                                                  float                             inPhi)
+SpecularCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SpecularCoordinatesBrdf& baseBrdf,
+                                                  const SpecularCoordinatesBrdf& insertedBrdf,
+                                                  double                         inPhi)
 {
     return insertBrdfAlongInPhiTemplate(baseBrdf, insertedBrdf, inPhi);
 }
 
-SphericalCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
-                                                   const SphericalCoordinatesBrdf&  insertedBrdf,
-                                                   float                            inPhi)
+SphericalCoordinatesBrdf* lb::insertBrdfAlongInPhi(const SphericalCoordinatesBrdf& baseBrdf,
+                                                   const SphericalCoordinatesBrdf& insertedBrdf,
+                                                   double                          inPhi)
 {
     return insertBrdfAlongInPhiTemplate(baseBrdf, insertedBrdf, inPhi);
 }
 
-void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float inTheta, float diffuseTheta)
+void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf,
+                                            double                   inTheta,
+                                            double                   diffuseTheta)
 {
     if (brdf->getNumInTheta() < 3 ||
         brdf->getInTheta(1) > inTheta ||
@@ -1003,8 +1009,8 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
     SpecularCoordinatesBrdf* glossyBrdf = brdf->clone();
     SpecularCoordinatesBrdf* diffuseBrdf = brdf->clone();
 
-    editComponents(*brdf, glossyBrdf,  diffuseThresholds, 1.0f, 1.0f, 0.0f);
-    editComponents(*brdf, diffuseBrdf, diffuseThresholds, 0.0f, 1.0f, 1.0f);
+    editComponents(*brdf, glossyBrdf,  diffuseThresholds, 1, 1, 0);
+    editComponents(*brdf, diffuseBrdf, diffuseThresholds, 0, 1, 1);
 
     SampleSet2D* gRefs = computeReflectances(*glossyBrdf);
     SampleSet2D* dRefs = computeReflectances(*diffuseBrdf);
@@ -1027,9 +1033,9 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
         Spectrum dRef0 = dRefs->getSpectrum(inThBoundaryIndex - 1, inPhIndex);
         Spectrum dRef1 = dRefs->getSpectrum(inThBoundaryIndex,     inPhIndex);
 
-        float angle0 = brdf->getInTheta(inThBoundaryIndex - 1);
-        float angle1 = brdf->getInTheta(inThBoundaryIndex);
-        float t = (brdf->getInTheta(inThIndex) - angle0) / (angle1 - angle0);
+        double angle0 = brdf->getInTheta(inThBoundaryIndex - 1);
+        double angle1 = brdf->getInTheta(inThBoundaryIndex);
+        double t = (brdf->getInTheta(inThIndex) - angle0) / (angle1 - angle0);
 
         Spectrum extrapolatedGRef = lerp(gRef0, gRef1, t);
         Spectrum extrapolatedDRef = lerp(dRef0, dRef1, t);
@@ -1038,7 +1044,7 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
         Spectrum dRef = dRefs->getSpectrum(inThIndex, inPhIndex);
 
         // Avoid dividing by zero.
-        const float minRef = 0.01f;
+        constexpr float minRef = 0.01f;
         extrapolatedGRef = extrapolatedGRef.cwiseMax(minRef);
         extrapolatedDRef = extrapolatedDRef.cwiseMax(minRef);
         gRef = gRef.cwiseMax(minRef);
@@ -1062,7 +1068,7 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float
     delete gRefs;
 }
 
-void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float outTheta)
+void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, double outTheta)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -1077,16 +1083,16 @@ void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float ou
                     ss->getAngle3(i3),
                     &inDir, &outDir);
 
-        float theta, phi;
+        double theta, phi;
         SphericalCoordinateSystem::fromXyz(outDir, &theta, &phi);
 
         if (theta >= outTheta && i2 >= 2) {
             const Spectrum& sp0 = ss->getSpectrum(i0, i1, i2 - 2, i3);
             const Spectrum& sp1 = ss->getSpectrum(i0, i1, i2 - 1, i3);
 
-            float angle2_0 = ss->getAngle2(i2 - 2);
-            float angle2_1 = ss->getAngle2(i2 - 1);
-            float t = (ss->getAngle2(i2) - angle2_0) / (angle2_1 - angle2_0);
+            double angle2_0 = ss->getAngle2(i2 - 2);
+            double angle2_1 = ss->getAngle2(i2 - 1);
+            double t = (ss->getAngle2(i2) - angle2_0) / (angle2_1 - angle2_0);
 
             Spectrum sp = lerp(sp0, sp1, t);
             sp = sp.cwiseMax(Spectrum::Scalar(0));
@@ -1098,7 +1104,7 @@ void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float ou
 void lb::copySpectraFromPhiOf0To360(SampleSet* samples)
 {
     if (samples->getNumAngles1() >= 2 &&
-        samples->getAngle1(0) == 0.0f &&
+        samples->getAngle1(0) == 0 &&
         samples->getAngle1(samples->getNumAngles1() - 1) >= SphericalCoordinateSystem::MAX_ANGLE1) {
         for (int i0 = 0; i0 < samples->getNumAngles0(); ++i0) {
         for (int i2 = 0; i2 < samples->getNumAngles2(); ++i2) {
@@ -1109,7 +1115,7 @@ void lb::copySpectraFromPhiOf0To360(SampleSet* samples)
     }
 
     if (samples->getNumAngles3() >= 2 &&
-        samples->getAngle3(0) == 0.0f &&
+        samples->getAngle3(0) == 0 &&
         samples->getAngle3(samples->getNumAngles3() - 1) >= SphericalCoordinateSystem::MAX_ANGLE3) {
         for (int i0 = 0; i0 < samples->getNumAngles0(); ++i0) {
         for (int i1 = 0; i1 < samples->getNumAngles1(); ++i1) {
@@ -1131,7 +1137,7 @@ bool lb::fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value)
     SampleSet* ss = brdf->getSampleSet();
 
     int endIndex0 = ss->getNumAngles0() - 1;
-    if (!isEqual(ss->getAngle0(endIndex0), PI_2_F)) {
+    if (!isEqual(ss->getAngle0(endIndex0), PI_2_D)) {
         return false;
     }
 
@@ -1154,13 +1160,13 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
         return nullptr;
     }
 
-    std::vector<float> filledAngles;
+    std::vector<double> filledAngles;
 
     for (int i = 0; i < brdf->getNumOutPhi(); ++i) {
-        float outPhi = brdf->getOutPhi(i);
-        bool inIncidentPlane = (outPhi == 0.0f ||
-                                isEqual(outPhi, PI_F) ||
-                                isEqual(outPhi, TAU_F));
+        double outPhi = brdf->getOutPhi(i);
+        bool inIncidentPlane = (outPhi == 0.0 ||
+                                isEqual(outPhi, PI_D) ||
+                                isEqual(outPhi, TAU_D));
         if (!inIncidentPlane) {
             filledAngles.push_back(SphericalCoordinateSystem::MAX_ANGLE3 - outPhi);
         }
@@ -1187,7 +1193,7 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
             filledBrdf->setOutPhi(i, filledAngles.at(i - brdf->getNumOutPhi()));
         }
     }
-    Arrayf& outPhiAngles = filledSs->getAngles3();
+    Arrayd& outPhiAngles = filledSs->getAngles3();
     std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
 
     // Set wavelengths.
@@ -1200,12 +1206,12 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
     for (int inPhIndex  = 0; inPhIndex  < filledBrdf->getNumInPhi();    ++inPhIndex)  {
     for (int outThIndex = 0; outThIndex < filledBrdf->getNumOutTheta(); ++outThIndex) {
     for (int outPhIndex = 0; outPhIndex < filledBrdf->getNumOutPhi();   ++outPhIndex) {
-        float outPhi = filledBrdf->getOutPhi(outPhIndex);
+        double outPhi = filledBrdf->getOutPhi(outPhIndex);
 
         // Find the corresponding index.
         int origIndex;
         for (origIndex = 0; origIndex < brdf->getNumOutPhi(); ++origIndex) {
-            float origOutPhi = brdf->getOutPhi(origIndex);
+            double origOutPhi = brdf->getOutPhi(origIndex);
             bool outPhiEqual = (origOutPhi == outPhi ||
                                 isEqual(origOutPhi, SphericalCoordinateSystem::MAX_ANGLE3 - outPhi));
             if (outPhiEqual) break;
@@ -1218,13 +1224,13 @@ SphericalCoordinatesBrdf* lb::fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf)
     return filledBrdf;
 }
 
-SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
-                                           float                            rotationAngle)
+SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf& brdf,
+                                           double                          rotationAngle)
 {
-    assert(rotationAngle > -TAU_F && rotationAngle < TAU_F);
+    assert(rotationAngle > -TAU_D && rotationAngle < TAU_D);
 
-    if (rotationAngle < 0.0f) {
-        rotationAngle += TAU_F;
+    if (rotationAngle < 0) {
+        rotationAngle += TAU_D;
     }
 
     SphericalCoordinatesBrdf* rotatedBrdf = new SphericalCoordinatesBrdf(brdf);
@@ -1233,15 +1239,15 @@ SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf
     ss->updateAngleAttributes();
     if (!ss->isEqualIntervalAngles3()) {
         for (int i = 0; i < rotatedBrdf->getNumOutPhi(); ++i) {
-            float outPhi = rotatedBrdf->getOutPhi(i) + rotationAngle;
-            if (outPhi > TAU_F) {
-                outPhi -= TAU_F;
+            double outPhi = rotatedBrdf->getOutPhi(i) + rotationAngle;
+            if (outPhi > TAU_D) {
+                outPhi -= TAU_D;
             }
 
             rotatedBrdf->setOutPhi(i, outPhi);
         }
 
-        Arrayf& outPhiAngles = ss->getAngles3();
+        Arrayd& outPhiAngles = ss->getAngles3();
         std::sort(outPhiAngles.data(), outPhiAngles.data() + outPhiAngles.size());
     }
 
@@ -1249,13 +1255,13 @@ SphericalCoordinatesBrdf* lb::rotateOutPhi(const SphericalCoordinatesBrdf&  brdf
     for (int inPhIndex  = 0; inPhIndex  < rotatedBrdf->getNumInPhi();    ++inPhIndex)  {
     for (int outThIndex = 0; outThIndex < rotatedBrdf->getNumOutTheta(); ++outThIndex) {
     for (int outPhIndex = 0; outPhIndex < rotatedBrdf->getNumOutPhi();   ++outPhIndex) {
-        float inTheta  = rotatedBrdf->getInTheta(inThIndex);
-        float inPhi    = rotatedBrdf->getInPhi(inPhIndex);
-        float outTheta = rotatedBrdf->getOutTheta(outThIndex);
-        float outPhi   = rotatedBrdf->getOutPhi(outPhIndex) - rotationAngle;
+        double inTheta  = rotatedBrdf->getInTheta(inThIndex);
+        double inPhi = rotatedBrdf->getInPhi(inPhIndex);
+        double outTheta = rotatedBrdf->getOutTheta(outThIndex);
+        double outPhi = rotatedBrdf->getOutPhi(outPhIndex) - rotationAngle;
 
-        if (outPhi < 0.0f) {
-            outPhi += TAU_F;
+        if (outPhi < 0) {
+            outPhi += TAU_D;
         }
 
         Spectrum sp = brdf.getSpectrum(inTheta, inPhi, outTheta, outPhi);
@@ -1312,12 +1318,12 @@ void lb::xyzToSrgb(SampleSet* samples)
     samples->setColorModel(RGB_MODEL);
 }
 
-void lb::fillSpectra(SampleSet* samples, Spectrum::Scalar value)
+void lb::fillSpectra(SampleSet* samples, float value)
 {
     fillSpectra(samples->getSpectra(), value);
 }
 
-void lb::fillSpectra(SpectrumList& spectra, Spectrum::Scalar value)
+void lb::fillSpectra(SpectrumList& spectra, float value)
 {
     for (auto& sp : spectra) {
         sp.fill(value);
@@ -1358,7 +1364,7 @@ bool lb::subtract(const Brdf& src0, const Brdf& src1, Brdf* dest)
     return compute(src0, src1, dest, sub);
 }
 
-void lb::multiplySpectra(SampleSet* samples, Spectrum::Scalar value)
+void lb::multiplySpectra(SampleSet* samples, float value)
 {
     for (auto& sp : samples->getSpectra()) {
         sp *= value;

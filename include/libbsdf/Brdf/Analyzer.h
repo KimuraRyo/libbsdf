@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2022 Kimura Ryo                                  //
+// Copyright (C) 2018-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -51,9 +51,7 @@ Spectrum computeBihemisphericalReflectance(const Brdf&  brdf,
  * \brief Computes specular reflectances using a standard sample.
  * \param ior   Index of refraction of the standard material. 1.0 is used for transmittance.
  */
-SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
-                                         const Brdf&    standardBrdf,
-                                         float          ior);
+SampleSet2D* computeSpecularReflectances(const Brdf& brdf, const Brdf& standardBrdf, double ior);
 
 /*!
  * \brief Computes specular reflectances using a standard sample.
@@ -67,8 +65,8 @@ SampleSet2D* computeSpecularReflectances(const Brdf&    brdf,
  */
 SampleSet2D* computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                          const Brdf&                    standardBrdf,
-                                         float                          ior,
-                                         float                          maxSpecularTheta = PI_2_F);
+                                         double                         ior,
+                                         double                         maxSpecularTheta = PI_2_D);
 
 /*!
  * \brief Computes the error between two BRDFs.
@@ -112,8 +110,7 @@ computeReciprocityError(const Brdf& brdf, int numInThetaDivisions = 9, int numIn
  * \brief Finds thresholds to separate the diffuse component from a BRDF.
  * \param maxTheta Maximum incoming and outgoing polar angle to define the range of search.
  */
-Spectrum findDiffuseThresholds(const Brdf&      brdf,
-                               const double&    maxTheta = PI_2_F);
+Spectrum findDiffuseThresholds(const Brdf& brdf, const double& maxTheta = PI_2_D);
 
 /*! \brief Returns true if a coordinate system has the angles of an incoming direction. */
 bool isInDirDependentCoordinateSystem(const Brdf& brdf);

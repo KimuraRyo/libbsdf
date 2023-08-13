@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2022 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -30,12 +30,12 @@ namespace lb {
  * \param glossyShininess   Ratio of the thinness of a glossy lobe. If 1.0 is specified, shininess is not changed.
  * \param diffuseIntensity  Rate of change of a diffuse intensity. If 1.0 is specified, it is not changed.
  */
-void editComponents(const Brdf&         origBrdf,
-                    Brdf*               brdf,
-                    const Spectrum&     diffuseThresholds,
-                    Spectrum::Scalar    glossyIntensity,
-                    Spectrum::Scalar    glossyShininess,
-                    Spectrum::Scalar    diffuseIntensity);
+void editComponents(const Brdf&     origBrdf,
+                    Brdf*           brdf,
+                    const Spectrum& diffuseThresholds,
+                    double          glossyIntensity,
+                    double          glossyShininess,
+                    double          diffuseIntensity);
 
 /*!
  * \brief Edits diffuse and glossy components of a BRDF value at a sample point.
@@ -44,16 +44,16 @@ void editComponents(const Brdf&         origBrdf,
  * \param glossyShininess   Ratio of the thinness of a glossy lobe. If 1.0 is specified, shininess is not changed.
  * \param diffuseIntensity  Rate of change of a diffuse intensity. If 1.0 is specified, it is not changed.
  */
-void editComponents(int                 i0,
-                    int                 i1,
-                    int                 i2,
-                    int                 i3,
-                    const Brdf&         origBrdf,
-                    Brdf*               brdf,
-                    const Spectrum&     diffuseThresholds,
-                    Spectrum::Scalar    glossyIntensity,
-                    Spectrum::Scalar    glossyShininess,
-                    Spectrum::Scalar    diffuseIntensity);
+void editComponents(int             i0,
+                    int             i1,
+                    int             i2,
+                    int             i3,
+                    const Brdf&     origBrdf,
+                    Brdf*           brdf,
+                    const Spectrum& diffuseThresholds,
+                    double          glossyIntensity,
+                    double          glossyShininess,
+                    double          diffuseIntensity);
 
 /*!
  * \brief Divides a BRDF by the cosine of the outgoing polar angle.
@@ -131,7 +131,12 @@ void fixEnergyConservation(SpecularCoordinatesBrdf* brdf,
  */
 void fillBackSide(SpecularCoordinatesBrdf* brdf);
 
-/*! \brief Averages samples for overlapping angles. */
+/*!
+ * \brief Averages samples for overlapping angles.
+ * 
+ * If the polar angle of the incident direction is 0, the samples per azimuthal angle are averaged.
+ * If the azimuthal angles overlap at 0 and 360 degrees, the samples are averaged.
+ */
 void equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf);
 
 /*!
@@ -139,7 +144,7 @@ void equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf);
  *
  * \param maxSpecularTheta  The maximum angle of removed areas around specular directions.
  */
-void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta);
+void removeSpecularValues(SpecularCoordinatesBrdf* brdf, double maxSpecularTheta);
 
 /*!
  * \brief Inserts a BRDF in a base BRDF along incoming azimuthal angle.
@@ -148,9 +153,9 @@ void removeSpecularValues(SpecularCoordinatesBrdf* brdf, float maxSpecularTheta)
  *
  * \return A new BRDF with a specular coordinate system.
  */
-SpecularCoordinatesBrdf* insertBrdfAlongInPhi(const SpecularCoordinatesBrdf&   baseBrdf,
-                                              const SpecularCoordinatesBrdf&   insertedBrdf,
-                                              float                            inPhi);
+SpecularCoordinatesBrdf* insertBrdfAlongInPhi(const SpecularCoordinatesBrdf& baseBrdf,
+                                              const SpecularCoordinatesBrdf& insertedBrdf,
+                                              double                         inPhi);
 
 /*!
  * \brief Inserts a BRDF in a base BRDF along incoming azimuthal angle.
@@ -159,9 +164,9 @@ SpecularCoordinatesBrdf* insertBrdfAlongInPhi(const SpecularCoordinatesBrdf&   b
  *
  * \return A new BRDF with a spherical coordinate system.
  */
-SphericalCoordinatesBrdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  baseBrdf,
-                                               const SphericalCoordinatesBrdf&  insertedBrdf,
-                                               float                            inPhi);
+SphericalCoordinatesBrdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf& baseBrdf,
+                                               const SphericalCoordinatesBrdf& insertedBrdf,
+                                               double                          inPhi);
 
 /*!
  * \brief Recalculates a BRDF with linearly extrapolated reflectances.
@@ -170,13 +175,15 @@ SphericalCoordinatesBrdf* insertBrdfAlongInPhi(const SphericalCoordinatesBrdf&  
  *
  * When a BRDF is extrapolated, it is separated into glossy and diffuse components to improve calculation results.
  */
-void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf, float inTheta, float diffuseTheta);
+void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf,
+                                        double                   inTheta,
+                                        double                   diffuseTheta);
 
 /*!
  * \brief Extrapolates a BRDF along outgoing polar angle.
  * \param outTheta  Minimum outgoing polar angle of extrapolated samples.
  */
-void extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float outTheta);
+void extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, double outTheta);
 
 /*!
  * \brief Copies spectra from the azimuthal angle of 0 degrees to 360 degrees.
@@ -186,7 +193,7 @@ void extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, float outThe
 void copySpectraFromPhiOf0To360(SampleSet* samples);
 
 /*! \brief Fills spectra of samples if incoming polar angle is 90 degrees. */
-bool fillSpectraAtInThetaOf90(Brdf* brdf, Spectrum::Scalar value = 0.0);
+bool fillSpectraAtInThetaOf90(Brdf* brdf, float value = 0.0f);
 
 /*!
  * \brief Fills omitted data using a plane symmetry.
@@ -201,8 +208,7 @@ SphericalCoordinatesBrdf* fillSymmetricBrdf(SphericalCoordinatesBrdf* brdf);
  * \brief Rotates a BRDF using an outgoing azimuthal angle.
  * \return A new BRDF with rotated angles.
  */
-SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf,
-                                       float                            rotationAngle);
+SphericalCoordinatesBrdf* rotateOutPhi(const SphericalCoordinatesBrdf&  brdf, double rotationAngle);
 
 /*! \brief Converts a BRDF to an sRGB BRDF. */
 Brdf* toSrgb(const Brdf& brdf);
@@ -211,10 +217,10 @@ Brdf* toSrgb(const Brdf& brdf);
 void xyzToSrgb(SampleSet* samples);
 
 /*! \brief Fills spectra of samples with a value. */
-void fillSpectra(SampleSet* samples, Spectrum::Scalar value);
+void fillSpectra(SampleSet* samples, float value);
 
 /*! \brief Fills spectra with a value. */
-void fillSpectra(SpectrumList& spectra, Spectrum::Scalar value);
+void fillSpectra(SpectrumList& spectra, float value);
 
 /*! \brief Computes spectra of a BRDF with two BRDFs. */
 bool compute(const Brdf& src0, const Brdf& src1, Brdf* dest,
@@ -224,7 +230,7 @@ bool compute(const Brdf& src0, const Brdf& src1, Brdf* dest,
 bool subtract(const Brdf& src0, const Brdf& src1, Brdf* dest);
 
 /*! \brief Multiplies spectra of samples by a value. */
-void multiplySpectra(SampleSet* samples, Spectrum::Scalar value);
+void multiplySpectra(SampleSet* samples, float value);
 
 /*!
  * \brief Fixes negative values of spectra to 0.

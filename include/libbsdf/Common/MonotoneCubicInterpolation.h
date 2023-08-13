@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2020 Kimura Ryo                                       //
+// Copyright (C) 2020-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -36,15 +36,15 @@ public:
      * \return Interpolated array.
      */
     template <typename ArrayT>
-    static ArrayT interpolate(const typename ArrayT::Scalar&    pos0,
-                              const typename ArrayT::Scalar&    pos1,
-                              const typename ArrayT::Scalar&    pos2,
-                              const typename ArrayT::Scalar&    pos3,
-                              const ArrayT&                     arr0,
-                              const ArrayT&                     arr1,
-                              const ArrayT&                     arr2,
-                              const ArrayT&                     arr3,
-                              const typename ArrayT::Scalar&    pos);
+    static ArrayT interpolate(double        pos0,
+                              double        pos1,
+                              double        pos2,
+                              double        pos3,
+                              const ArrayT& arr0,
+                              const ArrayT& arr1,
+                              const ArrayT& arr2,
+                              const ArrayT& arr3,
+                              double        pos);
 
 private:
     /*!
@@ -61,20 +61,20 @@ private:
      * See F. N. Fritsch and R. E. Carlson. 1980. "Monotone Piecewise Cubic Interpolation".
      */
     template <typename ArrayT>
-    static ArrayT computeSlope(const typename ArrayT::Scalar&   prevPos,
-                               const typename ArrayT::Scalar&   currPos,
-                               const typename ArrayT::Scalar&   nextPos,
-                               const ArrayT&                    prevArr,
-                               const ArrayT&                    currArr,
-                               const ArrayT&                    nextArr);
+    static ArrayT computeSlope(double        prevPos,
+                               double        currPos,
+                               double        nextPos,
+                               const ArrayT& prevArr,
+                               const ArrayT& currArr,
+                               const ArrayT& nextArr);
 };
 
 template <typename Vec2T>
-typename Vec2T::Scalar MonotoneCubicInterpolation::interpolate(const Vec2T&                     v0,
-                                                               const Vec2T&                     v1,
-                                                               const Vec2T&                     v2,
-                                                               const Vec2T&                     v3,
-                                                               const typename Vec2T::Scalar&    x)
+typename Vec2T::Scalar MonotoneCubicInterpolation::interpolate(const Vec2T&                  v0,
+                                                               const Vec2T&                  v1,
+                                                               const Vec2T&                  v2,
+                                                               const Vec2T&                  v3,
+                                                               const typename Vec2T::Scalar& x)
 {
     // Reference:
     // https://math.stackexchange.com/questions/4082/equation-of-a-curve-given-3-points-and-additional-constant-requirements#4104
@@ -101,15 +101,15 @@ typename Vec2T::Scalar MonotoneCubicInterpolation::interpolate(const Vec2T&     
 }
 
 template <typename ArrayT>
-ArrayT MonotoneCubicInterpolation::interpolate(const typename ArrayT::Scalar&   pos0,
-                                               const typename ArrayT::Scalar&   pos1,
-                                               const typename ArrayT::Scalar&   pos2,
-                                               const typename ArrayT::Scalar&   pos3,
-                                               const ArrayT&                    arr0,
-                                               const ArrayT&                    arr1,
-                                               const ArrayT&                    arr2,
-                                               const ArrayT&                    arr3,
-                                               const typename ArrayT::Scalar&   pos)
+ArrayT MonotoneCubicInterpolation::interpolate(double        pos0,
+                                               double        pos1,
+                                               double        pos2,
+                                               double        pos3,
+                                               const ArrayT& arr0,
+                                               const ArrayT& arr1,
+                                               const ArrayT& arr2,
+                                               const ArrayT& arr3,
+                                               double        pos)
 {
     assert(arr0.size() == arr1.size() &&
            arr1.size() == arr2.size() &&
@@ -124,9 +124,9 @@ ArrayT MonotoneCubicInterpolation::interpolate(const typename ArrayT::Scalar&   
     ArrayT slope1 = computeSlope(pos0, pos1, pos2, arr0, arr1, arr2);
     ArrayT slope2 = computeSlope(pos1, pos2, pos3, arr1, arr2, arr3);
 
-    Scalar distX = pos2 - pos1;
+    Scalar distX = static_cast<Scalar>(pos2 - pos1);
     ArrayT slope = (arr2 - arr1) / distX;
-    Scalar posX = pos - pos1;
+    Scalar posX = static_cast<Scalar>(pos - pos1);
 
     ArrayT arr = arr1 +
                  slope1 * posX +
@@ -163,19 +163,19 @@ typename Vec2T::Scalar MonotoneCubicInterpolation::computeSlope(const Vec2T& pre
 }
 
 template <typename ArrayT>
-ArrayT MonotoneCubicInterpolation::computeSlope(const typename ArrayT::Scalar&  prevPos,
-                                                const typename ArrayT::Scalar&  currPos,
-                                                const typename ArrayT::Scalar&  nextPos,
-                                                const ArrayT&                   prevArr,
-                                                const ArrayT&                   currArr,
-                                                const ArrayT&                   nextArr)
+ArrayT MonotoneCubicInterpolation::computeSlope(double        prevPos,
+                                                double        currPos,
+                                                double        nextPos,
+                                                const ArrayT& prevArr,
+                                                const ArrayT& currArr,
+                                                const ArrayT& nextArr)
 {
     using Scalar = typename ArrayT::Scalar;
 
     ArrayT prevDiff = currArr - prevArr;
     ArrayT nextDiff = nextArr - currArr;
-    Scalar prevDistX = currPos - prevPos;
-    Scalar nextDistX = nextPos - currPos;
+    Scalar prevDistX = static_cast<Scalar>(currPos - prevPos);
+    Scalar nextDistX = static_cast<Scalar>(nextPos - currPos);
 
     ArrayT prevSlope;
     if (prevDistX == Scalar(0)) {

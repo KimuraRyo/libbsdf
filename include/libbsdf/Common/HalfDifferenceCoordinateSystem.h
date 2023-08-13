@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -34,12 +34,12 @@ struct HalfDifferenceCoordinateSystem
      * assigns them to \a inDir and \a outDir.
      */
     template <typename ScalarT>
-    static void toXyz(ScalarT   halfTheta,
-                      ScalarT   halfPhi,
-                      ScalarT   diffTheta,
-                      ScalarT   diffPhi,
-                      Vec3*     inDir,
-                      Vec3*     outDir);
+    static void toXyz(ScalarT halfTheta,
+                      ScalarT halfPhi,
+                      ScalarT diffTheta,
+                      ScalarT diffPhi,
+                      Vec3*   inDir,
+                      Vec3*   outDir);
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
@@ -69,24 +69,24 @@ struct HalfDifferenceCoordinateSystem
     static constexpr char ANGLE2_NAME[] = "difference polar angle";     /*!< This attribute holds the name of diffTheta. */
     static constexpr char ANGLE3_NAME[] = "difference azimuthal angle"; /*!< This attribute holds the name of diffPhi. */
 
-    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of halfTheta. */
-    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of halfPhi. */
-    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of diffTheta. */
-    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of diffPhi. */
+    static constexpr double MIN_ANGLE0 = 0; /*!< This attribute holds the minimum value of halfTheta. */
+    static constexpr double MIN_ANGLE1 = 0; /*!< This attribute holds the minimum value of halfPhi. */
+    static constexpr double MIN_ANGLE2 = 0; /*!< This attribute holds the minimum value of diffTheta. */
+    static constexpr double MIN_ANGLE3 = 0; /*!< This attribute holds the minimum value of diffPhi. */
 
-    static constexpr float MAX_ANGLE0 = PI_2_F; /*!< This attribute holds the maximum value of halfTheta. */
-    static constexpr float MAX_ANGLE1 = TAU_F;  /*!< This attribute holds the maximum value of halfPhi. */
-    static constexpr float MAX_ANGLE2 = PI_2_F; /*!< This attribute holds the maximum value of diffTheta. */
-    static constexpr float MAX_ANGLE3 = TAU_F;  /*!< This attribute holds the maximum value of diffPhi. */
+    static constexpr double MAX_ANGLE0 = PI_2_D; /*!< This attribute holds the maximum value of halfTheta. */
+    static constexpr double MAX_ANGLE1 = TAU_D;  /*!< This attribute holds the maximum value of halfPhi. */
+    static constexpr double MAX_ANGLE2 = PI_2_D; /*!< This attribute holds the maximum value of diffTheta. */
+    static constexpr double MAX_ANGLE3 = TAU_D;  /*!< This attribute holds the maximum value of diffPhi. */
 };
 
 template <typename ScalarT>
-void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
-                                           ScalarT  halfPhi,
-                                           ScalarT  diffTheta,
-                                           ScalarT  diffPhi,
-                                           Vec3*    inDir,
-                                           Vec3*    outDir)
+void HalfDifferenceCoordinateSystem::toXyz(ScalarT halfTheta,
+                                           ScalarT halfPhi,
+                                           ScalarT diffTheta,
+                                           ScalarT diffPhi,
+                                           Vec3*   inDir,
+                                           Vec3*   outDir)
 {
     // Avoid unstable results.
     diffTheta = std::min(diffTheta, ScalarT(decrease(MAX_ANGLE2)));
@@ -106,12 +106,12 @@ void HalfDifferenceCoordinateSystem::toXyz(ScalarT  halfTheta,
 }
 
 template <typename ScalarT>
-void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
-                                             const Vec3&    outDir,
-                                             ScalarT*       halfTheta,
-                                             ScalarT*       halfPhi,
-                                             ScalarT*       diffTheta,
-                                             ScalarT*       diffPhi)
+void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir,
+                                             const Vec3& outDir,
+                                             ScalarT*    halfTheta,
+                                             ScalarT*    halfPhi,
+                                             ScalarT*    diffTheta,
+                                             ScalarT*    diffPhi)
 {
     Vec3 halfDir = (inDir + outDir).normalized();
     SphericalCoordinateSystem::fromXyz(halfDir, halfTheta, halfPhi);
@@ -127,11 +127,11 @@ void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
 }
 
 template <typename ScalarT>
-void HalfDifferenceCoordinateSystem::fromXyz(const Vec3&    inDir,
-                                             const Vec3&    outDir,
-                                             ScalarT*       halfTheta,
-                                             ScalarT*       diffTheta,
-                                             ScalarT*       diffPhi)
+void HalfDifferenceCoordinateSystem::fromXyz(const Vec3& inDir,
+                                             const Vec3& outDir,
+                                             ScalarT*    halfTheta,
+                                             ScalarT*    diffTheta,
+                                             ScalarT*    diffPhi)
 {
     Vec3 halfDir = (inDir + outDir).normalized();
     ScalarT halfPhi; // halfPhi is 0 for isotropic data.

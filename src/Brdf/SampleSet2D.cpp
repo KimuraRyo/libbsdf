@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -17,9 +17,7 @@ SampleSet2D::SampleSet2D(int        numTheta,
                          ColorModel colorModel,
                          int        numWavelengths,
                          bool       equalIntervalAngles)
-                         : equalIntervalTheta_(false),
-                           equalIntervalPhi_(false),
-                           sourceType_(UNKNOWN_SOURCE)
+    : equalIntervalTheta_(false), equalIntervalPhi_(false), sourceType_(UNKNOWN_SOURCE)
 {
     lbTrace << "[SampleSet2D::SampleSet2D]";
 
@@ -31,8 +29,8 @@ SampleSet2D::SampleSet2D(int        numTheta,
     spectra_.resize(numSamples);
 
     if (equalIntervalAngles) {
-        thetaAngles_ = Arrayf::LinSpaced(numTheta, 0.0, SphericalCoordinateSystem::MAX_ANGLE0);
-        phiAngles_   = Arrayf::LinSpaced(numPhi,   0.0, SphericalCoordinateSystem::MAX_ANGLE1);
+        thetaAngles_ = Arrayd::LinSpaced(numTheta, 0.0, SphericalCoordinateSystem::MAX_ANGLE0);
+        phiAngles_ = Arrayd::LinSpaced(numPhi, 0.0, SphericalCoordinateSystem::MAX_ANGLE1);
         updateAngleAttributes();
     }
     else {

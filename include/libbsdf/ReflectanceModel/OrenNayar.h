@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2018 Kimura Ryo                                  //
+// Copyright (C) 2016-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,20 +20,14 @@ class OrenNayar : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    OrenNayar(const Vec3&   albedo,
-              float         roughness)
-              : albedo_     (albedo),
-                roughness_  (roughness)
+    OrenNayar(const Vec3& albedo, double roughness) : albedo_(albedo), roughness_(roughness)
     {
-        parameters_.push_back(Parameter("Albedo",       &albedo_));
-        parameters_.push_back(Parameter("Roughness",    &roughness_));
+        parameters_.push_back(Parameter("Albedo", &albedo_));
+        parameters_.push_back(Parameter("Roughness", &roughness_));
     }
 
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& V,
-                        const Vec3& N,
-                        const Vec3& albedo,
-                        float       roughness);
+    static Vec3
+    compute(const Vec3& L, const Vec3& V, const Vec3& N, const Vec3& albedo, double roughness);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -52,8 +46,8 @@ public:
     }
 
 private:
-    Vec3    albedo_;
-    float   roughness_;
+    Vec3   albedo_;
+    double roughness_;
 };
 
 /*
@@ -64,7 +58,7 @@ inline Vec3 OrenNayar::compute(const Vec3& L,
                                const Vec3& V,
                                const Vec3& N,
                                const Vec3& albedo,
-                               float       roughness)
+                               double      roughness)
 {
     using std::abs;
     using std::acos;
@@ -74,16 +68,16 @@ inline Vec3 OrenNayar::compute(const Vec3& L,
     using std::sin;
     using std::tan;
 
-    float dotLN = L.dot(N);
-    float dotVN = V.dot(N);
+    double dotLN = L.dot(N);
+    double dotVN = V.dot(N);
 
-    if (dotLN <= 0.0f || dotVN <= 0.0f) {
+    if (dotLN <= 0 || dotVN <= 0) {
         return Vec3::Zero();
     }
 
-    float cosPhiDiff;
-    if (dotLN == 1.0f || dotVN == 1.0f) {
-        cosPhiDiff = 0.0f;
+    double cosPhiDiff;
+    if (dotLN == 1 || dotVN == 1) {
+        cosPhiDiff = 0;
     }
     else {
         Vec3 projectedL = (L - N * dotLN).normalized();
@@ -91,35 +85,33 @@ inline Vec3 OrenNayar::compute(const Vec3& L,
         cosPhiDiff = projectedL.dot(projectedV);
     }
 
-    float thetaL = acos(dotLN);
-    float thetaV = acos(dotVN);
-    float alpha = max(thetaL, thetaV);
-    float beta = min(thetaL, thetaV);
+    double thetaL = acos(dotLN);
+    double thetaV = acos(dotVN);
+    double alpha = max(thetaL, thetaV);
+    double beta = min(thetaL, thetaV);
 
-    float sqR = roughness * roughness;
+    double sqR = roughness * roughness;
 
-    float C1 = 1.0f - 0.5f * sqR / (sqR + 0.33f);
+    double C1 = 1 - 0.5 * sqR / (sqR + 0.33);
 
-    float C2 = 0.45f * sqR / (sqR + 0.09f);
-    if (cosPhiDiff >= 0.0f) {
+    double C2 = 0.45 * sqR / (sqR + 0.09);
+    if (cosPhiDiff >= 0) {
         C2 *= sin(alpha);
     }
     else {
-        C2 *= (sin(alpha) - pow(2.0f * beta / PI_F, 3.0f));
+        C2 *= (sin(alpha) - pow(2 * beta / PI_D, 3));
     }
 
-    float alphaBetaPi_C3 = (4.0f * alpha * beta) / (PI_F * PI_F);
-    float C3 = 0.125f * sqR / (sqR + 0.09f) * alphaBetaPi_C3 * alphaBetaPi_C3;
+    double alphaBetaPi_C3 = (4 * alpha * beta) / (PI_D * PI_D);
+    double C3 = 0.125 * sqR / (sqR + 0.09) * alphaBetaPi_C3 * alphaBetaPi_C3;
 
-    Vec3 L1 = albedo / PI_F
-            * (C1 +
-               cosPhiDiff * C2 * tan(beta) +
-               (1.0f - abs(cosPhiDiff)) * C3 * tan((alpha + beta) / 2.0f));
+    Vec3 L1 =
+        albedo / PI_D *
+        (C1 + cosPhiDiff * C2 * tan(beta) + (1 - abs(cosPhiDiff)) * C3 * tan((alpha + beta) / 2));
 
-    float betaPi_L2 = 2.0f * beta / PI_F;
-    Vec3 L2 = 0.17f * albedo.cwiseProduct(albedo) / PI_F
-            * sqR / (sqR + 0.13f)
-            * (1.0f - cosPhiDiff * betaPi_L2 * betaPi_L2);
+    double betaPi_L2 = 2 * beta / PI_D;
+    Vec3   L2 = 0.17 * albedo.cwiseProduct(albedo) / PI_D * sqR / (sqR + 0.13) *
+              (1 - cosPhiDiff * betaPi_L2 * betaPi_L2);
 
     return L1 + L2;
 }

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2020 Kimura Ryo                                  //
+// Copyright (C) 2017-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -65,10 +65,10 @@ public:
     void setMaxIteration3(int maxIteration);
 
     /*! Gets the maximum specular polar angle to avoid smoothing. */
-    float getSpecularPolarRegion() const;
+    double getSpecularPolarRegion() const;
 
     /*! Sets the maximum specular polar angle to avoid smoothing. */
-    void setSpecularPolarRegion(float angle);
+    void setSpecularPolarRegion(double angle);
 
 private:
     void initializeAngles();
@@ -78,10 +78,10 @@ private:
     bool insertAngle2();
     bool insertAngle3();
 
-    bool insertAngle(std::set<Arrayf::Scalar>&  angleSet,
-                     int                        angleSuffix,
-                     const Vec4f&               angles,
-                     const Vec4f&               nextAngles);
+    bool insertAngle(std::set<double>& angleSet,
+                     int               angleSuffix,
+                     const Vec4&       angles,
+                     const Vec4&       nextAngles);
 
     void updateBrdf();
 
@@ -98,19 +98,19 @@ private:
     int maxIteration2_; /*!< The maximum number of iterations of the division of angle2. */
     int maxIteration3_; /*!< The maximum number of iterations of the division of angle3. */
 
-    float minAngleInterval_; /*!< The minimum interval of divided angles. */
+    double minAngleInterval_; /*!< The minimum interval of divided angles. */
 
     /*!
      * The maximum specular polar angle to avoid smoothing.
      * If this attribute is 0, all regions are smoothed.
      * \a brdf_ must be \a SpecularCoordinatesBrdf.
      */
-    float specularPolarRegion_;
+    double specularPolarRegion_;
 
-    std::set<Arrayf::Scalar> angles0_; /*!< The angle array to insert sample points. */
-    std::set<Arrayf::Scalar> angles1_; /*!< The angle array to insert sample points. */
-    std::set<Arrayf::Scalar> angles2_; /*!< The angle array to insert sample points. */
-    std::set<Arrayf::Scalar> angles3_; /*!< The angle array to insert sample points. */
+    std::set<double> angles0_; /*!< The angle array to insert sample points. */
+    std::set<double> angles1_; /*!< The angle array to insert sample points. */
+    std::set<double> angles2_; /*!< The angle array to insert sample points. */
+    std::set<double> angles3_; /*!< The angle array to insert sample points. */
 };
 
 inline float Smoother::getDiffThreshold() const { return diffThreshold_; }
@@ -126,8 +126,8 @@ inline void Smoother::setMaxIteration1(int maxIteration) { maxIteration1_ = maxI
 inline void Smoother::setMaxIteration2(int maxIteration) { maxIteration2_ = maxIteration; }
 inline void Smoother::setMaxIteration3(int maxIteration) { maxIteration3_ = maxIteration; }
 
-inline float Smoother::getSpecularPolarRegion() const { return specularPolarRegion_; }
-inline void Smoother::setSpecularPolarRegion(float angle) { specularPolarRegion_ = angle; }
+inline double Smoother::getSpecularPolarRegion() const { return specularPolarRegion_; }
+inline void   Smoother::setSpecularPolarRegion(double angle) { specularPolarRegion_ = angle; }
 
 } // namespace lb
 

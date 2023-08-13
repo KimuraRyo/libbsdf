@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020 Kimura Ryo                                       //
+// Copyright (C) 2020-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,10 +25,10 @@ using namespace lb;
 
 using std::endl;
 
-bool SsddWriter::write(const std::string&   fileName,
-                       const Material&      material,
-                       DataFormat           format,
-                       const std::string&   comments)
+bool SsddWriter::write(const std::string& fileName,
+                       const Material&    material,
+                       DataFormat         format,
+                       const std::string& comments)
 {
     if (!material.getBsdf() &&
         !material.getSpecularReflectances() &&
@@ -109,31 +109,31 @@ bool SsddWriter::write(const std::string&   fileName,
     return true;
 }
 
-bool SsddWriter::write(const std::string&   fileName,
-                       const Brdf&          brdf,
-                       DataFormat           format,
-                       const std::string&   comments)
+bool SsddWriter::write(const std::string& fileName,
+                       const Brdf&        brdf,
+                       DataFormat         format,
+                       const std::string& comments)
 {
     std::shared_ptr<Bsdf> bsdf = std::make_shared<Bsdf>(std::shared_ptr<Brdf>(brdf.clone()), nullptr);
     std::unique_ptr<Material> material(new Material(bsdf));
-    return SsddWriter::write(fileName, *material);
+    return SsddWriter::write(fileName, *material, format, comments);
 }
 
-bool SsddWriter::write(const std::string&   fileName,
-                       const Btdf&          btdf,
-                       DataFormat           format,
-                       const std::string&   comments)
+bool SsddWriter::write(const std::string& fileName,
+                       const Btdf&        btdf,
+                       DataFormat         format,
+                       const std::string& comments)
 {
     std::shared_ptr<Bsdf> bsdf = std::make_shared<Bsdf>(nullptr, std::make_shared<Btdf>(btdf));
     std::unique_ptr<Material> material(new Material(bsdf));
-    return SsddWriter::write(fileName, *material);
+    return SsddWriter::write(fileName, *material, format, comments);
 }
 
-bool SsddWriter::write(const std::string&   fileName,
-                       const SampleSet2D&   specularReflectances,
-                       DataType             dataType,
-                       DataFormat           format,
-                       const std::string&   comments)
+bool SsddWriter::write(const std::string& fileName,
+                       const SampleSet2D& specularReflectances,
+                       DataType           dataType,
+                       DataFormat         format,
+                       const std::string& comments)
 {
     std::unique_ptr<Material> material;
 
@@ -153,7 +153,7 @@ bool SsddWriter::write(const std::string&   fileName,
             return false;
     }
 
-    return SsddWriter::write(fileName, *material);
+    return SsddWriter::write(fileName, *material, format, comments);
 }
 
 bool SsddWriter::output(const Brdf& brdf, DataFormat format, std::ostream& stream)
@@ -195,14 +195,13 @@ bool SsddWriter::output(const Brdf& brdf, DataFormat format, std::ostream& strea
         stream << endl;
     }
 
-    Arrayf degrees0 = toDegrees(ss->getAngles0());
-    Arrayf degrees1 = toDegrees(ss->getAngles1());
-    Arrayf degrees2 = toDegrees(ss->getAngles2());
-    Arrayf degrees3 = toDegrees(ss->getAngles3());
+    Arrayd degrees0 = toDegrees(ss->getAngles0());
+    Arrayd degrees1 = toDegrees(ss->getAngles1());
+    Arrayd degrees2 = toDegrees(ss->getAngles2());
+    Arrayd degrees3 = toDegrees(ss->getAngles3());
 
     stream << ssdd::PARAM0_LIST << " " << degrees0.format(ssdd::LIST_FORMAT) << endl;
-    if (degrees1.size() > 1 ||
-        degrees1[0] != Arrayf::Scalar(0)) {
+    if (degrees1.size() > 1 || degrees1[0] != 0) {
         stream << ssdd::PARAM1_LIST << " " << degrees1.format(ssdd::LIST_FORMAT) << endl;
     }
     stream << ssdd::PARAM2_LIST << " " << degrees2.format(ssdd::LIST_FORMAT) << endl;
@@ -210,7 +209,7 @@ bool SsddWriter::output(const Brdf& brdf, DataFormat format, std::ostream& strea
 
     if (specBrdf &&
         specBrdf->getNumSpecularOffsets() == specBrdf->getNumInTheta()) {
-        Arrayf offsets = toDegrees(specBrdf->getSpecularOffsets());
+        Arrayd offsets = toDegrees(specBrdf->getSpecularOffsets());
         stream << ssdd::PARAM4_LIST << " " << offsets.format(ssdd::LIST_FORMAT) << endl;
     }
 
@@ -233,12 +232,11 @@ bool SsddWriter::output(const SampleSet2D& ss2, DataFormat format, std::ostream&
 {
     output(ss2.getColorModel(), ss2.getWavelengths(), stream);
 
-    Arrayf degrees0 = toDegrees(ss2.getThetaArray());
-    Arrayf degrees1 = toDegrees(ss2.getPhiArray());
+    Arrayd degrees0 = toDegrees(ss2.getThetaArray());
+    Arrayd degrees1 = toDegrees(ss2.getPhiArray());
 
     stream << ssdd::PARAM0_LIST << " " << degrees0.format(ssdd::LIST_FORMAT) << endl;
-    if (degrees1.size() > 1 ||
-        degrees1[0] != Arrayf::Scalar(0)) {
+    if (degrees1.size() > 1 || degrees1[0] != 0) {
         stream << ssdd::PARAM1_LIST << " " << degrees1.format(ssdd::LIST_FORMAT) << endl;
     }
 
@@ -257,9 +255,9 @@ bool SsddWriter::output(const SampleSet2D& ss2, DataFormat format, std::ostream&
     return true;
 }
 
-bool SsddWriter::output(const ColorModel&   colorModel,
-                        const Arrayf&       wavelengths,
-                        std::ostream&       stream)
+bool SsddWriter::output(const ColorModel& colorModel,
+                        const Arrayf&     wavelengths,
+                        std::ostream&     stream)
 {
     stream << ssdd::COLOR_MODEL << " ";
 
@@ -285,8 +283,7 @@ bool SsddWriter::output(const ColorModel&   colorModel,
     return true;
 }
 
-void SsddWriter::outputAsciiData(const SampleSet&   ss,
-                                 std::ostream&      stream)
+void SsddWriter::outputAsciiData(const SampleSet& ss, std::ostream& stream)
 {
     stream << ssdd::DATA << " " << ssdd::DATA_ASCII << endl;
 
@@ -314,8 +311,7 @@ void SsddWriter::outputAsciiData(const SampleSet&   ss,
     }
 }
 
-void SsddWriter::outputBinaryData(const SampleSet&  ss,
-                                  std::ostream&     stream)
+void SsddWriter::outputBinaryData(const SampleSet& ss, std::ostream& stream)
 {
     stream << ssdd::DATA << " " << ssdd::DATA_BINARY << endl;
 
@@ -329,8 +325,7 @@ void SsddWriter::outputBinaryData(const SampleSet&  ss,
     }}}}
 }
 
-void SsddWriter::outputAsciiData(const SampleSet2D& ss2,
-                                 std::ostream&      stream)
+void SsddWriter::outputAsciiData(const SampleSet2D& ss2, std::ostream& stream)
 {
     stream << ssdd::DATA << " " << ssdd::DATA_ASCII << endl;
 
@@ -346,8 +341,7 @@ void SsddWriter::outputAsciiData(const SampleSet2D& ss2,
     }
 }
 
-void SsddWriter::outputBinaryData(const SampleSet2D&    ss2,
-                                  std::ostream&         stream)
+void SsddWriter::outputBinaryData(const SampleSet2D& ss2, std::ostream& stream)
 {
     stream << ssdd::DATA << " " << ssdd::DATA_BINARY << endl;
 

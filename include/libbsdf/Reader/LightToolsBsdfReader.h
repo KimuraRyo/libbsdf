@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -53,10 +53,10 @@ private:
     {
         DataBlock();
 
-        float aoi;          /*!< Angle Of Incidence. */
-        float poi;          /*!< Plane Of Incidence. */
-        float wavelength;
-        float tis;          /*!< Total Integrated Scatter. */
+        double aoi; /*!< Angle Of Incidence. */
+        double poi; /*!< Plane Of Incidence. */
+        float  wavelength;
+        float  tis; /*!< Total Integrated Scatter. */
 
         SideType                sideType;
         DataType                dataType;
@@ -71,10 +71,10 @@ private:
     static void ignoreCommentLines(std::istream& stream);
 
     /*! Creates a BRDF from LightTools BRDF data. */
-    static SphericalCoordinatesBrdf* createBrdf(std::vector<DataBlock*>&    brdfData,
-                                                const std::vector<float>&   outThetaDegrees,
-                                                const std::vector<float>&   outPhiDegrees,
-                                                ColorModel                  colorModel);
+    static SphericalCoordinatesBrdf* createBrdf(std::vector<DataBlock*>&   brdfData,
+                                                const std::vector<double>& outThetaDegrees,
+                                                const std::vector<double>& outPhiDegrees,
+                                                ColorModel                 colorModel);
 };
 
 inline void LightToolsBsdfReader::ignoreCommentLines(std::istream& stream)

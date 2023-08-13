@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2022 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,20 +20,14 @@ class IsotropicWard : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    IsotropicWard(const Vec3&   color,
-                  float         roughness)
-                  : color_      (color),
-                    roughness_  (roughness)
+    IsotropicWard(const Vec3& color, double roughness) : color_(color), roughness_(roughness)
     {
-        parameters_.push_back(Parameter("Color",        &color_));
-        parameters_.push_back(Parameter("Roughness",    &roughness_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Color", &color_));
+        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01, 1.0));
     }
 
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& V,
-                        const Vec3& N,
-                        const Vec3& color,
-                        float       roughness);
+    static Vec3
+    compute(const Vec3& L, const Vec3& V, const Vec3& N, const Vec3& color, double roughness);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -52,19 +46,19 @@ public:
     }
 
 private:
-    Vec3    color_;
-    float   roughness_;
+    Vec3   color_;
+    double roughness_;
 };
 
 /*
  * Implementation
  */
 
-inline Vec3 IsotropicWard::compute(const Vec3&  L,
-                                   const Vec3&  V,
-                                   const Vec3&  N,
-                                   const Vec3&  color,
-                                   float        roughness)
+inline Vec3 IsotropicWard::compute(const Vec3& L,
+                                   const Vec3& V,
+                                   const Vec3& N,
+                                   const Vec3& color,
+                                   double      roughness)
 {
     using std::acos;
     using std::exp;
@@ -72,19 +66,19 @@ inline Vec3 IsotropicWard::compute(const Vec3&  L,
     using std::sqrt;
     using std::tan;
 
-    float dotLN = L.dot(N);
-    float dotVN = V.dot(N);
+    double dotLN = L.dot(N);
+    double dotVN = V.dot(N);
 
     Vec3 H = (L + V).normalized();
-    float dotHN = H.dot(N);
+    double dotHN = H.dot(N);
 
-    float sqRoughness = roughness * roughness;
-    float tanHN = tan(acos(dotHN));
+    double sqRoughness = roughness * roughness;
+    double tanHN = tan(acos(dotHN));
 
-    constexpr float suppressionCoeff = 0.01f;
-    float brdf = 1.0f / sqrt(max(dotLN * dotVN, suppressionCoeff))
-               * exp(-(tanHN * tanHN / sqRoughness))
-               / (4.0f * PI_F * sqRoughness);
+    constexpr double suppressionCoeff = 0.01;
+
+    double brdf = 1 / sqrt(max(dotLN * dotVN, suppressionCoeff)) *
+                  exp(-(tanHN * tanHN / sqRoughness)) / (4 * PI_D * sqRoughness);
     return color * brdf;
 }
 

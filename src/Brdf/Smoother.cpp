@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2020 Kimura Ryo                                  //
+// Copyright (C) 2017-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -21,14 +21,16 @@ using namespace lb;
 using Interpolator = MonotoneCubicInterpolator;
 
 Smoother::Smoother(Brdf* brdf)
-                   : brdf_(brdf),
-                     diffThreshold_(0.001f),
-                     maxIteration0_(2),
-                     maxIteration1_(2),
-                     maxIteration2_(2),
-                     maxIteration3_(2),
-                     minAngleInterval_(toRadian(0.1f)),
-                     specularPolarRegion_(0.0f) {}
+    : brdf_(brdf),
+      diffThreshold_(0.001f),
+      maxIteration0_(2),
+      maxIteration1_(2),
+      maxIteration2_(2),
+      maxIteration3_(2),
+      minAngleInterval_(toRadian(0.1)),
+      specularPolarRegion_(0)
+{
+}
 
 void Smoother::smooth()
 {
@@ -97,18 +99,18 @@ bool Smoother::insertAngle0()
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
-        Vec4f angles, nextAngles;
+        Vec4 angles, nextAngles;
         #pragma omp parallel for private(angles, nextAngles)
         for (int i0 = 1; i0 < ss->getNumAngles0() - 2; ++i0) {
-            angles = Vec4f(ss->getAngle0(i0),
-                           ss->getAngle1(i1),
-                           ss->getAngle2(i2),
-                           ss->getAngle3(i3));
+            angles = Vec4(ss->getAngle0(i0),
+                          ss->getAngle1(i1),
+                          ss->getAngle2(i2),
+                          ss->getAngle3(i3));
 
-            nextAngles = Vec4f(ss->getAngle0(i0 + 1),
-                               ss->getAngle1(i1),
-                               ss->getAngle2(i2),
-                               ss->getAngle3(i3));
+            nextAngles = Vec4(ss->getAngle0(i0 + 1),
+                              ss->getAngle1(i1),
+                              ss->getAngle2(i2),
+                              ss->getAngle3(i3));
 
             if (insertAngle(angles0_, 0, angles, nextAngles)) {
                 inserted = true;
@@ -132,18 +134,18 @@ bool Smoother::insertAngle1()
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
-        Vec4f angles, nextAngles;
+        Vec4 angles, nextAngles;
         #pragma omp parallel for private(angles, nextAngles)
         for (int i1 = 0; i1 < ss->getNumAngles1() - 1; ++i1) {
-            angles = Vec4f(ss->getAngle0(i0),
-                           ss->getAngle1(i1),
-                           ss->getAngle2(i2),
-                           ss->getAngle3(i3));
+            angles = Vec4(ss->getAngle0(i0),
+                          ss->getAngle1(i1),
+                          ss->getAngle2(i2),
+                          ss->getAngle3(i3));
 
-            nextAngles = Vec4f(ss->getAngle0(i0),
-                               ss->getAngle1(i1 + 1),
-                               ss->getAngle2(i2),
-                               ss->getAngle3(i3));
+            nextAngles = Vec4(ss->getAngle0(i0),
+                              ss->getAngle1(i1 + 1),
+                              ss->getAngle2(i2),
+                              ss->getAngle3(i3));
 
             if (insertAngle(angles1_, 1, angles, nextAngles)) {
                 inserted = true;
@@ -167,18 +169,18 @@ bool Smoother::insertAngle2()
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
-        Vec4f angles, nextAngles;
+        Vec4 angles, nextAngles;
         #pragma omp parallel for private(angles, nextAngles)
         for (int i2 = 1; i2 < ss->getNumAngles2() - 2; ++i2) {
-            angles = Vec4f(ss->getAngle0(i0),
-                           ss->getAngle1(i1),
-                           ss->getAngle2(i2),
-                           ss->getAngle3(i3));
+            angles = Vec4(ss->getAngle0(i0),
+                          ss->getAngle1(i1),
+                          ss->getAngle2(i2),
+                          ss->getAngle3(i3));
 
-            nextAngles = Vec4f(ss->getAngle0(i0),
-                               ss->getAngle1(i1),
-                               ss->getAngle2(i2 + 1),
-                               ss->getAngle3(i3));
+            nextAngles = Vec4(ss->getAngle0(i0),
+                              ss->getAngle1(i1),
+                              ss->getAngle2(i2 + 1),
+                              ss->getAngle3(i3));
 
             if (dynamic_cast<SpecularCoordinatesBrdf*>(brdf_) &&
                 angles[2] <= specularPolarRegion_) {
@@ -207,18 +209,18 @@ bool Smoother::insertAngle3()
     for (int i0 = 0; i0 < ss->getNumAngles0(); ++i0) {
     for (int i1 = 0; i1 < ss->getNumAngles1(); ++i1) {
     for (int i2 = 0; i2 < ss->getNumAngles2(); ++i2) {
-        Vec4f angles, nextAngles;
+        Vec4 angles, nextAngles;
         #pragma omp parallel for private(angles, nextAngles)
         for (int i3 = 0; i3 < ss->getNumAngles3() - 1; ++i3) {
-            angles = Vec4f(ss->getAngle0(i0),
-                           ss->getAngle1(i1),
-                           ss->getAngle2(i2),
-                           ss->getAngle3(i3));
+            angles = Vec4(ss->getAngle0(i0),
+                          ss->getAngle1(i1),
+                          ss->getAngle2(i2),
+                          ss->getAngle3(i3));
 
-            nextAngles = Vec4f(ss->getAngle0(i0),
-                               ss->getAngle1(i1),
-                               ss->getAngle2(i2),
-                               ss->getAngle3(i3 + 1));
+            nextAngles = Vec4(ss->getAngle0(i0),
+                              ss->getAngle1(i1),
+                              ss->getAngle2(i2),
+                              ss->getAngle3(i3 + 1));
 
             if (insertAngle(angles3_, 3, angles, nextAngles)) {
                 inserted = true;
@@ -229,30 +231,30 @@ bool Smoother::insertAngle3()
     return inserted;
 }
 
-bool Smoother::insertAngle(std::set<Arrayf::Scalar>&    angleSet,
-                           int                          angleSuffix,
-                           const Vec4f&                 angles,
-                           const Vec4f&                 nextAngles)
+bool Smoother::insertAngle(std::set<double>& angleSet,
+                           int               angleSuffix,
+                           const Vec4&       angles,
+                           const Vec4&       nextAngles)
 {
     if (std::abs(angles[angleSuffix] - nextAngles[angleSuffix]) < minAngleInterval_) {
         return false;
     }
 
-    Vec4f midAngles = (angles + nextAngles) / 2.0f;
+    Vec4 midAngles = (angles + nextAngles) / 2;
 
     Vec3 inDir, outDir;
     brdf_->toXyz(midAngles[0], midAngles[1], midAngles[2], midAngles[3], &inDir, &outDir);
 
-    if (inDir.z() <= 0.0 || outDir.z() <= 0.0) {
+    if (inDir.z() <= 0 || outDir.z() <= 0) {
         return false;
     }
 
-    Spectrum lerpSp     = Sampler::getSpectrum<LinearInterpolator>(*brdf_, inDir, outDir);
-    Spectrum smoothSp   = Sampler::getSpectrum<Interpolator>(*brdf_, inDir, outDir);
+    Spectrum lerpSp = Sampler::getSpectrum<LinearInterpolator>(*brdf_, inDir, outDir);
+    Spectrum smoothSp = Sampler::getSpectrum<Interpolator>(*brdf_, inDir, outDir);
 
     Spectrum diffSp = (lerpSp - smoothSp).abs();
     if (diffSp.maxCoeff() > diffThreshold_) {
-        std::pair<std::set<Arrayf::Scalar>::iterator, bool> ret;
+        std::pair<std::set<double>::iterator, bool> ret;
         #pragma omp critical
         ret = angleSet.insert(midAngles[angleSuffix]);
         if (ret.second) {

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -36,9 +36,9 @@ void appendElement(ArrayT* arrayf, typename ArrayT::Scalar value);
 
 /*! \brief Creates a non-equal interval array from zero to \a maxValue with \a exponent. */
 template <typename ArrayT>
-ArrayT createExponential(int                        numElements,
-                         typename ArrayT::Scalar    maxValue,
-                         typename ArrayT::Scalar    exponent);
+ArrayT createExponential(int                     numElements,
+                         typename ArrayT::Scalar maxValue,
+                         typename ArrayT::Scalar exponent);
 
 /*! \brief Returns true if the elements of an array are equally-spaced intervals. */
 template <typename T>
@@ -53,13 +53,13 @@ bool isEqualInterval(const T& array);
  * \param lowerValue Found value of the sample point at the lower bound.
  * \param upperValue Found value of the sample point at the upper bound.
  */
-void findBounds(const Arrayf&   values,
-                float           value,
-                bool            equalIntervalValues,
-                int*            lowerIndex,
-                int*            upperIndex,
-                float*          lowerValue,
-                float*          upperValue);
+void findBounds(const Arrayd& values,
+                double        value,
+                bool          equalIntervalValues,
+                int*          lowerIndex,
+                int*          upperIndex,
+                double*       lowerValue,
+                double*       upperValue);
 
 } // namespace array_util
 
@@ -95,9 +95,9 @@ void array_util::appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
 }
 
 template <typename ArrayT>
-ArrayT array_util::createExponential(int                        numElements,
-                                     typename ArrayT::Scalar    maxValue,
-                                     typename ArrayT::Scalar    exponent)
+ArrayT array_util::createExponential(int                     numElements,
+                                     typename ArrayT::Scalar maxValue,
+                                     typename ArrayT::Scalar exponent)
 {
     ArrayT arr = ArrayT::LinSpaced(numElements, 0.0, maxValue);
 
@@ -115,7 +115,7 @@ bool array_util::isEqualInterval(const T& array)
 {
     if (array.size() <= 2) return false;
 
-    float interval = array[array.size() - 1] / (array.size() - 1);
+    double interval = array[array.size() - 1] / (array.size() - 1);
     for (int i = 0; i < array.size(); ++i) {
         if (!isEqual(array[i], interval * i)) {
             return false;

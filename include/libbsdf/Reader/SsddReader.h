@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020 Kimura Ryo                                       //
+// Copyright (C) 2020-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -9,6 +9,7 @@
 #ifndef LIBBSDF_SSDD_READER_H
 #define LIBBSDF_SSDD_READER_H
 
+#include <sstream>
 #include <string>
 
 #include <libbsdf/Brdf/Material.h>
@@ -36,15 +37,14 @@ private:
 
     struct DataInfo
     {
-        DataInfo() : reductionType(ReductionType::NONE),
-                     sourceType(SourceType::UNKNOWN_SOURCE) {};
+        DataInfo() : reductionType(ReductionType::NONE), sourceType(SourceType::UNKNOWN_SOURCE){};
 
         DataType            dataType;
         ColorModel          colorModel;
         std::vector<float>  wavelengths;
         std::string         paramType;
         ReductionType       reductionType;
-        std::vector<float>  params0, params1, params2, params3, params4;
+        std::vector<double> params0, params1, params2, params3, params4;
         std::string         name;
         SourceType          sourceType;
         std::string         device;
@@ -71,9 +71,30 @@ private:
     /*! Reads specular reflectance data in binary form. */
     static bool readBinaryData(std::ifstream& ifs, SampleSet2D* ss2);
 
-    /*! Gets float values in a string stream. */
-    static std::vector<float> getList(std::stringstream& stream);
+    /*! Gets values in a string stream. */
+    template <typename T>
+    static std::vector<T> getList(std::stringstream& stream);
 };
+
+template <typename T>
+std::vector<T> SsddReader::getList(std::stringstream& stream)
+{
+    std::vector<T> values;
+
+    std::string valueStr;
+    while (stream >> valueStr) {
+        char*  end;
+        double value = std::strtod(valueStr.c_str(), &end);
+        if (*end != '\0') {
+            lbError << "[SsddReader::getList] Invalid value: " << valueStr;
+            break;
+        }
+
+        values.push_back(static_cast<T>(value));
+    }
+
+    return values;
+}
 
 } // namespace lb
 

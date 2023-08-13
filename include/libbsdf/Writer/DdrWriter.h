@@ -23,23 +23,23 @@ class DdrWriter
 {
 public:
     /*! Writes the BRDF of a specular coordinate system in a DDR or DDT file. */
-    static bool write(const std::string&                fileName,
-                      const SpecularCoordinatesBrdf&    brdf,
-                      const std::string&                comments = "");
+    static bool write(const std::string&             fileName,
+                      const SpecularCoordinatesBrdf& brdf,
+                      const std::string&             comments = "");
 
     /*!
      * Converts and writes a DDR or DDT file.
      * Samples are extrapolated using \a dataType if it is possible.
      */
-    static bool write(const std::string&    fileName,
-                      const Brdf&           brdf,
-                      DataType              dataType,
-                      const std::string&    comments = "");
+    static bool write(const std::string& fileName,
+                      const Brdf&        brdf,
+                      DataType           dataType,
+                      const std::string& comments = "");
 
     /*! Outputs character data of a DDR or DDT file to a stream. */
-    static bool output(const SpecularCoordinatesBrdf&   brdf,
-                       std::ostream&                    stream,
-                       const std::string&               comments = "");
+    static bool output(const SpecularCoordinatesBrdf& brdf,
+                       std::ostream&                  stream,
+                       const std::string&             comments = "");
 
     /*! Converts lb::Brdf to lb::SpecularCoordinatesBrdf. */
     static SpecularCoordinatesBrdf* convert(const Brdf& brdf);
@@ -50,8 +50,7 @@ public:
      * BRDF is fixed if the sum of reflectances and transmittances exceed one.
      * Spectra of samples are filled if incoming polar angle is 90 degrees
      */
-    static SpecularCoordinatesBrdf* arrange(const SpecularCoordinatesBrdf&  brdf,
-                                            DataType                        dataType);
+    static SpecularCoordinatesBrdf* arrange(const SpecularCoordinatesBrdf& brdf, DataType dataType);
 };
 
 } // namespace lb

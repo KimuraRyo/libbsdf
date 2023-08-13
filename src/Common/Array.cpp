@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2019-2020 Kimura Ryo                                  //
+// Copyright (C) 2019-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -12,13 +12,13 @@
 
 using namespace lb;
 
-void array_util::findBounds(const Arrayf&   values,
-                            float           value,
-                            bool            equalIntervalValues,
-                            int*            lowerIndex,
-                            int*            upperIndex,
-                            float*          lowerValue,
-                            float*          upperValue)
+void array_util::findBounds(const Arrayd& values,
+                            double        value,
+                            bool          equalIntervalValues,
+                            int*          lowerIndex,
+                            int*          upperIndex,
+                            double*       lowerValue,
+                            double*       upperValue)
 {
     if (values.size() == 1) {
         *lowerIndex = 0;
@@ -38,7 +38,7 @@ void array_util::findBounds(const Arrayf&   values,
     }
     else {
         // Find lower and upper indices.
-        const float* valuePtr = std::lower_bound(&values[0], &values[0] + values.size(), value);
+        const double* valuePtr = std::lower_bound(&values[0], &values[0] + values.size(), value);
         *upperIndex = clamp(static_cast<int>(valuePtr - &values[0]), 1, backIndex);
         *lowerIndex = *upperIndex - 1;
     }

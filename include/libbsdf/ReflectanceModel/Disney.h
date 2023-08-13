@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2021 Kimura Ryo                                  //
+// Copyright (C) 2018-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -21,19 +21,19 @@ class Disney : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    Disney(const Vec3&  specularColor,
-           const Vec3&  diffuseColor,
-           float        roughnessX,
-           float        roughnessY)
-           : specularColor_ (specularColor),
-             diffuseColor_  (diffuseColor),
-             roughnessX_    (roughnessX),
-             roughnessY_    (roughnessY)
+    Disney(const Vec3& specularColor,
+           const Vec3& diffuseColor,
+           double      roughnessX,
+           double      roughnessY)
+        : specularColor_(specularColor),
+          diffuseColor_(diffuseColor),
+          roughnessX_(roughnessX),
+          roughnessY_(roughnessY)
     {
-        parameters_.push_back(Parameter("Specular color",   &specularColor_));
-        parameters_.push_back(Parameter("Roughness X",      &roughnessX_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Roughness Y",      &roughnessY_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Diffuse color",    &diffuseColor_));
+        parameters_.push_back(Parameter("Specular color", &specularColor_));
+        parameters_.push_back(Parameter("Roughness X", &roughnessX_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Roughness Y", &roughnessY_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Diffuse color", &diffuseColor_));
     }
 
     static Vec3 compute(const Vec3& L,
@@ -43,8 +43,8 @@ public:
                         const Vec3& B,
                         const Vec3& specularColor,
                         const Vec3& diffuseColor,
-                        float       roughnessX,
-                        float       roughnessY);
+                        double      roughnessX,
+                        double      roughnessY);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -67,10 +67,10 @@ public:
     }
 
 private:
-    Vec3    specularColor_;
-    Vec3    diffuseColor_;
-    float   roughnessX_;
-    float   roughnessY_;
+    Vec3   specularColor_;
+    Vec3   diffuseColor_;
+    double roughnessX_;
+    double roughnessY_;
 };
 
 /*
@@ -84,8 +84,8 @@ inline Vec3 Disney::compute(const Vec3& L,
                             const Vec3& B,
                             const Vec3& specularColor,
                             const Vec3& diffuseColor,
-                            float       roughnessX,
-                            float       roughnessY)
+                            double      roughnessX,
+                            double      roughnessY)
 {
     using std::min;
     using std::pow;
@@ -114,20 +114,19 @@ inline Vec3 Disney::compute(const Vec3& L,
     double sqAlphaG = alphaXG * alphaYG;
     double G = Ggx::computeG1(dotVN, sqAlphaG) * Ggx::computeG1(dotLN, sqAlphaG);
 
-    double d = dotHT * dotHT / (alphaX * alphaX)
-             + dotHB * dotHB / (alphaY * alphaY)
-             + dotHN * dotHN;
-    double D = 1.0 / (PI_D * sqAlpha * d * d);
+    double d =
+        dotHT * dotHT / (alphaX * alphaX) + dotHB * dotHB / (alphaY * alphaY) + dotHN * dotHN;
+    double D = 1 / (PI_D * sqAlpha * d * d);
 
     // specular component
-    Vec3 sBrdf = F * G * D / (4.0 * dotLN * dotVN);
+    Vec3 sBrdf = F * G * D / (4 * dotLN * dotVN);
 
-    double Fd90 = 0.5 + 2.0 * (roughnessX + roughnessY) / 2.0 * dotVH * dotVH;
+    double Fd90 = 0.5 + 2 * (roughnessX + roughnessY) / 2 * dotVH * dotVH;
 
     // diffuse component
     Vec3 dBrdf = diffuseColor / PI_D
-               * (1.0 + (Fd90 - 1.0) * pow(1.0 - dotLN, 5.0))
-               * (1.0 + (Fd90 - 1.0) * pow(1.0 - dotVN, 5.0));
+               * (1 + (Fd90 - 1) * pow(1 - dotLN, 5))
+               * (1 + (Fd90 - 1) * pow(1 - dotVN, 5));
 
     return sBrdf + dBrdf;
 }

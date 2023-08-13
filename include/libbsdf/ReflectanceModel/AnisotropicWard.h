@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2022 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,16 +20,12 @@ class AnisotropicWard : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    AnisotropicWard(const Vec3& color,
-                    float       roughnessX,
-                    float       roughnessY)
-                    : color_        (color),
-                      roughnessX_   (roughnessX),
-                      roughnessY_   (roughnessY)
+    AnisotropicWard(const Vec3& color, double roughnessX, double roughnessY)
+        : color_(color), roughnessX_(roughnessX), roughnessY_(roughnessY)
     {
-        parameters_.push_back(Parameter("Color",        &color_));
-        parameters_.push_back(Parameter("Roughness X",  &roughnessX_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Roughness Y",  &roughnessY_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Color", &color_));
+        parameters_.push_back(Parameter("Roughness X", &roughnessX_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Roughness Y", &roughnessY_, 0.01, 1.0));
     }
 
     static Vec3 compute(const Vec3& L,
@@ -38,8 +34,8 @@ public:
                         const Vec3& T,
                         const Vec3& B,
                         const Vec3& color,
-                        float       roughnessX,
-                        float       roughnessY);
+                        double      roughnessX,
+                        double      roughnessY);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -61,23 +57,23 @@ public:
     }
 
 private:
-    Vec3    color_;
-    float   roughnessX_;
-    float   roughnessY_;
+    Vec3   color_;
+    double roughnessX_;
+    double roughnessY_;
 };
 
 /*
  * Implementation
  */
 
-inline Vec3 AnisotropicWard::compute(const Vec3&    L,
-                                     const Vec3&    V,
-                                     const Vec3&    N,
-                                     const Vec3&    T,
-                                     const Vec3&    B,
-                                     const Vec3&    color,
-                                     float          roughnessX,
-                                     float          roughnessY)
+inline Vec3 AnisotropicWard::compute(const Vec3& L,
+                                     const Vec3& V,
+                                     const Vec3& N,
+                                     const Vec3& T,
+                                     const Vec3& B,
+                                     const Vec3& color,
+                                     double      roughnessX,
+                                     double      roughnessY)
 {
     using std::acos;
     using std::exp;
@@ -85,21 +81,22 @@ inline Vec3 AnisotropicWard::compute(const Vec3&    L,
     using std::sqrt;
     using std::tan;
 
-    float dotLN = L.dot(N);
-    float dotVN = V.dot(N);
+    double dotLN = L.dot(N);
+    double dotVN = V.dot(N);
 
     Vec3 H = (L + V).normalized();
-    float dotHN = H.dot(N);
-    float dotHT = H.dot(T);
-    float dotHB = H.dot(B);
+    double dotHN = H.dot(N);
+    double dotHT = H.dot(T);
+    double dotHB = H.dot(B);
 
-    float sqDotHT = (dotHT / roughnessX) * (dotHT / roughnessX);
-    float sqDotHB = (dotHB / roughnessY) * (dotHB / roughnessY);
+    double sqDotHT = (dotHT / roughnessX) * (dotHT / roughnessX);
+    double sqDotHB = (dotHB / roughnessY) * (dotHB / roughnessY);
 
-    constexpr float suppressionCoeff = 0.01f;
-    float brdf = 1.0f / sqrt(max(dotLN * dotVN, suppressionCoeff))
-               * exp(-2.0f * (sqDotHT + sqDotHB) / (1.0f + dotHN))
-               / (4.0f * PI_F * roughnessX * roughnessY);
+    constexpr double suppressionCoeff = 0.01;
+
+    double brdf = 1.0 / sqrt(max(dotLN * dotVN, suppressionCoeff)) *
+                  exp(-2.0 * (sqDotHT + sqDotHB) / (1.0 + dotHN)) /
+                  (4.0 * PI_D * roughnessX * roughnessY);
 
     return color * brdf;
 }

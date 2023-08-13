@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020 Kimura Ryo                                       //
+// Copyright (C) 2020-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -122,7 +122,7 @@ Material* SsddReader::read(const std::string& fileName)
             }
         }
         else if (propStr == ssdd::WAVELENGTH_LIST) {
-            dataInfo->wavelengths = getList(stream);
+            dataInfo->wavelengths = getList<float>(stream);
         }
         else if (propStr == ssdd::PARAM_TYPE) {
             stream >> dataInfo->paramType;
@@ -149,19 +149,19 @@ Material* SsddReader::read(const std::string& fileName)
             }
         }
         else if (propStr == ssdd::PARAM0_LIST) {
-            dataInfo->params0 = getList(stream);
+            dataInfo->params0 = getList<double>(stream);
         }
         else if (propStr == ssdd::PARAM1_LIST) {
-            dataInfo->params1 = getList(stream);
+            dataInfo->params1 = getList<double>(stream);
         }
         else if (propStr == ssdd::PARAM2_LIST) {
-            dataInfo->params2 = getList(stream);
+            dataInfo->params2 = getList<double>(stream);
         }
         else if (propStr == ssdd::PARAM3_LIST) {
-            dataInfo->params3 = getList(stream);
+            dataInfo->params3 = getList<double>(stream);
         }
         else if (propStr == ssdd::PARAM4_LIST) {
-            dataInfo->params4 = getList(stream);
+            dataInfo->params4 = getList<double>(stream);
         }
 
         // Read optional meta-data.
@@ -303,10 +303,10 @@ std::shared_ptr<Brdf> SsddReader::readBrdf(std::ifstream& ifs, const DataInfo& d
 
     SampleSet* ss = brdf->getSampleSet();
 
-    Arrayf& angles0 = ss->getAngles0();
-    Arrayf& angles1 = ss->getAngles1();
-    Arrayf& angles2 = ss->getAngles2();
-    Arrayf& angles3 = ss->getAngles3();
+    Arrayd& angles0 = ss->getAngles0();
+    Arrayd& angles1 = ss->getAngles1();
+    Arrayd& angles2 = ss->getAngles2();
+    Arrayd& angles3 = ss->getAngles3();
 
     array_util::copy(dataInfo.params0, &angles0);
     array_util::copy(dataInfo.params1, &angles1);
@@ -323,7 +323,7 @@ std::shared_ptr<Brdf> SsddReader::readBrdf(std::ifstream& ifs, const DataInfo& d
     if (specBrdf &&
         dataInfo.params4.size() == dataInfo.params0.size()) {
         specBrdf->getSpecularOffsets().resize(dataInfo.params4.size());
-        Arrayf& offsets = specBrdf->getSpecularOffsets();
+        Arrayd& offsets = specBrdf->getSpecularOffsets();
         array_util::copy(dataInfo.params4, &offsets);
         offsets = toRadians(offsets);
     }
@@ -413,7 +413,7 @@ bool SsddReader::readAsciiData(std::ifstream& ifs, SampleSet* ss)
         reader_utility::ignoreCommentLines(ifs, "#");
 
         std::stringstream stream(lineStr);
-        std::vector<float> values = getList(stream);
+        std::vector<float> values = getList<float>(stream);
 
         if (values.size() != ss->getNumWavelengths()) {
             lbError << "[SsddReader::readAsciiData] Invalid data found: " << lineStr;
@@ -464,7 +464,7 @@ bool SsddReader::readAsciiData(std::ifstream& ifs, SampleSet2D* ss2)
         reader_utility::ignoreCommentLines(ifs, "#");
 
         std::stringstream stream(lineStr);
-        std::vector<float> values = getList(stream);
+        std::vector<float> values = getList<float>(stream);
 
         if (values.size() != ss2->getNumWavelengths()) {
             lbError << "[SsddReader::readAsciiData] Invalid data found: " << lineStr;
@@ -502,23 +502,4 @@ bool SsddReader::readBinaryData(std::ifstream& ifs, SampleSet2D* ss2)
     }}
 
     return true;
-}
-
-std::vector<float> SsddReader::getList(std::stringstream& stream)
-{
-    std::vector<float> values;
-
-    std::string valueStr;
-    while (stream >> valueStr) {
-        char* end;
-        double value = std::strtod(valueStr.c_str(), &end);
-        if (*end != '\0') {
-            lbError << "[SsddReader::getList] Invalid value: " << valueStr;
-            break;
-        }
-
-        values.push_back(static_cast<float>(value));
-    }
-
-    return values;
 }

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -17,60 +17,51 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
                                                  ColorModel colorModel,
                                                  int        numWavelengths,
                                                  bool       equalIntervalAngles)
-                                                 : BaseBrdf(numInTheta,
-                                                            numInPhi,
-                                                            numSpecTheta,
-                                                            numSpecPhi,
-                                                            colorModel,
-                                                            numWavelengths,
-                                                            equalIntervalAngles) {}
+    : BaseBrdf(numInTheta,
+               numInPhi,
+               numSpecTheta,
+               numSpecPhi,
+               colorModel,
+               numWavelengths,
+               equalIntervalAngles)
+{
+}
 
-SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const Brdf&    brdf,
-                                                 const Arrayf&  inThetaAngles,
-                                                 const Arrayf&  inPhiAngles,
-                                                 const Arrayf&  specThetaAngles,
-                                                 const Arrayf&  specPhiAngles)
-                                                 : BaseBrdf(brdf,
-                                                            inThetaAngles,
-                                                            inPhiAngles,
-                                                            specThetaAngles,
-                                                            specPhiAngles) {}
+SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const Brdf&   brdf,
+                                                 const Arrayd& inThetaAngles,
+                                                 const Arrayd& inPhiAngles,
+                                                 const Arrayd& specThetaAngles,
+                                                 const Arrayd& specPhiAngles)
+    : BaseBrdf(brdf, inThetaAngles, inPhiAngles, specThetaAngles, specPhiAngles)
+{
+}
 
-SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const Brdf&    brdf,
-                                                 int            numInTheta,
-                                                 int            numInPhi,
-                                                 int            numSpecTheta,
-                                                 int            numSpecPhi)
-                                                 : BaseBrdf(brdf,
-                                                            numInTheta,
-                                                            numInPhi,
-                                                            numSpecTheta,
-                                                            numSpecPhi) {}
+SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const Brdf& brdf,
+                                                 int         numInTheta,
+                                                 int         numInPhi,
+                                                 int         numSpecTheta,
+                                                 int         numSpecPhi)
+    : BaseBrdf(brdf, numInTheta, numInPhi, numSpecTheta, numSpecPhi)
+{
+}
 
 SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
                                                  int        numInPhi,
                                                  int        numSpecTheta,
                                                  int        numSpecPhi,
-                                                 float      specThetaExponent,
+                                                 double     specThetaExponent,
                                                  ColorModel colorModel,
                                                  int        numWavelengths,
-                                                 float      refractiveIndex)
-                                                 : BaseBrdf(numInTheta,
-                                                            numInPhi,
-                                                            numSpecTheta,
-                                                            numSpecPhi,
-                                                            colorModel,
-                                                            numWavelengths,
-                                                            true)
+                                                 double     refractiveIndex)
+    : BaseBrdf(numInTheta, numInPhi, numSpecTheta, numSpecPhi, colorModel, numWavelengths, true)
 {
-    Arrayf& specThetaAngles = samples_->getAngles2();
-    specThetaAngles = array_util::createExponential<Arrayf>(static_cast<int>(specThetaAngles.size()),
-                                                            CoordSys::MAX_ANGLE2,
-                                                            specThetaExponent);
+    Arrayd& specThetaAngles = samples_->getAngles2();
+    specThetaAngles = array_util::createExponential<Arrayd>(
+        static_cast<int>(specThetaAngles.size()), CoordSys::MAX_ANGLE2, specThetaExponent);
 
     samples_->updateAngleAttributes();
 
-    if (refractiveIndex != 1.0f) {
+    if (refractiveIndex != 1) {
         setupSpecularOffsets(refractiveIndex);
     }
 }
@@ -78,19 +69,20 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(int        numInTheta,
 SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SphericalCoordinatesBrdf& brdf,
                                                  int                             numSpecTheta,
                                                  int                             numSpecPhi)
-                                                 : BaseBrdf()
+    : BaseBrdf()
 {
     const SampleSet* ss = brdf.getSampleSet();
 
-    Arrayf inThetaAngles   = ss->getAngles0();
-    Arrayf inPhiAngles     = ss->getAngles1();
+    Arrayd inThetaAngles = ss->getAngles0();
+    Arrayd inPhiAngles = ss->getAngles1();
 
     if (inPhiAngles.size() == 1) {
-        inPhiAngles[0] = 0.0f;
+        inPhiAngles[0] = 0;
     }
 
-    Arrayf specThetaAngles = array_util::createExponential<Arrayf>(numSpecTheta, CoordSys::MAX_ANGLE2, 2.0f);
-    Arrayf specPhiAngles   = Arrayf::LinSpaced(numSpecPhi, 0.0, CoordSys::MAX_ANGLE3);
+    Arrayd specThetaAngles =
+        array_util::createExponential<Arrayd>(numSpecTheta, CoordSys::MAX_ANGLE2, 2.0);
+    Arrayd specPhiAngles = Arrayd::LinSpaced(numSpecPhi, 0.0, CoordSys::MAX_ANGLE3);
 
     samples_ = new SampleSet(static_cast<int>(inThetaAngles.size()),
                              static_cast<int>(inPhiAngles.size()),
@@ -112,8 +104,9 @@ SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SphericalCoordinatesBrdf&
 }
 
 SpecularCoordinatesBrdf::SpecularCoordinatesBrdf(const SpecularCoordinatesBrdf& brdf)
-                                                 : BaseBrdf(brdf),
-                                                   specularOffsets_(brdf.getSpecularOffsets()) {}
+    : BaseBrdf(brdf), specularOffsets_(brdf.getSpecularOffsets())
+{
+}
 
 SpecularCoordinatesBrdf::~SpecularCoordinatesBrdf() {}
 
@@ -122,13 +115,13 @@ SpecularCoordinatesBrdf* SpecularCoordinatesBrdf::clone() const
     return new SpecularCoordinatesBrdf(*this);
 }
 
-void SpecularCoordinatesBrdf::setupSpecularOffsets(float refractiveIndex)
+void SpecularCoordinatesBrdf::setupSpecularOffsets(double refractiveIndex)
 {
     for (int i = 0; i < getNumInTheta(); ++i) {
-        float inTheta = getInTheta(i);
-        float sinT = std::min(std::sin(inTheta) / refractiveIndex, 1.0f);
-        float refractedTheta = std::asin(sinT);
-        float offset = refractedTheta - inTheta;
+        double inTheta = getInTheta(i);
+        double sinT = std::min(std::sin(inTheta) / refractiveIndex, 1.0);
+        double refractedTheta = std::asin(sinT);
+        double offset = refractedTheta - inTheta;
 
         setSpecularOffset(i, offset);
     }
@@ -168,8 +161,8 @@ bool SpecularCoordinatesBrdf::expandAngles(bool angle0Expanded,
                                            bool angle2Expanded,
                                            bool angle3Expanded)
 {
-    const Arrayf& angles0 = samples_->getAngles0();
-    Arrayf origAngles0 = angles0;
+    const Arrayd& angles0 = samples_->getAngles0();
+    Arrayd        origAngles0 = angles0;
 
     bool expanded = BaseBrdf::expandAngles(angle0Expanded,
                                            angle1Expanded,
@@ -182,7 +175,7 @@ bool SpecularCoordinatesBrdf::expandAngles(bool angle0Expanded,
 
     // Add the first element.
     if (origAngles0[0] != angles0[0]) {
-        Arrayf origOffsets = specularOffsets_;
+        Arrayd origOffsets = specularOffsets_;
 
         specularOffsets_.resize(origOffsets.size() + 1);
         specularOffsets_[0] = origOffsets[0];
@@ -193,7 +186,7 @@ bool SpecularCoordinatesBrdf::expandAngles(bool angle0Expanded,
 
     // Add the last element.
     if (origAngles0[origAngles0.size() - 1] != angles0[angles0.size() - 1]) {
-        Arrayf origOffsets = specularOffsets_;
+        Arrayd origOffsets = specularOffsets_;
 
         specularOffsets_.resize(origOffsets.size() + 1);
         for (int i = 0; i < specularOffsets_.size() - 1; ++i) {

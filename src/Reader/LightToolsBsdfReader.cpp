@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2020 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -29,8 +29,8 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
     SymmetryType symmetryType = UNKNOWN_SYMMETRY;
     ColorModel colorModel = UNKNOWN_MODEL;
 
-    std::vector<float> outThetaDegrees;
-    std::vector<float> outPhiDegrees;
+    std::vector<double> outThetaDegrees;
+    std::vector<double> outPhiDegrees;
 
     int numChannels = 1;
 
@@ -80,7 +80,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             int numOutPhi;
             ifs >> numOutPhi;
             for (int i = 0; i < numOutPhi; ++i) {
-                float angle;
+                double angle;
                 ifs >> angle;
                 outPhiDegrees.push_back(angle);
             }
@@ -89,7 +89,7 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             int numOutTheta;
             ifs >> numOutTheta;
             for (int i = 0; i < numOutTheta; ++i) {
-                float angle;
+                double angle;
                 ifs >> angle;
                 outThetaDegrees.push_back(angle);
             }
@@ -128,9 +128,9 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
             continue;
         }
         else if (dataStr == "AOI") {
-            float aoi;
+            double aoi;
             ifs >> aoi;
-            if (aoi > 90.0f) {
+            if (aoi > 90) {
                 aoi = 0;
             }
             data->aoi = aoi;
@@ -251,8 +251,8 @@ TwoSidedMaterial* LightToolsBsdfReader::read(const std::string& fileName)
     return material;
 }
 
-LightToolsBsdfReader::DataBlock::DataBlock() : aoi(0.0f),
-                                               poi(0.0f),
+LightToolsBsdfReader::DataBlock::DataBlock() : aoi(0),
+                                               poi(0),
                                                wavelength(0.0f),
                                                tis(0.0f),
                                                sideType(FRONT_SIDE),
@@ -268,10 +268,11 @@ bool LightToolsBsdfReader::DataBlock::cmp(DataBlock* lhs, DataBlock* rhs)
     }
 }
 
-SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock*>&     brdfData,
-                                                           const std::vector<float>&    outThetaDegrees,
-                                                           const std::vector<float>&    outPhiDegrees,
-                                                           ColorModel                   colorModel)
+SphericalCoordinatesBrdf*
+LightToolsBsdfReader::createBrdf(std::vector<DataBlock*>&   brdfData,
+                                 const std::vector<double>& outThetaDegrees,
+                                 const std::vector<double>& outPhiDegrees,
+                                 ColorModel                 colorModel)
 {
     if (brdfData.empty()) return 0;
 
@@ -288,7 +289,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
 
     std::sort(brdfData.begin(), brdfData.end(), DataBlock::cmp);
 
-    std::set<float> inThetaDegrees;
+    std::set<double> inThetaDegrees;
     for (auto it = brdfData.begin(); it != brdfData.end(); ++it) {
         inThetaDegrees.insert((*it)->aoi);
     }
@@ -307,7 +308,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
     SampleSet* ss = brdf->getSampleSet();
 
     array_util::copy(inThetaDegrees,    &ss->getAngles0());
-    brdf->setInPhi(0, 0.0f);
+    brdf->setInPhi(0, 0);
     array_util::copy(outThetaDegrees,   &ss->getAngles2());
     array_util::copy(outPhiDegrees,     &ss->getAngles3());
 
@@ -343,7 +344,7 @@ SphericalCoordinatesBrdf* LightToolsBsdfReader::createBrdf(std::vector<DataBlock
     }
 
     // An incoming azimuthal angle of an isotropic LightTools BSDF is 90 degrees.
-    SphericalCoordinatesBrdf* rotatedBrdf = rotateOutPhi(*brdf, -PI_2_F);
+    SphericalCoordinatesBrdf* rotatedBrdf = rotateOutPhi(*brdf, -PI_2_D);
     rotatedBrdf->clampAngles();
     brdf->setSourceType(MEASURED_SOURCE);
 

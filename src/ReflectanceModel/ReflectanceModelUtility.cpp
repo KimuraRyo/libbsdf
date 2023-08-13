@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2022 Kimura Ryo                                  //
+// Copyright (C) 2016-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -56,7 +56,7 @@ bool ReflectanceModelUtility::setupBrdf(const ReflectanceModel& model,
                                         int                     numAngles2,
                                         int                     numAngles3,
                                         DataType                dataType,
-                                        float                   ior)
+                                        double                  ior)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -67,10 +67,10 @@ bool ReflectanceModelUtility::setupBrdf(const ReflectanceModel& model,
         return false;
     }
 
-    Arrayf& angles0 = ss->getAngles0();
-    Arrayf& angles1 = ss->getAngles1();
-    Arrayf& angles2 = ss->getAngles2();
-    Arrayf& angles3 = ss->getAngles3();
+    Arrayd& angles0 = ss->getAngles0();
+    Arrayd& angles1 = ss->getAngles1();
+    Arrayd& angles2 = ss->getAngles2();
+    Arrayd& angles3 = ss->getAngles3();
 
     bool filled0 = (angles0.size() >= numAngles0);
     bool filled1 = (angles1.size() >= numAngles1);
@@ -118,30 +118,30 @@ void ReflectanceModelUtility::dumpParametersInfo(const ReflectanceModel& model)
 
     for (auto& param : params) {
         switch (param.getType()) {
-            case ReflectanceModel::Parameter::FLOAT_PARAMETER:
-                std::cout << param.getName() << ": " << *param.getFloat() << std::endl;
-                break;
-            case ReflectanceModel::Parameter::VEC3_PARAMETER:
-                std::cout << param.getName() << ": " << param.getVec3()->format(LB_EIGEN_IO_FMT)
-                          << std::endl;
-                break;
-            case ReflectanceModel::Parameter::INT_PARAMETER:
-                std::cout << param.getName() << ": " << *param.getInt() << std::endl;
-                break;
-            default:
-                lbError << "Invalid parameter type: " << param.getType();
-                break;
+        case ReflectanceModel::Parameter::REAL_PARAMETER:
+            std::cout << param.getName() << ": " << *param.getReal() << std::endl;
+            break;
+        case ReflectanceModel::Parameter::VEC3_PARAMETER:
+            std::cout << param.getName() << ": " << param.getVec3()->format(LB_EIGEN_IO_FMT)
+                      << std::endl;
+            break;
+        case ReflectanceModel::Parameter::INT_PARAMETER:
+            std::cout << param.getName() << ": " << *param.getInt() << std::endl;
+            break;
+        default:
+            lbError << "Invalid parameter type: " << param.getType();
+            break;
         }
     }
 }
 
-Spectrum ReflectanceModelUtility::getSpectrum(const ReflectanceModel&   model,
-                                              const Brdf&               brdf,
-                                              DataType                  dataType,
-                                              float                     angle0,
-                                              float                     angle1,
-                                              float                     angle2,
-                                              float                     angle3)
+Spectrum ReflectanceModelUtility::getSpectrum(const ReflectanceModel& model,
+                                              const Brdf&             brdf,
+                                              DataType                dataType,
+                                              double                  angle0,
+                                              double                  angle1,
+                                              double                  angle2,
+                                              double                  angle3)
 {
     using std::abs;
     using std::max;
@@ -177,25 +177,25 @@ Spectrum ReflectanceModelUtility::getSpectrum(const ReflectanceModel&   model,
     }
     else { // MONOCHROMATIC_MODEL
         Spectrum sp(1);
-        sp[0] = static_cast<float>(values.sum()) / 3.0f;
+        sp[0] = static_cast<float>(values.sum() / 3);
         return sp;
     }
 }
 
-bool ReflectanceModelUtility::insertAngle0(const ReflectanceModel&  model,
-                                           Brdf*                    brdf,
-                                           int                      numAngles,
-                                           DataType                 dataType)
+bool ReflectanceModelUtility::insertAngle0(const ReflectanceModel& model,
+                                           Brdf*                   brdf,
+                                           int                     numAngles,
+                                           DataType                dataType)
 {
     SampleSet* ss = brdf->getSampleSet();
 
-    float newAngle = 0.0f;
-    float maxDiff = 0.0f;
-    Arrayf& angles = ss->getAngles0();
+    double  newAngle = 0;
+    double  maxDiff = 0;
+    Arrayd& angles = ss->getAngles0();
 
-    Arrayf& angles1 = ss->getAngles1();
-    Arrayf& angles2 = ss->getAngles2();
-    Arrayf& angles3 = ss->getAngles3();
+    Arrayd& angles1 = ss->getAngles1();
+    Arrayd& angles2 = ss->getAngles2();
+    Arrayd& angles3 = ss->getAngles3();
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i1 = 0; i1 < angles1.size(); ++i1) {
         for (int i2 = 0; i2 < angles2.size(); ++i2) {
@@ -214,11 +214,10 @@ bool ReflectanceModelUtility::insertAngle0(const ReflectanceModel&  model,
             if (hasDownwardDir(*brdf, index,     i1, i2, i3) &&
                 hasDownwardDir(*brdf, nextIndex, i1, i2, i3)) break;
 
-            float angle     = angles[index];
-            float nextAngle = angles[nextIndex];
-            float midAngle  = (angle + nextAngle) * 0.5f;
-
-            float interval = nextAngle - angle;
+            double angle = angles[index];
+            double nextAngle = angles[nextIndex];
+            double midAngle = (angle + nextAngle) * 0.5;
+            double interval = nextAngle - angle;
 
             Spectrum sp     = getSpectrum(model, *brdf, dataType, angle,     angles1[i1], angles2[i2], angles3[i3]);
             Spectrum nextSp = getSpectrum(model, *brdf, dataType, nextAngle, angles1[i1], angles2[i2], angles3[i3]);
@@ -256,13 +255,13 @@ bool ReflectanceModelUtility::insertAngle1(const ReflectanceModel&  model,
 {
     SampleSet* ss = brdf->getSampleSet();
 
-    float newAngle = 0.0f;
-    float maxDiff = 0.0f;
-    Arrayf& angles = ss->getAngles1();
+    double  newAngle = 0;
+    double  maxDiff = 0;
+    Arrayd& angles = ss->getAngles1();
 
-    Arrayf& angles0 = ss->getAngles0();
-    Arrayf& angles2 = ss->getAngles2();
-    Arrayf& angles3 = ss->getAngles3();
+    Arrayd& angles0 = ss->getAngles0();
+    Arrayd& angles2 = ss->getAngles2();
+    Arrayd& angles3 = ss->getAngles3();
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i0 = 0; i0 < angles0.size(); ++i0) {
         for (int i2 = 0; i2 < angles2.size(); ++i2) {
@@ -281,14 +280,10 @@ bool ReflectanceModelUtility::insertAngle1(const ReflectanceModel&  model,
             if (hasDownwardDir(*brdf, i0, index,     i2, i3) &&
                 hasDownwardDir(*brdf, i0, nextIndex, i2, i3)) break;
 
-            float angle     = angles[index];
-            float nextAngle = angles[nextIndex];
-            float midAngle  = (angle + nextAngle) * 0.5f;
-
-            float interval = nextAngle - angle;
-
-            // Avoid the precision error of 32-bit float.
-            if (interval < 0.0001f) continue;
+            double angle = angles[index];
+            double nextAngle = angles[nextIndex];
+            double midAngle = (angle + nextAngle) * 0.5;
+            double interval = nextAngle - angle;
 
             Spectrum sp     = getSpectrum(model, *brdf, dataType, angles0[i0], angle,     angles2[i2], angles3[i3]);
             Spectrum nextSp = getSpectrum(model, *brdf, dataType, angles0[i0], nextAngle, angles2[i2], angles3[i3]);
@@ -326,13 +321,13 @@ bool ReflectanceModelUtility::insertAngle2(const ReflectanceModel&  model,
 {
     SampleSet* ss = brdf->getSampleSet();
 
-    float newAngle = 0.0f;
-    float maxDiff = 0.0f;
-    Arrayf& angles = ss->getAngles2();
+    double  newAngle = 0;
+    double  maxDiff = 0;
+    Arrayd& angles = ss->getAngles2();
 
-    Arrayf& angles0 = ss->getAngles0();
-    Arrayf& angles1 = ss->getAngles1();
-    Arrayf& angles3 = ss->getAngles3();
+    Arrayd& angles0 = ss->getAngles0();
+    Arrayd& angles1 = ss->getAngles1();
+    Arrayd& angles3 = ss->getAngles3();
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i0 = 0; i0 < angles0.size(); ++i0) {
         for (int i1 = 0; i1 < angles1.size(); ++i1) {
@@ -351,11 +346,10 @@ bool ReflectanceModelUtility::insertAngle2(const ReflectanceModel&  model,
             if (hasDownwardDir(*brdf, i0, i1, index,     i3) &&
                 hasDownwardDir(*brdf, i0, i1, nextIndex, i3)) break;
 
-            float angle     = angles[index];
-            float nextAngle = angles[nextIndex];
-            float midAngle  = (angle + nextAngle) * 0.5f;
-
-            float interval = nextAngle - angle;
+            double angle = angles[index];
+            double nextAngle = angles[nextIndex];
+            double midAngle = (angle + nextAngle) * 0.5;
+            double interval = nextAngle - angle;
 
             Spectrum sp     = getSpectrum(model, *brdf, dataType, angles0[i0], angles1[i1], angle,     angles3[i3]);
             Spectrum nextSp = getSpectrum(model, *brdf, dataType, angles0[i0], angles1[i1], nextAngle, angles3[i3]);
@@ -393,13 +387,13 @@ bool ReflectanceModelUtility::insertAngle3(const ReflectanceModel&  model,
 {
     SampleSet* ss = brdf->getSampleSet();
 
-    float newAngle = 0.0f;
-    float maxDiff = 0.0f;
-    Arrayf& angles = ss->getAngles3();
+    double  newAngle = 0;
+    double  maxDiff = 0;
+    Arrayd& angles = ss->getAngles3();
 
-    Arrayf& angles0 = ss->getAngles0();
-    Arrayf& angles1 = ss->getAngles1();
-    Arrayf& angles2 = ss->getAngles2();
+    Arrayd& angles0 = ss->getAngles0();
+    Arrayd& angles1 = ss->getAngles1();
+    Arrayd& angles2 = ss->getAngles2();
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i0 = 0; i0 < angles0.size(); ++i0) {
         for (int i1 = 0; i1 < angles1.size(); ++i1) {
@@ -418,14 +412,10 @@ bool ReflectanceModelUtility::insertAngle3(const ReflectanceModel&  model,
             if (hasDownwardDir(*brdf, i0, i1, i2, index) &&
                 hasDownwardDir(*brdf, i0, i1, i2, nextIndex)) break;
 
-            float angle     = angles[index];
-            float nextAngle = angles[nextIndex];
-            float midAngle  = (angle + nextAngle) * 0.5f;
-
-            float interval = nextAngle - angle;
-
-            // Avoid the precision error of 32-bit float.
-            if (interval < 0.0001f) continue;
+            double angle = angles[index];
+            double nextAngle = angles[nextIndex];
+            double midAngle = (angle + nextAngle) * 0.5;
+            double interval = nextAngle - angle;
 
             Spectrum sp     = getSpectrum(model, *brdf, dataType, angles0[i0], angles1[i1], angles2[i2], angle);
             Spectrum nextSp = getSpectrum(model, *brdf, dataType, angles0[i0], angles1[i1], angles2[i2], nextAngle);

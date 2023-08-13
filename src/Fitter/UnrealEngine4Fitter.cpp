@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2021-2022 Kimura Ryo                                  //
+// Copyright (C) 2021-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -100,20 +100,20 @@ void UnrealEngine4Fitter::estimateParameters(UnrealEngine4*      model,
     ReflectanceModel::Parameters& params = model->getParameters();
 
     UnrealEngine4 model0(*params.at(0).getVec3(),
-                         0.0f,
-                         *params.at(2).getFloat(),
-                         *params.at(3).getFloat());
+                         0,
+                         *params.at(2).getReal(),
+                         *params.at(3).getReal());
 
     UnrealEngine4 model1(*params.at(0).getVec3(),
-                         1.0f,
-                         *params.at(2).getFloat(),
-                         *params.at(3).getFloat());
+                         1,
+                         *params.at(2).getReal(),
+                         *params.at(3).getReal());
 
     Vec3*  colorVec3 = params.at(0).getVec3();
     double color[3] = {(*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2]};
-    double metallic = *params.at(1).getFloat();
-    double specular = *params.at(2).getFloat();
-    double roughness = *params.at(3).getFloat();
+    double metallic = *params.at(1).getReal();
+    double specular = *params.at(2).getReal();
+    double roughness = *params.at(3).getReal();
 
     ceres::Problem problem;
 
@@ -143,12 +143,12 @@ void UnrealEngine4Fitter::estimateParameters(UnrealEngine4*      model,
 
     using Scalar = typename Vec3::Scalar;
 
-    (*colorVec3)[0] = static_cast<Scalar>(color[0]);
-    (*colorVec3)[1] = static_cast<Scalar>(color[1]);
-    (*colorVec3)[2] = static_cast<Scalar>(color[2]);
-    *params.at(1).getFloat() = static_cast<float>(metallic);
-    *params.at(2).getFloat() = static_cast<float>(specular);
-    *params.at(3).getFloat() = static_cast<float>(roughness);
+    (*colorVec3)[0] = color[0];
+    (*colorVec3)[1] = color[1];
+    (*colorVec3)[2] = color[2];
+    *params.at(1).getReal() = metallic;
+    *params.at(2).getReal() = specular;
+    *params.at(3).getReal() = roughness;
 
     // Compare the results and select the best parameters.
     estimateWithoutMetallic(&model0, data);
@@ -169,9 +169,9 @@ void UnrealEngine4Fitter::estimateParameters(UnrealEngine4*      model,
         }
 
         *params.at(0).getVec3() = *newParams->at(0).getVec3();
-        *params.at(1).getFloat() = *newParams->at(1).getFloat();
-        *params.at(2).getFloat() = *newParams->at(2).getFloat();
-        *params.at(3).getFloat() = *newParams->at(3).getFloat();
+        *params.at(1).getReal() = *newParams->at(1).getReal();
+        *params.at(2).getReal() = *newParams->at(2).getReal();
+        *params.at(3).getReal() = *newParams->at(3).getReal();
     }
 }
 
@@ -181,9 +181,9 @@ void UnrealEngine4Fitter::estimateWithoutMetallic(UnrealEngine4* model, const Da
 
     Vec3*  colorVec3 = params.at(0).getVec3();
     double color[3] = {(*colorVec3)[0], (*colorVec3)[1], (*colorVec3)[2]};
-    double metallic = *params.at(1).getFloat();
-    double specular = *params.at(2).getFloat();
-    double roughness = *params.at(3).getFloat();
+    double metallic = *params.at(1).getReal();
+    double specular = *params.at(2).getReal();
+    double roughness = *params.at(3).getReal();
 
     ceres::Problem problem;
 
@@ -211,11 +211,9 @@ void UnrealEngine4Fitter::estimateWithoutMetallic(UnrealEngine4* model, const Da
     ceres::Solve(options, &problem, &summary);
     lbInfo << summary.FullReport();
 
-    using Scalar = typename Vec3::Scalar;
-
-    (*colorVec3)[0] = static_cast<Scalar>(color[0]);
-    (*colorVec3)[1] = static_cast<Scalar>(color[1]);
-    (*colorVec3)[2] = static_cast<Scalar>(color[2]);
-    *params.at(2).getFloat() = static_cast<float>(specular);
-    *params.at(3).getFloat() = static_cast<float>(roughness);
+    (*colorVec3)[0] = color[0];
+    (*colorVec3)[1] = color[1];
+    (*colorVec3)[2] = color[2];
+    *params.at(2).getReal() = specular;
+    *params.at(3).getReal() = roughness;
 }

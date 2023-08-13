@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2022 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -33,12 +33,12 @@ struct SphericalCoordinateSystem
      * assigns them to \a inDir and \a outDir.
      */
     template <typename ScalarT>
-    static void toXyz(ScalarT   inTheta,
-                      ScalarT   inPhi,
-                      ScalarT   outTheta,
-                      ScalarT   outPhi,
-                      Vec3*     inDir,
-                      Vec3*     outDir);
+    static void toXyz(ScalarT inTheta,
+                      ScalarT inPhi,
+                      ScalarT outTheta,
+                      ScalarT outPhi,
+                      Vec3*   inDir,
+                      Vec3*   outDir);
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
@@ -68,15 +68,15 @@ struct SphericalCoordinateSystem
     static constexpr char ANGLE2_NAME[] = "outgoing polar angle";     /*!< This attribute holds the name of outTheta. */
     static constexpr char ANGLE3_NAME[] = "outgoing azimuthal angle"; /*!< This attribute holds the name of outPhi. */
 
-    static constexpr float MIN_ANGLE0 = 0.0f; /*!< This attribute holds the minimum value of inTheta. */
-    static constexpr float MIN_ANGLE1 = 0.0f; /*!< This attribute holds the minimum value of inPhi. */
-    static constexpr float MIN_ANGLE2 = 0.0f; /*!< This attribute holds the minimum value of outTheta. */
-    static constexpr float MIN_ANGLE3 = 0.0f; /*!< This attribute holds the minimum value of outPhi. */
+    static constexpr double MIN_ANGLE0 = 0; /*!< This attribute holds the minimum value of inTheta. */
+    static constexpr double MIN_ANGLE1 = 0; /*!< This attribute holds the minimum value of inPhi. */
+    static constexpr double MIN_ANGLE2 = 0; /*!< This attribute holds the minimum value of outTheta. */
+    static constexpr double MIN_ANGLE3 = 0; /*!< This attribute holds the minimum value of outPhi. */
 
-    static constexpr float MAX_ANGLE0 = PI_2_F; /*!< This attribute holds the maximum value of inTheta. */
-    static constexpr float MAX_ANGLE1 = TAU_F;  /*!< This attribute holds the maximum value of inPhi. */
-    static constexpr float MAX_ANGLE2 = PI_2_F; /*!< This attribute holds the maximum value of outTheta. */
-    static constexpr float MAX_ANGLE3 = TAU_F;  /*!< This attribute holds the maximum value of outPhi. */
+    static constexpr double MAX_ANGLE0 = PI_2_D; /*!< This attribute holds the maximum value of inTheta. */
+    static constexpr double MAX_ANGLE1 = TAU_D;  /*!< This attribute holds the maximum value of inPhi. */
+    static constexpr double MAX_ANGLE2 = PI_2_D; /*!< This attribute holds the maximum value of outTheta. */
+    static constexpr double MAX_ANGLE3 = TAU_D;  /*!< This attribute holds the maximum value of outPhi. */
 
     /*! Converts from a spherical coordinate system to a Cartesian. */
     static Vec3 toXyz(const Vec2& thetaPhi);
@@ -97,12 +97,12 @@ struct SphericalCoordinateSystem
 };
 
 template <typename ScalarT>
-void SphericalCoordinateSystem::toXyz(ScalarT   inTheta,
-                                      ScalarT   inPhi,
-                                      ScalarT   outTheta,
-                                      ScalarT   outPhi,
-                                      Vec3*     inDir,
-                                      Vec3*     outDir)
+void SphericalCoordinateSystem::toXyz(ScalarT inTheta,
+                                      ScalarT inPhi,
+                                      ScalarT outTheta,
+                                      ScalarT outPhi,
+                                      Vec3*   inDir,
+                                      Vec3*   outDir)
 {
     Vec4 thetaPhi(inTheta, inPhi, outTheta, outPhi);
     Vec4 sinArray = thetaPhi.array().sin();
@@ -140,7 +140,7 @@ void SphericalCoordinateSystem::fromXyz(const Vec3& inDir,
     fromXyz(outDir, outTheta, outPhi);
 
     *outPhi = *outPhi - inPhi;
-    if (*outPhi < 0.0) {
+    if (*outPhi < 0) {
         *outPhi += ScalarT(TAU_D);
     }
 }
@@ -183,7 +183,7 @@ inline Vec3::Scalar SphericalCoordinateSystem::toTheta(const Vec3& dir)
 inline Vec3::Scalar SphericalCoordinateSystem::toPhi(const Vec3& dir)
 {
     Vec3::Scalar phi = std::atan2(dir[1], dir[0]);
-    if (phi < 0.0) {
+    if (phi < 0) {
         phi += Vec3::Scalar(TAU_D);
     }
     assert(!std::isnan(phi) && !std::isinf(phi));

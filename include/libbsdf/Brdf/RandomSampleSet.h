@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2019 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -27,7 +27,7 @@ template <typename CoordSysT>
 class RandomSampleSet
 {
 public:
-    using AngleList = std::vector<float>;
+    using AngleList = std::vector<double>;
     using SampleMap = std::map<AngleList, Spectrum, std::less<AngleList>,
                                Eigen::aligned_allocator<std::pair<const AngleList, Spectrum>>>;
 
@@ -48,11 +48,11 @@ public:
      * The nearest sample is searched with weights.
      */
     template <typename LocalCoordSysT>
-    const Spectrum& estimateSpectrum(const AngleList&   angles,
-                                     float              weight0 = 1.0f,
-                                     float              weight1 = 1.0f,
-                                     float              weight2 = 1.0f,
-                                     float              weight3 = 1.0f) const;
+    const Spectrum& estimateSpectrum(const AngleList& angles,
+                                     double           weight0 = 1,
+                                     double           weight1 = 1,
+                                     double           weight2 = 1,
+                                     double           weight3 = 1) const;
 
 protected:
     SampleMap sampleMap_; /*!< Random sample points. */
@@ -118,49 +118,46 @@ const Spectrum& RandomSampleSet<CoordSysT>::findSpectrumOfNearestSample(const An
 
 template <typename CoordSysT>
 template <typename LocalCoordSysT>
-const Spectrum& RandomSampleSet<CoordSysT>::estimateSpectrum(const AngleList&   angles,
-                                                             float              weight0,
-                                                             float              weight1,
-                                                             float              weight2,
-                                                             float              weight3) const
+const Spectrum& RandomSampleSet<CoordSysT>::estimateSpectrum(const AngleList& angles,
+                                                             double           weight0,
+                                                             double           weight1,
+                                                             double           weight2,
+                                                             double           weight3) const
 {
     using std::abs;
 
-    float angle0, angle1, angle2, angle3;
+    double angle0, angle1, angle2, angle3;
     convertCoordinateSystem<CoordSysT, LocalCoordSysT>(
-        angles.at(0), angles.at(1), angles.at(2), angles.at(3),
-        &angle0, &angle1, &angle2, &angle3);
+        angles.at(0), angles.at(1), angles.at(2), angles.at(3), &angle0, &angle1, &angle2, &angle3);
 
     const Spectrum* sp = 0;
-    float minAngleDiff = std::numeric_limits<float>::max();
+    double          minAngleDiff = std::numeric_limits<double>::max();
 
     for (auto it = sampleMap_.begin(); it != sampleMap_.end(); ++it) {
         const AngleList& sampleAngles = it->first;
-        float sampleAngle0, sampleAngle1, sampleAngle2, sampleAngle3;
+        double           sampleAngle0, sampleAngle1, sampleAngle2, sampleAngle3;
         convertCoordinateSystem<CoordSysT, LocalCoordSysT>(
             sampleAngles.at(0), sampleAngles.at(1), sampleAngles.at(2), sampleAngles.at(3),
             &sampleAngle0, &sampleAngle1, &sampleAngle2, &sampleAngle3);
 
-        float angle0Diff = abs(angle0 - sampleAngle0);
+        double angle0Diff = abs(angle0 - sampleAngle0);
 
-        float angle1Diff = abs(angle1 - sampleAngle1);
-        if (angle1Diff > PI_F) {
-            angle1Diff = TAU_F - angle1Diff;
+        double angle1Diff = abs(angle1 - sampleAngle1);
+        if (angle1Diff > PI_D) {
+            angle1Diff = TAU_D - angle1Diff;
         }
 
-        float angle2Diff = abs(angle2 - sampleAngle2);
+        double angle2Diff = abs(angle2 - sampleAngle2);
 
-        float angle3Diff = abs(angle3 - sampleAngle3);
-        if (angle3Diff > PI_F) {
-            angle3Diff = TAU_F - angle3Diff;
+        double angle3Diff = abs(angle3 - sampleAngle3);
+        if (angle3Diff > PI_D) {
+            angle3Diff = TAU_D - angle3Diff;
         }
 
-        float angleDiff = weight0 * angle0Diff
-                        + weight1 * angle1Diff
-                        + weight2 * angle2Diff
-                        + weight3 * angle3Diff;
+        double angleDiff = weight0 * angle0Diff + weight1 * angle1Diff + weight2 * angle2Diff +
+                           weight3 * angle3Diff;
 
-        if (angleDiff == 0.0f) {
+        if (angleDiff == 0) {
             return it->second;
         }
         else if (angleDiff < minAngleDiff) {

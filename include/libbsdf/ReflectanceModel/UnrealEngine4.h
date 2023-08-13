@@ -1,5 +1,5 @@
 ﻿// =================================================================== //
-// Copyright (C) 2021 Kimura Ryo                                       //
+// Copyright (C) 2021-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,30 +22,25 @@ class UnrealEngine4 : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    UnrealEngine4(const Vec3&   color,
-                  float         metallic,
-                  float         specular,
-                  float         roughness)
-                  : color_      (color),
-                    metallic_   (metallic),
-                    specular_   (specular),
-                    roughness_  (roughness)
+    UnrealEngine4(const Vec3& color, double metallic, double specular, double roughness)
+        : color_(color), metallic_(metallic), specular_(specular), roughness_(roughness)
     {
-        parameters_.push_back(Parameter("Base color",   &color_));
-        parameters_.push_back(Parameter("Metallic",     &metallic_, 0.0f, 1.0f));
-        parameters_.push_back(Parameter("Specular",     &specular_, 0.0f, 1.0f,
-                                        "Specular reflectance at normal incidence. 0.5 corresponds to 4% reflectance."));
-        parameters_.push_back(Parameter("Roughness",    &roughness_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Base color", &color_));
+        parameters_.push_back(Parameter("Metallic", &metallic_, 0.0, 1.0));
+        parameters_.push_back(Parameter(
+            "Specular", &specular_, 0.0, 1.0,
+            "Specular reflectance at normal incidence. 0.5 corresponds to 4% reflectance."));
+        parameters_.push_back(Parameter("Roughness", &roughness_, 0.01, 1.0));
     }
 
     template <typename Vec3T, typename ColorT, typename ScalarT>
-    static ColorT compute(const Vec3T&      L,
-                          const Vec3T&      V,
-                          const Vec3T&      N,
-                          const ColorT&     color,
-                          const ScalarT&    metallic,
-                          const ScalarT&    specular,
-                          const ScalarT&    roughness);
+    static ColorT compute(const Vec3T&   L,
+                          const Vec3T&   V,
+                          const Vec3T&   N,
+                          const ColorT&  color,
+                          const ScalarT& metallic,
+                          const ScalarT& specular,
+                          const ScalarT& roughness);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const override
     {
@@ -83,10 +78,10 @@ private:
     template <typename T>
     static T computeSmithJointApproxVis(const T& dotNL, const T& dotNV, const T& alpha);
 
-    Vec3    color_;
-    float   metallic_;
-    float   specular_;
-    float   roughness_;
+    Vec3   color_;
+    double metallic_;
+    double specular_;
+    double roughness_;
 };
 
 /*
@@ -94,13 +89,13 @@ private:
  */
 
 template <typename Vec3T, typename ColorT, typename ScalarT>
-ColorT UnrealEngine4::compute(const Vec3T&      L,
-                              const Vec3T&      V,
-                              const Vec3T&      N,
-                              const ColorT&     color,
-                              const ScalarT&    metallic,
-                              const ScalarT&    specular,
-                              const ScalarT&    roughness)
+ColorT UnrealEngine4::compute(const Vec3T&   L,
+                              const Vec3T&   V,
+                              const Vec3T&   N,
+                              const ColorT&  color,
+                              const ScalarT& metallic,
+                              const ScalarT& specular,
+                              const ScalarT& roughness)
 {
     using ColorScalar = typename ColorT::Scalar;
 

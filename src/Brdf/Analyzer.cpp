@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2022 Kimura Ryo                                  //
+// Copyright (C) 2018-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -64,11 +64,11 @@ Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThInd
     sumSpectrum.resize(brdf.getSampleSet()->getNumWavelengths());
     sumSpectrum.setZero();
 
-    float inTheta = brdf.getInTheta(inThIndex);
-    float inPhi   = brdf.getInPhi(inPhIndex);
+    double inTheta = brdf.getInTheta(inThIndex);
+    double inPhi = brdf.getInPhi(inPhIndex);
 
     // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
-    float offsetInTheta = std::max(inTheta, EPSILON_F);
+    double offsetInTheta = std::max(inTheta, EPSILON_D);
     Vec3 inDir = SphericalCoordinateSystem::toXyz(offsetInTheta, inPhi);
 
     for (int thIndex = 0; thIndex < brdf.getNumSpecTheta() - 1; ++thIndex) {
@@ -97,12 +97,12 @@ Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir, int numThet
     std::unique_ptr<SpecularCoordinatesBrdf> inDirBrdf(new SpecularCoordinatesBrdf(1, 1,
                                                                                    numThetaDivisions + 1,
                                                                                    numPhiDivisions + 1,
-                                                                                   2.0f,
+                                                                                   2,
                                                                                    ss->getColorModel(),
                                                                                    ss->getNumWavelengths()));
     inDirBrdf->getSampleSet()->getWavelengths() = ss->getWavelengths();
 
-    float inTheta, inPhi;
+    double inTheta, inPhi;
     SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
     inDirBrdf->setInTheta(0, inTheta);
     inDirBrdf->setInPhi(0, inPhi);
@@ -183,9 +183,7 @@ Spectrum lb::computeBihemisphericalReflectance(const Brdf&  brdf,
     return sumSp / ((numInThetaDivisions + 1) * numPhi);
 }
 
-SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
-                                             const Brdf&    standardBrdf,
-                                             float          ior)
+SampleSet2D* lb::computeSpecularReflectances(const Brdf& brdf, const Brdf& standardBrdf, double ior)
 {
     const SampleSet* ss = brdf.getSampleSet();
     const SampleSet* standardSs = standardBrdf.getSampleSet();
@@ -199,9 +197,9 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
                                        ss->getNumAngles1(),
                                        ss->getColorModel(),
                                        ss->getNumWavelengths());
-    ss2->getThetaArray()    = ss->getAngles0();
-    ss2->getPhiArray()      = ss->getAngles1();
-    ss2->getWavelengths()   = ss->getWavelengths();
+    ss2->getThetaArray() = ss->getAngles0();
+    ss2->getPhiArray() = ss->getAngles1();
+    ss2->getWavelengths() = ss->getWavelengths();
 
     for (int thIndex = 0; thIndex < ss2->getNumTheta(); ++thIndex) {
     for (int phIndex = 0; phIndex < ss2->getNumPhi();   ++phIndex) {
@@ -212,11 +210,11 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
         Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
 
         float standardRef;
-        if (ior == 1.0f) {
+        if (ior == 1) {
             standardRef = 1.0f;
         }
         else {
-            standardRef = computeFresnel(ss2->getTheta(thIndex), ior);
+            standardRef = static_cast<float>(computeFresnel(ss2->getTheta(thIndex), ior));
         }
 
         Spectrum refSp = brdfSp / standardBrdfSp * standardRef;
@@ -228,8 +226,8 @@ SampleSet2D* lb::computeSpecularReflectances(const Brdf&    brdf,
 
 SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf,
                                              const Brdf&                    standardBrdf,
-                                             float                          ior,
-                                             float                          maxSpecularTheta)
+                                             double                         ior,
+                                             double                         maxSpecularTheta)
 {
     const SampleSet* ss = brdf.getSampleSet();
     const SampleSet* standardSs = standardBrdf.getSampleSet();
@@ -272,11 +270,11 @@ SampleSet2D* lb::computeSpecularReflectances(const SpecularCoordinatesBrdf& brdf
         Spectrum standardBrdfSp = standardBrdf.getSpectrum(inDir, specularDir);
 
         float standardRef;
-        if (ior == 1.0f) {
+        if (ior == 1) {
             standardRef = 1.0f;
         }
         else {
-            standardRef = computeFresnel(ss2->getTheta(thIndex), ior);
+            standardRef = static_cast<float>(computeFresnel(ss2->getTheta(thIndex), ior));
         }
 
         Spectrum refSp = brdfSp / standardBrdfSp.cwiseMax(EPSILON_F) * standardRef;
@@ -303,7 +301,7 @@ Spectrum lb::computeDifference(const Brdf& brdf0,
 
     int numInPhi = std::max(ss0->getNumAngles1(), ss1->getNumAngles1());
     std::unique_ptr<Brdf> diffBrdf(new SpecularCoordinatesBrdf(
-        19, numInPhi, 91, 73, 2.0f, ss0->getColorModel(), ss0->getNumWavelengths()));
+        19, numInPhi, 91, 73, 2, ss0->getColorModel(), ss0->getNumWavelengths()));
 
     SampleSet* ss = diffBrdf->getSampleSet();
 
@@ -374,8 +372,7 @@ lb::computeReciprocityError(const Brdf& brdf, int numInThetaDivisions, int numIn
     return computeBihemisphericalReflectance(*diffBrdf, numInThetaDivisions, numInPhiDivisions);
 }
 
-Spectrum lb::findDiffuseThresholds(const Brdf&      brdf,
-                                   const double&    maxTheta)
+Spectrum lb::findDiffuseThresholds(const Brdf& brdf, const double& maxTheta)
 {
     const SampleSet* ss = brdf.getSampleSet();
 

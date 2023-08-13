@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2020 Kimura Ryo                                  //
+// Copyright (C) 2017-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,11 +20,13 @@ using namespace lb;
 using Interpolator = MonotoneCubicInterpolator;
 
 Smoother2D::Smoother2D(SampleSet2D* samples)
-                       : samples_(samples),
-                         diffThreshold_(0.001f),
-                         maxIteration0_(2),
-                         maxIteration1_(2),
-                         minAngleInterval_(toRadian(0.1f)) {}
+    : samples_(samples),
+      diffThreshold_(0.001f),
+      maxIteration0_(2),
+      maxIteration1_(2),
+      minAngleInterval_(toRadian(0.1))
+{
+}
 
 void Smoother2D::smooth()
 {
@@ -66,11 +68,8 @@ bool Smoother2D::insertAngle0()
 
     for (int i1 = 0; i1 < samples_->getNumPhi(); ++i1) {
         for (int i0 = 1; i0 < samples_->getNumTheta() - 2; ++i0) {
-            Vec2f angles(samples_->getTheta(i0),
-                         samples_->getPhi(i1));
-
-            Vec2f nextAngles(samples_->getTheta(i0 + 1),
-                             samples_->getPhi(i1));
+            Vec2 angles(samples_->getTheta(i0), samples_->getPhi(i1));
+            Vec2 nextAngles(samples_->getTheta(i0 + 1), samples_->getPhi(i1));
 
             if (insertAngle(angles0_, 0, angles, nextAngles)) {
                 inserted = true;
@@ -91,11 +90,8 @@ bool Smoother2D::insertAngle1()
 
     for (int i0 = 0; i0 < samples_->getNumTheta(); ++i0) {
         for (int i1 = 0; i1 < samples_->getNumPhi() - 1; ++i1) {
-            Vec2f angles(samples_->getTheta(i0),
-                         samples_->getPhi(i1));
-
-            Vec2f nextAngles(samples_->getTheta(i0),
-                             samples_->getPhi(i1 + 1));
+            Vec2 angles(samples_->getTheta(i0), samples_->getPhi(i1));
+            Vec2 nextAngles(samples_->getTheta(i0), samples_->getPhi(i1 + 1));
 
             if (insertAngle(angles1_, 1, angles, nextAngles)) {
                 inserted = true;
@@ -106,19 +102,19 @@ bool Smoother2D::insertAngle1()
     return inserted;
 }
 
-bool Smoother2D::insertAngle(std::set<Arrayf::Scalar>&  angleSet,
-                             int                        angleSuffix,
-                             const Vec2f&               angles,
-                             const Vec2f&               nextAngles)
+bool Smoother2D::insertAngle(std::set<double>& angleSet,
+                             int               angleSuffix,
+                             const Vec2&       angles,
+                             const Vec2&       nextAngles)
 {
     if (std::abs(angles[angleSuffix] - nextAngles[angleSuffix]) < minAngleInterval_) {
         return false;
     }
 
-    Vec2f midAngles = (angles + nextAngles) / 2.0f;
+    Vec2 midAngles = (angles + nextAngles) / 2;
 
-    Spectrum lerpSp     = LinearInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
-    Spectrum smoothSp   = Interpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
+    Spectrum lerpSp = LinearInterpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
+    Spectrum smoothSp = Interpolator::getSpectrum(*samples_, midAngles[0], midAngles[1]);
 
     Spectrum diffSp = (lerpSp - smoothSp).abs();
     if (diffSp.maxCoeff() > diffThreshold_) {
@@ -140,7 +136,7 @@ void Smoother2D::updateSamples()
     array_util::copy(angles1_, &samples_->getPhiArray());
     samples_->updateAngleAttributes();
 
-    lb::initializeSpectra<Interpolator>(*origSs2, samples_);
+    initializeSpectra<Interpolator>(*origSs2, samples_);
 
     delete origSs2;
 }

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -30,20 +30,20 @@ public:
      *
      * \param equalIntervalAngles If this parameter is true, angles of sample points are equally-spaced intervals.
      */
-    CoordinatesBrdf(int         numAngles0,
-                    int         numAngles1,
-                    int         numAngles2,
-                    int         numAngles3,
-                    ColorModel  colorModel = RGB_MODEL,
-                    int         numWavelengths = 3,
-                    bool        equalIntervalAngles = false);
+    CoordinatesBrdf(int        numAngles0,
+                    int        numAngles1,
+                    int        numAngles2,
+                    int        numAngles3,
+                    ColorModel colorModel = RGB_MODEL,
+                    int        numWavelengths = 3,
+                    bool       equalIntervalAngles = false);
 
     /*! Constructs a BRDF from lb::Brdf and angle lists. */
-    CoordinatesBrdf(const Brdf&     brdf,
-                    const Arrayf&   angles0,
-                    const Arrayf&   angles1,
-                    const Arrayf&   angles2,
-                    const Arrayf&   angles3);
+    CoordinatesBrdf(const Brdf&   brdf,
+                    const Arrayd& angles0,
+                    const Arrayd& angles1,
+                    const Arrayd& angles2,
+                    const Arrayd& angles3);
 
     /*! Constructs a BRDF from lb::Brdf and the numbers of angles. Angles are equally-spaced intervals. */
     CoordinatesBrdf(const Brdf& brdf,
@@ -73,44 +73,44 @@ public:
      * Computes incoming and outgoing directions of a Cartesian coordinate system
      * using a set of angle indices.
      */
-    void getInOutDirection(int      index0,
-                           int      index1,
-                           int      index2,
-                           int      index3,
-                           Vec3*    inDir,
-                           Vec3*    outDir) const override;
+    void getInOutDirection(int   index0,
+                           int   index1,
+                           int   index2,
+                           int   index3,
+                           Vec3* inDir,
+                           Vec3* outDir) const override;
 
     /*!
      * Converts from four angles to incoming and outgoing directions and
      * assigns them to \a inDir and \a outDir.
      */
-    void toXyz(float angle0,
-               float angle1,
-               float angle2,
-               float angle3,
-               Vec3* inDir,
-               Vec3* outDir) const override;
+    void toXyz(double angle0,
+               double angle1,
+               double angle2,
+               double angle3,
+               Vec3*  inDir,
+               Vec3*  outDir) const override;
 
     /*!
      * Converts from incoming and outgoing directions to four angles and
      * assigns them to \a angle0, \a angle1, \a angle2, and \a angle3.
      */
-    void fromXyz(const Vec3&    inDir,
-                 const Vec3&    outDir,
-                 float*         angle0,
-                 float*         angle1,
-                 float*         angle2,
-                 float*         angle3) const override;
+    void fromXyz(const Vec3& inDir,
+                 const Vec3& outDir,
+                 double*     angle0,
+                 double*     angle1,
+                 double*     angle2,
+                 double*     angle3) const override;
 
     /*!
      * Converts from incoming and outgoing directions to three angles for an isotropic BRDF and
      * assigns them to \a angle0, \a angle2, and \a angle3.
      */
-    void fromXyz(const Vec3&    inDir,
-                 const Vec3&    outDir,
-                 float*         angle0,
-                 float*         angle2,
-                 float*         angle3) const override;
+    void fromXyz(const Vec3& inDir,
+                 const Vec3& outDir,
+                 double*     angle0,
+                 double*     angle2,
+                 double*     angle3) const override;
 
     std::string getAngle0Name() const override; /*!< Gets a name of angle0. */
     std::string getAngle1Name() const override; /*!< Gets a name of angle1. */
@@ -143,10 +143,10 @@ public:
 
 protected:
     /*! Sets the angle0 at the index. The array of angles must be sorted in ascending order. */
-    void setAngle0(int index, float angle);
-    void setAngle1(int index, float angle); /*!< Sets the angle1 at the index. \sa setAngle0() */
-    void setAngle2(int index, float angle); /*!< Sets the angle2 at the index. \sa setAngle0() */
-    void setAngle3(int index, float angle); /*!< Sets the angle3 at the index. \sa setAngle0() */
+    void setAngle0(int index, double angle);
+    void setAngle1(int index, double angle); /*!< Sets the angle1 at the index. \sa setAngle0() */
+    void setAngle2(int index, double angle); /*!< Sets the angle2 at the index. \sa setAngle0() */
+    void setAngle3(int index, double angle); /*!< Sets the angle3 at the index. \sa setAngle0() */
 
 private:
     /*! Copy operator is disabled. */
@@ -157,19 +157,14 @@ private:
 };
 
 template <typename CoordSysT>
-CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(int         numAngles0,
-                                            int         numAngles1,
-                                            int         numAngles2,
-                                            int         numAngles3,
-                                            ColorModel  colorModel,
-                                            int         numWavelengths,
-                                            bool        equalIntervalAngles)
-                                            : Brdf(numAngles0,
-                                                   numAngles1,
-                                                   numAngles2,
-                                                   numAngles3,
-                                                   colorModel,
-                                                   numWavelengths)
+CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(int        numAngles0,
+                                            int        numAngles1,
+                                            int        numAngles2,
+                                            int        numAngles3,
+                                            ColorModel colorModel,
+                                            int        numWavelengths,
+                                            bool       equalIntervalAngles)
+    : Brdf(numAngles0, numAngles1, numAngles2, numAngles3, colorModel, numWavelengths)
 {
     if (equalIntervalAngles) {
         initializeEqualIntervalAngles();
@@ -177,11 +172,11 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(int         numAngles0,
 }
 
 template <typename CoordSysT>
-CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&     brdf,
-                                            const Arrayf&   angles0,
-                                            const Arrayf&   angles1,
-                                            const Arrayf&   angles2,
-                                            const Arrayf&   angles3)
+CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf&   brdf,
+                                            const Arrayd& angles0,
+                                            const Arrayd& angles1,
+                                            const Arrayd& angles2,
+                                            const Arrayd& angles3)
                                             : Brdf()
 {
     const SampleSet* ss = brdf.getSampleSet();
@@ -210,7 +205,7 @@ CoordinatesBrdf<CoordSysT>::CoordinatesBrdf(const Brdf& brdf,
                                             int         numAngles1,
                                             int         numAngles2,
                                             int         numAngles3)
-                                            : Brdf()
+    : Brdf()
 {
     assert(numAngles0 > 0 && numAngles1 > 0 && numAngles2 > 0 && numAngles3 > 0);
 
@@ -255,12 +250,12 @@ float CoordinatesBrdf<CoordSysT>::getValue(const Vec3& inDir, const Vec3& outDir
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::getInOutDirection(int      index0,
-                                                   int      index1,
-                                                   int      index2,
-                                                   int      index3,
-                                                   Vec3*    inDir,
-                                                   Vec3*    outDir) const
+void CoordinatesBrdf<CoordSysT>::getInOutDirection(int   index0,
+                                                   int   index1,
+                                                   int   index2,
+                                                   int   index3,
+                                                   Vec3* inDir,
+                                                   Vec3* outDir) const
 {
     toXyz(samples_->getAngle0(index0),
           samples_->getAngle1(index1),
@@ -270,33 +265,33 @@ void CoordinatesBrdf<CoordSysT>::getInOutDirection(int      index0,
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::toXyz(float angle0,
-                                       float angle1,
-                                       float angle2,
-                                       float angle3,
-                                       Vec3* inDir,
-                                       Vec3* outDir) const
+void CoordinatesBrdf<CoordSysT>::toXyz(double angle0,
+                                       double angle1,
+                                       double angle2,
+                                       double angle3,
+                                       Vec3*  inDir,
+                                       Vec3*  outDir) const
 {
     CoordSysT::toXyz(angle0, angle1, angle2, angle3, inDir, outDir);
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3&    inDir,
-                                         const Vec3&    outDir,
-                                         float*         angle0,
-                                         float*         angle1,
-                                         float*         angle2,
-                                         float*         angle3) const
+void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3& inDir,
+                                         const Vec3& outDir,
+                                         double*     angle0,
+                                         double*     angle1,
+                                         double*     angle2,
+                                         double*     angle3) const
 {
     CoordSysT::fromXyz(inDir, outDir, angle0, angle1, angle2, angle3);
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3&    inDir,
-                                         const Vec3&    outDir,
-                                         float*         angle0,
-                                         float*         angle2,
-                                         float*         angle3) const
+void CoordinatesBrdf<CoordSysT>::fromXyz(const Vec3& inDir,
+                                         const Vec3& outDir,
+                                         double*     angle0,
+                                         double*     angle2,
+                                         double*     angle3) const
 {
     CoordSysT::fromXyz(inDir, outDir, angle0, angle2, angle3);
 }
@@ -357,14 +352,14 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
         }
     }}}}
 
-    Arrayf angles0 = samples_->getAngles0();
-    Arrayf angles1 = samples_->getAngles1();
-    Arrayf angles2 = samples_->getAngles2();
-    Arrayf angles3 = samples_->getAngles3();
+    Arrayd angles0 = samples_->getAngles0();
+    Arrayd angles1 = samples_->getAngles1();
+    Arrayd angles2 = samples_->getAngles2();
+    Arrayd angles3 = samples_->getAngles3();
 
     // Angle arrays
     if (angles0.minCoeff() < CoordSysT::MIN_ANGLE0 ||
-        angles0.maxCoeff() > CoordSysT::MAX_ANGLE0 + EPSILON_F * CoordSysT::MAX_ANGLE0) {
+        angles0.maxCoeff() > CoordSysT::MAX_ANGLE0 + EPSILON_D * CoordSysT::MAX_ANGLE0) {
         valid = false;
         lbWarn
             << "[CoordinatesBrdf::validate] The angle(s) in angles0 is outside of range:\n\t"
@@ -375,7 +370,7 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
     }
 
     if (angles1.minCoeff() < CoordSysT::MIN_ANGLE1 ||
-        angles1.maxCoeff() > CoordSysT::MAX_ANGLE1 + EPSILON_F * CoordSysT::MAX_ANGLE1) {
+        angles1.maxCoeff() > CoordSysT::MAX_ANGLE1 + EPSILON_D * CoordSysT::MAX_ANGLE1) {
         valid = false;
         lbWarn
             << "[CoordinatesBrdf::validate] The angle(s) in angles1 is outside of range:\n\t"
@@ -386,7 +381,7 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
     }
 
     if (angles2.minCoeff() < CoordSysT::MIN_ANGLE2 ||
-        angles2.maxCoeff() > CoordSysT::MAX_ANGLE2 + EPSILON_F * CoordSysT::MAX_ANGLE2) {
+        angles2.maxCoeff() > CoordSysT::MAX_ANGLE2 + EPSILON_D * CoordSysT::MAX_ANGLE2) {
         valid = false;
         lbWarn
             << "[CoordinatesBrdf::validate] The angle(s) in angles2 is outside of range:\n\t"
@@ -397,7 +392,7 @@ bool CoordinatesBrdf<CoordSysT>::validate(bool verbose) const
     }
 
     if (angles3.minCoeff() < CoordSysT::MIN_ANGLE3 ||
-        angles3.maxCoeff() > CoordSysT::MAX_ANGLE3 + EPSILON_F * CoordSysT::MAX_ANGLE3) {
+        angles3.maxCoeff() > CoordSysT::MAX_ANGLE3 + EPSILON_D * CoordSysT::MAX_ANGLE3) {
         valid = false;
         lbWarn
             << "[CoordinatesBrdf::validate] The angle(s) in angles3 is outside of range:\n\t"
@@ -418,10 +413,10 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles(bool angle0Expanded,
 {
     bool expanded = false;
 
-    Arrayf angles0 = samples_->getAngles0();
-    Arrayf angles1 = samples_->getAngles1();
-    Arrayf angles2 = samples_->getAngles2();
-    Arrayf angles3 = samples_->getAngles3();
+    Arrayd angles0 = samples_->getAngles0();
+    Arrayd angles1 = samples_->getAngles1();
+    Arrayd angles2 = samples_->getAngles2();
+    Arrayd angles3 = samples_->getAngles3();
 
     using array_util::appendElement;
 
@@ -430,10 +425,10 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles(bool angle0Expanded,
     if (angle2Expanded && !isEqual(angles2[0], CoordSysT::MIN_ANGLE2)) { appendElement(&angles2, CoordSysT::MIN_ANGLE2); }
     if (angle3Expanded && !isEqual(angles3[0], CoordSysT::MIN_ANGLE3)) { appendElement(&angles3, CoordSysT::MIN_ANGLE3); }
 
-    const float maxAngle0 = CoordSysT::MAX_ANGLE0;
-    const float maxAngle1 = CoordSysT::MAX_ANGLE1;
-    const float maxAngle2 = CoordSysT::MAX_ANGLE2;
-    const float maxAngle3 = CoordSysT::MAX_ANGLE3;
+    constexpr double maxAngle0 = CoordSysT::MAX_ANGLE0;
+    constexpr double maxAngle1 = CoordSysT::MAX_ANGLE1;
+    constexpr double maxAngle2 = CoordSysT::MAX_ANGLE2;
+    constexpr double maxAngle3 = CoordSysT::MAX_ANGLE3;
 
     if (angle0Expanded && !isEqual(angles0[angles0.size() - 1], maxAngle0)) { appendElement(&angles0, maxAngle0); }
     if (angle2Expanded && !isEqual(angles2[angles2.size() - 1], maxAngle2)) { appendElement(&angles2, maxAngle2); }
@@ -480,10 +475,10 @@ bool CoordinatesBrdf<CoordSysT>::expandAngles(bool angle0Expanded,
 template <typename CoordSysT>
 void CoordinatesBrdf<CoordSysT>::clampAngles()
 {
-    Arrayf& angles0 = samples_->getAngles0();
-    Arrayf& angles1 = samples_->getAngles1();
-    Arrayf& angles2 = samples_->getAngles2();
-    Arrayf& angles3 = samples_->getAngles3();
+    Arrayd& angles0 = samples_->getAngles0();
+    Arrayd& angles1 = samples_->getAngles1();
+    Arrayd& angles2 = samples_->getAngles2();
+    Arrayd& angles3 = samples_->getAngles3();
 
     angles0 = angles0.cwiseMax(CoordSysT::MIN_ANGLE0);
     angles1 = angles1.cwiseMax(CoordSysT::MIN_ANGLE1);
@@ -497,25 +492,25 @@ void CoordinatesBrdf<CoordSysT>::clampAngles()
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::setAngle0(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle0(int index, double angle)
 {
     samples_->setAngle0(index, clamp(angle, CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0));
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::setAngle1(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle1(int index, double angle)
 {
     samples_->setAngle1(index, clamp(angle, CoordSysT::MIN_ANGLE1, CoordSysT::MAX_ANGLE1));
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::setAngle2(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle2(int index, double angle)
 {
     samples_->setAngle2(index, clamp(angle, CoordSysT::MIN_ANGLE2, CoordSysT::MAX_ANGLE2));
 }
 
 template <typename CoordSysT>
-void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
+void CoordinatesBrdf<CoordSysT>::setAngle3(int index, double angle)
 {
     samples_->setAngle3(index, clamp(angle, CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3));
 }
@@ -523,15 +518,19 @@ void CoordinatesBrdf<CoordSysT>::setAngle3(int index, float angle)
 template <typename CoordSysT>
 void CoordinatesBrdf<CoordSysT>::initializeEqualIntervalAngles()
 {
-    samples_->getAngles0() = Arrayf::LinSpaced(samples_->getNumAngles0(), CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0);
-    samples_->getAngles1() = Arrayf::LinSpaced(samples_->getNumAngles1(), CoordSysT::MIN_ANGLE1, CoordSysT::MAX_ANGLE1);
-    samples_->getAngles2() = Arrayf::LinSpaced(samples_->getNumAngles2(), CoordSysT::MIN_ANGLE2, CoordSysT::MAX_ANGLE2);
-    samples_->getAngles3() = Arrayf::LinSpaced(samples_->getNumAngles3(), CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3);
+    samples_->getAngles0() =
+        Arrayd::LinSpaced(samples_->getNumAngles0(), CoordSysT::MIN_ANGLE0, CoordSysT::MAX_ANGLE0);
+    samples_->getAngles1() =
+        Arrayd::LinSpaced(samples_->getNumAngles1(), CoordSysT::MIN_ANGLE1, CoordSysT::MAX_ANGLE1);
+    samples_->getAngles2() =
+        Arrayd::LinSpaced(samples_->getNumAngles2(), CoordSysT::MIN_ANGLE2, CoordSysT::MAX_ANGLE2);
+    samples_->getAngles3() =
+        Arrayd::LinSpaced(samples_->getNumAngles3(), CoordSysT::MIN_ANGLE3, CoordSysT::MAX_ANGLE3);
 
-    if (samples_->getNumAngles0() == 1) { setAngle0(0, 0.0f); }
-    if (samples_->getNumAngles1() == 1) { setAngle1(0, 0.0f); }
-    if (samples_->getNumAngles2() == 1) { setAngle2(0, 0.0f); }
-    if (samples_->getNumAngles3() == 1) { setAngle3(0, 0.0f); }
+    if (samples_->getNumAngles0() == 1) { setAngle0(0, 0); }
+    if (samples_->getNumAngles1() == 1) { setAngle1(0, 0); }
+    if (samples_->getNumAngles2() == 1) { setAngle2(0, 0); }
+    if (samples_->getNumAngles3() == 1) { setAngle3(0, 0); }
 
     samples_->updateAngleAttributes();
 }

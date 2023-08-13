@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2015-2021 Kimura Ryo                                  //
+// Copyright (C) 2015-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,9 +22,7 @@ class ReflectanceModelUtility
 {
 public:
     /*! Sets up a lb::Brdf using an analytic reflectance or transmittance model. */
-    static bool setupBrdf(const ReflectanceModel&   model,
-                          Brdf*                     brdf,
-                          DataType                  dataType = BRDF_DATA);
+    static bool setupBrdf(const ReflectanceModel& model, Brdf* brdf, DataType dataType = BRDF_DATA);
 
     /*!
      * Sets up a lb::Brdf using an analytic reflectance or transmittance model.
@@ -35,14 +33,14 @@ public:
      * \param numAngles2    Upper limit of the number of angle2.
      * \param numAngles3    Upper limit of the number of angle3.
      */
-    static bool setupBrdf(const ReflectanceModel&   model,
-                          Brdf*                     brdf,
-                          int                       numAngles0,
-                          int                       numAngles1,
-                          int                       numAngles2,
-                          int                       numAngles3,
-                          DataType                  dataType = BRDF_DATA,
-                          float                     ior = 1.0f);
+    static bool setupBrdf(const ReflectanceModel& model,
+                          Brdf*                   brdf,
+                          int                     numAngles0,
+                          int                     numAngles1,
+                          int                     numAngles2,
+                          int                     numAngles3,
+                          DataType                dataType = BRDF_DATA,
+                          double                  ior = 1.0);
 
     /*! Dumps information about parameters to lbInfo. */
     static void dumpParametersInfo(const ReflectanceModel& model);
@@ -51,10 +49,10 @@ private:
     static Spectrum getSpectrum(const ReflectanceModel& model,
                                 const Brdf&             brdf,
                                 DataType                dataType,
-                                float                   angle0,
-                                float                   angle1,
-                                float                   angle2,
-                                float                   angle3);
+                                double                  angle0,
+                                double                  angle1,
+                                double                  angle2,
+                                double                  angle3);
 
     static bool insertAngle0(const ReflectanceModel&    model,
                              Brdf*                      brdf,

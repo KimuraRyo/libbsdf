@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2022 Kimura Ryo                                       //
+// Copyright (C) 2022-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -21,12 +21,12 @@ class SimpleAnisotropicGgx : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    SimpleAnisotropicGgx(const Vec3& color, float roughnessX, float roughnessY)
+    SimpleAnisotropicGgx(const Vec3& color, double roughnessX, double roughnessY)
         : color_(color), roughnessX_(roughnessX), roughnessY_(roughnessY)
     {
         parameters_.push_back(Parameter("Color", &color_));
-        parameters_.push_back(Parameter("Roughness X", &roughnessX_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Roughness Y", &roughnessY_, 0.01f, 1.0f));
+        parameters_.push_back(Parameter("Roughness X", &roughnessX_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Roughness Y", &roughnessY_, 0.01, 1.0));
     }
 
     template <typename Vec3T, typename ColorT, typename ScalarT>
@@ -58,9 +58,9 @@ public:
     }
 
 private:
-    Vec3  color_;
-    float roughnessX_;
-    float roughnessY_;
+    Vec3   color_;
+    double roughnessX_;
+    double roughnessY_;
 };
 
 /*
@@ -91,7 +91,6 @@ ColorT SimpleAnisotropicGgx::compute(const Vec3T&   L,
     ScalarT dotBH = static_cast<ScalarT>(B.dot(H));
 
     ScalarT dotLH = static_cast<ScalarT>(Ggx::clampDotLH(L.dot(H)));
-    ScalarT dotVH = dotLH;
 
     ColorT F = computeSchlickFresnel(dotLH, color);
 

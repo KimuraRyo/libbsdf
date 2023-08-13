@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2018 Kimura Ryo                                  //
+// Copyright (C) 2016-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -20,20 +20,15 @@ class SimplifiedOrenNayar : public ReflectanceModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    SimplifiedOrenNayar(const Vec3& albedo,
-                        float       roughness)
-                        : albedo_   (albedo),
-                          roughness_(roughness)
+    SimplifiedOrenNayar(const Vec3& albedo, double roughness)
+        : albedo_(albedo), roughness_(roughness)
     {
-        parameters_.push_back(Parameter("Albedo",       &albedo_));
-        parameters_.push_back(Parameter("Roughness",    &roughness_));
+        parameters_.push_back(Parameter("Albedo", &albedo_));
+        parameters_.push_back(Parameter("Roughness", &roughness_));
     }
 
-    static Vec3 compute(const Vec3& L,
-                        const Vec3& V,
-                        const Vec3& N,
-                        const Vec3& albedo,
-                        float       roughness);
+    static Vec3
+    compute(const Vec3& L, const Vec3& V, const Vec3& N, const Vec3& albedo, double roughness);
 
     Vec3 getValue(const Vec3& inDir, const Vec3& outDir) const
     {
@@ -52,19 +47,19 @@ public:
     }
 
 private:
-    Vec3    albedo_;
-    float   roughness_;
+    Vec3   albedo_;
+    double roughness_;
 };
 
 /*
  * Implementation
  */
 
-inline Vec3 SimplifiedOrenNayar::compute(const Vec3&    L,
-                                         const Vec3&    V,
-                                         const Vec3&    N,
-                                         const Vec3&    albedo,
-                                         float          roughness)
+inline Vec3 SimplifiedOrenNayar::compute(const Vec3& L,
+                                         const Vec3& V,
+                                         const Vec3& N,
+                                         const Vec3& albedo,
+                                         double      roughness)
 {
     using std::acos;
     using std::max;
@@ -72,16 +67,16 @@ inline Vec3 SimplifiedOrenNayar::compute(const Vec3&    L,
     using std::sin;
     using std::tan;
 
-    float dotLN = L.dot(N);
-    float dotVN = V.dot(N);
+    double dotLN = L.dot(N);
+    double dotVN = V.dot(N);
 
-    if (dotLN <= 0.0f || dotVN <= 0.0f) {
+    if (dotLN <= 0 || dotVN <= 0) {
         return Vec3::Zero();
     }
 
-    float cosPhiDiff;
-    if (dotLN == 1.0f || dotVN == 1.0f) {
-        cosPhiDiff = 0.0f;
+    double cosPhiDiff;
+    if (dotLN == 1 || dotVN == 1) {
+        cosPhiDiff = 0;
     }
     else {
         Vec3 projectedL = (L - N * dotLN).normalized();
@@ -89,17 +84,17 @@ inline Vec3 SimplifiedOrenNayar::compute(const Vec3&    L,
         cosPhiDiff = projectedL.dot(projectedV);
     }
 
-    float inTheta = acos(dotLN);
-    float outTheta = acos(dotVN);
-    float alpha = max(inTheta, outTheta);
-    float beta = min(inTheta, outTheta);
+    double inTheta = acos(dotLN);
+    double outTheta = acos(dotVN);
+    double alpha = max(inTheta, outTheta);
+    double beta = min(inTheta, outTheta);
 
-    float sqR = roughness * roughness;
+    double sqR = roughness * roughness;
 
-    float A = 1.0f - 0.5f * sqR / (sqR + 0.33f);
-    float B = 0.45f * sqR / (sqR + 0.09f);
+    double A = 1 - 0.5 * sqR / (sqR + 0.33);
+    double B = 0.45 * sqR / (sqR + 0.09);
 
-    return albedo / PI_F * (A + B * max(0.0f, cosPhiDiff) * sin(alpha) * tan(beta));
+    return albedo / PI_D * (A + B * max(0.0, cosPhiDiff) * sin(alpha) * tan(beta));
 }
 
 } // namespace lb

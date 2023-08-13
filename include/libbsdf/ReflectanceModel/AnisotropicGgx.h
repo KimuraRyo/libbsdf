@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2017-2022 Kimura Ryo                                  //
+// Copyright (C) 2017-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -22,10 +22,10 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     AnisotropicGgx(const Vec3& color,
-                   float       roughnessX,
-                   float       roughnessY,
-                   float       refractiveIndex,
-                   float       extinctionCoefficient = 0.0f)
+                   double      roughnessX,
+                   double      roughnessY,
+                   double      refractiveIndex,
+                   double      extinctionCoefficient = 0.0)
         : color_(color),
           roughnessX_(roughnessX),
           roughnessY_(roughnessY),
@@ -33,11 +33,11 @@ public:
           extinctionCoefficient_(extinctionCoefficient)
     {
         parameters_.push_back(Parameter("Color", &color_));
-        parameters_.push_back(Parameter("Roughness X", &roughnessX_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Roughness Y", &roughnessY_, 0.01f, 1.0f));
-        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_, 0.01f, 100.0f));
+        parameters_.push_back(Parameter("Roughness X", &roughnessX_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Roughness Y", &roughnessY_, 0.01, 1.0));
+        parameters_.push_back(Parameter("Refractive index", &refractiveIndex_, 0.01, 100.0));
         parameters_.push_back(
-            Parameter("Extinction coefficient", &extinctionCoefficient_, 0.0f, 100.0f));
+            Parameter("Extinction coefficient", &extinctionCoefficient_, 0.0, 100.0));
     }
 
     template <typename Vec3T, typename ColorT, typename ScalarT>
@@ -71,11 +71,11 @@ public:
     }
 
 private:
-    Vec3  color_;
-    float roughnessX_;
-    float roughnessY_;
-    float refractiveIndex_;
-    float extinctionCoefficient_;
+    Vec3   color_;
+    double roughnessX_;
+    double roughnessY_;
+    double refractiveIndex_;
+    double extinctionCoefficient_;
 };
 
 /*
@@ -152,10 +152,9 @@ ColorT AnisotropicGgx::compute(const Vec3T&   L,
         return F * G * D / (ScalarT(4) * abs(dotNL) * abs(dotNV));
     }
     else {
-        ScalarT d = dotLH + refractiveIndex * dotVH;
-        return (abs(dotLH) * abs(dotVH)) / (abs(dotNL) * abs(dotNV)) *
-               refractiveIndex * refractiveIndex *
-               (ColorT::Ones() - F) * G * D / (d * d);
+        ScalarT coeff = dotLH + refractiveIndex * dotVH;
+        return (abs(dotLH) * abs(dotVH)) / (abs(dotNL) * abs(dotNV)) * refractiveIndex *
+               refractiveIndex * (ColorT::Ones() - F) * G * D / (coeff * coeff);
     }
 }
 

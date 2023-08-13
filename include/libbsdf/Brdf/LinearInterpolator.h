@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -25,41 +25,36 @@ class LinearInterpolator
 {
 public:
     /*! Gets the interpolated spectrum of sample points at a set of angles. */
-    static Spectrum getSpectrum(const SampleSet&    samples,
-                                float               angle0,
-                                float               angle1,
-                                float               angle2,
-                                float               angle3);
+    static Spectrum getSpectrum(const SampleSet& samples,
+                                double           angle0,
+                                double           angle1,
+                                double           angle2,
+                                double           angle3);
 
     /*! Gets the interpolated spectrum of sample points at a set of angles. */
-    static Spectrum getSpectrum(const SampleSet&    samples,
-                                float               angle0,
-                                float               angle2,
-                                float               angle3);
+    static Spectrum
+    getSpectrum(const SampleSet& samples, double angle0, double angle2, double angle3);
 
     /*! Gets the interpolated value of sample points at a set of angles and the index of wavelength. */
-    static float getValue(const SampleSet&  samples,
-                          float             angle0,
-                          float             angle1,
-                          float             angle2,
-                          float             angle3,
-                          int               wavelengthIndex);
+    static float getValue(const SampleSet& samples,
+                          double           angle0,
+                          double           angle1,
+                          double           angle2,
+                          double           angle3,
+                          int              wavelengthIndex);
 
     /*! Gets the interpolated value of sample points at a set of angles and the index of wavelength. */
-    static float getValue(const SampleSet&  samples,
-                          float             angle0,
-                          float             angle2,
-                          float             angle3,
-                          int               wavelengthIndex);
+    static float getValue(const SampleSet& samples,
+                          double           angle0,
+                          double           angle2,
+                          double           angle3,
+                          int              wavelengthIndex);
 
     /*! Gets the interpolated spectrum of sample points at a set of angles. */
-    static Spectrum getSpectrum(const SampleSet2D&  ss2,
-                                float               theta,
-                                float               phi);
+    static Spectrum getSpectrum(const SampleSet2D& ss2, double theta, double phi);
 
     /*! Gets the interpolated spectrum of sample points at a polar angle. */
-    static Spectrum getSpectrum(const SampleSet2D&  ss2,
-                                float               theta);
+    static Spectrum getSpectrum(const SampleSet2D& ss2, double theta);
 };
 
 } // namespace lb

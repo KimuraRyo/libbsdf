@@ -17,13 +17,13 @@ public:
     virtual ~MicrosurfaceHeight() {}
 
     // height PDF
-    virtual float P1(float h) const = 0;
+    virtual double P1(double h) const = 0;
 
     // height CDF
-    virtual float C1(float h) const = 0;
+    virtual double C1(double h) const = 0;
 
     // inverse of the height CDF
-    virtual float invC1(float U) const = 0;
+    virtual double invC1(double U) const = 0;
 };
 
 /* Uniform height distribution in [-1, 1] */
@@ -33,13 +33,13 @@ public:
     virtual ~MicrosurfaceHeightUniform() {}
 
     // height PDF
-    virtual float P1(float h) const;
+    virtual double P1(double h) const;
 
     // height CDF
-    virtual float C1(float h) const;
+    virtual double C1(double h) const;
 
     // inverse of the height CDF
-    virtual float invC1(float U) const;
+    virtual double invC1(double U) const;
 };
 
 /* Gaussian height distribution N(0,1) */
@@ -49,98 +49,98 @@ public:
     virtual ~MicrosurfaceHeightGaussian() {}
 
     // height PDF
-    virtual float P1(float h) const;
+    virtual double P1(double h) const;
 
     // height CDF
-    virtual float C1(float h) const;
+    virtual double C1(double h) const;
 
     // inverse of the height CDF
-    virtual float invC1(float U) const;
+    virtual double invC1(double U) const;
 };
 
 /* Abstract class for slope distribution */
 class MicrosurfaceSlope
 {
 public:
-    MicrosurfaceSlope(float alpha_x = 1.0f,
-                      float alpha_y = 1.0f)
-                      : m_alpha_x(alpha_x),
-                        m_alpha_y(alpha_y) {}
+    MicrosurfaceSlope(double alpha_x = 1, double alpha_y = 1)
+        : m_alpha_x(alpha_x), m_alpha_y(alpha_y)
+    {
+    }
 
     virtual ~MicrosurfaceSlope() {}
 
     // roughness
-    float m_alpha_x, m_alpha_y;
+    double m_alpha_x, m_alpha_y;
 
     // projected roughness in wi
-    float alpha_i(const Vec3f& wi) const;
+    double alpha_i(const Vec3& wi) const;
 
     // distribution of normals (NDF)
-    float D(const Vec3f& wm) const;
+    double D(const Vec3& wm) const;
 
     // distribution of visible normals (VNDF)
-    float D_wi(const Vec3f& wi, const Vec3f& wm) const;
+    double D_wi(const Vec3& wi, const Vec3& wm) const;
 
     // sample the VNDF
-    Vec3f sampleD_wi(const Vec3f& wi, float U1, float U2) const;
+    Vec3 sampleD_wi(const Vec3& wi, double U1, double U2) const;
 
     // distribution of slopes
-    virtual float P22(float slope_x, float slope_y) const = 0;
+    virtual double P22(double slope_x, double slope_y) const = 0;
 
     // Smith's Lambda function
-    virtual float Lambda(const Vec3f& wi) const = 0;
+    virtual double Lambda(const Vec3& wi) const = 0;
 
     // projected area towards incident direction
-    virtual float projectedArea(const Vec3f& wi) const = 0;
+    virtual double projectedArea(const Vec3& wi) const = 0;
 
     // sample the distribution of visible slopes with alpha=1.0
-    virtual Vec2f sampleP22_11(float theta_i, float U1, float U2) const = 0;
+    virtual Vec2 sampleP22_11(double theta_i, double U1, double U2) const = 0;
 };
 
 /* Beckmann slope distribution */
 class MicrosurfaceSlopeBeckmann : public MicrosurfaceSlope
 {
 public:
-    MicrosurfaceSlopeBeckmann(float alpha_x = 1.0f,
-                              float alpha_y = 1.0f)
-                              : MicrosurfaceSlope(alpha_x, alpha_y) {}
+    MicrosurfaceSlopeBeckmann(double alpha_x = 1, double alpha_y = 1)
+        : MicrosurfaceSlope(alpha_x, alpha_y)
+    {
+    }
 
     virtual ~MicrosurfaceSlopeBeckmann() {}
 
     // distribution of slopes
-    virtual float P22(float slope_x, float slope_y) const;
+    virtual double P22(double slope_x, double slope_y) const;
 
     // Smith's Lambda function
-    virtual float Lambda(const Vec3f& wi) const;
+    virtual double Lambda(const Vec3& wi) const;
 
     // projected area towards incident direction
-    virtual float projectedArea(const Vec3f& wi) const;
+    virtual double projectedArea(const Vec3& wi) const;
 
     // sample the distribution of visible slopes with alpha=1.0
-    virtual Vec2f sampleP22_11(float theta_i, float U1, float U2) const;
+    virtual Vec2 sampleP22_11(double theta_i, double U1, double U2) const;
 };
 
 /* GGX slope distribution */
 class MicrosurfaceSlopeGGX : public MicrosurfaceSlope
 {
 public:
-    MicrosurfaceSlopeGGX(float alpha_x = 1.0f,
-                         float alpha_y = 1.0f)
-                         : MicrosurfaceSlope(alpha_x, alpha_y) {}
+    MicrosurfaceSlopeGGX(double alpha_x = 1, double alpha_y = 1)
+        : MicrosurfaceSlope(alpha_x, alpha_y) {}
 
     virtual ~MicrosurfaceSlopeGGX() {}
 
     // distribution of slopes
-    virtual float P22(float slope_x, float slope_y) const;
+    virtual double P22(double slope_x, double slope_y) const;
 
     // Smith's Lambda function
-    virtual float Lambda(const Vec3f& wi) const;
+    virtual double Lambda(const Vec3& wi) const;
 
     // projected area towards incident direction
-    virtual float projectedArea(const Vec3f& wi) const;
+    virtual double projectedArea(const Vec3& wi) const;
 
     // sample the distribution of visible slopes with alpha=1.0
-    virtual Vec2f sampleP22_11(float theta_i, float U1, float U2) const;
+    virtual Vec2 sampleP22_11(double theta_i, double U1, double U2) const;
 };
 
 /* Abstract class for microsurface */
@@ -155,8 +155,8 @@ public:
 
     Microsurface(bool   height_uniform, // uniform or Gaussian height distribution
                  bool   slope_beckmann, // Beckmann or GGX slope distribution
-                 float  alpha_x,
-                 float  alpha_y)
+                 double alpha_x,
+                 double alpha_y)
                  : m_microsurfaceheight((height_uniform) ? static_cast<MicrosurfaceHeight*>(new MicrosurfaceHeightUniform)
                                                          : static_cast<MicrosurfaceHeight*>(new MicrosurfaceHeightGaussian)),
                    m_microsurfaceslope((slope_beckmann) ? static_cast<MicrosurfaceSlope*>(new MicrosurfaceSlopeBeckmann(alpha_x, alpha_y))
@@ -172,71 +172,74 @@ public:
     // scatteringOrder=0 --> contribution from all scattering events
     // scatteringOrder=1 --> contribution from 1st bounce only
     // scatteringOrder=2 --> contribution from 2nd bounce only, etc..
-    virtual float eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder = 0) const;
+    virtual double eval(const Vec3& wi, const Vec3& wo, int scatteringOrder = 0) const;
 
     // sample BSDF with a random walk
     // scatteringOrder is set to the number of bounces computed for this sample
-    virtual Vec3f sample(const Vec3f& wi, int& scatteringOrder) const;
-    Vec3f sample(const Vec3f& wi) const
+    virtual Vec3 sample(const Vec3& wi, int& scatteringOrder) const;
+    Vec3 sample(const Vec3& wi) const
     {
         int scatteringOrder;
         return sample(wi, scatteringOrder);
     }
 
     // masking function
-    float G_1(const Vec3f& wi) const;
+    double G_1(const Vec3& wi) const;
 
     // masking function at height h0
-    float G_1(const Vec3f& wi, float h0) const;
+    double G_1(const Vec3& wi, double h0) const;
 
     // sample height in outgoing direction
-    float sampleHeight(const Vec3f& wo, float h0, float U) const;
+    double sampleHeight(const Vec3& wo, double h0, double U) const;
 
     // evaluate local phase function
-    virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const = 0;
+    virtual double evalPhaseFunction(const Vec3& wi, const Vec3& wo) const = 0;
 
     // sample local phase function
-    virtual Vec3f samplePhaseFunction(const Vec3f& wi) const = 0;
+    virtual Vec3 samplePhaseFunction(const Vec3& wi) const = 0;
 
     // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
-    virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const = 0;
+    virtual double evalSingleScattering(const Vec3& wi, const Vec3& wo) const = 0;
 };
 
 /* Microsurface made of conductor material */
 class MicrosurfaceConductor : public Microsurface
 {
 public:
-    MicrosurfaceConductor(bool  height_uniform, // uniform or Gaussian
-                          bool  slope_beckmann, // Beckmann or GGX
-                          float alpha_x,
-                          float alpha_y)
-                          : Microsurface(height_uniform, slope_beckmann, alpha_x, alpha_y) {}
+    MicrosurfaceConductor(bool   height_uniform, // uniform or Gaussian
+                          bool   slope_beckmann, // Beckmann or GGX
+                          double alpha_x,
+                          double alpha_y)
+        : Microsurface(height_uniform, slope_beckmann, alpha_x, alpha_y)
+    {
+    }
 
     virtual ~MicrosurfaceConductor() {}
 
     // evaluate local phase function
-    virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const;
+    virtual double evalPhaseFunction(const Vec3& wi, const Vec3& wo) const;
 
     // sample local phase function
-    virtual Vec3f samplePhaseFunction(const Vec3f& wi) const;
+    virtual Vec3 samplePhaseFunction(const Vec3& wi) const;
 
     // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
-    virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const;
+    virtual double evalSingleScattering(const Vec3& wi, const Vec3& wo) const;
 };
 
 /* Microsurface made of conductor material */
 class MicrosurfaceDielectric : public Microsurface
 {
 public:
-    MicrosurfaceDielectric(bool     height_uniform, // uniform or Gaussian
-                           bool     slope_beckmann, // Beckmann or GGX
-                           float    alpha_x,
-                           float    alpha_y,
-                           float    eta = 1.5f)
-                           : Microsurface(height_uniform, slope_beckmann, alpha_x, alpha_y),
-                             m_eta(eta) {}
+    MicrosurfaceDielectric(bool   height_uniform, // uniform or Gaussian
+                           bool   slope_beckmann, // Beckmann or GGX
+                           double alpha_x,
+                           double alpha_y,
+                           double eta = 1.5)
+        : Microsurface(height_uniform, slope_beckmann, alpha_x, alpha_y), m_eta(eta)
+    {
+    }
 
     virtual ~MicrosurfaceDielectric() {}
 
@@ -244,52 +247,53 @@ public:
     // scatteringOrder=0 --> contribution from all scattering events
     // scatteringOrder=1 --> contribution from 1st bounce only
     // scatteringOrder=2 --> contribution from 2nd bounce only, etc..
-    virtual float eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder = 0) const;
+    virtual double eval(const Vec3& wi, const Vec3& wo, int scatteringOrder = 0) const;
 
     // sample final BSDF with a random walk
     // scatteringOrder is set to the number of bounces computed for this sample
-    virtual Vec3f sample(const Vec3f& wi, int& scatteringOrder) const;
+    virtual Vec3 sample(const Vec3& wi, int& scatteringOrder) const;
 
     // evaluate local phase function
-    virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const;
-    float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo, bool wi_outside, bool wo_outside) const;
+    virtual double evalPhaseFunction(const Vec3& wi, const Vec3& wo) const;
+    double
+    evalPhaseFunction(const Vec3& wi, const Vec3& wo, bool wi_outside, bool wo_outside) const;
 
     // sample local phase function
-    virtual Vec3f samplePhaseFunction(const Vec3f& wi) const;
-    Vec3f samplePhaseFunction(const Vec3f& wi, bool wi_outside, bool& wo_outside) const;
+    virtual Vec3 samplePhaseFunction(const Vec3& wi) const;
+    Vec3         samplePhaseFunction(const Vec3& wi, bool wi_outside, bool& wo_outside) const;
 
     // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
-    virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const;
+    virtual double evalSingleScattering(const Vec3& wi, const Vec3& wo) const;
 
 private:
-    float Fresnel(const Vec3f& wi, const Vec3f& wm, float eta) const;
-    Vec3f refract(const Vec3f& wi, const Vec3f& wm, float eta) const;
+    double fresnel(const Vec3& wi, const Vec3& wm, double eta) const;
+    Vec3   refract(const Vec3& wi, const Vec3& wm, double eta) const;
 
-    float m_eta;
+    double m_eta;
 };
 
 /* Microsurface made of conductor material */
 class MicrosurfaceDiffuse : public Microsurface
 {
 public:
-    MicrosurfaceDiffuse(bool  height_uniform, // uniform or Gaussian
-                        bool  slope_beckmann, // Beckmann or GGX
-                        float alpha_x,
-                        float alpha_y)
+    MicrosurfaceDiffuse(bool   height_uniform, // uniform or Gaussian
+                        bool   slope_beckmann, // Beckmann or GGX
+                        double alpha_x,
+                        double alpha_y)
                         : Microsurface(height_uniform, slope_beckmann, alpha_x, alpha_y) {}
 
     virtual ~MicrosurfaceDiffuse() {}
 
     // evaluate local phase function
-    virtual float evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const;
+    virtual double evalPhaseFunction(const Vec3& wi, const Vec3& wo) const;
 
     // sample local phase function
-    virtual Vec3f samplePhaseFunction(const Vec3f& wi) const;
+    virtual Vec3 samplePhaseFunction(const Vec3& wi) const;
 
     // evaluate BSDF limited to single scattering
     // this is in average equivalent to eval(wi, wo, 1);
-    virtual float evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const;
+    virtual double evalSingleScattering(const Vec3& wi, const Vec3& wo) const;
 };
 
 //
@@ -303,36 +307,30 @@ public:
 using namespace std;
 
 #ifndef M_PI
-#define M_PI            3.14159265358979323846f /* pi */
+#define M_PI            3.14159265358979323846 /* pi */
 #endif
 
 #ifndef M_PI_2
-#define M_PI_2          1.57079632679489661923f /* pi/2 */
+#define M_PI_2          1.57079632679489661923 /* pi/2 */
 #endif
 
-#define INV_M_PI        0.31830988618379067153f /* 1/pi */
-#define SQRT_M_PI       1.77245385090551602729f /* sqrt(pi) */
-#define SQRT_2          1.41421356237309504880f /* sqrt(2) */
-#define INV_SQRT_M_PI   0.56418958354775628694f /* 1/sqrt(pi) */
-#define INV_2_SQRT_M_PI 0.28209479177387814347f /* 0.5/sqrt(pi) */
-#define INV_SQRT_2_M_PI 0.3989422804014326779f  /* 1/sqrt(2*pi) */
-#define INV_SQRT_2      0.7071067811865475244f  /* 1/sqrt(2) */
+#define INV_M_PI        0.31830988618379067153 /* 1/pi */
+#define SQRT_M_PI       1.77245385090551602729 /* sqrt(pi) */
+#define SQRT_2          1.41421356237309504880 /* sqrt(2) */
+#define INV_SQRT_M_PI   0.56418958354775628694 /* 1/sqrt(pi) */
+#define INV_2_SQRT_M_PI 0.28209479177387814347 /* 0.5/sqrt(pi) */
+#define INV_SQRT_2_M_PI 0.3989422804014326779  /* 1/sqrt(2*pi) */
+#define INV_SQRT_2      0.7071067811865475244  /* 1/sqrt(2) */
 
 #include <libbsdf/Common/Utility.h>
 
-static bool IsFiniteNumber(float x)
-{
-    return (x <= FLT_MAX && x >= -FLT_MAX);
-}
+static bool IsFiniteNumber(double x) { return (x <= FLT_MAX && x >= -FLT_MAX); }
 
 static std::random_device rd;
 static std::mt19937 gen(rd());
 static std::uniform_real_distribution<> dis(0, 1);
 
-static float generateRandomNumber()
-{
-    return (float)dis(gen);
-}
+static double generateRandomNumber() { return dis(gen); }
 
 static double erfAs(double x)
 {
@@ -356,34 +354,34 @@ static double erfAs(double x)
     return sign*y;
 }
 
-static float erfinv(float x)
+static double erfinv(double x)
 {
-    float w, p;
-    w = -logf((1.0f - x) * (1.0f + x));
+    double w, p;
+    w = -log((1 - x) * (1 + x));
 
-    if (w < 5.000000f) {
-        w = w - 2.500000f;
-        p = 2.81022636e-08f;
-        p = 3.43273939e-07f + p * w;
-        p = -3.5233877e-06f + p * w;
-        p = -4.39150654e-06f + p * w;
-        p = 0.00021858087f + p * w;
-        p = -0.00125372503f + p * w;
-        p = -0.00417768164f + p * w;
-        p = 0.246640727f + p * w;
-        p = 1.50140941f + p * w;
+    if (w < 5) {
+        w = w - 2.5;
+        p = 2.81022636e-08;
+        p = 3.43273939e-07 + p * w;
+        p = -3.5233877e-06 + p * w;
+        p = -4.39150654e-06 + p * w;
+        p = 0.00021858087 + p * w;
+        p = -0.00125372503 + p * w;
+        p = -0.00417768164 + p * w;
+        p = 0.246640727 + p * w;
+        p = 1.50140941 + p * w;
     }
     else {
-        w = sqrtf(w) - 3.000000f;
-        p = -0.000200214257f;
-        p = 0.000100950558f + p * w;
-        p = 0.00134934322f + p * w;
-        p = -0.00367342844f + p * w;
-        p = 0.00573950773f + p * w;
-        p = -0.0076224613f + p * w;
-        p = 0.00943887047f + p * w;
-        p = 1.00167406f + p * w;
-        p = 2.83297682f + p * w;
+        w = sqrt(w) - 3;
+        p = -0.000200214257;
+        p = 0.000100950558 + p * w;
+        p = 0.00134934322 + p * w;
+        p = -0.00367342844 + p * w;
+        p = 0.00573950773 + p * w;
+        p = -0.0076224613 + p * w;
+        p = 0.00943887047 + p * w;
+        p = 1.00167406 + p * w;
+        p = 2.83297682 + p * w;
     }
 
     return p * x;
@@ -422,86 +420,87 @@ static double beta(double m, double n)
  * Implementation of MicrosurfaceHeightUniform
  */
 
-float MicrosurfaceHeightUniform::P1(float h) const
+double MicrosurfaceHeightUniform::P1(double h) const
 {
-    return (h >= -1.0f && h <= 1.0f) ? 0.5f : 0.0f;
+    return (h >= -1 && h <= 1) ? 0.5 : 0;
 }
 
-float MicrosurfaceHeightUniform::C1(float h) const
+double MicrosurfaceHeightUniform::C1(double h) const
 {
     using std::max;
     using std::min;
 
-    return min(1.0f, max(0.0f, 0.5f * (h + 1.0f)));
+    return min(1.0, max(0.0, 0.5 * (h + 1)));
 }
 
-float MicrosurfaceHeightUniform::invC1(float U) const
+double MicrosurfaceHeightUniform::invC1(double U) const
 {
     using std::max;
     using std::min;
 
-    return max(-1.0f, min(1.0f, 2.0f * U - 1.0f));
+    return max(-1.0, min(1.0, 2 * U - 1));
 }
 
-float MicrosurfaceHeightGaussian::P1(float h) const
+double MicrosurfaceHeightGaussian::P1(double h) const
 {
-    return INV_SQRT_2_M_PI * expf(-0.5f * h * h);
+    return INV_SQRT_2_M_PI * exp(-0.5 * h * h);
 }
 
-float MicrosurfaceHeightGaussian::C1(float h) const
+double MicrosurfaceHeightGaussian::C1(double h) const
 {
-    return static_cast<float>(0.5 + 0.5 * erfAs(INV_SQRT_2 * h));
+    return 0.5 + 0.5 * erfAs(INV_SQRT_2 * h);
 }
 
-float MicrosurfaceHeightGaussian::invC1(float U) const
+double MicrosurfaceHeightGaussian::invC1(double U) const
 {
-    return SQRT_2 * erfinv(2.0f * U - 1.0f);
+    return SQRT_2 * erfinv(2 * U - 1);
 }
 
 /*
  * Implementation of MicrosurfaceSlope
  */
 
-float MicrosurfaceSlope::D(const Vec3f& wm) const
+double MicrosurfaceSlope::D(const Vec3& wm) const
 {
-    if (wm.z() <= 0.0f) return 0.0f;
+    if (wm.z() <= 0)
+        return 0;
 
     // slope of wm
-    float slope_x = -wm.x() / wm.z();
-    float slope_y = -wm.y() / wm.z();
+    double slope_x = -wm.x() / wm.z();
+    double slope_y = -wm.y() / wm.z();
 
     return P22(slope_x, slope_y) / (wm.z() * wm.z() * wm.z() * wm.z());
 }
 
-float MicrosurfaceSlope::D_wi(const Vec3f& wi, const Vec3f& wm) const
+double MicrosurfaceSlope::D_wi(const Vec3& wi, const Vec3& wm) const
 {
-    if (wm.z() <= 0.0f) return 0.0f;
+    if (wm.z() <= 0)
+        return 0;
 
     // normalization coefficient
-    float projectedarea = projectedArea(wi);
-    if (projectedarea == 0) return 0;
+    double projectedarea = projectedArea(wi);
+    if (projectedarea == 0)
+        return 0;
 
-    float c = 1.0f / projectedarea;
+    double c = 1 / projectedarea;
 
     using std::max;
 
-    return c * max(0.0f, wi.dot(wm)) * D(wm);
+    return c * max(0.0, wi.dot(wm)) * D(wm);
 }
 
-Vec3f MicrosurfaceSlope::sampleD_wi(const Vec3f& wi, float U1, float U2) const
+Vec3 MicrosurfaceSlope::sampleD_wi(const Vec3& wi, double U1, double U2) const
 {
     // stretch to match configuration with alpha=1.0
-    Vec3f wi_11 = Vec3f(m_alpha_x * wi.x(),
-                        m_alpha_y * wi.y(),
-                        wi.z()).normalized();
+    Vec3 wi_11 = Vec3(m_alpha_x * wi.x(), m_alpha_y * wi.y(), wi.z()).normalized();
 
     // sample visible slope with alpha=1.0
-    Vec2f slope_11 = sampleP22_11(acosf(wi_11.z()), U1, U2);
+    Vec2 slope_11 = sampleP22_11(acos(wi_11.z()), U1, U2);
 
     // align with view direction
-    float phi = atan2(wi_11.y(), wi_11.x());
-    Vec2f slope(cosf(phi) * slope_11.x() - sinf(phi) * slope_11.y(),
-                sinf(phi) * slope_11.x() + cosf(phi) * slope_11.y());
+    double phi = atan2(wi_11.y(), wi_11.x());
+    Vec2 slope(cos(phi) * slope_11.x() - sin(phi) * slope_11.y(),
+                sin(phi) * slope_11.x() + cos(phi) * slope_11.y());
 
     // stretch back
     slope.x() *= m_alpha_x;
@@ -510,226 +509,239 @@ Vec3f MicrosurfaceSlope::sampleD_wi(const Vec3f& wi, float U1, float U2) const
     // if numerical instability
     if (slope.x() != slope.x() || !IsFiniteNumber(slope.x())) {
         if (wi.z() > 0) {
-            return Vec3f(0.0f, 0.0f, 1.0f);
+            return Vec3(0, 0, 1);
         }
         else {
-            return Vec3f(wi.x(), wi.y(), 0.0f).normalized();
+            return Vec3(wi.x(), wi.y(), 0).normalized();
         }
     }
 
     // compute normal
-    Vec3f wm = Vec3f(-slope.x(), -slope.y(), 1.0f).normalized();
+    Vec3 wm = Vec3(-slope.x(), -slope.y(), 1).normalized();
     return wm;
 }
 
-float MicrosurfaceSlope::alpha_i(const Vec3f& wi) const
+double MicrosurfaceSlope::alpha_i(const Vec3& wi) const
 {
-    float invSinTheta2 = 1.0f / (1.0f - wi.z() * wi.z());
-    float cosPhi2 = wi.x() * wi.x() * invSinTheta2;
-    float sinPhi2 = wi.y() * wi.y() * invSinTheta2;
-    float alpha_i = sqrtf(cosPhi2 * m_alpha_x * m_alpha_x + sinPhi2 * m_alpha_y * m_alpha_y);
+    double invSinTheta2 = 1 / (1 - wi.z() * wi.z());
+    double cosPhi2 = wi.x() * wi.x() * invSinTheta2;
+    double sinPhi2 = wi.y() * wi.y() * invSinTheta2;
+    double alpha_i = sqrt(cosPhi2 * m_alpha_x * m_alpha_x + sinPhi2 * m_alpha_y * m_alpha_y);
     return alpha_i;
 }
 
-float MicrosurfaceSlopeBeckmann::P22(float slope_x, float slope_y) const
+double MicrosurfaceSlopeBeckmann::P22(double slope_x, double slope_y) const
 {
-    return 1.0f / (M_PI * m_alpha_x * m_alpha_y) *
+    return 1 / (M_PI * m_alpha_x * m_alpha_y) *
            exp(-slope_x * slope_x / (m_alpha_x * m_alpha_x) -
                 slope_y * slope_y / (m_alpha_y * m_alpha_y));
 }
 
-float MicrosurfaceSlopeBeckmann::Lambda(const Vec3f& wi) const
+double MicrosurfaceSlopeBeckmann::Lambda(const Vec3& wi) const
 {
-    if (wi.z() > 0.9999f) return 0.0f;
-    if (wi.z() < -0.9999f) return -1.0f;
+    if (wi.z() > 0.9999)
+        return 0;
+
+    if (wi.z() < -0.9999)
+        return -1;
 
     // a
-    float theta_i = acosf(wi.z());
-    float a = 1.0f / tanf(theta_i) / alpha_i(wi);
+    double theta_i = acos(wi.z());
+    double a = 1 / tan(theta_i) / alpha_i(wi);
 
-    return static_cast<float>(0.5 * (erfAs(a) - 1.0) + INV_2_SQRT_M_PI / a * expf(-a * a));
+    return 0.5 * (erfAs(a) - 1.0) + INV_2_SQRT_M_PI / a * exp(-a * a);
 }
 
-float MicrosurfaceSlopeBeckmann::projectedArea(const Vec3f& wi) const
+double MicrosurfaceSlopeBeckmann::projectedArea(const Vec3& wi) const
 {
-    if (wi.z() > 0.9999f) return 1.0f;
-    if (wi.z() < -0.9999f) return 0.0f;
+    if (wi.z() > 0.9999)
+        return 1;
+
+    if (wi.z() < -0.9999)
+        return 0;
 
     // a
-    float alphai = alpha_i(wi);
-    float theta_i = acosf(wi.z());
-    float a = 1.0f / tanf(theta_i) / alphai;
+    double alphai = alpha_i(wi);
+    double theta_i = acos(wi.z());
+    double a = 1 / tan(theta_i) / alphai;
 
-    return static_cast<float>(0.5 * (erfAs(a) + 1.0) * wi.z() + INV_2_SQRT_M_PI * alphai * sinf(theta_i) * expf(-a * a));
+    return 0.5 * (erfAs(a) + 1.0) * wi.z() + INV_2_SQRT_M_PI * alphai * sin(theta_i) * exp(-a * a);
 }
 
-Vec2f MicrosurfaceSlopeBeckmann::sampleP22_11(float theta_i, float U, float U_2) const
+Vec2 MicrosurfaceSlopeBeckmann::sampleP22_11(double theta_i, double U, double U_2) const
 {
     using std::max;
     using std::min;
 
-    Vec2f slope2D;
+    Vec2 slope2D;
 
-    if (theta_i < 0.0001f) {
-        float r = sqrtf(-logf(U));
-        float phi = 6.28318530718f * U_2;
-        slope2D.x() = r * cosf(phi);
-        slope2D.y() = r * sinf(phi);
+    if (theta_i < 0.0001) {
+        double r = sqrt(-log(U));
+        double phi = 6.28318530718 * U_2;
+        slope2D.x() = r * cos(phi);
+        slope2D.y() = r * sin(phi);
         return slope2D;
     }
 
     // constant
-    float sin_theta_i = sinf(theta_i);
-    float cos_theta_i = cosf(theta_i);
+    double sin_theta_i = sin(theta_i);
+    double cos_theta_i = cos(theta_i);
 
     // slope associated to theta_i
-    float slope_i = cos_theta_i / sin_theta_i;
+    double slope_i = cos_theta_i / sin_theta_i;
 
     // projected area
-    float a = cos_theta_i / sin_theta_i;
-    float projectedarea = 0.5f * (static_cast<float>(erfAs(a)) + 1.0f) * cos_theta_i
-                        + INV_2_SQRT_M_PI * sin_theta_i * expf(-a * a);
-    if (projectedarea < 0.0001f || projectedarea != projectedarea) {
-        return Vec2f(0, 0);
+    double a = cos_theta_i / sin_theta_i;
+    double projectedarea =
+        0.5 * (erfAs(a) + 1) * cos_theta_i + INV_2_SQRT_M_PI * sin_theta_i * exp(-a * a);
+    if (projectedarea < 0.0001 || projectedarea != projectedarea) {
+        return Vec2(0, 0);
     }
 
     // VNDF normalization factor
-    float c = 1.0f / projectedarea;
+    double c = 1 / projectedarea;
 
     // search
-    float erf_min = -0.9999f;
-    float erf_max = max(erf_min, static_cast<float>(erfAs(slope_i)));
-    float erf_current = 0.5f * (erf_min + erf_max);
+    double erf_min = -0.9999;
+    double erf_max = max(erf_min, erfAs(slope_i));
+    double erf_current = 0.5 * (erf_min + erf_max);
 
-    while (erf_max - erf_min > 0.00001f) {
+    while (erf_max - erf_min > 0.00001) {
         if (!(erf_current >= erf_min && erf_current <= erf_max)) {
-            erf_current = 0.5f * (erf_min + erf_max);
+            erf_current = 0.5 * (erf_min + erf_max);
         }
 
         // evaluate slope
-        float slope = erfinv(erf_current);
+        double slope = erfinv(erf_current);
 
         // CDF
-        float CDF = (slope >= slope_i)
-                  ? 1.0f
-                  : c * (INV_2_SQRT_M_PI * sin_theta_i * expf(-slope * slope) +
-                    cos_theta_i * (0.5f + 0.5f * static_cast<float>(erfAs(slope))));
-        float diff = CDF - U;
+        double CDF = (slope >= slope_i) ? 1
+                                        : c * (INV_2_SQRT_M_PI * sin_theta_i * exp(-slope * slope) +
+                                               cos_theta_i * (0.5 + 0.5 * erfAs(slope)));
+        double diff = CDF - U;
 
         // test estimate
-        if (abs(diff) < 0.00001f) break;
+        if (abs(diff) < 0.00001)
+            break;
 
         // update bounds
-        if (diff > 0.0f) {
-            if (erf_max == erf_current) break;
+        if (diff > 0) {
+            if (erf_max == erf_current)
+                break;
 
             erf_max = erf_current;
         }
         else {
-            if (erf_min == erf_current) break;
+            if (erf_min == erf_current)
+                break;
 
             erf_min = erf_current;
         }
 
         // update estimate
-        float derivative = 0.5f * c * cos_theta_i - 0.5f * c * sin_theta_i * slope;
+        double derivative = 0.5 * c * cos_theta_i - 0.5 * c * sin_theta_i * slope;
         erf_current -= diff / derivative;
     }
 
     slope2D.x() = erfinv(min(erf_max, max(erf_min, erf_current)));
-    slope2D.y() = erfinv(2.0f * U_2 - 1.0f);
+    slope2D.y() = erfinv(2 * U_2 - 1);
 
     return slope2D;
 }
 
-float MicrosurfaceSlopeGGX::P22(float slope_x, float slope_y) const
+double MicrosurfaceSlopeGGX::P22(double slope_x, double slope_y) const
 {
-    float temp = 1.0f
-               + slope_x * slope_x / (m_alpha_x * m_alpha_x)
-               + slope_y * slope_y / (m_alpha_y * m_alpha_y);
+    double temp = 1 + slope_x * slope_x / (m_alpha_x * m_alpha_x) +
+                  slope_y * slope_y / (m_alpha_y * m_alpha_y);
 
-    return 1.0f / (M_PI * m_alpha_x * m_alpha_y) / (temp * temp);
+    return 1 / (M_PI * m_alpha_x * m_alpha_y) / (temp * temp);
 }
 
-float MicrosurfaceSlopeGGX::Lambda(const Vec3f& wi) const
+double MicrosurfaceSlopeGGX::Lambda(const Vec3& wi) const
 {
-    if (wi.z() > 0.9999f)   return 0.0f;
-    if (wi.z() < -0.9999f)  return -1.0f;
+    if (wi.z() > 0.9999)
+        return 0;
+
+    if (wi.z() < -0.9999)
+        return -1;
 
     // a
-    float theta_i = acosf(wi.z());
-    float a = 1.0f / tanf(theta_i) / alpha_i(wi);
+    double theta_i = acos(wi.z());
+    double a = 1 / tan(theta_i) / alpha_i(wi);
 
-    return 0.5f * (-1.0f + sign(a) * sqrtf(1 + 1 / (a * a)));
+    return 0.5 * (-1 + sign(a) * sqrt(1 + 1 / (a * a)));
 }
 
-float MicrosurfaceSlopeGGX::projectedArea(const Vec3f& wi) const
+double MicrosurfaceSlopeGGX::projectedArea(const Vec3& wi) const
 {
-    if (wi.z() > 0.9999f)   return 1.0f;
-    if (wi.z() < -0.9999f)  return 0.0f;
+    if (wi.z() > 0.9999)
+        return 1;
+
+    if (wi.z() < -0.9999)
+        return 0;
 
     // a
-    float theta_i = acosf(wi.z());
-    float sin_theta_i = sinf(theta_i);
+    double theta_i = acos(wi.z());
+    double sin_theta_i = sin(theta_i);
 
-    float alphai = alpha_i(wi);
+    double alphai = alpha_i(wi);
 
-    return 0.5f * (wi.z() + sqrtf(wi.z() * wi.z() + sin_theta_i * sin_theta_i * alphai * alphai));
+    return 0.5 * (wi.z() + sqrt(wi.z() * wi.z() + sin_theta_i * sin_theta_i * alphai * alphai));
 }
 
-Vec2f MicrosurfaceSlopeGGX::sampleP22_11(float theta_i, float U, float U_2) const
+Vec2 MicrosurfaceSlopeGGX::sampleP22_11(double theta_i, double U, double U_2) const
 {
-    Vec2f slope;
+    Vec2 slope;
 
-    if (theta_i < 0.0001f) {
-        float r = sqrtf(U / (1.0f - U));
-        float phi = 6.28318530718f * U_2;
-        slope.x() = r * cosf(phi);
-        slope.y() = r * sinf(phi);
+    if (theta_i < 0.0001) {
+        double r = sqrt(U / (1 - U));
+        double phi = 6.28318530718 * U_2;
+        slope.x() = r * cos(phi);
+        slope.y() = r * sin(phi);
 
         return slope;
     }
 
     // constant
-    float sin_theta_i = sinf(theta_i);
-    float cos_theta_i = cosf(theta_i);
-    float tan_theta_i = sin_theta_i / cos_theta_i;
+    double sin_theta_i = sin(theta_i);
+    double cos_theta_i = cos(theta_i);
+    double tan_theta_i = sin_theta_i / cos_theta_i;
 
     // slope associated to theta_i
-    //float slope_i = cos_theta_i / sin_theta_i;
+    //double slope_i = cos_theta_i / sin_theta_i;
 
     // projected area
-    float projectedarea = 0.5f * (cos_theta_i + 1.0f);
-    if (projectedarea < 0.0001f || projectedarea != projectedarea) {
-        return Vec2f(0, 0);
+    double projectedarea = 0.5 * (cos_theta_i + 1);
+    if (projectedarea < 0.0001 || projectedarea != projectedarea) {
+        return Vec2(0, 0);
     }
     // normalization coefficient
-    float c = 1.0f / projectedarea;
+    double c = 1 / projectedarea;
 
-    float A = 2.0f * U / cos_theta_i / c - 1.0f;
-    float B = tan_theta_i;
-    float tmp = 1.0f / (A * A - 1.0f);
+    double A = 2 * U / cos_theta_i / c - 1;
+    double B = tan_theta_i;
+    double tmp = 1 / (A * A - 1);
 
     using std::max;
 
-    float D = sqrtf(max(0.0f, B * B * tmp * tmp - (A * A - B * B) * tmp));
-    float slope_x_1 = B * tmp - D;
-    float slope_x_2 = B * tmp + D;
-    slope.x() = (A < 0.0f || slope_x_2 > 1.0f / tan_theta_i) ? slope_x_1 : slope_x_2;
+    double D = sqrt(max(0.0, B * B * tmp * tmp - (A * A - B * B) * tmp));
+    double slope_x_1 = B * tmp - D;
+    double slope_x_2 = B * tmp + D;
+    slope.x() = (A < 0 || slope_x_2 > 1 / tan_theta_i) ? slope_x_1 : slope_x_2;
 
-    float U2;
-    float S;
-    if (U_2 > 0.5f) {
-        S = 1.0f;
-        U2 = 2.0f * (U_2 - 0.5f);
+    double U2;
+    double S;
+    if (U_2 > 0.5) {
+        S = 1;
+        U2 = 2 * (U_2 - 0.5);
     }
     else {
-        S = -1.0f;
-        U2 = 2.0f * (0.5f - U_2);
+        S = -1;
+        U2 = 2 * (0.5 - U_2);
     }
-    float z = (U2 * (U2 * (U2 * 0.27385f - 0.73369f) + 0.46341f))
-            / (U2 * (U2 * (U2 * 0.093073f + 0.309420f) - 1.000000f) + 0.597999f);
-    slope.y() = S * z * sqrtf(1.0f + slope.x() * slope.x());
+    double z = (U2 * (U2 * (U2 * 0.27385 - 0.73369) + 0.46341)) /
+               (U2 * (U2 * (U2 * 0.093073 + 0.309420) - 1.000000) + 0.597999);
+    slope.y() = S * z * sqrt(1 + slope.x() * slope.x());
 
     return slope;
 }
@@ -738,64 +750,72 @@ Vec2f MicrosurfaceSlopeGGX::sampleP22_11(float theta_i, float U, float U_2) cons
  * Implementation of Microsurface
  */
 
-float Microsurface::G_1(const Vec3f& wi) const
+double Microsurface::G_1(const Vec3& wi) const
 {
-    if (wi.z() > 0.9999f)   return 1.0f;
-    if (wi.z() <= 0.0f)     return 0.0f;
+    if (wi.z() > 0.9999)
+        return 1;
+
+    if (wi.z() <= 0)
+        return 0;
 
     // Lambda
-    float Lambda = m_microsurfaceslope->Lambda(wi);
+    double Lambda = m_microsurfaceslope->Lambda(wi);
 
-    return 1.0f / (1.0f + Lambda);
+    return 1 / (1 + Lambda);
 }
 
-float Microsurface::G_1(const Vec3f& wi, float h0) const
+double Microsurface::G_1(const Vec3& wi, double h0) const
 {
-    if (wi.z() > 0.9999f)   return 1.0f;
-    if (wi.z() <= 0.0f)     return 0.0f;
+    if (wi.z() > 0.9999)
+        return 1;
+
+    if (wi.z() <= 0)
+        return 0;
 
     // height CDF
-    float C1_h0 = m_microsurfaceheight->C1(h0);
+    double C1_h0 = m_microsurfaceheight->C1(h0);
     // Lambda
-    float Lambda = m_microsurfaceslope->Lambda(wi);
+    double Lambda = m_microsurfaceslope->Lambda(wi);
 
-    return powf(C1_h0, Lambda);
+    return pow(C1_h0, Lambda);
 }
 
-float Microsurface::sampleHeight(const Vec3f& wr, float hr, float U) const
+double Microsurface::sampleHeight(const Vec3& wr, double hr, double U) const
 {
-    if (wr.z() > 0.9999f) return FLT_MAX;
+    if (wr.z() > 0.9999)
+        return FLT_MAX;
 
-    if (wr.z() < -0.9999f) {
+    if (wr.z() < -0.9999) {
         return m_microsurfaceheight->invC1(U * m_microsurfaceheight->C1(hr));
     }
 
-    if (fabsf(wr.z()) < 0.0001f) return hr;
+    if (fabs(wr.z()) < 0.0001)
+        return hr;
 
     // probability of intersection
-    float G_1_ = G_1(wr, hr);
+    double G_1_ = G_1(wr, hr);
 
-    if (U > 1.0f - G_1_) {
+    if (U > 1 - G_1_) {
         // leave the microsurface
         return FLT_MAX;
     }
 
-    float h = m_microsurfaceheight->invC1(
-        m_microsurfaceheight->C1(hr) / powf((1.0f - U), 1.0f / m_microsurfaceslope->Lambda(wr)));
+    double h = m_microsurfaceheight->invC1(
+        m_microsurfaceheight->C1(hr) / pow((1 - U), 1 / m_microsurfaceslope->Lambda(wr)));
     return h;
 }
 
-Vec3f Microsurface::sample(const Vec3f& wi, int& scatteringOrder) const
+Vec3 Microsurface::sample(const Vec3& wi, int& scatteringOrder) const
 {
     // init
-    Vec3f wr = -wi;
-    float hr = 1.0f + m_microsurfaceheight->invC1(0.999f);
+    Vec3 wr = -wi;
+    double hr = 1 + m_microsurfaceheight->invC1(0.999);
 
     // random walk
     scatteringOrder = 0;
     while (true) {
         // next height
-        float U = generateRandomNumber();
+        double U = generateRandomNumber();
         hr = sampleHeight(wr, hr, U);
 
         // leave the microsurface?
@@ -811,28 +831,29 @@ Vec3f Microsurface::sample(const Vec3f& wi, int& scatteringOrder) const
 
         // if NaN (should not happen, just in case)
         if ((hr != hr) || (wr.z() != wr.z())) {
-            return Vec3f(0, 0, 1);
+            return Vec3(0, 0, 1);
         }
     }
 
     return wr;
 }
 
-float Microsurface::eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder) const
+double Microsurface::eval(const Vec3& wi, const Vec3& wo, int scatteringOrder) const
 {
-    if (wo.z() < 0.0f) return 0.0f;
+    if (wo.z() < 0)
+        return 0;
 
     // init
-    Vec3f wr = -wi;
-    float hr = 1.0f + m_microsurfaceheight->invC1(0.999f);
+    Vec3 wr = -wi;
+    double hr = 1 + m_microsurfaceheight->invC1(0.999);
 
-    float sum = 0;
+    double sum = 0;
 
     // random walk
     int current_scatteringOrder = 0;
     while (scatteringOrder == 0 || current_scatteringOrder <= scatteringOrder) {
         // next height
-        float U = generateRandomNumber();
+        double U = generateRandomNumber();
         hr = sampleHeight(wr, hr, U);
 
         // leave the microsurface?
@@ -844,9 +865,9 @@ float Microsurface::eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder) 
         }
 
         // next event estimation
-        float phasefunction = evalPhaseFunction(-wr, wo);
-        float shadowing = G_1(wo, hr);
-        float I = phasefunction * shadowing;
+        double phasefunction = evalPhaseFunction(-wr, wo);
+        double shadowing = G_1(wo, hr);
+        double I = phasefunction * shadowing;
 
         if (IsFiniteNumber(I) &&
             (scatteringOrder == 0 || current_scatteringOrder == scatteringOrder)) {
@@ -858,199 +879,207 @@ float Microsurface::eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder) 
 
         // if NaN (should not happen, just in case)
         if ((hr != hr) || (wr.z() != wr.z())) {
-            return 0.0f;
+            return 0;
         }
     }
 
     return sum;
 }
 
-float MicrosurfaceConductor::evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const
+double MicrosurfaceConductor::evalPhaseFunction(const Vec3& wi, const Vec3& wo) const
 {
     // half vector
-    Vec3f wh = (wi + wo).normalized();
-    if (wh.z() < 0.0f) return 0.0f;
+    Vec3 wh = (wi + wo).normalized();
+    if (wh.z() < 0)
+        return 0;
 
-    return 0.25f * m_microsurfaceslope->D_wi(wi, wh) / wi.dot(wh);
+    return 0.25 * m_microsurfaceslope->D_wi(wi, wh) / wi.dot(wh);
 }
 
-Vec3f MicrosurfaceConductor::samplePhaseFunction(const Vec3f& wi) const
+Vec3 MicrosurfaceConductor::samplePhaseFunction(const Vec3& wi) const
 {
-    float U1 = generateRandomNumber();
-    float U2 = generateRandomNumber();
+    double U1 = generateRandomNumber();
+    double U2 = generateRandomNumber();
 
-    Vec3f wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
+    Vec3 wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
 
     // reflect
-    Vec3f wo = -wi + 2.0f * wm * wi.dot(wm);
+    Vec3 wo = -wi + 2 * wm * wi.dot(wm);
 
     return wo;
 }
 
-float MicrosurfaceConductor::evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const
+double MicrosurfaceConductor::evalSingleScattering(const Vec3& wi, const Vec3& wo) const
 {
     // half-vector
-    Vec3f wh = (wi + wo).normalized();
-    float D = m_microsurfaceslope->D(wh);
+    Vec3 wh = (wi + wo).normalized();
+    double D = m_microsurfaceslope->D(wh);
 
     // masking-shadowing
-    float G2 = 1.0f / (1.0f + m_microsurfaceslope->Lambda(wi) + m_microsurfaceslope->Lambda(wo));
+    double G2 = 1 / (1 + m_microsurfaceslope->Lambda(wi) + m_microsurfaceslope->Lambda(wo));
 
     // BRDF * cos
-    return D * G2 / (4.0f * wi.z());
+    return D * G2 / (4 * wi.z());
 }
 
-Vec3f MicrosurfaceDielectric::refract(const Vec3f& wi, const Vec3f& wm, float eta) const
+Vec3 MicrosurfaceDielectric::refract(const Vec3& wi, const Vec3& wm, double eta) const
 {
     using std::max;
 
-    float cos_theta_i = wi.dot(wm);
-    float cos_theta_t2 = 1.0f - (1.0f - cos_theta_i * cos_theta_i) / (eta * eta);
-    float cos_theta_t = -sqrtf(max(0.0f, cos_theta_t2));
+    double cos_theta_i = wi.dot(wm);
+    double cos_theta_t2 = 1 - (1 - cos_theta_i * cos_theta_i) / (eta * eta);
+    double cos_theta_t = -sqrt(max(0.0, cos_theta_t2));
 
     return wm * (wi.dot(wm) / eta + cos_theta_t) - wi / eta;
 }
 
-float MicrosurfaceDielectric::Fresnel(const Vec3f& wi, const Vec3f& wm, float eta) const
+double MicrosurfaceDielectric::fresnel(const Vec3& wi, const Vec3& wm, double eta) const
 {
-    float cos_theta_i = wi.dot(wm);
-    float cos_theta_t2 = 1.0f - (1.0f - cos_theta_i * cos_theta_i) / (eta * eta);
+    double cos_theta_i = wi.dot(wm);
+    double cos_theta_t2 = 1 - (1 - cos_theta_i * cos_theta_i) / (eta * eta);
 
     // total internal reflection
-    if (cos_theta_t2 <= 0.0f) return 1.0f;
+    if (cos_theta_t2 <= 0)
+        return 1;
 
-    float cos_theta_t = sqrtf(cos_theta_t2);
+    double cos_theta_t = sqrt(cos_theta_t2);
 
-    float Rs = (cos_theta_i - eta * cos_theta_t) / (cos_theta_i + eta * cos_theta_t);
-    float Rp = (eta * cos_theta_i - cos_theta_t) / (eta * cos_theta_i + cos_theta_t);
+    double Rs = (cos_theta_i - eta * cos_theta_t) / (cos_theta_i + eta * cos_theta_t);
+    double Rp = (eta * cos_theta_i - cos_theta_t) / (eta * cos_theta_i + cos_theta_t);
 
-    float F = 0.5f * (Rs * Rs + Rp * Rp);
+    double F = 0.5 * (Rs * Rs + Rp * Rp);
     return F;
 }
 
 // wrapper (only for the API and testing)
-float MicrosurfaceDielectric::evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const
+double MicrosurfaceDielectric::evalPhaseFunction(const Vec3& wi, const Vec3& wo) const
 {
     return evalPhaseFunction(wi, wo, true, true) +
            evalPhaseFunction(wi, wo, true, false);
 }
 
-float MicrosurfaceDielectric::evalPhaseFunction(const Vec3f& wi, const Vec3f& wo, bool wi_outside, bool wo_outside) const
+double MicrosurfaceDielectric::evalPhaseFunction(const Vec3& wi,
+                                                 const Vec3& wo,
+                                                 bool        wi_outside,
+                                                 bool        wo_outside) const
 {
-    float eta = wi_outside ? m_eta : 1.0f / m_eta;
+    double eta = wi_outside ? m_eta : 1 / m_eta;
 
     if (wi_outside == wo_outside) { // reflection
         // half vector
-        Vec3f wh = (wi + wo).normalized();
+        Vec3 wh = (wi + wo).normalized();
 
-        return (wi_outside) ?
-               (0.25f * m_microsurfaceslope->D_wi(wi, wh) / wi.dot(wh) * Fresnel(wi, wh, eta)) :
-               (0.25f * m_microsurfaceslope->D_wi(-wi, -wh) / (-wi).dot(-wh) * Fresnel(-wi, -wh, eta));
+        return wi_outside
+                 ? (0.25 * m_microsurfaceslope->D_wi(wi, wh) / wi.dot(wh) * fresnel(wi, wh, eta))
+                 : (0.25 * m_microsurfaceslope->D_wi(-wi, -wh) / (-wi).dot(-wh) *
+                    fresnel(-wi, -wh, eta));
     }
     else { // transmission
-        Vec3f wh = -((wi + wo*eta).normalized());
-        wh *= (wi_outside) ? (static_cast<Vec3f::Scalar>(sign(wh.z()))) : (static_cast<Vec3f::Scalar>(-sign(wh.z())));
+        Vec3 wh = -((wi + wo * eta).normalized());
+        wh *= wi_outside ? sign(wh.z()) : -sign(wh.z());
 
-        if (wh.dot(wi) < 0.0f) return 0.0f;
+        if (wh.dot(wi) < 0)
+            return 0;
 
         using std::max;
 
         if (wi_outside) {
-            return eta * eta * (1.0f - Fresnel(wi, wh, eta)) *
-                   m_microsurfaceslope->D_wi(wi, wh) * max(0.0f, -wo.dot(wh)) *
-                   1.0f / powf(wi.dot(wh) + eta * wo.dot(wh), 2.0f);
+            return eta * eta * (1 - fresnel(wi, wh, eta)) *
+                   m_microsurfaceslope->D_wi(wi, wh) * max(0.0, -wo.dot(wh)) *
+                   1 / pow(wi.dot(wh) + eta * wo.dot(wh), 2);
         }
         else {
-            return eta * eta * (1.0f - Fresnel(-wi, -wh, eta)) *
-                   m_microsurfaceslope->D_wi(-wi, -wh) * max(0.0f, -(-wo).dot(-wh)) *
-                   1.0f / powf((-wi).dot(-wh) + eta * (-wo).dot(-wh), 2.0f);
+            return eta * eta * (1 - fresnel(-wi, -wh, eta)) *
+                   m_microsurfaceslope->D_wi(-wi, -wh) * max(0.0, -(-wo).dot(-wh)) *
+                   1 / pow((-wi).dot(-wh) + eta * (-wo).dot(-wh), 2);
         }
     }
 }
 
-Vec3f MicrosurfaceDielectric::samplePhaseFunction(const Vec3f& wi) const
+Vec3 MicrosurfaceDielectric::samplePhaseFunction(const Vec3& wi) const
 {
     bool wo_outside;
     return samplePhaseFunction(wi, true, wo_outside);
 }
 
-Vec3f MicrosurfaceDielectric::samplePhaseFunction(const Vec3f& wi, bool wi_outside, bool& wo_outside) const
+Vec3 MicrosurfaceDielectric::samplePhaseFunction(const Vec3& wi,
+                                                 bool        wi_outside,
+                                                 bool&       wo_outside) const
 {
-    float U1 = generateRandomNumber();
-    float U2 = generateRandomNumber();
+    double U1 = generateRandomNumber();
+    double U2 = generateRandomNumber();
 
-    float eta = wi_outside ? m_eta : 1.0f / m_eta;
+    double eta = wi_outside ? m_eta : 1 / m_eta;
 
-    Vec3f wm = wi_outside ? (m_microsurfaceslope->sampleD_wi(wi, U1, U2))
-                          : (-m_microsurfaceslope->sampleD_wi(-wi, U1, U2));
+    Vec3 wm = wi_outside ? (m_microsurfaceslope->sampleD_wi(wi, U1, U2))
+                         : (-m_microsurfaceslope->sampleD_wi(-wi, U1, U2));
 
-    float F = Fresnel(wi, wm, eta);
+    double F = fresnel(wi, wm, eta);
 
     if (generateRandomNumber() < F) {
-        Vec3f wo = -wi + 2.0f * wm * wi.dot(wm); // reflect
+        Vec3 wo = -wi + 2 * wm * wi.dot(wm); // reflect
         return wo;
     }
     else {
         wo_outside = !wi_outside;
-        Vec3f wo = refract(wi, wm, eta);
+        Vec3 wo = refract(wi, wm, eta);
         return wo.normalized();
     }
 }
 
-float MicrosurfaceDielectric::evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const
+double MicrosurfaceDielectric::evalSingleScattering(const Vec3& wi, const Vec3& wo) const
 {
     //bool wi_outside = true;
     bool wo_outside = wo.z() > 0;
 
-    float eta = m_eta;
+    double eta = m_eta;
 
     if (wo_outside) { // reflection
         // D
-        Vec3f wh = (wi + wo).normalized();
-        float D = m_microsurfaceslope->D(wh);
+        Vec3   wh = (wi + wo).normalized();
+        double D = m_microsurfaceslope->D(wh);
 
         // masking shadowing
-        float Lambda_i = m_microsurfaceslope->Lambda(wi);
-        float Lambda_o = m_microsurfaceslope->Lambda(wo);
-        float G2 = 1.0f / (1.0f + Lambda_i + Lambda_o);
+        double Lambda_i = m_microsurfaceslope->Lambda(wi);
+        double Lambda_o = m_microsurfaceslope->Lambda(wo);
+        double G2 = 1 / (1 + Lambda_i + Lambda_o);
 
         // BRDF
-        return Fresnel(wi, wh, eta) * D * G2 / (4.0f * wi.z());
+        return fresnel(wi, wh, eta) * D * G2 / (4 * wi.z());
     }
     else { // refraction
         // D
-        Vec3f wh = -((wi + wo*eta).normalized());
-        if (eta < 1.0f) wh = -wh;
-        float D = m_microsurfaceslope->D(wh);
+        Vec3 wh = -((wi + wo * eta).normalized());
+        if (eta < 1) wh = -wh;
+        double D = m_microsurfaceslope->D(wh);
 
         // G2
-        float Lambda_i = m_microsurfaceslope->Lambda(wi);
-        float Lambda_o = m_microsurfaceslope->Lambda(-wo);
-        float G2 = static_cast<float>(mss::beta(1.0f + Lambda_i, 1.0f + Lambda_o));
+        double Lambda_i = m_microsurfaceslope->Lambda(wi);
+        double Lambda_o = m_microsurfaceslope->Lambda(-wo);
+        double G2 = mss::beta(1 + Lambda_i, 1 + Lambda_o);
 
         using std::max;
 
         // BSDF
-        return max(0.0f, wi.dot(wh)) * max(0.0f, -wo.dot(wh)) *
-               1.0f / wi.z() * eta * eta * (1.0f - Fresnel(wi, wh, eta)) *
-               G2 * D / powf(wi.dot(wh) + eta * wo.dot(wh), 2.0f);
+        return max(0.0, wi.dot(wh)) * max(0.0, -wo.dot(wh)) * 1 / wi.z() * eta * eta *
+               (1 - fresnel(wi, wh, eta)) * G2 * D / pow(wi.dot(wh) + eta * wo.dot(wh), 2);
     }
 }
 
-float MicrosurfaceDielectric::eval(const Vec3f& wi, const Vec3f& wo, int scatteringOrder) const
+double MicrosurfaceDielectric::eval(const Vec3& wi, const Vec3& wo, int scatteringOrder) const
 {
     // init
-    Vec3f wr = -wi;
-    float hr = 1.0f + m_microsurfaceheight->invC1(0.999f);
+    Vec3 wr = -wi;
+    double hr = 1 + m_microsurfaceheight->invC1(0.999);
     bool outside = true;
 
-    float sum = 0.0f;
+    double sum = 0;
 
     // random walk
     int current_scatteringOrder = 0;
     while (scatteringOrder == 0 || current_scatteringOrder <= scatteringOrder) {
         // next height
-        float U = generateRandomNumber();
+        double U = generateRandomNumber();
         hr = (outside) ? sampleHeight(wr, hr, U) : -sampleHeight(-wr, -hr, U);
 
         // leave the microsurface?
@@ -1062,9 +1091,9 @@ float MicrosurfaceDielectric::eval(const Vec3f& wi, const Vec3f& wo, int scatter
         }
 
         // next event estimation
-        float phasefunction = evalPhaseFunction(-wr, wo, outside, (wo.z() > 0));
-        float shadowing = (wo.z() > 0) ? G_1(wo, hr) : G_1(-wo, -hr);
-        float I = phasefunction * shadowing;
+        double phasefunction = evalPhaseFunction(-wr, wo, outside, (wo.z() > 0));
+        double shadowing = (wo.z() > 0) ? G_1(wo, hr) : G_1(-wo, -hr);
+        double I = phasefunction * shadowing;
 
         if (IsFiniteNumber(I) &&
             (scatteringOrder == 0 || current_scatteringOrder == scatteringOrder)) {
@@ -1076,25 +1105,25 @@ float MicrosurfaceDielectric::eval(const Vec3f& wi, const Vec3f& wo, int scatter
 
         // if NaN (should not happen, just in case)
         if ((hr != hr) || (wr.z() != wr.z())) {
-            return 0.0f;
+            return 0;
         }
     }
 
     return sum;
 }
 
-Vec3f MicrosurfaceDielectric::sample(const Vec3f& wi, int& scatteringOrder) const
+Vec3 MicrosurfaceDielectric::sample(const Vec3& wi, int& scatteringOrder) const
 {
     // init
-    Vec3f wr = -wi;
-    float hr = 1.0f + m_microsurfaceheight->invC1(0.999f);
+    Vec3 wr = -wi;
+    double hr = 1 + m_microsurfaceheight->invC1(0.999);
     bool outside = true;
 
     // random walk
     scatteringOrder = 0;
     while (true) {
         // next height
-        float U = generateRandomNumber();
+        double U = generateRandomNumber();
         hr = (outside) ? sampleHeight(wr, hr, U) : -sampleHeight(-wr, -hr, U);
 
         // leave the microsurface?
@@ -1110,79 +1139,75 @@ Vec3f MicrosurfaceDielectric::sample(const Vec3f& wi, int& scatteringOrder) cons
 
         // if NaN (should not happen, just in case)
         if ((hr != hr) || (wr.z() != wr.z())) {
-            return Vec3f(0.0f, 0.0f, 1.0f);
+            return Vec3(0, 0, 1);
         }
     }
 
     return wr;
 }
 
-float MicrosurfaceDiffuse::evalPhaseFunction(const Vec3f& wi, const Vec3f& wo) const
+double MicrosurfaceDiffuse::evalPhaseFunction(const Vec3& wi, const Vec3& wo) const
 {
-    float U1 = generateRandomNumber();
-    float U2 = generateRandomNumber();
-    Vec3f wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
+    double U1 = generateRandomNumber();
+    double U2 = generateRandomNumber();
+    Vec3 wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
 
     using std::max;
 
-    return 1.0f / M_PI * max(0.0f, wo.dot(wm));
+    return 1 / M_PI * max(0.0, wo.dot(wm));
 }
 
 // build orthonormal basis (Building an Orthonormal Basis from a 3D Unit Vector Without Normalization, [Frisvad2012])
-void buildOrthonormalBasis(Vec3f& omega_1, Vec3f& omega_2, const Vec3f& omega_3)
+void buildOrthonormalBasis(Vec3& omega_1, Vec3& omega_2, const Vec3& omega_3)
 {
-    if (omega_3.z() < -0.9999999f) {
-        omega_1 = Vec3f(0.0f, -1.0f, 0.0f);
-        omega_2 = Vec3f(-1.0f, 0.0f, 0.0f);
+    if (omega_3.z() < -0.9999999) {
+        omega_1 = Vec3(0, -1, 0);
+        omega_2 = Vec3(-1, 0, 0);
     }
     else {
-        float a = 1.0f / (1.0f + omega_3.z());
-        float b = -omega_3.x() * omega_3.y() * a;
-        omega_1 = Vec3f(1.0f - omega_3.x() * omega_3.x() * a,
-                        b,
-                        -omega_3.x());
-        omega_2 = Vec3f(b,
-                        1.0f - omega_3.y() * omega_3.y() * a,
-                        -omega_3.y());
+        double a = 1 / (1 + omega_3.z());
+        double b = -omega_3.x() * omega_3.y() * a;
+        omega_1 = Vec3(1 - omega_3.x() * omega_3.x() * a, b, -omega_3.x());
+        omega_2 = Vec3(b, 1 - omega_3.y() * omega_3.y() * a, -omega_3.y());
     }
 }
 
-Vec3f MicrosurfaceDiffuse::samplePhaseFunction(const Vec3f& wi) const
+Vec3 MicrosurfaceDiffuse::samplePhaseFunction(const Vec3& wi) const
 {
-    float U1 = generateRandomNumber();
-    float U2 = generateRandomNumber();
-    float U3 = generateRandomNumber();
-    float U4 = generateRandomNumber();
+    double U1 = generateRandomNumber();
+    double U2 = generateRandomNumber();
+    double U3 = generateRandomNumber();
+    double U4 = generateRandomNumber();
 
-    Vec3f wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
+    Vec3 wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
 
     // sample diffuse reflection
-    Vec3f w1, w2;
+    Vec3 w1, w2;
     buildOrthonormalBasis(w1, w2, wm);
 
-    float r1 = 2.0f * U3 - 1.0f;
-    float r2 = 2.0f * U4 - 1.0f;
+    double r1 = 2 * U3 - 1;
+    double r2 = 2 * U4 - 1;
 
     using std::max;
 
     // concentric map code from
     // http://psgraphics.blogspot.ch/2011/01/improved-code-for-concentric-map.html
-    float phi, r;
+    double phi, r;
     if (r1 == 0 && r2 == 0) {
         r = phi = 0;
     }
     else if (r1 * r1 > r2 * r2) {
         r = r1;
-        phi = (M_PI / 4.0f) * (r2 / r1);
+        phi = (M_PI / 4) * (r2 / r1);
     }
     else {
         r = r2;
-        phi = (M_PI / 2.0f) - (r1 / r2) * (M_PI / 4.0f);
+        phi = (M_PI / 2) - (r1 / r2) * (M_PI / 4);
     }
-    float x = r * cosf(phi);
-    float y = r * sinf(phi);
-    float z = sqrtf(max(0.0f, 1.0f - x * x - y * y));
-    Vec3f wo = x * w1 + y * w2 + z * wm;
+    double x = r * cos(phi);
+    double y = r * sin(phi);
+    double z = sqrt(max(0.0, 1 - x * x - y * y));
+    Vec3 wo = x * w1 + y * w2 + z * wm;
 
     return wo;
 }
@@ -1190,35 +1215,35 @@ Vec3f MicrosurfaceDiffuse::samplePhaseFunction(const Vec3f& wi) const
 // stochastic evaluation
 // Heitz and Dupuy 2015
 // Implementing a Simple Anisotropic Rough Diffuse Material with Stochastic Evaluation
-float MicrosurfaceDiffuse::evalSingleScattering(const Vec3f& wi, const Vec3f& wo) const
+double MicrosurfaceDiffuse::evalSingleScattering(const Vec3& wi, const Vec3& wo) const
 {
     // sample visible microfacet
-    float U1 = generateRandomNumber();
-    float U2 = generateRandomNumber();
-    Vec3f wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
+    double U1 = generateRandomNumber();
+    double U2 = generateRandomNumber();
+    Vec3 wm = m_microsurfaceslope->sampleD_wi(wi, U1, U2);
 
     // shadowing given masking
-    float Lambda_i = m_microsurfaceslope->Lambda(wi);
-    float Lambda_o = m_microsurfaceslope->Lambda(wo);
-    float G2_given_G1 = (1.0f + Lambda_i) / (1.0f + Lambda_i + Lambda_o);
+    double Lambda_i = m_microsurfaceslope->Lambda(wi);
+    double Lambda_o = m_microsurfaceslope->Lambda(wo);
+    double G2_given_G1 = (1 + Lambda_i) / (1 + Lambda_i + Lambda_o);
 
     using std::max;
 
     // evaluate diffuse and shadowing given masking
-    return 1.0f / M_PI * max(0.0f, wm.dot(wo)) * G2_given_G1;
+    return 1 / M_PI * max(0.0, wm.dot(wo)) * G2_given_G1;
 }
 
 // Interface to evaluate a BSDF value with iterations.
-Vec3 MultipleScatteringSmith::compute(const Vec3&   L,
-                                      const Vec3&   V,
-                                      const Vec3&   color,
-                                      float         roughnessX,
-                                      float         roughnessY,
-                                      float         refractiveIndex,
-                                      MaterialType  materialType,
-                                      HeightType    heightType,
-                                      SlopeType     slopeType,
-                                      int           numIterations)
+Vec3 MultipleScatteringSmith::compute(const Vec3&  L,
+                                      const Vec3&  V,
+                                      const Vec3&  color,
+                                      double       roughnessX,
+                                      double       roughnessY,
+                                      double       refractiveIndex,
+                                      MaterialType materialType,
+                                      HeightType   heightType,
+                                      SlopeType    slopeType,
+                                      int          numIterations)
 {
     bool uniformHeightUsed;
     if (heightType == UNIFORM_HEIGHT) {
@@ -1236,8 +1261,8 @@ Vec3 MultipleScatteringSmith::compute(const Vec3&   L,
         beckmannSlopeUsed = false;
     }
 
-    float alphaX = roughnessX * roughnessX;
-    float alphaY = roughnessY * roughnessY;
+    double alphaX = roughnessX * roughnessX;
+    double alphaY = roughnessY * roughnessY;
 
     Microsurface* microsurface;
 
@@ -1262,8 +1287,8 @@ Vec3 MultipleScatteringSmith::compute(const Vec3&   L,
 
     double sum = 0.0;
     for (int i = 0; i < numIterations; ++i) {
-        Vec3f wi = L.cast<Vec3f::Scalar>();
-        Vec3f wo = V.cast<Vec3f::Scalar>();
+        Vec3 wi = L;
+        Vec3 wo = V;
         sum += microsurface->eval(wi, wo, 0);
     }
     double val = sum / numIterations;
@@ -1273,5 +1298,5 @@ Vec3 MultipleScatteringSmith::compute(const Vec3&   L,
     using std::abs;
     using std::max;
 
-    return color * val / max(abs(V.z()), Vec3::Scalar(EPSILON_F));
+    return color * val / max(abs(V.z()), EPSILON_D);
 }

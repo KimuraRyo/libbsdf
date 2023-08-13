@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2022 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -31,15 +31,9 @@ using Vec4f = Eigen::Vector4f;
 using Vec4d = Eigen::Vector4d;
 using Vec4i = Eigen::Vector4i;
 
-#if defined(LIBBSDF_DOUBLE_PRECISION_VECTOR)
 using Vec2 = Vec2d;
 using Vec3 = Vec3d;
 using Vec4 = Vec4d;
-#else
-using Vec2 = Vec2f;
-using Vec3 = Vec3f;
-using Vec4 = Vec4f;
-#endif
 
 /*! \brief Converts from a vector to lb::Vec3. */
 template <typename Vec3T>

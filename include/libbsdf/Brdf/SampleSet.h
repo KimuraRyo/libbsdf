@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -37,34 +37,24 @@ public:
      * Constructs the sample points of a BRDF.
      * The initialization of angles, wavelengths, and spectra is required.
      */
-    SampleSet(int           numAngles0,
-              int           numAngles1,
-              int           numAngles2,
-              int           numAngles3,
-              ColorModel    colorModel = RGB_MODEL,
-              int           numWavelengths = 3);
+    SampleSet(int        numAngles0,
+              int        numAngles1,
+              int        numAngles2,
+              int        numAngles3,
+              ColorModel colorModel = RGB_MODEL,
+              int        numWavelengths = 3);
 
     /*! Gets the spectrum at a set of angle indices. */
-    Spectrum& getSpectrum(int index0,
-                          int index1,
-                          int index2,
-                          int index3);
+    Spectrum& getSpectrum(int index0, int index1, int index2, int index3);
 
     /*! Gets the spectrum at a set of angle indices of isotropic data. */
-    Spectrum& getSpectrum(int index0,
-                          int index2,
-                          int index3);
+    Spectrum& getSpectrum(int index0, int index2, int index3);
 
     /*! Gets the spectrum at a set of angle indices. */
-    const Spectrum& getSpectrum(int index0,
-                                int index1,
-                                int index2,
-                                int index3) const;
+    const Spectrum& getSpectrum(int index0, int index1, int index2, int index3) const;
 
     /*! Gets the spectrum at a set of angle indices of isotropic data. */
-    const Spectrum& getSpectrum(int index0,
-                                int index2,
-                                int index3) const;
+    const Spectrum& getSpectrum(int index0, int index2, int index3) const;
 
     /*! Gets the spectrum at an index. */
     Spectrum& getSpectrum(int index);
@@ -73,17 +63,10 @@ public:
     const Spectrum& getSpectrum(int index) const;
 
     /*! Sets the spectrum at a set of angle indices. */
-    void setSpectrum(int                index0,
-                     int                index1,
-                     int                index2,
-                     int                index3,
-                     const Spectrum&    spectrum);
+    void setSpectrum(int index0, int index1, int index2, int index3, const Spectrum& spectrum);
 
     /*! Sets the spectrum at a set of angle indices of isotropic data. */
-    void setSpectrum(int                index0,
-                     int                index2,
-                     int                index3,
-                     const Spectrum&    spectrum);
+    void setSpectrum(int index0, int index2, int index3, const Spectrum& spectrum);
 
     /*! Gets all spectra. */
     SpectrumList& getSpectra();
@@ -91,25 +74,25 @@ public:
     /*! Gets all spectra. */
     const SpectrumList& getSpectra() const;
 
-    float getAngle0(int index) const; /*!< Gets the angle0 at an index. */
-    float getAngle1(int index) const; /*!< Gets the angle1 at an index. */
-    float getAngle2(int index) const; /*!< Gets the angle2 at an index. */
-    float getAngle3(int index) const; /*!< Gets the angle3 at an index. */
+    double getAngle0(int index) const; /*!< Gets the angle0 at an index. */
+    double getAngle1(int index) const; /*!< Gets the angle1 at an index. */
+    double getAngle2(int index) const; /*!< Gets the angle2 at an index. */
+    double getAngle3(int index) const; /*!< Gets the angle3 at an index. */
 
-    void setAngle0(int index, float angle); /*!< Sets the angle0 at an index. */
-    void setAngle1(int index, float angle); /*!< Sets the angle1 at an index. */
-    void setAngle2(int index, float angle); /*!< Sets the angle2 at an index. */
-    void setAngle3(int index, float angle); /*!< Sets the angle3 at an index. */
+    void setAngle0(int index, double angle); /*!< Sets the angle0 at an index. */
+    void setAngle1(int index, double angle); /*!< Sets the angle1 at an index. */
+    void setAngle2(int index, double angle); /*!< Sets the angle2 at an index. */
+    void setAngle3(int index, double angle); /*!< Sets the angle3 at an index. */
 
-    Arrayf& getAngles0(); /*!< Gets The array of angle0. */
-    Arrayf& getAngles1(); /*!< Gets The array of angle1. */
-    Arrayf& getAngles2(); /*!< Gets The array of angle2. */
-    Arrayf& getAngles3(); /*!< Gets The array of angle3. */
+    Arrayd& getAngles0(); /*!< Gets The array of angle0. */
+    Arrayd& getAngles1(); /*!< Gets The array of angle1. */
+    Arrayd& getAngles2(); /*!< Gets The array of angle2. */
+    Arrayd& getAngles3(); /*!< Gets The array of angle3. */
 
-    const Arrayf& getAngles0() const; /*!< Gets The array of angle0. */
-    const Arrayf& getAngles1() const; /*!< Gets The array of angle1. */
-    const Arrayf& getAngles2() const; /*!< Gets The array of angle2. */
-    const Arrayf& getAngles3() const; /*!< Gets The array of angle3. */
+    const Arrayd& getAngles0() const; /*!< Gets The array of angle0. */
+    const Arrayd& getAngles1() const; /*!< Gets The array of angle1. */
+    const Arrayd& getAngles2() const; /*!< Gets The array of angle2. */
+    const Arrayd& getAngles3() const; /*!< Gets The array of angle3. */
 
     int getNumAngles0() const; /*!< Gets the number of angles0. */
     int getNumAngles1() const; /*!< Gets the number of angles1. */
@@ -168,24 +151,16 @@ public:
     void updateAngleAttributes();
 
     /*! Resizes the number of angles. Angles and spectra must be initialized. */
-    void resizeAngles(int numAngles0,
-                      int numAngles1,
-                      int numAngles2,
-                      int numAngles3);
+    void resizeAngles(int numAngles0, int numAngles1, int numAngles2, int numAngles3);
 
     /*! Resizes the number of wavelengths. Wavelengths and spectra must be initialized. */
     void resizeWavelengths(int numWavelengths);
 
     /*! Gets the index of the spectrum from a set of angle indices. */
-    size_t getIndex(int index0,
-                    int index1,
-                    int index2,
-                    int index3) const;
+    size_t getIndex(int index0, int index1, int index2, int index3) const;
 
     /*! Gets the index of the spectrum from a set of angle indices of isotropic data. */
-    size_t getIndex(int index0,
-                    int index2,
-                    int index3) const;
+    size_t getIndex(int index0, int index2, int index3) const;
 
 private:
     /*! Updates the attributes whether angles are set at equal intervals. */
@@ -199,10 +174,10 @@ private:
 
     SpectrumList spectra_; /*!< The list of spectrum for each pair of incoming and outgoing directions. */
 
-    Arrayf angles0_; /*!< The array of angle0. */
-    Arrayf angles1_; /*!< The array of angle1. */
-    Arrayf angles2_; /*!< The array of angle2. */
-    Arrayf angles3_; /*!< The array of angle3. */
+    Arrayd angles0_; /*!< The array of angle0. */
+    Arrayd angles1_; /*!< The array of angle1. */
+    Arrayd angles2_; /*!< The array of angle2. */
+    Arrayd angles3_; /*!< The array of angle3. */
 
     bool equalIntervalAngles0_; /*!< This attribute holds whether angles0 are set at equal intervals. */
     bool equalIntervalAngles1_; /*!< This attribute holds whether angles1 are set at equal intervals. */
@@ -211,58 +186,42 @@ private:
 
     ColorModel colorModel_; /*!< The color model of spectra. */
 
-    Arrayf wavelengths_; /*!< The array of wavelengths. */
+    Arrayf wavelengths_; /*!< The array of wavelengths in nanometers. */
 
     /*! This attribute holds whether sample points are contained in one side of the plane of incidence. */
     bool oneSide_;
 };
 
-inline Spectrum& SampleSet::getSpectrum(int index0,
-                                        int index1,
-                                        int index2,
-                                        int index3)
+inline Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3)
 {
     return spectra_.at(getIndex(index0, index1, index2, index3));
 }
 
-inline Spectrum& SampleSet::getSpectrum(int index0,
-                                        int index2,
-                                        int index3)
+inline Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3)
 {
     return spectra_.at(getIndex(index0, index2, index3));
 }
 
-inline const Spectrum& SampleSet::getSpectrum(int index0,
-                                              int index1,
-                                              int index2,
-                                              int index3) const
+inline const Spectrum& SampleSet::getSpectrum(int index0, int index1, int index2, int index3) const
 {
     return spectra_.at(getIndex(index0, index1, index2, index3));
 }
 
-inline const Spectrum& SampleSet::getSpectrum(int index0,
-                                              int index2,
-                                              int index3) const
+inline const Spectrum& SampleSet::getSpectrum(int index0, int index2, int index3) const
 {
     return spectra_.at(getIndex(index0, index2, index3));
 }
 
-inline       Spectrum& SampleSet::getSpectrum(int index)       { return spectra_.at(index); }
+inline Spectrum&       SampleSet::getSpectrum(int index) { return spectra_.at(index); }
 inline const Spectrum& SampleSet::getSpectrum(int index) const { return spectra_.at(index); }
 
-inline void SampleSet::setSpectrum(int              index0,
-                                   int              index1,
-                                   int              index2,
-                                   int              index3,
-                                   const Spectrum&  spectrum)
+inline void
+SampleSet::setSpectrum(int index0, int index1, int index2, int index3, const Spectrum& spectrum)
 {
     spectra_.at(getIndex(index0, index1, index2, index3)) = spectrum;
 }
 
-inline void SampleSet::setSpectrum(int              index0,
-                                   int              index2,
-                                   int              index3,
-                                   const Spectrum&  spectrum)
+inline void SampleSet::setSpectrum(int index0, int index2, int index3, const Spectrum& spectrum)
 {
     spectra_.at(getIndex(index0, index2, index3)) = spectrum;
 }
@@ -270,44 +229,44 @@ inline void SampleSet::setSpectrum(int              index0,
 inline       SpectrumList& SampleSet::getSpectra()       { return spectra_; }
 inline const SpectrumList& SampleSet::getSpectra() const { return spectra_; }
 
-inline float SampleSet::getAngle0(int index) const { return angles0_[index]; }
-inline float SampleSet::getAngle1(int index) const { return angles1_[index]; }
-inline float SampleSet::getAngle2(int index) const { return angles2_[index]; }
-inline float SampleSet::getAngle3(int index) const { return angles3_[index]; }
+inline double SampleSet::getAngle0(int index) const { return angles0_[index]; }
+inline double SampleSet::getAngle1(int index) const { return angles1_[index]; }
+inline double SampleSet::getAngle2(int index) const { return angles2_[index]; }
+inline double SampleSet::getAngle3(int index) const { return angles3_[index]; }
 
-inline void SampleSet::setAngle0(int index, float angle)
+inline void SampleSet::setAngle0(int index, double angle)
 {
     angles0_[index] = angle;
     equalIntervalAngles0_ = array_util::isEqualInterval(angles0_);
 }
 
-inline void SampleSet::setAngle1(int index, float angle)
+inline void SampleSet::setAngle1(int index, double angle)
 {
     angles1_[index] = angle;
     equalIntervalAngles1_ = array_util::isEqualInterval(angles1_);
 }
 
-inline void SampleSet::setAngle2(int index, float angle)
+inline void SampleSet::setAngle2(int index, double angle)
 {
     angles2_[index] = angle;
     equalIntervalAngles2_ = array_util::isEqualInterval(angles2_);
 }
 
-inline void SampleSet::setAngle3(int index, float angle)
+inline void SampleSet::setAngle3(int index, double angle)
 {
     angles3_[index] = angle;
     equalIntervalAngles3_ = array_util::isEqualInterval(angles3_);
 }
 
-inline Arrayf& SampleSet::getAngles0() { return angles0_; }
-inline Arrayf& SampleSet::getAngles1() { return angles1_; }
-inline Arrayf& SampleSet::getAngles2() { return angles2_; }
-inline Arrayf& SampleSet::getAngles3() { return angles3_; }
+inline Arrayd& SampleSet::getAngles0() { return angles0_; }
+inline Arrayd& SampleSet::getAngles1() { return angles1_; }
+inline Arrayd& SampleSet::getAngles2() { return angles2_; }
+inline Arrayd& SampleSet::getAngles3() { return angles3_; }
 
-inline const Arrayf& SampleSet::getAngles0() const { return angles0_; }
-inline const Arrayf& SampleSet::getAngles1() const { return angles1_; }
-inline const Arrayf& SampleSet::getAngles2() const { return angles2_; }
-inline const Arrayf& SampleSet::getAngles3() const { return angles3_; }
+inline const Arrayd& SampleSet::getAngles0() const { return angles0_; }
+inline const Arrayd& SampleSet::getAngles1() const { return angles1_; }
+inline const Arrayd& SampleSet::getAngles2() const { return angles2_; }
+inline const Arrayd& SampleSet::getAngles3() const { return angles3_; }
 
 inline int SampleSet::getNumAngles0() const { return static_cast<int>(angles0_.size()); }
 inline int SampleSet::getNumAngles1() const { return static_cast<int>(angles1_.size()); }
@@ -345,13 +304,11 @@ inline bool SampleSet::isIsotropic() const { return (angles1_.size() == 1); }
 
 inline bool SampleSet::isOneSide() const { return oneSide_; }
 
-inline size_t SampleSet::getIndex(int index0,
-                                  int index1,
-                                  int index2,
-                                  int index3) const
+inline size_t SampleSet::getIndex(int index0, int index1, int index2, int index3) const
 {
     assert(index0 >= 0 && index1 >= 0 && index2 >= 0 && index3 >= 0);
-    assert(index0 < angles0_.size() && index1 < angles1_.size() && index2 < angles2_.size() && index3 < angles3_.size());
+    assert(index0 < angles0_.size() && index1 < angles1_.size() && index2 < angles2_.size() &&
+           index3 < angles3_.size());
 
     size_t index = index0
                  + angles0_.size() * index1
@@ -360,9 +317,7 @@ inline size_t SampleSet::getIndex(int index0,
     return index;
 }
 
-inline size_t SampleSet::getIndex(int index0,
-                                  int index2,
-                                  int index3) const
+inline size_t SampleSet::getIndex(int index0, int index2, int index3) const
 {
     assert(index0 >= 0 && index2 >= 0 && index3 >= 0);
     assert(index0 < angles0_.size() && index2 < angles2_.size() && index3 < angles3_.size());

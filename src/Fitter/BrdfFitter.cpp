@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2021-2022 Kimura Ryo                                  //
+// Copyright (C) 2021-2023 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -98,9 +98,9 @@ bool BrdfFitter::setParameterBounds(ceres::Problem*                    problem,
                                     const ReflectanceModel::Parameter& bounds)
 {
     switch (bounds.getType()) {
-        case ReflectanceModel::Parameter::FLOAT_PARAMETER:
-            problem->SetParameterLowerBound(parameter, 0, *bounds.getMinFloat());
-            problem->SetParameterUpperBound(parameter, 0, *bounds.getMaxFloat());
+        case ReflectanceModel::Parameter::REAL_PARAMETER:
+            problem->SetParameterLowerBound(parameter, 0, *bounds.getMinReal());
+            problem->SetParameterUpperBound(parameter, 0, *bounds.getMaxReal());
             break;
         case ReflectanceModel::Parameter::VEC3_PARAMETER: {
             const Vec3* minVec3 = bounds.getMinVec3();
