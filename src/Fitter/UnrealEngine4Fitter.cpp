@@ -83,7 +83,7 @@ UnrealEngine4 UnrealEngine4Fitter::estimateParameters(const Brdf&         brdf,
                                                       int                 numSampling,
                                                       const Vec3::Scalar& maxTheta)
 {
-    UnrealEngine4 model(Vec3(0.5, 0.5, 0.5), 0.5f, 0.5f, 0.01f);
+    UnrealEngine4 model(Vec3(0.5, 0.5, 0.5), 0.5, 0.5, 0.1);
 
     estimateParameters(&model, brdf, numSampling, maxTheta);
 

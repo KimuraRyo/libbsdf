@@ -52,7 +52,7 @@ SimpleAnisotropicGgx SimpleAnisotropicGgxFitter::estimateParameters(const Brdf& 
                                                                     int                 numSampling,
                                                                     const Vec3::Scalar& maxTheta)
 {
-    SimpleAnisotropicGgx model(Vec3(0.5, 0.5, 0.5), 0.01f, 0.01f);
+    SimpleAnisotropicGgx model(Vec3(0.5, 0.5, 0.5), 0.1, 0.1);
 
     estimateParameters(&model, brdf, numSampling, maxTheta);
 

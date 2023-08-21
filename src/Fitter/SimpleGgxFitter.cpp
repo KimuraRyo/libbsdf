@@ -45,7 +45,7 @@ private:
 SimpleGgx
 SimpleGgxFitter::estimateParameters(const Brdf& brdf, int numSampling, const Vec3::Scalar& maxTheta)
 {
-    SimpleGgx model(Vec3(0.5, 0.5, 0.5), 0.01f);
+    SimpleGgx model(Vec3(0.5, 0.5, 0.5), 0.1);
 
     estimateParameters(&model, brdf, numSampling, maxTheta);
 
