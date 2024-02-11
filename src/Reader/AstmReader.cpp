@@ -24,7 +24,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
     std::ifstream ifs(fileName.c_str(), std::ios_base::binary);
     if (ifs.fail()) {
         lbError << "[AstmReader::read] Could not open: " << fileName;
-        return 0;
+        return nullptr;
     }
 
     std::ios_base::sync_with_stdio(false);
@@ -62,7 +62,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
             // Read the names of color components.
             if (varNames.size() < 5) {
                 // No color components.
-                return 0;
+                return nullptr;
             }
             else if (varNames.size() == 7 &&
                      varNames.at(4) == "R" &&
@@ -136,7 +136,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
         std::stringstream stream(dataStr);
         std::string token;
-        int count = 0;
+        int index = 0;
         while (std::getline(stream, token, ',')) {
             if (token.at(token.size() - 1) == '\r') {
                 token.erase(token.size() - 1);
@@ -144,7 +144,7 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
 
             double val = std::atof(token.c_str());
 
-            if (count <= 3) {
+            if (index <= 3) {
                 if (val < 0) {
                     val += TAU_D;
                 }
@@ -153,10 +153,21 @@ SphericalCoordinatesBrdf* AstmReader::read(const std::string& fileName)
                 angles.push_back(val);
             }
             else {
-                values[count - 4] = static_cast<float>(std::max(val, 0.0));
+                int valIndex = index - 4;
+                if (wavelengths.size() == valIndex) {
+                    lbError << "[AstmReader::read] Data format is invalid.";
+                    return nullptr;
+                }
+
+                values[valIndex] = static_cast<float>(std::max(val, 0.0));
             }
 
-            ++count;
+            ++index;
+        }
+
+        if (wavelengths.size() < index - 4) {
+            lbError << "[AstmReader::read] Data format is invalid.";
+            return nullptr;
         }
 
         inThetaAngles.insert(angles.at(0));
