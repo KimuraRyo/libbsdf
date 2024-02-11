@@ -22,7 +22,7 @@ jobs:
           - Release
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Dependencies
         run: |
@@ -37,7 +37,7 @@ jobs:
 
       - name: Cache Build
         id: cache-build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{env.CCACHE_DIR}}
           key: ${{matrix.os}}-ccache-${{matrix.build_type}}-${{github.run_id}}
