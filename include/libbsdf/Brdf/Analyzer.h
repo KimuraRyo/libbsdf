@@ -36,8 +36,8 @@ Spectrum computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, 
  */
 Spectrum computeReflectance(const Brdf& brdf,
                             const Vec3& inDir,
-                            int         numThetaDivisions = 90,
-                            int         numPhiDivisions = 72);
+                            int         numThetaDivisions = 360,
+                            int         numPhiDivisions = 360);
 
 /*! \brief Computes reflectances at each incoming direction. */
 SampleSet2D* computeReflectances(const SpecularCoordinatesBrdf& brdf);
