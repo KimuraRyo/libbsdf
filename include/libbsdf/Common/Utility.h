@@ -417,7 +417,7 @@ Vec3T xyyToXyz(const Vec3T& xyy)
     ScalarType Y = xyy[2];
 
     if (y == ScalarType(0)) {
-        Vec3T::Zero();
+        return Vec3T(0, Y, 0);
     }
 
     ScalarType X = Y / y * x;
