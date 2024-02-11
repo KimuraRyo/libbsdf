@@ -1,7 +1,7 @@
 # Surface scattering distribution data (SSDD) file format
 
-Version: 0.1
-Revised: 2020-05-18
+Version: 0.2
+Revised: 2023-08-14
 
 The SSDD file format is designed to store tabular data of measured or generated bidirectional scattering distribution function (BSDF). A bidirectional reflectance distribution function (BRDF), bidirectional transmittance distribution function (BTDF), specular reflectance, and specular transmittance can be contained in an SSDD file.
 
@@ -75,11 +75,11 @@ Properties of data are stored in ASCII form. The following is the list of entrie
 | WAVELENGTH_LIST   | float[]   | e.g. *400 500 600 700*                                                    | List of wavelengths expressed in nanometers (nm). This is required if **COLOR_MODEL** is ***spectrum***. Numbers are in ascending order. |
 | PARAM_TYPE        | string    | *spherical_coordinate_system*<br> *specular_coordinate_system*<br> *half_difference_coordinate_system* | BRDF/BTDF parameterization type of incoming and outgoing directions. Parameter lists are contained in **PARAM0_LIST**, **PARAM1_LIST**, **PARAM2_LIST**, **PARAM3_LIST**, and **PARAM4_LIST**. Details are explained in [Parameterization types](#parameterization-types). |
 | REDUCTION_TYPE    | string[]  | *bilateral_symmetry*<br> *reciprocity*                                    | Reduction types of **PARAM3_LIST**. ***bilateral_symmetry*** uses a symmetry along the incident plane. ***reciprocity*** uses the Helmholtz reciprocity principle and is only valid for ***half_difference_coordinate_system***. The range is reduced to [0, 180]. If both types are specified, the range is [0, 90]. |
-| PARAM0_LIST       | float[]   | e.g. *0 15 30 45 60 75 90*                                                | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
-| PARAM1_LIST       | float[]   | e.g. *0 90 180 270 360*                                                   | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
-| PARAM2_LIST       | float[]   | e.g. *0 0.5 1 1.5 2 3 4 5 7.5 10 12.5 15 20 30 45 60 75 90*               | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
-| PARAM3_LIST       | float[]   | e.g. *0 45 90 135 180 225 270 315 360*                                    | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
-| PARAM4_LIST       | float[]   | e.g. *0 -5.06 -10.52 -16.87 -24.73 -34.9 -48.18*                          | List of optional parameters.  This is valid if **PARAM_TYPE** is ***specular_coordinate_system***, see [Parameterization types](#parameterization-types) for details. |
+| PARAM0_LIST       | double[]   | e.g. *0 15 30 45 60 75 90*                                                | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
+| PARAM1_LIST       | double[]   | e.g. *0 90 180 270 360*                                                   | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
+| PARAM2_LIST       | double[]   | e.g. *0 0.5 1 1.5 2 3 4 5 7.5 10 12.5 15 20 30 45 60 75 90*               | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
+| PARAM3_LIST       | double[]   | e.g. *0 45 90 135 180 225 270 315 360*                                    | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
+| PARAM4_LIST       | double[]   | e.g. *0 -5.06 -10.52 -16.87 -24.73 -34.9 -48.18*                          | List of optional parameters.  This is valid if **PARAM_TYPE** is ***specular_coordinate_system***, see [Parameterization types](#parameterization-types) for details. |
 | NAME              | string    | e.g. *metallic paint*                                                     | Name of data. |
 | SOURCE_TYPE       | string    | *measured*<br> *generated*<br> *edited*                                   | Way of creating data. Types are predefined for scattering data measured by a device, generated artificially, and edited for specific purposes. |
 | DEVICE            | string    | e.g. *GCMS-4*                                                             | Name of the measurement device. |
@@ -156,7 +156,7 @@ Specular reflectance (***specular_reflectance***) and transmittance (***specular
 #### Tabular data
 
 Data is stored below the **DATA \<*mode*\>** entry. Values are in ascii or binary form.
-The size of data depends on **COLOR_MODEL** and **PARAM_TYPE**. The number of stored values is derived by multiplying the size of color channels, **PARAM0_LIST**, **PARAM1_LIST**, **PARAM2_LIST**, and **PARAM3_LIST**. Data consists of the list of colors. A color is a monochromatic value, RGB, XYZ, or spectrum for each pair of incoming and outgoing directions. In ascii form, a color is stored in a line. Values in a line are separated by one or more spaces or tabs and terminated by a new line (**\n**). The binary format is IEEE 754 single-precision floating-point number in little-endian ordering.
+The size of data depends on **COLOR_MODEL** and **PARAM_TYPE**. The number of stored values is derived by multiplying the size of color channels, **PARAM0_LIST**, **PARAM1_LIST**, **PARAM2_LIST**, and **PARAM3_LIST**. Data consists of the list of colors. A color is a monochromatic value, RGB, XYZ, or spectrum for each pair of incoming and outgoing directions. In ascii form, a color is stored in a line. Values in a line are separated by one or more spaces or tabs and terminated by a new line (**\n**). The binary format of floating-point number is IEEE 754 in little-endian ordering.
 
 The index of a value is got by the following function:
 
@@ -172,7 +172,7 @@ index = param0_index
 Lambertian BRDF with a sample point.
 
 ```
-VERSION 0.1
+VERSION 0.2
 
 DATA_TYPE brdf
 COLOR_MODEL monochrome
@@ -187,7 +187,7 @@ DATA ascii
 Material containing BRDF, BTDF, specular reflectance, and specular transmittance.
 
 ```
-VERSION 0.1
+VERSION 0.2
 
 # Bluish diffuse BRDF
 DATA_TYPE brdf

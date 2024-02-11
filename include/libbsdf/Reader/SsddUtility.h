@@ -14,7 +14,7 @@
 namespace lb {
 
 namespace ssdd {
-    constexpr char FILE_VERSION[] = "0.1";
+    constexpr char FILE_VERSION[] = "0.2";
 
     constexpr char VERSION[]    = "VERSION";
     constexpr char SOFTWARE[]   = "SOFTWARE";
