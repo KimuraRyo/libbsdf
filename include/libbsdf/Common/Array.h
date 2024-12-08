@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2023 Kimura Ryo                                  //
+// Copyright (C) 2014-2024 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -86,7 +86,7 @@ void array_util::appendElement(ArrayT* arrayf, typename ArrayT::Scalar value)
     orig.push_back(value);
     a.resize(a.size() + 1);
 
-#if (_MSC_VER >= 1600) // Visual Studio 2010
+#if (_MSC_VER >= 1600) && (_MSC_VER < 1930) // Visual Studio 2010 to 2019
     std::copy(orig.begin(), orig.end(),
               stdext::checked_array_iterator<ScalarType*>(a.data(), a.size()));
 #else
