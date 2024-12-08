@@ -763,13 +763,27 @@ void lb::equalizeOverlappingSamples(SpecularCoordinatesBrdf* brdf)
             for (int inThIndex = 0; inThIndex < brdf->getNumInTheta(); ++inThIndex) {
             for (int inPhIndex = 0; inPhIndex < brdf->getNumInPhi();   ++inPhIndex) {
                 Arrayd sumSp = Arrayd::Zero(ss->getNumWavelengths());
+
+                int numUpperHemisphereSamples = 0;
                 for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex).cast<Arrayd::Scalar>();
+                    // Add up only the values of the sample points in the upper hemisphere.
+                    if (brdf->getSpecPhi(spPhIndex) > toRadian(90 + EPSILON_D) &&
+                        brdf->getSpecPhi(spPhIndex) < toRadian(270 - EPSILON_D))
+                        continue;
+
+                    sumSp += brdf->getSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1,
+                                               spPhIndex)
+                                 .cast<Arrayd::Scalar>();
+                    ++numUpperHemisphereSamples;
                 }
 
-                Spectrum sp = sumSp.cast<Spectrum::Scalar>() / brdf->getNumSpecPhi();
+                if (numUpperHemisphereSamples == 0)
+                    continue;
+
+                Spectrum sp = sumSp.cast<Spectrum::Scalar>() / numUpperHemisphereSamples;
                 for (int spPhIndex = 0; spPhIndex < brdf->getNumSpecPhi(); ++spPhIndex) {
-                    brdf->setSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex, sp);
+                    brdf->setSpectrum(inThIndex, inPhIndex, brdf->getNumSpecTheta() - 1, spPhIndex,
+                                      sp);
                 }
             }}
         }
