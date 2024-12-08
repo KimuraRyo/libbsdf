@@ -183,7 +183,7 @@ bool DdrWriter::output(const SpecularCoordinatesBrdf& brdf,
 
                     if (ss->getColorModel() == XYZ_MODEL) {
                         Spectrum rgb = xyzToSrgb<Vec3f>(sp);
-                        stream << " " << rgb[wlIndex] * PI_F;
+                        stream << " " << std::max(rgb[wlIndex], 0.0f) * PI_F;
                     }
                     else {
                         stream << " " << sp[wlIndex] * PI_F;
