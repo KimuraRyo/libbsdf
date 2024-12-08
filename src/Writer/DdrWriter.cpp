@@ -254,7 +254,7 @@ SpecularCoordinatesBrdf* DdrWriter::arrange(const SpecularCoordinatesBrdf& brdf,
         arrangedBrdf = filledBrdf;
     }
 
-    equalizeOverlappingSamples(arrangedBrdf);
+    //equalizeOverlappingSamples(arrangedBrdf);
     arrangedBrdf->expandAngles();
     copySpectraFromPhiOf0To360(arrangedBrdf->getSampleSet());
     fixEnergyConservation(arrangedBrdf);
