@@ -1082,7 +1082,9 @@ void lb::extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf,
     delete gRefs;
 }
 
-void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, double outTheta)
+void lb::extrapolateSamplesAlongSpecTheta(SpecularCoordinatesBrdf* brdf,
+                                          double                   maxInTheta,
+                                          double                   minOutTheta)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -1097,10 +1099,13 @@ void lb::extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, double o
                     ss->getAngle3(i3),
                     &inDir, &outDir);
 
-        double theta, phi;
-        SphericalCoordinateSystem::fromXyz(outDir, &theta, &phi);
+        double inTheta, inPhi;
+        SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
 
-        if (theta >= outTheta && i2 >= 2) {
+        double outTheta, outPhi;
+        SphericalCoordinateSystem::fromXyz(outDir, &outTheta, &outPhi);
+
+        if (inTheta <= maxInTheta && outTheta >= minOutTheta && i2 >= 2) {
             const Spectrum& sp0 = ss->getSpectrum(i0, i1, i2 - 2, i3);
             const Spectrum& sp1 = ss->getSpectrum(i0, i1, i2 - 1, i3);
 

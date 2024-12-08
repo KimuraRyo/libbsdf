@@ -180,10 +180,15 @@ void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf,
                                         double                   diffuseTheta);
 
 /*!
- * \brief Extrapolates a BRDF along outgoing polar angle.
+ * \brief Extrapolates a BRDF along specular polar angle.
+ * \param inTheta   Maximum incoming polar angle of extrapolated samples.
  * \param outTheta  Minimum outgoing polar angle of extrapolated samples.
+ *
+ * \note Note that back side values may be abnormally large when data with an incoming polar angle of 90 degrees are included.
  */
-void extrapolateSamplesAlongOutTheta(SpecularCoordinatesBrdf* brdf, double outTheta);
+void extrapolateSamplesAlongSpecTheta(SpecularCoordinatesBrdf* brdf,
+                                      double                   maxInTheta = PI_2_D,
+                                      double                   minOutTheta = PI_2_D);
 
 /*!
  * \brief Copies spectra from the azimuthal angle of 0 degrees to 360 degrees.
