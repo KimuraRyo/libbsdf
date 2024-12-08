@@ -164,7 +164,7 @@ private:
     /*! Copy operator is disabled. */
     Brdf& operator=(const Brdf&);
 
-    std::string name_; /*! The name of BRDF. */
+    std::string name_; /*!< The name of BRDF. */
 };
 
 inline       SampleSet* Brdf::getSampleSet()       { return samples_; }
