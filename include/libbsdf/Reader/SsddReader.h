@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020-2023 Kimura Ryo                                  //
+// Copyright (C) 2020-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -37,7 +37,11 @@ private:
 
     struct DataInfo
     {
-        DataInfo() : reductionType(ReductionType::NONE), sourceType(SourceType::UNKNOWN_SOURCE){};
+        DataInfo()
+            : dataType(DataType::UNKNOWN_DATA),
+              colorModel(ColorModel::UNKNOWN_MODEL),
+              reductionType(ReductionType::NONE),
+              sourceType(SourceType::UNKNOWN_SOURCE) {};
 
         DataType            dataType;
         ColorModel          colorModel;
