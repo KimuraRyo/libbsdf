@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2023 Kimura Ryo                                  //
+// Copyright (C) 2014-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -8,6 +8,8 @@
 
 #ifndef LIBBSDF_SPHERICAL_COORDINATE_SYSTEM_H
 #define LIBBSDF_SPHERICAL_COORDINATE_SYSTEM_H
+
+#include <cassert>
 
 #include <libbsdf/Common/Global.h>
 #include <libbsdf/Common/Vector.h>
