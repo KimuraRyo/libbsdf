@@ -1,14 +1,16 @@
 ## =================================================================== ##
-## Copyright (C) 2014-2023 Kimura Ryo                                  ##
+## Copyright (C) 2014-2025 Kimura Ryo                                  ##
 ##                                                                     ##
 ## This Source Code Form is subject to the terms of the Mozilla Public ##
 ## License, v. 2.0. If a copy of the MPL was not distributed with this ##
 ## file, You can obtain one at http://mozilla.org/MPL/2.0/.            ##
 ## =================================================================== ##
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.31)
 
 project(libbsdf)
+
+set(CMAKE_CXX_STANDARD 17)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -60,10 +62,9 @@ if(LIBBSDF_ENABLE_FITTING)
 endif()
 
 if(MSVC)
+    add_compile_options(/W4)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 else()
-    set(CMAKE_CXX_STANDARD 17)
-
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
 endif()
@@ -92,4 +93,5 @@ if(LIBBSDF_BUILD_APPLICATIONS)
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${LIBBSDF_CORE_FOLDER_NAME})
 endif()
 
-target_link_libraries(${PROJECT_NAME} Eigen3::Eigen ${CERES_LIB})
+set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
+target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen ${CERES_LIB})
