@@ -6,7 +6,7 @@
 ## file, You can obtain one at http://mozilla.org/MPL/2.0/.            ##
 ## =================================================================== ##
 
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.22)
 
 project(libbsdf)
 
