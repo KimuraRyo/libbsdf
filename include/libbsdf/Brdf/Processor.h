@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2023 Kimura Ryo                                  //
+// Copyright (C) 2014-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -57,10 +57,11 @@ void editComponents(int             i0,
 
 /*!
  * \brief Divides a BRDF by the cosine of the outgoing polar angle.
+ * \param epsilon A small value to avoid division by zero. If the cosine of the outgoing polar angle is smaller than \a epsilon, the value is divided by \a epsilon.
  *
  * This function converts from a CCBRDF to a BRDF.
  */
-void divideByCosineOutTheta(Brdf* brdf);
+void divideByCosineOutTheta(Brdf* brdf, double epsilon = 0.001);
 
 /*!
  * \brief Fills omitted angles using a bilateral symmetry.
@@ -181,8 +182,8 @@ void extrapolateSamplesWithReflectances(SpecularCoordinatesBrdf* brdf,
 
 /*!
  * \brief Extrapolates a BRDF along specular polar angle.
- * \param inTheta   Maximum incoming polar angle of extrapolated samples.
- * \param outTheta  Minimum outgoing polar angle of extrapolated samples.
+ * \param maxInTheta    Maximum incoming polar angle of extrapolated samples.
+ * \param minOutTheta   Minimum outgoing polar angle of extrapolated samples.
  *
  * \note Note that back side values may be abnormally large when data with an incoming polar angle of 90 degrees are included.
  */

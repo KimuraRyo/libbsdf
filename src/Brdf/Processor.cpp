@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2023 Kimura Ryo                                  //
+// Copyright (C) 2014-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -96,7 +96,7 @@ void lb::editComponents(int             i0,
     brdf->getSampleSet()->setSpectrum(i0, i1, i2, i3, sp);
 }
 
-void lb::divideByCosineOutTheta(Brdf* brdf)
+void lb::divideByCosineOutTheta(Brdf* brdf, double epsilon)
 {
     SampleSet* ss = brdf->getSampleSet();
 
@@ -106,19 +106,9 @@ void lb::divideByCosineOutTheta(Brdf* brdf)
     for (int i3 = 0; i3 < ss->getNumAngles3(); ++i3) {
         Vec3 inDir, outDir;
         brdf->getInOutDirection(i0, i1, i2, i3, &inDir, &outDir);
-        Vec3::Scalar cosOutTheta = outDir.dot(Vec3(0.0, 0.0, 1.0));
 
         Spectrum& sp = ss->getSpectrum(i0, i1, i2, i3);
-
-        // Copy the spectrum if the Z-component of the outgoing direction is zero or negative.
-        if (cosOutTheta <= 0.0 && i2 > 0) {
-            // Assume i2 is the index of the polar angle related to outgoing directions.
-            brdf->getInOutDirection(i0, i1, i2 - 1, i3, &inDir, &outDir);
-            sp = ss->getSpectrum(i0, i1, i2 - 1, i3);
-            cosOutTheta = outDir.dot(Vec3(0.0, 0.0, 1.0));
-        }
-
-        sp /= static_cast<Spectrum::Scalar>(cosOutTheta);
+        sp /= static_cast<float>(std::max(outDir.z(), epsilon));
     }}}}
 }
 

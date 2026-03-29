@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2020 Kimura Ryo                                  //
+// Copyright (C) 2014-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -135,7 +135,7 @@ FileType reader_utility::classifyFile(const std::string& fileName)
     else if (hasSuffix(name, ".bsdf")) {
         ignoreCommentLines(ifs, "#");
 
-        // Distinguish between LightTools and Zemax.
+        // Distinguish between LightTools, Zemax, and RGL EPFL.
         std::string token;
         while (ifs >> token) {
             ignoreCommentLines(ifs, "#");
@@ -145,6 +145,9 @@ FileType reader_utility::classifyFile(const std::string& fileName)
             }
             else if (token == "AngleOfIncidence") {
                 return ZEMAX_FILE;
+            }
+            else if (token.substr(0, 11) == "tensor_file") {
+                return RGL_EPFL_BSDF_FILE;
             }
             else {
                 ignoreLine(ifs);

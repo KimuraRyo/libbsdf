@@ -1,5 +1,5 @@
 ## =================================================================== ##
-## Copyright (C) 2014-2025 Kimura Ryo                                  ##
+## Copyright (C) 2014-2026 Kimura Ryo                                  ##
 ##                                                                     ##
 ## This Source Code Form is subject to the terms of the Mozilla Public ##
 ## License, v. 2.0. If a copy of the MPL was not distributed with this ##
@@ -45,6 +45,16 @@ set(DELAUNATOR_SOURCES "${DELAUNATOR_PATH}/delaunator.hpp" "${DELAUNATOR_PATH}/d
 source_group("ThirdParty\\delaunator-cpp" FILES ${DELAUNATOR_SOURCES})
 list(APPEND SOURCES ${DELAUNATOR_SOURCES})
 
+# Set rgl-epfl/brdf-loader.
+set(RGL_EPFL_BRDF_LOADER_PATH src/ThirdParty/rgl-epfl_brdf-loader)
+set(RGL_EPFL_BRDF_LOADER_SOURCES
+    "${RGL_EPFL_BRDF_LOADER_PATH}/powitacq.h"
+    "${RGL_EPFL_BRDF_LOADER_PATH}/powitacq.inl"
+    "${RGL_EPFL_BRDF_LOADER_PATH}/powitacq_rgb.h"
+    "${RGL_EPFL_BRDF_LOADER_PATH}/powitacq_rgb.inl")
+source_group("ThirdParty\\rgl-epfl_brdf-loader" FILES ${RGL_EPFL_BRDF_LOADER_SOURCES})
+list(APPEND SOURCES ${RGL_EPFL_BRDF_LOADER_SOURCES})
+
 include_directories(include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -63,6 +73,10 @@ endif()
 
 if(MSVC)
     add_compile_options(/W4)
+
+    # Suppress warnings for rgl-epfl/brdf-loader headers
+    set_source_files_properties(src/Reader/RglEpflBsdfReader.cpp PROPERTIES COMPILE_OPTIONS "/W0")
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3")

@@ -36,15 +36,16 @@ To enable the fitting function to reflectance models, enable LIBBSDF_ENABLE_FITT
 
 ### File reader
 
-| Format                                            | Extension  | Measured Data                      |
-| ------------------------------------------------- | ---------- | ---------------------------------- |
-| [Surface Scattering Distribution Data][Spec_SSDD] | .ssdd      |                                    |
-| Integra Diffuse Distribution                      | .ddr, .ddt |                                    |
-| Integra Specular Distribution                     | .sdr, .sdt |                                    |
-| Zemax BSDF                                        | .bsdf      | [RPC Photonics][Data_RPC]          |
-| LightTools BSDF                                   | .bsdf      |                                    |
-| ASTM E1392-96(2002)                               | .astm      | [Cornell University][Data_Cornell] |
-| MERL BRDF                                         | .binary    | [MERL][Data_MERL]                  |
+| Format                                            | Extension  | Measured Data                     |
+| ------------------------------------------------- | ---------- | ----------------------------------|
+| [Surface Scattering Distribution Data][Spec_SSDD] | .ssdd      |                                   |
+| Integra Diffuse Distribution                      | .ddr, .ddt |                                   |
+| Integra Specular Distribution                     | .sdr, .sdt |                                   |
+| Zemax BSDF                                        | .bsdf      | [RPC Photonics][Data_RPC]         |
+| LightTools BSDF                                   | .bsdf      |                                   |
+| RGL-EPFL BSDF                                     | .bsdf      | [RGL-EPFL Material Database][DATA_RGL-EPFL]|
+| ASTM E1392-96(2002)                               | .astm      | [Cornell University][Data_Cornell]|
+| MERL BRDF                                         | .binary    | [MERL][Data_MERL]                 |
 
 ### File writer
 
@@ -58,3 +59,4 @@ To enable the fitting function to reflectance models, enable LIBBSDF_ENABLE_FITT
 [Data_MERL]: http://www.merl.com/brdf
 [Data_RPC]: http://www.rpcphotonics.com/bsdf-data-optical-diffusers/
 [Spec_SSDD]: https://github.com/KimuraRyo/libbsdf/blob/master/doc/SsddFileFormatSpecification.md
+[DATA_RGL-EPFL]: https://rgl.epfl.ch/materials

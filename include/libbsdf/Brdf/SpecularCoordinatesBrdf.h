@@ -59,6 +59,7 @@ public:
     /*!
      * Constructs a BRDF with narrow intervals near specular directions.
      *
+     * \param specThetaExponent Exponent for the distribution of polar angles of specular directions. The larger this parameter is, the narrower intervals near specular directions are.
      * \param refractiveIndex   Refractive index used for the specular offset of BTDF.
      */
     SpecularCoordinatesBrdf(int        numInTheta,

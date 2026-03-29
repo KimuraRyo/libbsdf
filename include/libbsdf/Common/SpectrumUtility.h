@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2022 Kimura Ryo                                  //
+// Copyright (C) 2014-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -75,10 +75,18 @@ inline Vec3 SpectrumUtility::wavelengthToSrgb(float wavelength)
     Vec3 xyz = Vec3f(CieData::XYZ[index * 3],
                      CieData::XYZ[index * 3 + 1],
                      CieData::XYZ[index * 3 + 2]).cast<Vec3::Scalar>();
+
+    // Set the ultraviolet and infrared regions to gray.
+    constexpr double threshold = 0.001;
+    if (xyz.y() < threshold) {
+        double offset = threshold - xyz.y();
+        xyz += Vec3(offset, offset, offset);
+    }
+
     Vec3 rgb = xyzToSrgb(xyz);
     rgb = rgb.cwiseMin(1.0);
     rgb = rgb.cwiseMax(0.0);
-    rgb /= std::max(rgb.maxCoeff(), Vec3::Scalar(0.001));
+    rgb /= std::max(rgb.maxCoeff(), threshold * 10);
     return rgb;
 }
 
