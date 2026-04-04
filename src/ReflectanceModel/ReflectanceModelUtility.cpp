@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2023 Kimura Ryo                                  //
+// Copyright (C) 2016-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -127,6 +127,9 @@ void ReflectanceModelUtility::dumpParametersInfo(const ReflectanceModel& model)
             break;
         case ReflectanceModel::Parameter::INT_PARAMETER:
             std::cout << param.getName() << ": " << *param.getInt() << std::endl;
+            break;
+        case ReflectanceModel::Parameter::BOOL_PARAMETER:
+            std::cout << param.getName() << ": " << *param.getBool() << std::endl;
             break;
         default:
             lbError << "Invalid parameter type: " << param.getType();

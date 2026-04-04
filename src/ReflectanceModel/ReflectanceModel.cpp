@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2023 Kimura Ryo                                  //
+// Copyright (C) 2016-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -52,6 +52,16 @@ ReflectanceModel::Parameter::Parameter(const std::string& name,
     description_ = description;
 }
 
+ReflectanceModel::Parameter::Parameter(const std::string& name,
+                                       bool*              value,
+                                       const std::string& description)
+{
+    name_ = name;
+    type_ = BOOL_PARAMETER;
+    value_.boolean = value;
+    description_ = description;
+}
+
 ReflectanceModel::Parameter::~Parameter()
 {
     switch (type_) {
@@ -66,6 +76,8 @@ ReflectanceModel::Parameter::~Parameter()
     case INT_PARAMETER:
         delete minValue_.integer;
         delete maxValue_.integer;
+        break;
+    case BOOL_PARAMETER:
         break;
     default:
         break;
@@ -100,6 +112,8 @@ ReflectanceModel::Parameter& ReflectanceModel::Parameter::operator=(const Parame
     case INT_PARAMETER:
         minValue_.integer = new int(*param.minValue_.integer);
         maxValue_.integer = new int(*param.maxValue_.integer);
+        break;
+    case BOOL_PARAMETER:
         break;
     default:
         break;

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2016-2023 Kimura Ryo                                  //
+// Copyright (C) 2016-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,6 +10,7 @@
 #define LIBBSDF_REFLECTANCE_MODEL_H
 
 #include <vector>
+#include <string>
 
 #include <libbsdf/Common/Vector.h>
 
@@ -38,7 +39,8 @@ public:
         {
             REAL_PARAMETER,
             VEC3_PARAMETER,
-            INT_PARAMETER
+            INT_PARAMETER,
+            BOOL_PARAMETER
         };
 
         union ValueUnion
@@ -46,6 +48,7 @@ public:
             double* real;
             Vec3*   vec3;
             int*    integer;
+            bool*   boolean;
         };
 
         Parameter(const std::string& name,
@@ -66,6 +69,10 @@ public:
                   int                maxValue = 999,
                   const std::string& description = "");
 
+        Parameter(const std::string& name,
+                  bool*              value,
+                  const std::string& description = "");
+
         ~Parameter();
         Parameter(const Parameter& param);
         Parameter& operator=(const Parameter& param);
@@ -76,6 +83,7 @@ public:
         double* getReal() const;
         Vec3*   getVec3() const;
         int*    getInt() const;
+        bool*   getBool() const;
 
         double* getMinReal() const;
         Vec3*   getMinVec3() const;
@@ -141,6 +149,7 @@ inline ReflectanceModel::Parameter::ParameterType ReflectanceModel::Parameter::g
 inline double* ReflectanceModel::Parameter::getReal() const { return value_.real; }
 inline Vec3* ReflectanceModel::Parameter::getVec3() const { return value_.vec3; }
 inline int* ReflectanceModel::Parameter::getInt() const { return value_.integer; }
+inline bool* ReflectanceModel::Parameter::getBool() const { return value_.boolean; }
 
 inline double* ReflectanceModel::Parameter::getMinReal() const { return minValue_.real; }
 inline Vec3* ReflectanceModel::Parameter::getMinVec3() const { return minValue_.vec3; }
