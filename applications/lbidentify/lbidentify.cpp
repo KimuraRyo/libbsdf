@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2019-2020 Kimura Ryo                                  //
+// Copyright (C) 2019-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -40,7 +40,7 @@ void showHelp()
     cout << "           Valid formats:" << endl;
     cout << "               Surface Scattering Distribution Data (\".ssdd\")" << endl;
     cout << "               Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
-    cout << "               LightTools/Zemax (\".bsdf\")" << endl;
+    cout << "               LightTools/Zemax/RGL-EPFL (\".bsdf\")" << endl;
     cout << "               ASTM E1392-96(2002) (\".astm\")" << endl;
     cout << "               MERL binary (\".binary\")" << endl;
     cout << endl;
@@ -66,6 +66,9 @@ void showFileType(FileType fileType)
             break;
         case MERL_BINARY_FILE:
             cout << "File type: MERL BRDF" << endl;
+            break;
+        case RGL_EPFL_BSDF_FILE:
+            cout << "File type: RGL-EPFL BSDF" << endl;
             break;
         case SSDD_FILE:
             cout << "File type: Surface Scattering Distribution Data" << endl;

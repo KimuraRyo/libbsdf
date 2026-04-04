@@ -14,6 +14,7 @@
 #include <libbsdf/Reader/DdrReader.h>
 #include <libbsdf/Reader/LightToolsBsdfReader.h>
 #include <libbsdf/Reader/MerlBinaryReader.h>
+#include <libbsdf/Reader/RglEpflBsdfReader.h>
 #include <libbsdf/Reader/SdrReader.h>
 #include <libbsdf/Reader/SsddReader.h>
 #include <libbsdf/Reader/ZemaxBsdfReader.h>
@@ -209,6 +210,10 @@ std::shared_ptr<Brdf> reader_utility::readBrdf(const std::string&   fileName,
         }
         case MERL_BINARY_FILE:
             brdf.reset(MerlBinaryReader::read(fileName));
+            *dataType = BRDF_DATA;
+            break;
+        case RGL_EPFL_BSDF_FILE:
+            brdf.reset(RglEpflBsdfReader::read(fileName));
             *dataType = BRDF_DATA;
             break;
         case SSDD_FILE: {

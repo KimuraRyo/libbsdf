@@ -50,7 +50,7 @@ void showHelp()
     cout << "                   Valid formats:" << endl;
     cout << "                       Surface Scattering Distribution Data (\".ssdd\")" << endl;
     cout << "                       Integra Diffuse Distribution (\".ddr, .ddt\")" << endl;
-    cout << "                       LightTools/Zemax (\".bsdf\")" << endl;
+    cout << "                       LightTools/Zemax/RGL-EPFL (\".bsdf\")" << endl;
     cout << "                       ASTM E1392-96(2002) (\".astm\")" << endl;
     cout << "                       MERL binary (\".binary\")" << endl;
     cout << endl;
