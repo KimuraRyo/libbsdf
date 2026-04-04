@@ -75,7 +75,7 @@ if(MSVC)
     add_compile_options(/W4)
 
     # Suppress warnings for rgl-epfl/brdf-loader headers
-    set_source_files_properties(src/Reader/RglEpflBsdfReader.cpp PROPERTIES COMPILE_OPTIONS "/W0")
+    set_source_files_properties(src/Reader/RglEpflBsdfReader.cpp PROPERTIES COMPILE_OPTIONS "/W2")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 else()
