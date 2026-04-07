@@ -94,7 +94,7 @@ public:
 
     bool isIsotropic() const { return false; }
 
-    std::string getName() const { return "Multiple scattering Smith"; }
+    std::string getName() const { return "Multiple-scattering microfacet BSDF"; }
 
     static std::string getReference()
     {

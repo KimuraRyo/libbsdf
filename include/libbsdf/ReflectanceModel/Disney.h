@@ -58,7 +58,7 @@ public:
 
     bool isIsotropic() const { return false; }
 
-    std::string getName() const { return "Disney"; }
+    std::string getName() const { return "Disney principled BRDF"; }
 
     std::string getDescription() const
     {
