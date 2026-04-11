@@ -45,8 +45,8 @@ public:
 
     std::string getDescription() const
     {
-        std::string reference("Alejandro Conty Estevez and Christopher Kulla, \"Production Friendly Microfacet Sheen BRDF,\" SIGGRAPH 2017 Course Notes, 2017.");
-        return reference;
+        std::string reference("Alejandro Conty Estevez and Christopher Kulla, \"Production friendly microfacet sheen BRDF,\" SIGGRAPH 2017 Course Notes, 2017.");
+        return "Reference: " + reference;
     }
 
 private:

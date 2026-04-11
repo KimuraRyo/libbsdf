@@ -52,7 +52,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Bui Tuong Phong, \"Illumination for computer generated pictures,\" Communications of the ACM, vol. 18, no. 6, pp. 311-317, June 1975.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

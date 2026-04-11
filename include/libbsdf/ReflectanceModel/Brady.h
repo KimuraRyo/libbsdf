@@ -59,7 +59,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Adam Brady, Jason Lawrence, Pieter Peers, and Westley Weimer, \"genBRDF: discovering new analytic BRDFs with genetic programming,\" SIGGRAPH 2014 Technical Papers, 2014.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

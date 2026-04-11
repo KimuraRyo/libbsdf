@@ -43,6 +43,8 @@ public:
 
     std::string getName() const override { return "Lambertian"; }
 
+    std::string getDescription() const override { return "Lambertian diffuse reflection"; }
+
 private:
     Vec3 color_;
 };

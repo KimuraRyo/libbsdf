@@ -43,7 +43,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Eric P. Lafortune and Yves D. Willems, \"Using the modified phong reflectance model for physically based rendering,\" Technical Report CW197, Leuven, Belgium, 1994.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

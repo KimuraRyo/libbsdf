@@ -42,7 +42,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Michael Oren and Shree K. Nayar, \"Generalization of Lambert's reflectance model,\" Computer Graphics (SIGGRAPH '94 Proceedings), pp. 239-246, July 1994.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

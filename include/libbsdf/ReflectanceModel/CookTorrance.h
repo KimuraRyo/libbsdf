@@ -43,7 +43,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Robert L. Cook and Kenneth E. Torrance, \"A reflectance model for computer graphics,\" Computer Graphics (SIGGRAPH '81 Proceedings), pp. 307-316, July 1981.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

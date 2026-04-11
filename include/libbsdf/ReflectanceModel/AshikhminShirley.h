@@ -63,7 +63,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Michael Ashikhmin and Peter Shirley, \"An anisotropic phong BRDF model,\" Journal of Graphics Tools, Volume 5, Issue 2, pp. 25-32, December 2000.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

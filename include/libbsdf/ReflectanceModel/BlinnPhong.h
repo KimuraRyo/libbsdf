@@ -51,7 +51,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("James F. Blinn, \"Models of light reflection for computer synthesized pictures,\" ACM Computer Graphics (SIGGRAPH '77 Proceedings), pp. 192-198, July 1977.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

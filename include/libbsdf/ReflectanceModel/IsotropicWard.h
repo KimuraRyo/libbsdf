@@ -42,7 +42,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Gregory J. Ward, \"Measuring and modeling anisotropic reflection,\" Computer Graphics (SIGGRAPH '92 Proceedings), pp. 265-272, July 1992.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

@@ -67,7 +67,7 @@ public:
     std::string getDescription() const override
     {
         std::string reference("Brent Burley, \"Physically based shading at Disney,\" part of \"Practical physically based shading in film and game production\", SIGGRAPH 2012 Course Notes, 2012.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:

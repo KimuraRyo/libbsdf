@@ -49,7 +49,7 @@ public:
     std::string getDescription() const
     {
         std::string reference("Marcel Minnaert, \"The reciprocity principle in lunar photometry,\" Astrophysical Journal, vol. 93, no. 6, pp. 403-410, May 1941.");
-        return reference;
+        return "Reference: " + reference;
     }
 
 private:
