@@ -103,7 +103,7 @@ public:
 
 private:
     /*! Copy operator is disabled. */
-    SphericalCoordinatesBrdf& operator=(const SphericalCoordinatesBrdf&);
+    SphericalCoordinatesBrdf& operator=(const SphericalCoordinatesBrdf&) = delete;
 };
 
 inline Spectrum

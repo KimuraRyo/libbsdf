@@ -82,7 +82,7 @@ protected:
 
 private:
     /*! Copy operator is disabled. */
-    Material& operator=(const Material&);
+    Material& operator=(const Material&) = delete;
 };
 
 inline std::shared_ptr<      Bsdf> Material::getBsdf()       { return bsdf_; }

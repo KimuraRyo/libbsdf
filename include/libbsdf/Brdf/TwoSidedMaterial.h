@@ -59,7 +59,7 @@ protected:
 
 private:
     /*! Copy operator is disabled. */
-    TwoSidedMaterial& operator=(const TwoSidedMaterial&);
+    TwoSidedMaterial& operator=(const TwoSidedMaterial&) = delete;
 };
 
 inline std::shared_ptr<Material> TwoSidedMaterial::getFrontMaterial() { return frontMaterial_; }

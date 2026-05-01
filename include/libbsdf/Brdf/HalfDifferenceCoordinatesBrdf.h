@@ -113,7 +113,7 @@ public:
 
 private:
     /*! Copy operator is disabled. */
-    HalfDifferenceCoordinatesBrdf& operator=(const HalfDifferenceCoordinatesBrdf&);
+    HalfDifferenceCoordinatesBrdf& operator=(const HalfDifferenceCoordinatesBrdf&) = delete;
 };
 
 inline Spectrum HalfDifferenceCoordinatesBrdf::getSpectrum(double halfTheta,

@@ -68,7 +68,7 @@ protected:
 
 private:
     /*! Copy operator is disabled. */
-    Btdf& operator=(const Btdf&);
+    Btdf& operator=(const Btdf&) = delete;
 };
 
 inline Spectrum Btdf::getSpectrum(const Vec3& inDir, const Vec3& outDir) const

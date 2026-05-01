@@ -17,11 +17,12 @@ namespace lb {
  * \struct  SpecularCoordinateSystem
  * \brief   The SpecularCoordinateSystem struct provides the functions of a specular coordinate system.
  *
+ * The outgoing direction is defined in a rotated spherical coordinate system with the specular direction as the zenith.
  * The coordinate system has four angle parameters.
  *   - \a inTheta: the polar angle of an incoming direction
  *   - \a inPhi: the azimuthal angle of an incoming direction
- *   - \a specTheta: the polar angle of a specular direction
- *   - \a specPhi: the azimuthal angle of a specular direction
+ *   - \a specTheta: the polar angle of an outgoing direction in a specular coordinate system
+ *   - \a specPhi: the azimuthal angle of an outgoing direction in a specular coordinate system
  *
  * \a spec is an abbreviation for specular. \a inPhi is not used for isotropic BRDFs.
  */

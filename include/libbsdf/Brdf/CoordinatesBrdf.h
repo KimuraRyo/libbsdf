@@ -150,7 +150,7 @@ protected:
 
 private:
     /*! Copy operator is disabled. */
-    CoordinatesBrdf& operator=(const CoordinatesBrdf&);
+    CoordinatesBrdf& operator=(const CoordinatesBrdf&) = delete;
 
     /*! Initializes angle lists consisting of equal interval angles. */
     void initializeEqualIntervalAngles();

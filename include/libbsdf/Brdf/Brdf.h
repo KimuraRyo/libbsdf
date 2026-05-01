@@ -162,7 +162,7 @@ protected:
 
 private:
     /*! Copy operator is disabled. */
-    Brdf& operator=(const Brdf&);
+    Brdf& operator=(const Brdf&) = delete;
 
     std::string name_; /*!< The name of BRDF. */
 };

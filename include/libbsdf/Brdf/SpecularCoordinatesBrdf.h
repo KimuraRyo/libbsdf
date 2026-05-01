@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2014-2023 Kimura Ryo                                  //
+// Copyright (C) 2014-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -59,7 +59,7 @@ public:
     /*!
      * Constructs a BRDF with narrow intervals near specular directions.
      *
-     * \param specThetaExponent Exponent for the distribution of polar angles of specular directions. The larger this parameter is, the narrower intervals near specular directions are.
+     * \param specThetaExponent Exponent for the distribution of specular polar angles. The larger this parameter is, the narrower intervals near specular directions are.
      * \param refractiveIndex   Refractive index used for the specular offset of BTDF.
      */
     SpecularCoordinatesBrdf(int        numInTheta,
@@ -137,20 +137,41 @@ public:
                      int             specPhiIndex,
                      const Spectrum& spectrum);
 
-    double getInTheta(int index) const;   /*!< Gets the polar angle of an incoming direction. */
-    double getInPhi(int index) const;     /*!< Gets the azimuthal angle of an incoming direction. */
-    double getSpecTheta(int index) const; /*!< Gets the polar angle of a specular direction. */
-    double getSpecPhi(int index) const;   /*!< Gets the azimuthal angle of a specular direction. */
+    /*! Gets the polar angle of an incoming direction. */
+    double getInTheta(int index) const;
 
-    void setInTheta(int index, double angle);   /*!< Sets the polar angle of an incoming direction. */
-    void setInPhi(int index, double angle);     /*!< Sets the azimuthal angle of an incoming direction. */
-    void setSpecTheta(int index, double angle); /*!< Sets the polar angle of a specular direction. */
-    void setSpecPhi(int index, double angle);   /*!< Sets the azimuthal angle of a specular direction. */
+    /*! Gets the azimuthal angle of an incoming direction. */
+    double getInPhi(int index) const;
 
-    int getNumInTheta() const;   /*!< Gets the number of polar angles of an incoming direction. */
-    int getNumInPhi() const;     /*!< Gets the number of azimuthal angles of an incoming direction. */
-    int getNumSpecTheta() const; /*!< Gets the number of polar angles of a specular direction. */
-    int getNumSpecPhi() const;   /*!< Gets the number of azimuthal angles of a specular direction. */
+    /*! Gets the polar angle of an outgoing direction in a specular coordinate system. */
+    double getSpecTheta(int index) const;
+
+    /*! Gets the azimuthal angle of an outgoing direction in a specular coordinate system. */
+    double getSpecPhi(int index) const;
+
+    /*! Sets the polar angle of an incoming direction. */
+    void setInTheta(int index, double angle);
+
+    /*! Sets the azimuthal angle of an incoming direction. */
+    void setInPhi(int index, double angle);
+
+    /*! Sets the polar angle of an outgoing direction in a specular coordinate system. */
+    void setSpecTheta(int index, double angle);
+
+    /*! Sets the azimuthal angle of an outgoing direction in a specular coordinate system. */
+    void setSpecPhi(int index, double angle);
+
+    /*! Gets the number of polar angles of an incoming direction. */
+    int getNumInTheta() const;
+
+    /*! Gets the number of azimuthal angles of an incoming direction. */
+    int getNumInPhi() const;
+
+    /*! Gets the number of polar angles of an outgoing direction in a specular coordinate system. */
+    int getNumSpecTheta() const;
+
+    /*! Gets the number of azimuthal angles of an outgoing direction in a specular coordinate system. */
+    int getNumSpecPhi() const;
 
     /*! Sets up specular offsets using a refractive index. */
     void setupSpecularOffsets(double refractiveIndex);
@@ -227,7 +248,7 @@ public:
 
 private:
     /*! Copy operator is disabled. */
-    SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&);
+    SpecularCoordinatesBrdf& operator=(const SpecularCoordinatesBrdf&) = delete;
 
     /*!
      * The array of offsets from specular directions.
