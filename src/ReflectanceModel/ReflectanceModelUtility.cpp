@@ -12,6 +12,7 @@
 #include <iostream>
 #include <set>
 
+#include <libbsdf/Brdf/DistortedSphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 
 using namespace lb;
@@ -77,13 +78,18 @@ bool ReflectanceModelUtility::setupBrdf(const ReflectanceModel& model,
     bool filled2 = (angles2.size() >= numAngles2);
     bool filled3 = (angles3.size() >= numAngles3);
 
+    auto distBrdf = dynamic_cast<DistortedSphericalCoordinatesBrdf*>(brdf);
+    auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
+
     while (!(filled0 && filled1 && filled2 && filled3)) {
         if (!filled0) {
             filled0 = insertAngle0(model, brdf, numAngles0, dataType);
 
-            auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
-            if (specBrdf &&
-                specBrdf->getNumSpecularOffsets() != 0) {
+            if (distBrdf && distBrdf->getNumSpecularOffsets() != 0) {
+                distBrdf->setupSpecularOffsets(ior);
+            }
+
+            if (specBrdf && specBrdf->getNumSpecularOffsets() != 0) {
                 specBrdf->setupSpecularOffsets(ior);
             }
         }
@@ -199,14 +205,21 @@ bool ReflectanceModelUtility::insertAngle0(const ReflectanceModel& model,
     Arrayd& angles1 = ss->getAngles1();
     Arrayd& angles2 = ss->getAngles2();
     Arrayd& angles3 = ss->getAngles3();
+
+    auto distBrdf = dynamic_cast<DistortedSphericalCoordinatesBrdf*>(brdf);
+    auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
+
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i1 = 0; i1 < angles1.size(); ++i1) {
         for (int i2 = 0; i2 < angles2.size(); ++i2) {
         for (int i3 = 0; i3 < angles3.size(); ++i3) {
-            // Avoid insertion considering total internal reflection.
-            auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
-            if (specBrdf &&
-                specBrdf->getNumSpecularOffsets() != 0) {
+            // Avoid insertion considering total internal reflection (TIR).
+            if (distBrdf && distBrdf->getNumSpecularOffsets() != 0) {
+                if (angles[index] + distBrdf->getSpecularOffset(index) > decrease(PI_2_F)) {
+                    continue;
+                }
+            }
+            else if (specBrdf && specBrdf->getNumSpecularOffsets() != 0) {
                 if (angles[index] + specBrdf->getSpecularOffset(index) > decrease(PI_2_F)) {
                     continue;
                 }
@@ -265,14 +278,21 @@ bool ReflectanceModelUtility::insertAngle1(const ReflectanceModel&  model,
     Arrayd& angles0 = ss->getAngles0();
     Arrayd& angles2 = ss->getAngles2();
     Arrayd& angles3 = ss->getAngles3();
+
+    auto distBrdf = dynamic_cast<DistortedSphericalCoordinatesBrdf*>(brdf);
+    auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
+
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i0 = 0; i0 < angles0.size(); ++i0) {
         for (int i2 = 0; i2 < angles2.size(); ++i2) {
         for (int i3 = 0; i3 < angles3.size(); ++i3) {
-            // Avoid insertion considering total internal reflection.
-            auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
-            if (specBrdf &&
-                specBrdf->getNumSpecularOffsets() != 0) {
+            // Avoid insertion considering total internal reflection (TIR).
+            if (distBrdf && distBrdf->getNumSpecularOffsets() != 0) {
+                if (angles0[i0] + distBrdf->getSpecularOffset(i0) > decrease(PI_2_F)) {
+                    continue;
+                }
+            }
+            else if (specBrdf && specBrdf->getNumSpecularOffsets() != 0) {
                 if (angles0[i0] + specBrdf->getSpecularOffset(i0) > decrease(PI_2_F)) {
                     continue;
                 }
@@ -331,14 +351,21 @@ bool ReflectanceModelUtility::insertAngle2(const ReflectanceModel&  model,
     Arrayd& angles0 = ss->getAngles0();
     Arrayd& angles1 = ss->getAngles1();
     Arrayd& angles3 = ss->getAngles3();
+
+    auto distBrdf = dynamic_cast<DistortedSphericalCoordinatesBrdf*>(brdf);
+    auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
+
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i0 = 0; i0 < angles0.size(); ++i0) {
         for (int i1 = 0; i1 < angles1.size(); ++i1) {
         for (int i3 = 0; i3 < angles3.size(); ++i3) {
-            // Avoid insertion considering total internal reflection.
-            auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
-            if (specBrdf &&
-                specBrdf->getNumSpecularOffsets() != 0) {
+            // Avoid insertion considering total internal reflection (TIR).
+            if (distBrdf && distBrdf->getNumSpecularOffsets() != 0) {
+                if (angles0[i0] + distBrdf->getSpecularOffset(i0) > decrease(PI_2_F)) {
+                    continue;
+                }
+            }
+            else if (specBrdf && specBrdf->getNumSpecularOffsets() != 0) {
                 if (angles0[i0] + specBrdf->getSpecularOffset(i0) > decrease(PI_2_F)) {
                     continue;
                 }
@@ -397,14 +424,21 @@ bool ReflectanceModelUtility::insertAngle3(const ReflectanceModel&  model,
     Arrayd& angles0 = ss->getAngles0();
     Arrayd& angles1 = ss->getAngles1();
     Arrayd& angles2 = ss->getAngles2();
+
+    auto distBrdf = dynamic_cast<DistortedSphericalCoordinatesBrdf*>(brdf);
+    auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
+
     for (int index = 0; index < angles.size() - 1; ++index) {
         for (int i0 = 0; i0 < angles0.size(); ++i0) {
         for (int i1 = 0; i1 < angles1.size(); ++i1) {
         for (int i2 = 0; i2 < angles2.size(); ++i2) {
-            // Avoid insertion considering total internal reflection.
-            auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf);
-            if (specBrdf &&
-                specBrdf->getNumSpecularOffsets() != 0) {
+            // Avoid insertion considering total internal reflection (TIR).
+            if (distBrdf && distBrdf->getNumSpecularOffsets() != 0) {
+                if (angles0[i0] + distBrdf->getSpecularOffset(i0) > decrease(PI_2_F)) {
+                    continue;
+                }
+            }
+            else if (specBrdf && specBrdf->getNumSpecularOffsets() != 0) {
                 if (angles0[i0] + specBrdf->getSpecularOffset(i0) > decrease(PI_2_F)) {
                     continue;
                 }

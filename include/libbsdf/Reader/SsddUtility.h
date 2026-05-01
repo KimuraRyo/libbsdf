@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020 Kimura Ryo                                       //
+// Copyright (C) 2020-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -14,7 +14,7 @@
 namespace lb {
 
 namespace ssdd {
-    constexpr char FILE_VERSION[] = "0.2";
+    constexpr char FILE_VERSION[] = "0.3";
 
     constexpr char VERSION[]    = "VERSION";
     constexpr char SOFTWARE[]   = "SOFTWARE";
@@ -36,6 +36,7 @@ namespace ssdd {
     constexpr char WAVELENGTH_LIST[] = "WAVELENGTH_LIST";
 
     constexpr char PARAM_TYPE[]             = "PARAM_TYPE";
+    constexpr char PARAM_TYPE_DISTORTED[]   = "distorted_spherical_coordinate_system";
     constexpr char PARAM_TYPE_HALF_DIFF[]   = "half_difference_coordinate_system";
     constexpr char PARAM_TYPE_SPECULAR[]    = "specular_coordinate_system";
     constexpr char PARAM_TYPE_SPHERICAL[]   = "spherical_coordinate_system";

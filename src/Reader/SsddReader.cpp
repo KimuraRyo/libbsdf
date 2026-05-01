@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020-2023 Kimura Ryo                                  //
+// Copyright (C) 2020-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,6 +10,7 @@
 
 #include <fstream>
 
+#include <libbsdf/Brdf/DistortedSphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
@@ -270,7 +271,15 @@ std::shared_ptr<Brdf> SsddReader::readBrdf(std::ifstream& ifs, const DataInfo& d
 {
     std::shared_ptr<Brdf> brdf;
 
-    if (dataInfo.paramType == ssdd::PARAM_TYPE_HALF_DIFF) {
+    if (dataInfo.paramType == ssdd::PARAM_TYPE_DISTORTED) {
+        brdf = std::make_shared<DistortedSphericalCoordinatesBrdf>(static_cast<int>(dataInfo.params0.size()),
+                                                                   static_cast<int>(dataInfo.params1.size()),
+                                                                   static_cast<int>(dataInfo.params2.size()),
+                                                                   static_cast<int>(dataInfo.params3.size()),
+                                                                   dataInfo.colorModel,
+                                                                   static_cast<int>(dataInfo.wavelengths.size()));
+    }
+    else if (dataInfo.paramType == ssdd::PARAM_TYPE_HALF_DIFF) {
         brdf = std::make_shared<HalfDifferenceCoordinatesBrdf>(static_cast<int>(dataInfo.params0.size()),
                                                                static_cast<int>(dataInfo.params1.size()),
                                                                static_cast<int>(dataInfo.params2.size()),
@@ -317,6 +326,16 @@ std::shared_ptr<Brdf> SsddReader::readBrdf(std::ifstream& ifs, const DataInfo& d
     angles1 = toRadians(angles1);
     angles2 = toRadians(angles2);
     angles3 = toRadians(angles3);
+
+    // Set offset angles for lb::DistortedSphericalCoordinatesBrdf.
+    auto distBrdf = dynamic_cast<DistortedSphericalCoordinatesBrdf*>(brdf.get());
+    if (distBrdf &&
+        dataInfo.params4.size() == dataInfo.params0.size()) {
+        distBrdf->getSpecularOffsets().resize(dataInfo.params4.size());
+        Arrayd& offsets = distBrdf->getSpecularOffsets();
+        array_util::copy(dataInfo.params4, &offsets);
+        offsets = toRadians(offsets);
+    }
 
     // Set offset angles for lb::SpecularCoordinatesBrdf.
     auto specBrdf = dynamic_cast<SpecularCoordinatesBrdf*>(brdf.get());

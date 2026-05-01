@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2020-2023 Kimura Ryo                                  //
+// Copyright (C) 2020-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 
+#include <libbsdf/Brdf/DistortedSphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
@@ -163,10 +164,14 @@ bool SsddWriter::output(const Brdf& brdf, DataFormat format, std::ostream& strea
     output(ss->getColorModel(), ss->getWavelengths(), stream);
 
     stream << ssdd::PARAM_TYPE << " ";
-    auto halfDiffBrdf   = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
-    auto specBrdf       = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
-    auto spheBrdf       = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
-    if (halfDiffBrdf) {
+    auto distBrdf = dynamic_cast<const DistortedSphericalCoordinatesBrdf*>(&brdf);
+    auto halfDiffBrdf = dynamic_cast<const HalfDifferenceCoordinatesBrdf*>(&brdf);
+    auto specBrdf = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
+    auto spheBrdf = dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
+    if (distBrdf) {
+        stream << ssdd::PARAM_TYPE_DISTORTED << endl;
+    }
+    else if (halfDiffBrdf) {
         stream << ssdd::PARAM_TYPE_HALF_DIFF << endl;
     }
     else if (specBrdf) {
@@ -207,7 +212,12 @@ bool SsddWriter::output(const Brdf& brdf, DataFormat format, std::ostream& strea
     stream << ssdd::PARAM2_LIST << " " << degrees2.format(ssdd::LIST_FORMAT) << endl;
     stream << ssdd::PARAM3_LIST << " " << degrees3.format(ssdd::LIST_FORMAT) << endl;
 
-    if (specBrdf &&
+    if (distBrdf &&
+        distBrdf->getNumSpecularOffsets() == distBrdf->getNumInTheta()) {
+        Arrayd offsets = toDegrees(distBrdf->getSpecularOffsets());
+        stream << ssdd::PARAM4_LIST << " " << offsets.format(ssdd::LIST_FORMAT) << endl;
+    }
+    else if (specBrdf &&
         specBrdf->getNumSpecularOffsets() == specBrdf->getNumInTheta()) {
         Arrayd offsets = toDegrees(specBrdf->getSpecularOffsets());
         stream << ssdd::PARAM4_LIST << " " << offsets.format(ssdd::LIST_FORMAT) << endl;

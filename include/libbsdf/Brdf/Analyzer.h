@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2023 Kimura Ryo                                  //
+// Copyright (C) 2018-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -14,6 +14,7 @@
 #ifndef LIBBSDF_ANALYZER_H
 #define LIBBSDF_ANALYZER_H
 
+#include <libbsdf/Brdf/DistortedSphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SampleSet2D.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
@@ -25,6 +26,9 @@ Spectrum computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIndex,
 
 /*! \brief Computes a reflectance of BRDF with a specular coordinate system. */
 Spectrum computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
+
+/*! \brief Computes a reflectance of BRDF with a distorted spherical coordinate system. */
+Spectrum computeReflectance(const DistortedSphericalCoordinatesBrdf& brdf, int inThIndex, int inPhIndex);
 
 /*!
  * \brief Computes a reflectance of BRDF at an incoming direction.

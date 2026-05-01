@@ -1,7 +1,7 @@
 # Surface scattering distribution data (SSDD) file format
 
-Version: 0.2
-Revised: 2023-08-14
+Version: 0.3  
+Revised: 2026-05-01
 
 The SSDD file format is designed to store tabular data of measured or generated bidirectional scattering distribution function (BSDF). A bidirectional reflectance distribution function (BRDF), bidirectional transmittance distribution function (BTDF), specular reflectance, and specular transmittance can be contained in an SSDD file.
 
@@ -27,6 +27,7 @@ The goal of SSDD file format is to save scattering properties in a file with the
   - Spherical coordinate system
   - Specular coordinate system
   - Half-difference coordinate system
+  - Distorted spherical coordinate system
 
 ## Format
 
@@ -73,7 +74,7 @@ Properties of data are stored in ASCII form. The following is the list of entrie
 | DATA_TYPE         | string    | *brdf*<br> *btdf*<br> *specular_reflectance*<br> *specular_transmittance* | Type of data. This entry is located in the starting position of meta-data. |
 | COLOR_MODEL       | string    | *monochrome*<br> *rgb*<br> *xyz*<br> *spectrum*                           | Color model of data. ***monochrome*** is a scalar model. ***rgb*** and ***xyz*** have tristimulus values. The color space of ***rgb*** is not defined in the current SSDD version. ***xyz*** is the CIE XYZ color space. ***spectrum*** has multiple channels with the **WAVELENGTH_LIST** entry. |
 | WAVELENGTH_LIST   | float[]   | e.g. *400 500 600 700*                                                    | List of wavelengths expressed in nanometers (nm). This is required if **COLOR_MODEL** is ***spectrum***. Numbers are in ascending order. |
-| PARAM_TYPE        | string    | *spherical_coordinate_system*<br> *specular_coordinate_system*<br> *half_difference_coordinate_system* | BRDF/BTDF parameterization type of incoming and outgoing directions. Parameter lists are contained in **PARAM0_LIST**, **PARAM1_LIST**, **PARAM2_LIST**, **PARAM3_LIST**, and **PARAM4_LIST**. Details are explained in [Parameterization types](#parameterization-types). |
+| PARAM_TYPE        | string    | *spherical_coordinate_system*<br> *specular_coordinate_system*<br> *half_difference_coordinate_system* *distorted_spherical_coordinate_system*<br> | BRDF/BTDF parameterization type of incoming and outgoing directions. Parameter lists are contained in **PARAM0_LIST**, **PARAM1_LIST**, **PARAM2_LIST**, **PARAM3_LIST**, and **PARAM4_LIST**. Details are explained in [Parameterization types](#parameterization-types). |
 | REDUCTION_TYPE    | string[]  | *bilateral_symmetry*<br> *reciprocity*                                    | Reduction types of **PARAM3_LIST**. ***bilateral_symmetry*** uses a symmetry along the incident plane. ***reciprocity*** uses the Helmholtz reciprocity principle and is only valid for ***half_difference_coordinate_system***. The range is reduced to [0, 180]. If both types are specified, the range is [0, 90]. |
 | PARAM0_LIST       | double[]   | e.g. *0 15 30 45 60 75 90*                                                | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
 | PARAM1_LIST       | double[]   | e.g. *0 90 180 270 360*                                                   | List of parameters. The definition of parameter depends on **PARAM_TYPE**, see [Parameterization types](#parameterization-types) for details. |
@@ -143,6 +144,16 @@ Followings are currently supported parameterization types and parameter lists. T
 | PARAM1_LIST   | Half azimuthal angles                     | <nobr>[0, 360]</nobr> | Rotation angles of halfway directions around the normal direction. This property is required for anisotropic data. |
 | PARAM2_LIST   | Difference polar angles                   | [0, 90]               | Angles between incoming and halfway directions. |
 | PARAM3_LIST   | <nobr>Difference azimuthal angles</nobr>  | [0, 360]              | Rotation angles of incoming directions around halfway directions. |
+
+***distorted_spherical_coordinate_system*** has the incoming direction of spherical coordinates and the reparameterized outgoing direction. The latter is defined in a distorted spherical coordinate system with the specular direction as the zenith.
+
+| Name          | Definition                                | Range                   | Description |
+|-|-|-|-|
+| PARAM0_LIST   | Incoming polar angles                     | [0, 90]                 ||
+| PARAM1_LIST   | <nobr>Incoming azimuthal angles</nobr>    | [0, 360]                | This property is required for anisotropic data. |
+| PARAM2_LIST   | Distorted polar angles                     | [0, 90]                | Angles between outgoing and specular directions in the coordinate system. |
+| PARAM3_LIST   | Distorted azimuthal angles                 | [0, 360]                | Azimuthal angles of outgoing directions in the coordinate system. |
+| PARAM4_LIST   | Offset angles                             | <nobr>[-90, 90]</nobr>  | Offsets from specular directions. The size of the list must be equal to the number of incoming polar angles (**PARAM0_LIST**). This parameter list is efficient to represent the BTDF with refraction. |
 
 Specular reflectance (***specular_reflectance***) and transmittance (***specular_transmittance***) are defined in each incoming direction. The parameterization type is a spherical coordinate system.
 

@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2021-2023 Kimura Ryo                                  //
+// Copyright (C) 2021-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,6 +10,7 @@
 
 #include <ceres/ceres.h>
 
+#include <libbsdf/Brdf/DistortedSphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SpecularCoordinatesBrdf.h>
 #include <libbsdf/Brdf/SphericalCoordinatesBrdf.h>
 #include <libbsdf/Common/SpectrumUtility.h>
@@ -55,7 +56,8 @@ BrdfFitter::Data::Data(const Brdf& brdf, int numSampling, const Vec3::Scalar& ma
         int count = 0;
         Xorshift rnd;
 
-        bool inDirIsParam = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf) ||
+        bool inDirIsParam = dynamic_cast<const DistortedSphericalCoordinatesBrdf*>(&brdf) ||
+                            dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf) ||
                             dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf);
 
         while (count < numSampling) {

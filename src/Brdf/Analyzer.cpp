@@ -1,5 +1,5 @@
 // =================================================================== //
-// Copyright (C) 2018-2023 Kimura Ryo                                  //
+// Copyright (C) 2018-2026 Kimura Ryo                                  //
 //                                                                     //
 // This Source Code Form is subject to the terms of the Mozilla Public //
 // License, v. 2.0. If a copy of the MPL was not distributed with this //
@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include <libbsdf/Brdf/HalfDifferenceCoordinatesBrdf.h>
+#include <libbsdf/Brdf/DistortedSphericalCoordinatesBrdf.h>
 #include <libbsdf/Brdf/Processor.h>
 #include <libbsdf/Common/SolidAngle.h>
 #include <libbsdf/ReflectanceModel/Fresnel.h>
@@ -42,6 +42,88 @@ Arrayd computeReflectanceOfRectangle(const SphericalCoordinatesBrdf& brdf,
     return sp.cast<Arrayd::Scalar>() * midCosTheta * solidAngle;
 }
 
+template <
+    typename BrdfT,
+    typename = std::enable_if_t<std::is_same<BrdfT, DistortedSphericalCoordinatesBrdf>::value ||
+                                std::is_same<BrdfT, SpecularCoordinatesBrdf>::value>>
+Spectrum computeReflectanceImpl(const BrdfT& brdf, int inThIndex, int inPhIndex)
+{
+    Arrayd sumSpectrum;
+    sumSpectrum.resize(brdf.getSampleSet()->getNumWavelengths());
+    sumSpectrum.setZero();
+
+    double inTheta = brdf.getInTheta(inThIndex);
+    double inPhi = brdf.getInPhi(inPhIndex);
+
+    // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
+    double offsetInTheta = std::max(inTheta, EPSILON_D);
+    Vec3   inDir = SphericalCoordinateSystem::toXyz(offsetInTheta, inPhi);
+
+    int numTheta, numPhi;
+    if constexpr (std::is_same_v<BrdfT, DistortedSphericalCoordinatesBrdf>) {
+        numTheta = brdf.getNumDistTheta();
+        numPhi = brdf.getNumDistPhi();
+    } else if constexpr (std::is_same_v<BrdfT, SpecularCoordinatesBrdf>) {
+        numTheta = brdf.getNumSpecTheta();
+        numPhi = brdf.getNumSpecPhi();
+    }
+
+    for (int thIndex = 0; thIndex < numTheta - 1; ++thIndex) {
+        for (int phIndex = 0; phIndex < numPhi   - 1; ++phIndex) {
+            Vec3 outDir0 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex,     phIndex);
+            Vec3 outDir1 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex,     phIndex + 1);
+            Vec3 outDir2 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex + 1);
+            Vec3 outDir3 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex);
+
+            Vec3   centroid;
+            double solidAngle =
+                SolidAngle::fromRectangleOnHemisphere(outDir0, outDir1, outDir2, outDir3, &centroid);
+
+            if (solidAngle <= 0.0)
+                continue;
+
+            Spectrum sp = brdf.getSpectrum(inDir, centroid);
+            sumSpectrum += (sp * centroid.z() * solidAngle).cast<Arrayd::Scalar>();
+        }}
+
+    return sumSpectrum.cast<Spectrum::Scalar>();
+}
+
+template <
+    typename BrdfT,
+    typename = std::enable_if_t<std::is_same<BrdfT, DistortedSphericalCoordinatesBrdf>::value ||
+                                std::is_same<BrdfT, SpecularCoordinatesBrdf>::value>>
+Spectrum computeReflectanceImpl(const Brdf& brdf,
+                                const Vec3& inDir,
+                                int         numThetaDivisions,
+                                int         numPhiDivisions)
+{
+    const SampleSet* ss = brdf.getSampleSet();
+
+    BrdfT inDirBrdf(1, 1, numThetaDivisions + 1, numPhiDivisions + 1, 2, ss->getColorModel(),
+                    ss->getNumWavelengths());
+    inDirBrdf.getSampleSet()->getWavelengths() = ss->getWavelengths();
+
+    double inTheta, inPhi;
+    SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
+    inDirBrdf.setInTheta(0, inTheta);
+    inDirBrdf.setInPhi(0, inPhi);
+
+    auto distBrdf = dynamic_cast<const DistortedSphericalCoordinatesBrdf*>(&brdf);
+    if (distBrdf && distBrdf->getNumSpecularOffsets()) {
+        inDirBrdf.setSpecularOffset(0, distBrdf->getSpecularOffset(inTheta));
+    }
+
+    auto specBrdf = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
+    if (specBrdf && specBrdf->getNumSpecularOffsets()) {
+        inDirBrdf.setSpecularOffset(0, specBrdf->getSpecularOffset(inTheta));
+    }
+
+    inDirBrdf.initializeSpectra(brdf);
+
+    return computeReflectance(inDirBrdf, 0, 0);
+}
+
 }
 
 Spectrum lb::computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIndex, int inPhIndex)
@@ -60,65 +142,27 @@ Spectrum lb::computeReflectance(const SphericalCoordinatesBrdf& brdf, int inThIn
 
 Spectrum lb::computeReflectance(const SpecularCoordinatesBrdf& brdf, int inThIndex, int inPhIndex)
 {
-    Arrayd sumSpectrum;
-    sumSpectrum.resize(brdf.getSampleSet()->getNumWavelengths());
-    sumSpectrum.setZero();
-
-    double inTheta = brdf.getInTheta(inThIndex);
-    double inPhi = brdf.getInPhi(inPhIndex);
-
-    // An incoming polar angle of zero is offset to validate an incoming azimuthal angle.
-    double offsetInTheta = std::max(inTheta, EPSILON_D);
-    Vec3 inDir = SphericalCoordinateSystem::toXyz(offsetInTheta, inPhi);
-
-    for (int thIndex = 0; thIndex < brdf.getNumSpecTheta() - 1; ++thIndex) {
-    for (int phIndex = 0; phIndex < brdf.getNumSpecPhi()   - 1; ++phIndex) {
-        Vec3 outDir0 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex,     phIndex);
-        Vec3 outDir1 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex,     phIndex + 1);
-        Vec3 outDir2 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex + 1);
-        Vec3 outDir3 = brdf.getOutDirection(inThIndex, inPhIndex, thIndex + 1, phIndex);
-
-        Vec3 centroid;
-        double solidAngle = SolidAngle::fromRectangleOnHemisphere(outDir0, outDir1, outDir2, outDir3, &centroid);
-
-        if (solidAngle <= 0.0) continue;
-
-        Spectrum sp = brdf.getSpectrum(inDir, centroid);
-        sumSpectrum += (sp * centroid.z() * solidAngle).cast<Arrayd::Scalar>();
-    }}
-
-    return sumSpectrum.cast<Spectrum::Scalar>();
+    return computeReflectanceImpl(brdf, inThIndex, inPhIndex);
 }
 
-Spectrum lb::computeReflectance(const Brdf& brdf, const Vec3& inDir, int numThetaDivisions, int numPhiDivisions)
+Spectrum lb::computeReflectance(const DistortedSphericalCoordinatesBrdf& brdf, int inThIndex, int inPhIndex)
 {
-    const SampleSet* ss = brdf.getSampleSet();
+    return computeReflectanceImpl(brdf, inThIndex, inPhIndex);
+}
 
-    std::unique_ptr<SpecularCoordinatesBrdf> inDirBrdf(new SpecularCoordinatesBrdf(1, 1,
-                                                                                   numThetaDivisions + 1,
-                                                                                   numPhiDivisions + 1,
-                                                                                   2,
-                                                                                   ss->getColorModel(),
-                                                                                   ss->getNumWavelengths()));
-    inDirBrdf->getSampleSet()->getWavelengths() = ss->getWavelengths();
-
-    double inTheta, inPhi;
-    SphericalCoordinateSystem::fromXyz(inDir, &inTheta, &inPhi);
-    inDirBrdf->setInTheta(0, inTheta);
-    inDirBrdf->setInPhi(0, inPhi);
-
-    //std::string inThetaStr = std::to_string(toDegree(inTheta));
-    //std::string inPhiStr   = std::to_string(toDegree(inPhi));
-    //inDirBrdf->setName("inDirBrdf_inTheta=" + inThetaStr + "_inPhi=" + inPhiStr);
-
-    auto specBrdf = dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf);
-    if (specBrdf && specBrdf->getNumSpecularOffsets()) {
-        inDirBrdf->setSpecularOffset(0, specBrdf->getSpecularOffset(inTheta));
+Spectrum lb::computeReflectance(const Brdf& brdf,
+                                const Vec3& inDir,
+                                int         numThetaDivisions,
+                                int         numPhiDivisions)
+{
+    if (dynamic_cast<const DistortedSphericalCoordinatesBrdf*>(&brdf)) {
+        return computeReflectanceImpl<DistortedSphericalCoordinatesBrdf>(
+            brdf, inDir, numThetaDivisions, numPhiDivisions);
     }
-
-    inDirBrdf->initializeSpectra(brdf);
-
-    return computeReflectance(*inDirBrdf, 0, 0);
+    else {
+        return computeReflectanceImpl<SpecularCoordinatesBrdf>(brdf, inDir, numThetaDivisions,
+                                                               numPhiDivisions);
+    }
 }
 
 SampleSet2D* lb::computeReflectances(const SpecularCoordinatesBrdf& brdf)
@@ -163,7 +207,7 @@ Spectrum lb::computeBihemisphericalReflectance(const Brdf&  brdf,
     Vec3 inDir;
     Spectrum sp;
     #pragma omp parallel for private(phIndex, inTheta, inPhi, inDir, sp)
-    for (int thIndex = 0; thIndex <= numInThetaDivisions; ++thIndex) {
+    for (int thIndex = 0; thIndex < numInThetaDivisions; ++thIndex) {
         for (phIndex = 0; phIndex < numPhi; ++phIndex) {
             inTheta = static_cast<Vec3::Scalar>(thIndex * PI_2_D / numInThetaDivisions);
             inPhi   = static_cast<Vec3::Scalar>(phIndex * TAU_D / numInPhiDivisions);
@@ -180,7 +224,7 @@ Spectrum lb::computeBihemisphericalReflectance(const Brdf&  brdf,
 
     Log::setNotificationLevel(origLogLevel);
 
-    return sumSp / ((numInThetaDivisions + 1) * numPhi);
+    return sumSp / (numInThetaDivisions * numPhi);
 }
 
 SampleSet2D* lb::computeSpecularReflectances(const Brdf& brdf, const Brdf& standardBrdf, double ior)
@@ -401,7 +445,8 @@ Spectrum lb::findDiffuseThresholds(const Brdf& brdf, const double& maxTheta)
 
 bool lb::isInDirDependentCoordinateSystem(const Brdf& brdf)
 {
-    if (dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf) ||
+    if (dynamic_cast<const DistortedSphericalCoordinatesBrdf*>(&brdf) ||
+        dynamic_cast<const SphericalCoordinatesBrdf*>(&brdf) ||
         dynamic_cast<const SpecularCoordinatesBrdf*>(&brdf)) {
         return true;
     }
