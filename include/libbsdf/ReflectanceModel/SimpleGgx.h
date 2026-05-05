@@ -20,8 +20,6 @@ namespace lb {
 class SimpleGgx : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     SimpleGgx(const Vec3& color, double roughness) : color_(color), roughness_(roughness)
     {
         parameters_.push_back(Parameter("Color", &color_));

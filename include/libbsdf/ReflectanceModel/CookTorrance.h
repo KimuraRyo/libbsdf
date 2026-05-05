@@ -19,8 +19,6 @@ namespace lb {
 class CookTorrance : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     CookTorrance(const Vec3& color, double roughness) : color_(color), roughness_(roughness)
     {
         parameters_.push_back(Parameter("Color", &color_));

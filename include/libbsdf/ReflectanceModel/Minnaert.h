@@ -19,8 +19,6 @@ namespace lb {
 class Minnaert : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     Minnaert(const Vec3& albedo, double darkness) : albedo_(albedo), darkness_(darkness)
     {
         parameters_.push_back(Parameter("Albedo", &albedo_));

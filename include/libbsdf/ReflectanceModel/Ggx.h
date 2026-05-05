@@ -19,8 +19,6 @@ namespace lb {
 class Ggx : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     Ggx(const Vec3& color,
         double      roughness,
         double      refractiveIndex,

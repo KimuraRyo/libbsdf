@@ -19,8 +19,6 @@ namespace lb {
 class AshikhminShirley : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     AshikhminShirley(const Vec3& specularColor,
                      const Vec3& diffuseColor,
                      double      shininessX,

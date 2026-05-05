@@ -20,8 +20,6 @@ namespace lb {
 class UnrealEngine4 : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     UnrealEngine4(const Vec3& color, double metallic, double specular, double roughness)
         : color_(color), metallic_(metallic), specular_(specular), roughness_(roughness)
     {

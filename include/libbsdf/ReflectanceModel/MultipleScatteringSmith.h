@@ -18,8 +18,6 @@ namespace lb {
 class MultipleScatteringSmith : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     /*! Types of material. */
     enum MaterialType
     {

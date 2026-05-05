@@ -18,9 +18,7 @@ namespace lb {
 class IsotropicWard : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    IsotropicWard(const Vec3& color, double roughness) : color_(color), roughness_(roughness)
+   IsotropicWard(const Vec3& color, double roughness) : color_(color), roughness_(roughness)
     {
         parameters_.push_back(Parameter("Color", &color_));
         parameters_.push_back(Parameter("Roughness", &roughness_, 0.01, 1.0));

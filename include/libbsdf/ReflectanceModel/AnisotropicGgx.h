@@ -19,8 +19,6 @@ namespace lb {
 class AnisotropicGgx : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     AnisotropicGgx(const Vec3& color,
                    double      roughnessX,
                    double      roughnessY,

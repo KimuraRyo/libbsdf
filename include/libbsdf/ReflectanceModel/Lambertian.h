@@ -18,8 +18,6 @@ namespace lb {
 class Lambertian : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     explicit Lambertian(const Vec3& color) : color_(color)
     {
         parameters_.push_back(Parameter("Color", &color_));

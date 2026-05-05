@@ -18,8 +18,6 @@ namespace lb {
 class BlinnPhong : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     BlinnPhong(const Vec3& color, double shininess) : color_(color), shininess_(shininess)
     {
         parameters_.push_back(Parameter("Color", &color_));

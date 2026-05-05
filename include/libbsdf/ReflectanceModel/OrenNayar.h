@@ -18,8 +18,6 @@ namespace lb {
 class OrenNayar : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     OrenNayar(const Vec3& albedo, double roughness) : albedo_(albedo), roughness_(roughness)
     {
         parameters_.push_back(Parameter("Albedo", &albedo_));

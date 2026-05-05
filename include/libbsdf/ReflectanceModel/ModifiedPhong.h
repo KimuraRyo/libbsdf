@@ -19,8 +19,6 @@ namespace lb {
 class ModifiedPhong : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     ModifiedPhong(const Vec3& color, double shininess) : color_(color), shininess_(shininess)
     {
         parameters_.push_back(Parameter("Color", &color_));

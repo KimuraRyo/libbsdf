@@ -19,8 +19,6 @@ namespace lb {
 class Disney : public ReflectanceModel
 {
 public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     Disney(const Vec3& specularColor,
            const Vec3& diffuseColor,
            double      roughnessX,
