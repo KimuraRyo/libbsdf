@@ -344,17 +344,17 @@ Spectrum lb::computeDifference(const Brdf& brdf0,
     }
 
     int numInPhi = std::max(ss0->getNumAngles1(), ss1->getNumAngles1());
-    std::unique_ptr<Brdf> diffBrdf(new SpecularCoordinatesBrdf(
-        19, numInPhi, 91, 73, 2, ss0->getColorModel(), ss0->getNumWavelengths()));
+    SpecularCoordinatesBrdf diffBrdf(19, numInPhi, 91, 73, 2, ss0->getColorModel(),
+                                     ss0->getNumWavelengths());
 
-    SampleSet* ss = diffBrdf->getSampleSet();
+    SampleSet* ss = diffBrdf.getSampleSet();
 
     ss->getWavelengths() = ss0->getWavelengths();
 
     auto diff = [](const Spectrum& sp0, const Spectrum& sp1) { return (sp0 - sp1).cwiseAbs(); };
-    compute(brdf0, brdf1, diffBrdf.get(), diff);
+    compute(brdf0, brdf1, &diffBrdf, diff);
 
-    return computeBihemisphericalReflectance(*diffBrdf, numInThetaDivisions, numInPhiDivisions);
+    return computeBihemisphericalReflectance(diffBrdf, numInThetaDivisions, numInPhiDivisions);
 }
 
 Spectrum lb::computeDegreeOfBilateralSymmetry(const Brdf& brdf,

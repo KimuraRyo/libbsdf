@@ -83,11 +83,10 @@ void showError(const Brdf& loadedBrdf, const ReflectanceModel& model)
 {
     std::unique_ptr<Brdf> loadedRgbBrdf(toSrgb(loadedBrdf));
 
-    std::unique_ptr<Brdf> generatedBrdf(
-        new SpecularCoordinatesBrdf(19, 1, 91, 73, 2.0f, RGB_MODEL, 3));
-    ReflectanceModelUtility::setupBrdf(model, generatedBrdf.get());
+    SpecularCoordinatesBrdf generatedBrdf(19, 1, 91, 73, 2.0f, RGB_MODEL, 3);
+    ReflectanceModelUtility::setupBrdf(model, &generatedBrdf);
 
-    Spectrum errorSp = computeDifference(*loadedRgbBrdf, *generatedBrdf);
+    Spectrum errorSp = computeDifference(*loadedRgbBrdf, generatedBrdf);
     std::cout << "Error: " << errorSp.sum() / errorSp.size() << std::endl;
 }
 
