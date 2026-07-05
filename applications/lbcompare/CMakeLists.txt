@@ -19,4 +19,4 @@ if(MSVC)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${UTILITY_LIB_NAME} libbsdf)
+target_link_libraries(${PROJECT_NAME} ${UTILITY_LIB_NAME} libbsdf::libbsdf)

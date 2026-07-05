@@ -25,7 +25,7 @@ set(UTILITY_LIB_NAME AppUtility)
 add_library(${UTILITY_LIB_NAME} ${UTILITY_SOURCES})
 set_target_properties(${UTILITY_LIB_NAME} PROPERTIES FOLDER ${LIBBSDF_APPLICATION_FOLDER_NAME})
 
-target_link_libraries(${UTILITY_LIB_NAME} libbsdf Eigen3::Eigen)
+target_link_libraries(${UTILITY_LIB_NAME} libbsdf::libbsdf Eigen3::Eigen)
 
 add_subdirectory(lbanalyze)
 add_subdirectory(lbaverage)
