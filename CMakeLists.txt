@@ -10,6 +10,12 @@ cmake_minimum_required(VERSION 3.22)
 
 project(libbsdf VERSION 0.11.1)
 
+# Generate Version.h from the project version above.
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/libbsdf/Common/Version.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/libbsdf/Common/Version.h
+    @ONLY)
+
 set(CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
@@ -137,7 +143,8 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(DIRECTORY include/libbsdf DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/libbsdf DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    PATTERN "*.in" EXCLUDE)
 
 install(EXPORT libbsdfTargets
     FILE      libbsdfTargets.cmake
